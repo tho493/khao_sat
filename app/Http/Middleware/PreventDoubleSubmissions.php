@@ -26,7 +26,7 @@ class PreventDoubleSubmissions
      * @param  string  $formName Tên định danh cho form
      * @return mixed
      */
-    public function handle(Request $request, Closure $next, string $formName = null)
+    public function handle(Request $request, Closure $next, ?string $formName = null)
     {
         if (!$request->isMethod('POST') && !$request->isMethod('PUT') && !$request->isMethod('PATCH') && !$request->isMethod('DELETE')) {
             return $next($request);
@@ -54,7 +54,7 @@ class PreventDoubleSubmissions
      * Helper tĩnh để tạo thẻ input.
      * @param string $formName Tên định danh cho form
      */
-    public static function tokenField(string $formName = null): string
+    public static function tokenField(?string $formName = null): string
     {
         if (is_null($formName)) {
             $formName = sha1(request()->fullUrl());

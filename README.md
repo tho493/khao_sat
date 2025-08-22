@@ -152,9 +152,10 @@ Hệ thống sử dụng Google reCAPTCHA v2 để bảo mật.
 
 ### 5. Khởi chạy ứng dụng
 
-1.  **Dọn dẹp cache (quan trọng):**
+1.  **Dọn dẹp cache và link storage (quan trọng):**
     ```sh
     php artisan optimize:clear
+    php artisan storage:link
     ```
 2.  **Khởi chạy server phát triển:**
     ```sh
