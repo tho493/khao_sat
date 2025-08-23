@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - Hệ thống khảo sát</title>
+    <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
@@ -16,6 +18,74 @@
             align-items: center;
             justify-content: center;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #devtools-blocker {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(26, 32, 44, 0.95);
+            /* Nền đen mờ đậm hơn */
+
+            /* SỬA LỖI 1: SỬ DỤNG Z-INDEX CAO NHẤT CÓ THỂ */
+            z-index: 2147483647;
+            /* Số z-index cao nhất để đảm bảo luôn nằm trên cùng */
+
+            display: none;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            /* Màu chữ mặc định cho các phần tử con */
+            text-align: center;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .blocker-content {
+            max-width: 600px;
+            /* Đảm bảo nội dung không bị trong suốt */
+            opacity: 1;
+        }
+
+        .blocker-icon {
+            font-size: 80px;
+            color: #e53e3e;
+            /* Màu đỏ đậm hơn */
+            animation: pulse 1.5s infinite;
+        }
+
+        .blocker-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #ffffff;
+            /* SỬA LỖI 2: Đảm bảo tiêu đề màu trắng rõ ràng */
+        }
+
+        .blocker-message {
+            font-size: 1.2rem;
+            margin-top: 15px;
+
+            /* SỬA LỖI 3: Đặt màu chữ rõ ràng, không bị mờ */
+            color: #e2e8f0;
+            opacity: 1;
+            /* Đảm bảo không bị trong suốt */
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         .login-container {
@@ -131,7 +201,19 @@
 </head>
 
 <body>
-    <div class="login-container">
+    <div id="devtools-blocker">
+        <div class="blocker-content">
+            <div class="blocker-icon">
+                <img src="/image/mim_cry.gif" alt="Lỗi truy cập">
+            </div>
+            <h1 class="blocker-title">CÓ BIẾN RỒI!!!</h1>
+            <p id="blocker-message" class="blocker-message">
+                Đóng DevTools và tải lại trang để tiếp tục.
+            </p>
+        </div>
+    </div>
+
+    <div class="login-container" id="main-content">
         <div class="login-card">
             <div class="logo-section">
                 <i class="bi bi-clipboard-data"></i>
@@ -268,6 +350,7 @@
             });
         }, 5000);
     </script>
+    <script src="/js/protected.js"></script>
 </body>
 
 </html>

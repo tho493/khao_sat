@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Panel') - Hệ thống khảo sát</title>
+    <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
 
     <!-- CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -23,6 +24,74 @@
             font-family: 'Inter', 'Segoe UI', sans-serif;
             background-color: #f8fafc;
             color: #1f2937;
+        }
+
+        #devtools-blocker {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(26, 32, 44, 0.95);
+            /* Nền đen mờ đậm hơn */
+
+            /* SỬA LỖI 1: SỬ DỤNG Z-INDEX CAO NHẤT CÓ THỂ */
+            z-index: 2147483647;
+            /* Số z-index cao nhất để đảm bảo luôn nằm trên cùng */
+
+            display: none;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            /* Màu chữ mặc định cho các phần tử con */
+            text-align: center;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .blocker-content {
+            max-width: 600px;
+            /* Đảm bảo nội dung không bị trong suốt */
+            opacity: 1;
+        }
+
+        .blocker-icon {
+            font-size: 80px;
+            color: #e53e3e;
+            /* Màu đỏ đậm hơn */
+            animation: pulse 1.5s infinite;
+        }
+
+        .blocker-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #ffffff;
+            /* SỬA LỖI 2: Đảm bảo tiêu đề màu trắng rõ ràng */
+        }
+
+        .blocker-message {
+            font-size: 1.2rem;
+            margin-top: 15px;
+
+            /* SỬA LỖI 3: Đặt màu chữ rõ ràng, không bị mờ */
+            color: #e2e8f0;
+            opacity: 1;
+            /* Đảm bảo không bị trong suốt */
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         #wrapper {
@@ -409,129 +478,139 @@
 </head>
 
 <body>
-    <div id="wrapper">
-        <!-- Sidebar -->
-        <nav id="sidebar">
-            <ul class="list-unstyled components" style="position: relative; z-index: 2;">
-                <li>
-                    <a href="{{ route('admin.dashboard.index') }}"
-                        class="{{ request()->routeIs('admin.dashboard.*') ? 'active' : '' }}">
-                        <i class="bi bi-house-door-fill"></i> <span>Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.mau-khao-sat.index') }}"
-                        class="{{ request()->routeIs('admin.mau-khao-sat.*') ? 'active' : '' }}">
-                        <i class="bi bi-file-earmark-text-fill"></i> <span>Mẫu khảo sát</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.dot-khao-sat.index') }}"
-                        class="{{ request()->routeIs('admin.dot-khao-sat.*') ? 'active' : '' }}">
-                        <i class="bi bi-calendar-check-fill"></i> <span>Đợt khảo sát</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.bao-cao.index') }}"
-                        class="{{ request()->routeIs('admin.bao-cao.*') ? 'active' : '' }}">
-                        <i class="bi bi-graph-up-arrow"></i> <span>Báo cáo</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.users.index') }}"
-                        class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                        <i class="bi bi-person-badge-fill"></i> <span>Người dùng</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.config.index') }}"
-                        class="{{ request()->routeIs('admin.config.*') ? 'active' : '' }}">
-                        <i class="bi bi-gear-fill"></i> <span>Cấu hình</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.logs.index') }}"
-                        class="{{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
-                        <i class="bi bi-journal-text"></i> <span>Nhật ký</span>
-                    </a>
-                </li>
-            </ul>
-            <div id="sidebar-backdrop" class="sidebar-backdrop d-lg-none" style="z-index: 1;"></div>
-        </nav>
+    <div id="devtools-blocker">
+        <div class="blocker-content">
+            <div class="blocker-icon">
+                <img src="/image/mim_cry.gif" alt="Lỗi truy cập" loop=infinite>
+            </div>
+            <h1 class="blocker-title">CÓ BIẾN RỒI!!!</h1>
+            <p id="blocker-message" class="blocker-message">
+                Đóng DevTools và tải lại trang để tiếp tục.
+            </p>
+        </div>
+    </div>
 
-        <!-- Page Content -->
-        <div id="content">
-            <!-- Top Navbar -->
-            <nav class="navbar navbar-expand-lg navbar-light">
-                <button id="mobileSidebarToggle" class="navbar-btn me-2 d-lg-none" aria-controls="sidebar"
-                    aria-expanded="false" aria-label="Mở menu">
-                    <i class="bi bi-list fs-3"></i>
-                </button>
-                <div class="container-fluid">
-                    <!-- Tiêu đề trang web -->
-                    <h4 class="navbar-brand">
-                        <i class="bi bi-grid-1x2-fill"></i> <span id="admin-panel">Admin Panel</span>
-                    </h4>
+    <div id="main-content">
 
-                    <div class="ms-auto profile-dropdown">
-                        <div class="dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
-                                data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle fs-5 me-2"></i>
-                                <span class="fw-medium">{{ auth()->user()->hoten ?? 'Admin' }}</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('admin.users.edit', auth()->user()->id) }}">
-                                        <i class="bi bi-person me-2"></i> Thông tin cá nhân
-                                    </a>
-                                </li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li>
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item text-danger">
-                                            <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+        <div id="wrapper">
+            <!-- Sidebar -->
+            <nav id="sidebar">
+                <ul class="list-unstyled components" style="position: relative; z-index: 2;">
+                    <li>
+                        <a href="{{ route('admin.dashboard.index') }}"
+                            class="{{ request()->routeIs('admin.dashboard.*') ? 'active' : '' }}">
+                            <i class="bi bi-house-door-fill"></i> <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.mau-khao-sat.index') }}"
+                            class="{{ request()->routeIs('admin.mau-khao-sat.*') ? 'active' : '' }}">
+                            <i class="bi bi-file-earmark-text-fill"></i> <span>Mẫu khảo sát</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.dot-khao-sat.index') }}"
+                            class="{{ request()->routeIs('admin.dot-khao-sat.*') ? 'active' : '' }}">
+                            <i class="bi bi-calendar-check-fill"></i> <span>Đợt khảo sát</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.bao-cao.index') }}"
+                            class="{{ request()->routeIs('admin.bao-cao.*') ? 'active' : '' }}">
+                            <i class="bi bi-graph-up-arrow"></i> <span>Báo cáo</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.users.index') }}"
+                            class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                            <i class="bi bi-person-badge-fill"></i> <span>Người dùng</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.logs.index') }}"
+                            class="{{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
+                            <i class="bi bi-journal-text"></i> <span>Nhật ký</span>
+                        </a>
+                    </li>
+                </ul>
+                <div id="sidebar-backdrop" class="sidebar-backdrop d-lg-none" style="z-index: 1;"></div>
             </nav>
 
-            <!-- Main Content -->
-            <div class="main-content">
-                <!-- Alerts -->
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
+            <!-- Page Content -->
+            <div id="content">
+                <!-- Top Navbar -->
+                <nav class="navbar navbar-expand-lg navbar-light">
+                    <button id="mobileSidebarToggle" class="navbar-btn me-2 d-lg-none" aria-controls="sidebar"
+                        aria-expanded="false" aria-label="Mở menu">
+                        <i class="bi bi-list fs-3"></i>
+                    </button>
+                    <div class="container-fluid">
+                        <!-- Tiêu đề trang web -->
+                        <h4 class="navbar-brand">
+                            <i class="bi bi-grid-1x2-fill"></i> <span id="admin-panel">Admin Panel</span>
+                        </h4>
 
-                @if(session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-circle-fill me-2"></i>
-                        {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <div class="ms-auto profile-dropdown">
+                            <div class="dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
+                                    data-bs-toggle="dropdown">
+                                    <i class="bi bi-person-circle fs-5 me-2"></i>
+                                    <span class="fw-medium">{{ auth()->user()->hoten ?? 'Admin' }}</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item"
+                                            href="{{ route('admin.users.edit', auth()->user()->id) }}">
+                                            <i class="bi bi-person me-2"></i> Thông tin cá nhân
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li>
+                                        <form method="POST" action="{{ route('logout') }}">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
-                @endif
+                </nav>
 
-                @if(session('info'))
-                    <div class="alert alert-info alert-dismissible fade show" role="alert">
-                        <i class="bi bi-info-circle-fill me-2"></i>
-                        {{ session('info') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
+                <!-- Main Content -->
+                <div class="main-content">
+                    <!-- Alerts -->
+                    @if(session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
 
-                <!-- Page Content -->
-                @yield('content')
+                    @if(session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-circle-fill me-2"></i>
+                            {{ session('error') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
+                    @if(session('info'))
+                        <div class="alert alert-info alert-dismissible fade show" role="alert">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            {{ session('info') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
+                    <!-- Page Content -->
+                    @yield('content')
+                </div>
             </div>
         </div>
     </div>
@@ -686,7 +765,7 @@
             });
         });
     </script>
-
+    <script src="/js/protected.js"></script>
     @stack('scripts')
 </body>
 

@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\UserManagementController;
-use App\Http\Controllers\Admin\SystemConfigController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\LogController;
 use App\Http\Controllers\Admin\MauKhaoSatController;
@@ -66,18 +65,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/survey/{dotKhaoSat}', [ReportController::class, 'survey'])->name('survey');
         Route::get('/export', [ReportController::class, 'export'])->name('export');
         Route::get('/analytics', [ReportController::class, 'analytics'])->name('analytics');
-    });
-
-    // System Configuration
-    Route::prefix('config')->name('config.')->group(function () {
-        Route::get('/', [SystemConfigController::class, 'index'])->name('index');
-
-        // Cập nhật template email
-        Route::post('/email-template/store', [SystemConfigController::class, 'storeEmailTemplate'])->name('email-template.store');
-        Route::put('/email-template/{template}', [SystemConfigController::class, 'updateEmailTemplate'])->name('email-template.update');
-        Route::delete('/email-template/{template}', [SystemConfigController::class, 'destroyEmailTemplate'])->name('email-template.destroy');
-        Route::post('/test-email', [SystemConfigController::class, 'testEmail'])->name('test-email');
-        Route::post('/backup', [SystemConfigController::class, 'backup'])->name('backup');
     });
 
     // System Logs

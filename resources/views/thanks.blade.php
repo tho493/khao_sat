@@ -67,9 +67,9 @@
                 <a href="{{ route('khao-sat.index') }}" class="btn btn-primary">
                     <i class="bi bi-house"></i> Về trang chủ
                 </a>
-                <button class="btn btn-outline-secondary" onclick="window.print()">
+                <!-- <button class="btn btn-outline-secondary" onclick="window.print()">
                     <i class="bi bi-printer"></i> In xác nhận
-                </button>
+                </button> -->
             </div>
 
             <hr class="my-4">

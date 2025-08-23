@@ -6,7 +6,7 @@
 <style>
     .progress-section {
         position: sticky;
-        top: 20px;
+        top: 80px;
     }
     
     input[type="text"],
@@ -24,7 +24,7 @@
 
 
 @section('content')
-    <div class="container mx-auto py-8 px-2">
+    <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
         <div class="flex flex-col lg:flex-row gap-8">
             <!-- Main Content -->
             <div class="w-full lg:w-2/3">
@@ -270,15 +270,18 @@
                         </div>
                     </div>
                     <script>
-                        // Simple timer for survey duration
                         let secondsElapsed = 0;
                         function pad(n) { return n < 10 ? '0' + n : n; }
+
                         function updateTimer() {
+                            const el = document.getElementById('survey-timer');
+                            if (!el) return;
                             secondsElapsed++;
                             const minutes = Math.floor(secondsElapsed / 60);
                             const seconds = secondsElapsed % 60;
-                            document.getElementById('survey-timer')?.textContent = pad(minutes) + ':' + pad(seconds);
+                            el.textContent = pad(minutes) + ':' + pad(seconds);
                         }
+
                         document.addEventListener('DOMContentLoaded', function() {
                             setInterval(updateTimer, 1000);
                         });
