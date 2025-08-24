@@ -97,7 +97,7 @@ class KhaoSatController extends Controller
             'g-recaptcha-response.required' => 'Vui lòng xác thực reCAPTCHA.'
         ]);
 
-        PreventDoubleSubmissions::clearToken('survey_submission');
+        PreventDoubleSubmissions::clearToken();
 
         DB::beginTransaction();
         try {

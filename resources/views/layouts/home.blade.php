@@ -197,7 +197,9 @@
         </header>
 
         {{-- Page Content --}}
-        @yield('content')
+        <section class="py-12 md:py-16 bg-gradient-to-br from-blue-100 to-slate-50">
+            @yield('content')
+        </section>
 
         {{-- Footer --}}
         <footer class="relative text-white pt-16 pb-8 overflow-hidden bg-gradient-to-br from-[#174a7e] to-[#1f66b3]">
@@ -308,7 +310,7 @@
             });
         }
     </script>
-    <script src="/js/protected.js"></script>
+    <!-- <script src="/js/protected.js"></script> -->
     <script src="https://unpkg.com/scrollreveal"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
