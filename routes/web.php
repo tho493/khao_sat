@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Mail\SentMessage;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\KhaoSatController;
+use App\Http\Controllers\Api\ChatbotController;
 
 // Nạp các route dành cho admin:
 require __DIR__ . '/admin.php';
@@ -20,5 +20,8 @@ Route::prefix('')->name('khao-sat.')->group(function () {
     // Route::get('/review/{token}', [KhaoSatController::class, 'review'])->name('review');
     Route::get('/{dotKhaoSat}', [KhaoSatController::class, 'show'])->name('show');
     Route::post('/{dotKhaoSat}', [KhaoSatController::class, 'store'])->name('store')->middleware('prevent.double.submit');
+});
 
+Route::prefix('api')->name('api.')->group(function () {
+    Route::post('/chatbot/ask', [ChatbotController::class, 'ask']);
 });

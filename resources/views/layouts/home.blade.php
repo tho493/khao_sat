@@ -2,35 +2,59 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
+    <!-- Thẻ meta -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name="description"
+        content="@yield('description', 'Hệ thống khảo sát trực tuyến của Trường Đại học Sao Đỏ nhằm thu thập ý kiến, nâng cao chất lượng đào tạo và dịch vụ.')" />
+    <meta name="keywords" content="khảo sát, Đại học Sao Đỏ, SDU, khảo sát sinh viên, chất lượng đào tạo" />
+    <meta name="author" content="Trường Đại học Sao Đỏ" />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="@yield('title', 'Trang chủ') - Hệ thống Khảo sát Trường Đại học Sao Đỏ" />
+    <meta property="og:description"
+        content="@yield('description', 'Tham gia khảo sát để đóng góp ý kiến và cải thiện chất lượng tại Trường Đại học Sao Đỏ.')" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ url()->current() }}" />
+    <meta property="og:image" content="@yield('og_image', asset('image/logo.png'))" />
+    <meta property="og:image:width" content="150" />
+    <meta property="og:image:height" content="150" />
+    <meta property="og:site_name" content="Hệ thống Khảo sát SDU" />
+    <meta property="og:locale" content="vi_VN" />
+    <link rel="canonical" href="{{ url()->current() }}" />
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon" />
+    <link rel="icon" type="image/png" href="{{ asset('/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ asset('/favicon.svg') }}" />
+    <link rel="shortcut icon" href="{{ asset('/favicon.ico') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('/apple-touch-icon.png ') }}" />
+
     <title> @yield('title', "Trang chủ") - Hệ thống khảo sát trực tuyến </title>
 
     <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
 
-
     {{-- Tailwind CSS & Scripts --}}
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="https://unpkg.com/scrollreveal"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- <script src="/js/protected.js"></script> -->
+
 
     {{-- Icons --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
     {{-- Google Fonts --}}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
+        rel="stylesheet" />
 
-    {{-- CSS for Glassmorphism & Improvements --}}
     <style>
         :root {
             --primary-color: #2a76c9;
             --secondary-color: #1f66b3;
         }
 
-        /* Sử dụng font chữ hiện đại hơn */
         body {
             font-family: 'Be Vietnam Pro', sans-serif;
             background-color: #e8f1fe;
@@ -154,11 +178,142 @@
                 transform: scale(1);
             }
         }
+
+        /* Box chatbot */
+        .chatbot-toggler {
+            position: fixed;
+            bottom: 20px;
+            height: 50px;
+            right: 70px;
+            width: 50px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .chatbot-toggler:hover {
+            transform: scale(1.1);
+        }
+
+        .chatbot-container {
+            position: fixed;
+            bottom: 100px;
+            right: 35px;
+            width: 350px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 128px 0 rgba(0, 0, 0, 0.1), 0 32px 64px -48px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            transform: scale(0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .chatbot-container.show {
+            transform: scale(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .chatbot-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .chatbot-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .chatbox {
+            height: 350px;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .chat {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        .chat p {
+            max-width: 75%;
+            font-size: 0.95rem;
+            padding: 12px;
+            border-radius: 10px;
+            background: #f2f2f2;
+            margin: 0;
+        }
+
+        .chat.outgoing {
+            justify-content: flex-end;
+        }
+
+        .chat.outgoing p {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 5px;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .chat-input textarea {
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            resize: none;
+            font-size: 0.95rem;
+        }
+
+        .chat-input button {
+            border: none;
+            background: none;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .flash-effect {
+            animation: flashAnimation 0.5s 4;
+        }
+
+        @keyframes flashAnimation {
+            0% {
+                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(79, 70, 229, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+            }
+        }
     </style>
     @stack('styles')
 </head>
 
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-gradient-to-br from-blue-500 to-slate-50 text-slate-800">
     <div id="devtools-blocker">
         <div class="blocker-content">
             <div class="blocker-icon">
@@ -168,6 +323,26 @@
             <p id="blocker-message" class="blocker-message">
                 Đóng DevTools và tải lại trang để tiếp tục.
             </p>
+        </div>
+    </div>
+
+    {{-- Box chatbot --}}
+    <button class="chatbot-toggler">
+        <i class="bi bi-chat-dots-fill"></i>
+    </button>
+
+    <div class="chatbot-container">
+        <div class="chatbot-header">
+            <h2>Trợ lý ảo</h2>
+        </div>
+        <ul class="chatbox list-unstyled">
+            <li class="chat incoming">
+                <p>Xin chào 👋<br>Tôi có thể giúp gì cho bạn?</p>
+            </li>
+        </ul>
+        <div class="chat-input">
+            <textarea placeholder="Nhập câu hỏi của bạn..." required></textarea>
+            <button id="send-btn"><i class="bi bi-send-fill"></i></button>
         </div>
     </div>
 
@@ -197,9 +372,7 @@
         </header>
 
         {{-- Page Content --}}
-        <section class="py-12 md:py-16 bg-gradient-to-br from-blue-100 to-slate-50">
-            @yield('content')
-        </section>
+        @yield('content')
 
         {{-- Footer --}}
         <footer class="relative text-white pt-16 pb-8 overflow-hidden bg-gradient-to-br from-[#174a7e] to-[#1f66b3]">
@@ -275,13 +448,14 @@
                 © {{ date('Y') }} Trường Đại học Sao Đỏ · Hệ thống khảo sát trực tuyến.
             </div>
 
-            <button id="back-to-top" title="Cuộn lên đầu trang" class="hidden fixed bottom-5 right-5 w-12 h-12 rounded-full bg-blue-300/40 backdrop-blur-sm text-white text-2xl
-                   hover:bg-white/30 focus:outline-none transition-all duration-300">
+            <button id="back-to-top" title="Cuộn lên đầu trang" class="hidden fixed bottom-5 right-5 w-12 h-12 rounded-full bg-blue-300/70 backdrop-blur-sm text-white text-2xl
+                   hover:bg-white/70 focus:outline-none transition-all duration-300">
                 <i class="bi bi-arrow-up-short"></i>
             </button>
         </footer>
     </div>
 
+    <!-- SCRIPT -->
     <script> // nút lướt lên đầu
         const backToTopButton = document.getElementById('back-to-top');
         if (backToTopButton) {
@@ -298,6 +472,7 @@
             });
         }
     </script>
+
     <script>
         const header = document.querySelector('header.sticky-header');
         if (header) {
@@ -310,8 +485,7 @@
             });
         }
     </script>
-    <!-- <script src="/js/protected.js"></script> -->
-    <script src="https://unpkg.com/scrollreveal"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const sr = ScrollReveal({
@@ -336,6 +510,185 @@
             sr.reveal('.reveal-survey-card', { interval: 100 }); // interval: độ trễ giữa mỗi card
         });
     </script>
+
+    <!-- CHAT BOT -->
+    <script>
+        $(document).ready(function () {
+            const chatbotToggler = $('.chatbot-toggler');
+            const chatbotContainer = $('.chatbot-container');
+            const chatInput = $('.chat-input textarea');
+            const sendChatBtn = $('#send-btn');
+            const chatbox = $('.chatbox');
+
+            // Hiện/ẩn chatbot
+            chatbotToggler.on('click', function () {
+                chatbotContainer.toggleClass('show');
+            });
+
+            const createChatLi = (message, className) => {
+                const chatLi = $('<li>').addClass(`chat ${className}`);
+                const chatContent = $('<p>').html(message); // Dùng .html() để render thẻ <br>
+                chatLi.append(chatContent);
+                return chatLi;
+            }
+
+            const generateResponse = (userMessage) => {
+                const interactiveResponse = handleInteractiveCommands(userMessage);
+
+                if (interactiveResponse) {
+                    const botMessageLi = createChatLi(interactiveResponse, "incoming");
+                    chatbox.append(botMessageLi);
+                    chatbox.scrollTop(chatbox[0].scrollHeight);
+                    return;
+                }
+
+                const API_URL = "/api/chatbot/ask";
+                const thinkingLi = createChatLi("Đang suy nghĩ...", "incoming");
+                chatbox.append(thinkingLi);
+                chatbox.scrollTop(chatbox[0].scrollHeight);
+
+                $.ajax({
+                    url: API_URL,
+                    method: 'POST',
+                    data: { _token: '{{ csrf_token() }}', message: userMessage },
+                    success: function (response) {
+                        thinkingLi.find("p").html(response.answer);
+                    },
+                    error: function () {
+                        thinkingLi.find("p").html("Ôi! Có lỗi xảy ra. Hãy chat với tôi sau nhé.");
+                    }
+                });
+            }
+
+            const handleChat = () => {
+                const userMessage = chatInput.val().trim();
+                if (!userMessage) return;
+
+                chatInput.val("");
+
+                chatbox.append(createChatLi(userMessage, "outgoing"));
+                chatbox.scrollTop(chatbox[0].scrollHeight);
+
+                setTimeout(() => {
+                    generateResponse(userMessage);
+                }, 600);
+            }
+
+            function toTitleCase(str) {
+                return str.replace(/\w\S*/g, function (txt) {
+                    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+                });
+            }
+
+            function handleInteractiveCommands(message) {
+                let lowerCaseMessage = message.toLowerCase();
+                console.log(lowerCaseMessage);
+
+                const numberWords = {
+                    'một': 1, 'hai': 2, 'ba': 3, 'bốn': 4, 'năm': 5,
+                    'sáu': 6, 'bảy': 7, 'tám': 8, 'chín': 9, 'mười': 10
+                };
+                for (const word in numberWords) {
+                    const regex = new RegExp('\\b' + word + '\\b', 'g');
+                    lowerCaseMessage = lowerCaseMessage.replace(regex, numberWords[word]);
+                }
+
+                const words = lowerCaseMessage.split(/[\s,]+/);
+                const indexOfLa = words.indexOf('là');
+
+                const maSoKeywords = ['mã', 'msv', 'mnv', 'mã số'];
+                const hasMaSoKeyword = words.some(word => maSoKeywords.includes(word));
+
+                if (hasMaSoKeyword && indexOfLa > -1 && indexOfLa < words.length - 1) {
+                    const potentialMaSo = words[words.length - 1];
+                    if (potentialMaSo && potentialMaSo.length >= 3 && /^[a-z0-9_.-]+$/.test(potentialMaSo)) {
+                        const maSo = potentialMaSo.toUpperCase();
+                        const inputElement = $('input[name="ma_nguoi_traloi"]');
+                        if (inputElement.length) {
+                            inputElement.val(maSo).trigger('change');
+                            inputElement.addClass('flash-effect');
+                            setTimeout(() => inputElement.removeClass('flash-effect'), 2000);
+                            return `Đã điền mã số <strong>${maSo}</strong> giúp bạn!`;
+                        }
+                    }
+                }
+
+                const hoTenKeywords = ['tên', 'tôi'];
+                const hasHoTenKeyword = words.some(word => hoTenKeywords.includes(word));
+
+
+                if (hasHoTenKeyword && indexOfLa > -1 && indexOfLa < words.length - 1) {
+                    const hoTenParts = words.slice(indexOfLa + 1);
+                    const hoTen = toTitleCase(hoTenParts.join(' '));
+                    const inputElement = $('input[name="metadata[hoten]"]');
+                    if (inputElement.length) {
+                        inputElement.val(hoTen).trigger('change');
+                        inputElement.addClass('flash-effect');
+                        setTimeout(() => inputElement.removeClass('flash-effect'), 2000);
+                        return `Xin chào <strong>${hoTen}</strong>, tôi đã điền tên giúp bạn.`;
+                    }
+                }
+
+                const cauHoiKeywords = ['câu', 'chuyển', 'tới'];
+                const hasCauHoiKeyword = words.some(word => cauHoiKeywords.includes(word));
+                if (hasCauHoiKeyword) {
+                    const numberMatch = lowerCaseMessage.match(/(\d+)/);
+                    if (numberMatch && numberMatch[1]) {
+                        const questionNumber = parseInt(numberMatch[1]);
+                        const questionCard = $(`.question-card:eq(${questionNumber - 1})`);
+                        if (questionCard.length) {
+                            questionCard[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            questionCard.addClass('flash-effect');
+                            setTimeout(() => questionCard.removeClass('flash-effect'), 2000);
+                            return `Đã chuyển đến câu hỏi số <strong>${questionNumber}</strong>.`;
+                        }
+                    }
+                }
+                else if (lowerCaseMessage.includes('kiểm tra') || (lowerCaseMessage.includes('thiếu') || lowerCaseMessage.includes('xong chưa'))) {
+                    const missingRequired = [];
+                    $('#formKhaoSat [required]').each(function () {
+                        let isMissing = false;
+                        if ($(this).is(':radio')) {
+                            if ($(`input[name="${$(this).attr('name')}"]:checked`).length === 0) {
+                                isMissing = true;
+                            }
+                        } else if ($(this).val().trim() === '') {
+                            isMissing = true;
+                        }
+
+                        if (isMissing) {
+                            const label = $(this).closest('.p-6, .px-2').find('label').first().text().replace('*', '').trim();
+                            if (label && !missingRequired.includes(label)) {
+                                missingRequired.push(label);
+                            }
+                        }
+                    });
+
+                    if (missingRequired.length > 0) {
+                        let response = 'Bạn còn thiếu các câu bắt buộc sau:<ul class="list-disc ps-4 mt-2">';
+                        missingRequired.forEach(label => {
+                            response += `<li>${label}</li>`;
+                        });
+                        response += '</ul>';
+                        return response;
+                    } else {
+                        return 'Tuyệt vời! Bạn đã trả lời tất cả các câu hỏi bắt buộc rồi.';
+                    }
+                }
+
+                return null;
+            }
+
+            sendChatBtn.on('click', handleChat);
+            chatInput.on('keydown', function (e) {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleChat();
+                }
+            });
+        });
+    </script>
+
     @stack('scripts')
 
 </body>

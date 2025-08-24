@@ -1,6 +1,7 @@
 @extends('layouts.home')
 
 @section('title','Khảo sát ' . $dotKhaoSat->ten_dot)
+@section('og_image', $dotKhaoSat->image)
 
 @push('styles')
 <style>
@@ -241,10 +242,8 @@
             </div>
         </div>
     </div>
-
     
 @push('scripts')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
     $(document).ready(function() {

@@ -243,6 +243,16 @@ CREATE TABLE IF NOT EXISTS `template_email` (
   KEY `idx_ma_template` (`ma_template`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE `chatbot_qa` (
+  `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `keywords` VARCHAR(255) NOT NULL,
+  `question` VARCHAR(255) NULL,
+  `answer` TEXT NOT NULL,
+  `is_enabled` TINYINT(1) NOT NULL DEFAULT 1,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- --------------------------------------------------------
 -- CÁC VIEW ĐỂ TRUY VẤN NHANH
 -- --------------------------------------------------------
@@ -578,6 +588,15 @@ INSERT INTO `namhoc` (`namhoc`) VALUES
 ('2023-2024'),
 ('2024-2025'),
 ('2025-2026');
+
+-- Câu hỏi cho chatbot
+INSERT INTO `chatbot_qa` (`keywords`, `question`, `answer`, `is_enabled`) VALUES
+('bảo mật,an toàn,dữ liệu,cá nhân', 'Thông tin của tôi có được bảo mật không?', 'Chào bạn, chúng tôi cam kết mọi thông tin cá nhân và câu trả lời của bạn đều được <strong>bảo mật tuyệt đối</strong> và chỉ được sử dụng cho mục đích thống kê, nghiên cứu tổng hợp.', 1),
+('hạn,cuối,hạn chót,kết thúc', 'Khi nào là hạn cuối của khảo sát này?', 'Chào bạn, mỗi đợt khảo sát sẽ có thời gian kết thúc riêng. Bạn có thể xem hạn cuối được ghi rõ ở đầu trang khảo sát nhé!', 1),
+('bắt buộc,thiếu,bỏ qua', 'Tôi có phải trả lời tất cả câu hỏi không?', 'Chào bạn, bạn nên trả lời tất cả các câu hỏi để cung cấp thông tin đầy đủ nhất. Tuy nhiên, chỉ những câu hỏi có dấu sao màu đỏ (*) là bắt buộc phải trả lời.', 1),
+('làm gì,mục đích', 'Khảo sát này dùng để làm gì?', 'Cảm ơn bạn đã quan tâm! Khảo sát này nhằm thu thập ý kiến đóng góp để nhà trường có thể cải thiện và nâng cao chất lượng đào tạo và các dịch vụ hỗ trợ.', 1),
+('lỗi,gửi,submit,không được', 'Tôi bị lỗi không gửi được khảo sát?', 'Chào bạn, nếu bạn không gửi được khảo sát, vui lòng thử các bước sau: <br>1. Kiểm tra lại kết nối mạng. <br>2. Đảm bảo đã trả lời tất cả các câu hỏi bắt buộc (*). <br>3. Xác thực reCAPTCHA "Tôi không phải người máy". <br>4. Thử tải lại trang và làm lại. Dữ liệu của bạn đã được tự động lưu.', 1),
+('cảm ơn,ok,chào', 'Chào bot', 'Chào bạn, tôi là trợ lý ảo của hệ thống khảo sát. Tôi có thể giúp gì cho bạn?', 1);
 
 -- --------------------------------------------------------
 -- CÁC INDEX BỔ SUNG CHO HIỆU NĂNG
