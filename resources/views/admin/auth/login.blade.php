@@ -235,9 +235,6 @@
                         
                         <div class="mb-4 d-flex justify-content-center">
                             <div class="g-recaptcha" data-theme="dark" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div>
-                            @error('g-recaptcha-response')
-                                <div class="invalid-feedback d-block text-center mt-2">{{ $message }}</div>
-                            @enderror
                         </div>
 
                         <button type="submit" class="btn btn-login" id="loginBtn">

@@ -45,8 +45,6 @@ class PreventDoubleSubmissions
             return back()->with('error', 'Thao tác đã được xử lý hoặc phiên làm việc đã hết hạn. Vui lòng thử lại.');
         }
 
-        $request->session()->forget($sessionKey);
-
         return $next($request);
     }
 
@@ -66,6 +64,18 @@ class PreventDoubleSubmissions
         session()->put($sessionKey, $token);
 
         return '<input type="hidden" name="' . self::INPUT_NAME . '" value="' . $token . '">';
+    }
+
+    /**
+     * Helper tĩnh để xóa token từ Controller.
+     */
+    public static function clearToken(?string $formName = null)
+    {
+        if (is_null($formName)) {
+            $formName = sha1(request()->fullUrl());
+        }
+        $sessionKey = self::SESSION_KEY_PREFIX . $formName;
+        request()->session()->forget($sessionKey);
     }
 
 }

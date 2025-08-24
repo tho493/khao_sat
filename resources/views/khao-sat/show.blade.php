@@ -324,8 +324,7 @@
                         }
                     },
                     error: function(xhr) {
-                        alert('Có lỗi xảy ra: ' + (xhr.responseJSON?.message || 'Vui lòng thử lại'));
-                        location.reload(true); // submit rồi thì cần reload lại key submit
+                        console.log('Có lỗi xảy ra: ' + (xhr.responseJSON?.message || 'Hãy xác thực captcha và thử lại'));
                         $('#submitBtn').prop('disabled', false)
                             .html('<i class="bi bi-send mr-2"></i> Gửi khảo sát');
                     }

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\CauHoiKhaoSat;
 use Illuminate\Support\Facades\DB;
+use App\Http\Middleware\PreventDoubleSubmissions;
 
 class KhaoSatController extends Controller
 {
@@ -96,6 +97,8 @@ class KhaoSatController extends Controller
             'g-recaptcha-response.required' => 'Vui lòng xác thực reCAPTCHA.'
         ]);
 
+        PreventDoubleSubmissions::clearToken('survey_submission');
+
         DB::beginTransaction();
         try {
             // Tạo phiếu khảo sát
@@ -176,7 +179,7 @@ class KhaoSatController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Gửi khảo sát thành công',
-                'redirect' => route('thanks')
+                'redirect' => route('khao-sat.thanks')
             ]);
 
         } catch (\Exception $e) {
