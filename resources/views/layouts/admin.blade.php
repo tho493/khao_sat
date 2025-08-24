@@ -6,471 +6,247 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Panel') - Hệ thống khảo sát</title>
-    <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
 
-    <!-- CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
     <style>
         :root {
+            --sidebar-width: 250px;
+            --sidebar-width-collapsed: 88px;
             --primary-color: #4f46e5;
-            --secondary-color: #3730a3;
-            --accent-color: #6366f1;
-            --text-light: #f3f4f6;
-            --transition: all 0.3s ease;
+            --bg-color: #f1f5f9;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --transition: all 0.3s ease-in-out;
         }
 
         body {
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-            background-color: #f8fafc;
-            color: #1f2937;
-        }
-
-        #devtools-blocker {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(26, 32, 44, 0.95);
-            /* Nền đen mờ đậm hơn */
-
-            /* SỬA LỖI 1: SỬ DỤNG Z-INDEX CAO NHẤT CÓ THỂ */
-            z-index: 2147483647;
-            /* Số z-index cao nhất để đảm bảo luôn nằm trên cùng */
-
-            display: none;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            /* Màu chữ mặc định cho các phần tử con */
-            text-align: center;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-        }
-
-        .blocker-content {
-            max-width: 600px;
-            /* Đảm bảo nội dung không bị trong suốt */
-            opacity: 1;
-        }
-
-        .blocker-icon {
-            font-size: 80px;
-            color: #e53e3e;
-            /* Màu đỏ đậm hơn */
-            animation: pulse 1.5s infinite;
-        }
-
-        .blocker-title {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-top: 20px;
-            color: #ffffff;
-            /* SỬA LỖI 2: Đảm bảo tiêu đề màu trắng rõ ràng */
-        }
-
-        .blocker-message {
-            font-size: 1.2rem;
-            margin-top: 15px;
-
-            /* SỬA LỖI 3: Đặt màu chữ rõ ràng, không bị mờ */
-            color: #e2e8f0;
-            opacity: 1;
-            /* Đảm bảo không bị trong suốt */
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.1);
-            }
-
-            100% {
-                transform: scale(1);
-            }
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            overflow-x: hidden;
         }
 
         #wrapper {
             display: flex;
-            min-height: 100vh;
         }
 
+        /* === Sidebar === */
         #sidebar {
-            min-width: 220px;
-            max-width: 220px;
-            background: rgba(30, 27, 75, 0.7);
+            width: var(--sidebar-width-collapsed);
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.6);
+            -webkit-backdrop-filter: blur(12px);
             backdrop-filter: blur(12px);
-            border-radius: 24px;
-            margin: 20px 0 20px 20px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            transition: all 0.4s cubic-bezier(.4, 2, .6, 1);
-            overflow: hidden;
+
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
             position: fixed;
-            height: calc(100vh - 40px);
             z-index: 1000;
+            overflow-x: hidden;
+        }
+
+        #sidebar:hover {
+            width: var(--sidebar-width);
         }
 
         #sidebar .sidebar-header {
-            background: transparent;
-            border-bottom: none;
-            padding: 32px 0 16px 0;
+            padding: 24px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            height: 81px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #sidebar .logo-expanded {
+            display: none;
+        }
+
+        #sidebar:hover .logo-expanded {
+            display: flex;
+        }
+
+        #sidebar:hover .logo-collapsed {
+            display: none;
         }
 
         #sidebar ul.components {
-            padding: 0;
-        }
-
-        #sidebar ul li {
-            margin: 12px 0;
+            padding: 16px;
         }
 
         #sidebar ul li a {
-            padding: 14px 24px;
-            font-size: 1.1rem;
-            border-radius: 16px;
-            color: #fff;
-            background: transparent;
-            transition: all 0.25s;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 8px;
+            color: var(--text-light);
+            transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: 16px;
             text-decoration: none;
-        }
-
-        #sidebar ul li a:hover,
-        #sidebar ul li a.active {
-            background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%);
-            color: #fff;
-            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.15);
-            transform: scale(1.04);
-        }
-
-        #sidebar ul li a:hover i,
-        #sidebar ul li a.active i {
-            transform: scale(1.2);
-        }
-
-        #sidebar ul li a i {
-            font-size: 1.4rem;
-            margin-right: 0;
-            transition: transform 0.3s;
-        }
-
-        /* Ẩn chữ khi thu nhỏ */
-        #sidebar.collapsed {
-            min-width: 64px;
-            max-width: 64px;
-            transition: all 0.3s cubic-bezier(.4, 2, .6, 1);
-        }
-
-        #sidebar.collapsed~#content {
-            margin-left: 84px;
-        }
-
-        #sidebar ul li a span {
-            transition: opacity 0.2s, margin 0.2s;
-            opacity: 1;
-            margin-left: 12px;
+            margin-bottom: 4px;
             white-space: nowrap;
         }
 
-        #sidebar.collapsed ul li a span {
+        #sidebar ul li a:hover {
+            color: var(--primary-color);
+            background-color: rgba(79, 70, 229, 0.08);
+        }
+
+        #sidebar ul li a.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            font-weight: 600;
+        }
+
+        #sidebar ul li a i {
+            font-size: 1.25rem;
+            margin-right: 16px;
+            width: 24px;
+            transition: transform 0.3s;
+            flex-shrink: 0;
+        }
+
+        #sidebar ul li a.active i {
+            transform: scale(1.1);
+        }
+
+        #sidebar ul li a span {
+            transition: opacity 0.2s ease 0.1s;
+        }
+
+        #sidebar:not(:hover) ul li a span {
             opacity: 0;
-            margin-left: -24px;
             pointer-events: none;
         }
 
-        /* Responsive */
-        @media (max-width: 992px) {
-            #sidebar {
-                min-width: 0;
-                max-width: 0;
-                border-radius: 0 24px 24px 0;
-                margin: 0;
-                height: 100vh;
-            }
 
-            #sidebar.sidebar-visible {
-                min-width: 220px;
-                max-width: 220px;
-            }
-        }
-
-        @media (max-width: 992px) {
-
-            #content,
-            #sidebar.collapsed~#content {
-                margin-left: 0 !important;
-            }
-        }
-
-        /* Content */
+        /* === Content Area === */
         #content {
             width: 100%;
+            margin-left: var(--sidebar-width-collapsed);
+            transition: margin-left 0.3s ease-in-out;
             min-height: 100vh;
-            margin-left: 240px;
-            transition: var(--transition);
         }
 
-        #content.active {
-            margin-left: 0;
+        #sidebar:hover~#content {
+            margin-left: var(--sidebar-width);
         }
 
-        .navbar {
-            padding: 15px 30px;
-            background: #fff;
-            border: none;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, .03);
+        #main-content {
+            padding: 32px;
+        }
+
+        /* === Top Navbar === */
+        .top-navbar {
+            padding: 16px 32px;
+            background: rgba(255, 255, 255, 0.6);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             position: sticky;
             top: 0;
             z-index: 999;
         }
 
-        .navbar-btn {
-            background: transparent;
-            border: none;
-            padding: 8px;
-            border-radius: 8px;
-            transition: var(--transition);
+        .dropdown-menu.glass-effect {
+            background-color: rgba(255, 255, 255, 0.6);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
+            border-radius: 0.75rem;
+            padding: 0.5rem;
+            margin-top: 0.5rem !important;
         }
 
-        .navbar-btn:hover {
-            background: rgba(79, 70, 229, 0.1);
-            color: var(--primary-color);
-        }
-
-        .profile-dropdown .nav-link {
-            padding: 8px 16px;
-            border-radius: 50px;
-            transition: var(--transition);
+        .dropdown-menu.glass-effect .dropdown-item {
+            color: var(--text-dark);
             font-weight: 500;
-        }
-
-        .profile-dropdown .nav-link:hover {
-            background: rgba(79, 70, 229, 0.1);
-            color: var(--primary-color);
-        }
-
-        .dropdown-menu {
-            border: none;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            border-radius: 12px;
-            padding: 8px;
-        }
-
-        .dropdown-item {
-            padding: 8px 16px;
-            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
             transition: var(--transition);
         }
 
-        .dropdown-item:hover {
-            background: rgba(79, 70, 229, 0.1);
+        .dropdown-menu.glass-effect .dropdown-item:hover,
+        .dropdown-menu.glass-effect .dropdown-item:focus {
+            background-color: rgba(79, 70, 229, 0.1);
+            /* Màu hover nhẹ nhàng */
             color: var(--primary-color);
         }
 
-        .main-content {
-            padding: 30px;
-            flex: 1;
+        .dropdown-menu.glass-effect .dropdown-item i {
+            opacity: 0.7;
         }
+
+        .dropdown-menu.glass-effect .dropdown-divider {
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .dropdown-menu.glass-effect .dropdown-item.text-danger:hover {
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
 
         .card {
             border: none;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, .05);
-            transition: var(--transition);
-            overflow: hidden;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, .08);
+            border-radius: 1rem;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
 
         .card-header {
-            background-color: #fff;
+            background-color: transparent;
             border-bottom: 1px solid #f1f5f9;
-            padding: 20px;
+            padding: 1.25rem;
             font-weight: 600;
         }
 
-        .alert {
-            border: none;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, .05);
-        }
-
-        .alert-success {
-            background-color: #ecfdf5;
-            color: #065f46;
-        }
-
-        .alert-danger {
-            background-color: #fef2f2;
-            color: #991b1b;
-        }
-
-        .alert-info {
-            background-color: #eff6ff;
-            color: #1e40af;
-        }
-
         @media (max-width: 992px) {
             #sidebar {
-                margin-left: -280px;
-            }
-
-            #sidebar.active {
-                margin-left: 0;
-            }
-
-            #content {
-                margin-left: 0;
-            }
-
-            #content.active {
-                margin-left: 280px;
-            }
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(-10px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .alert {
-            animation: slideIn 0.3s ease;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-
-        /* ---------- MOBILE SIDEBAR ---------- */
-        @media (max-width: 992px) {
-            #wrapper {
-                overflow-x: hidden;
-            }
-
-            /* Đưa sidebar full-height và ẩn ra ngoài màn hình */
-            #sidebar {
-                position: fixed;
-                left: 0;
-                top: 0;
-                height: 100vh;
-                width: 82vw;
-                /* rộng ~80% màn hình */
-                max-width: 320px;
-                min-width: auto;
-                max-width: none;
-                margin: 0;
-                border-radius: 0 20px 20px 0;
+                width: 280px;
                 transform: translateX(-100%);
-                transition: transform .35s cubic-bezier(.4, 0, .2, 1);
-                z-index: 1050;
-                /* trên nội dung, dưới dropdown */
             }
 
-            /* Khi mở */
+            #sidebar:hover {
+                width: 280px;
+            }
+
             #sidebar.active {
                 transform: translateX(0);
             }
 
-            /* Không tự thu nhỏ/mở rộng bằng hover trên mobile */
-            #sidebar.collapsed {
-                min-width: auto;
-                max-width: none;
-            }
-
-            /* Nội dung không bị chèn lề trên mobile */
             #content,
-            #sidebar.collapsed~#content {
-                margin-left: 0 !important;
+            #sidebar:hover~#content {
+                margin-left: 0;
             }
 
-            /* Backdrop tối nền khi mở menu */
+            #sidebar:not(:hover) ul li a span {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
             .sidebar-backdrop {
                 position: fixed;
                 inset: 0;
-                background: rgba(0, 0, 0, .35);
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
                 opacity: 0;
                 visibility: hidden;
-                transition: opacity .25s ease, visibility .25s ease;
-                z-index: 1040;
+                transition: opacity 0.3s, visibility 0.3s;
             }
 
             .sidebar-backdrop.show {
                 opacity: 1;
                 visibility: visible;
-            }
-
-            /* Tăng vùng chạm và cỡ chữ mục menu cho mobile */
-            #sidebar ul li a {
-                padding: 16px 20px;
-                font-size: 1.05rem;
-            }
-
-            #sidebar ul li a i {
-                font-size: 1.35rem;
-            }
-        }
-
-        /* --------- DESKTOP LAYOUT --------- */
-        @media (min-width: 992px) {
-            #content {
-                margin-left: 240px;
-            }
-
-            #sidebar.collapsed {
-                min-width: 64px;
-                max-width: 64px;
-                transition: all 0.3s cubic-bezier(.4, 2, .6, 1);
-            }
-
-            #sidebar.collapsed~#content {
-                margin-left: 84px;
-            }
-
-            #sidebar.collapsed ul li a span {
-                opacity: 0;
-                margin-left: -24px;
-                pointer-events: none;
-            }
-        }
-
-        @media (max-width: 992px) {
-            #sidebar ul li a span {
-                opacity: 1;
-                margin-left: 12px;
-                pointer-events: auto;
             }
         }
     </style>
@@ -478,291 +254,172 @@
 </head>
 
 <body>
-    <div id="devtools-blocker">
-        <div class="blocker-content">
-            <div class="blocker-icon">
-                <img src="/image/mim_cry.gif" alt="Lỗi truy cập" loop=infinite>
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <a href="{{ route('admin.dashboard') }}"
+                    class="d-flex align-items-center justify-content-center text-decoration-none">
+                    <img src="/image/logo.png" alt="Logo" style="height: 40px;" class="logo-collapsed">
+                    <div class="logo-expanded align-items-center gap-2">
+                        <img src="/image/logo.png" alt="Logo" style="height: 40px;">
+                    </div>
+                </a>
             </div>
-            <h1 class="blocker-title">CÓ BIẾN RỒI!!!</h1>
-            <p id="blocker-message" class="blocker-message">
-                Đóng DevTools và tải lại trang để tiếp tục.
-            </p>
-        </div>
-    </div>
 
-    <div id="main-content">
+            <ul class="list-unstyled components">
+                <li>
+                    <a href="{{ route('admin.dashboard') }}"
+                        class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                        <i class="bi bi-grid-1x2-fill"></i> <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.mau-khao-sat.index') }}"
+                        class="{{ request()->routeIs('admin.mau-khao-sat.*') ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-text-fill"></i> <span>Mẫu khảo sát</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.dot-khao-sat.index') }}"
+                        class="{{ request()->routeIs('admin.dot-khao-sat.*') ? 'active' : '' }}">
+                        <i class="bi bi-calendar-check-fill"></i> <span>Đợt khảo sát</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.bao-cao.index') }}"
+                        class="{{ request()->routeIs('admin.bao-cao.*') ? 'active' : '' }}">
+                        <i class="bi bi-graph-up-arrow"></i> <span>Báo cáo</span>
+                    </a>
+                </li>
+                <hr class="my-3" style="border-color: rgba(0,0,0,0.07);">
+                <li>
+                    <a href="{{ route('admin.users.index') }}"
+                        class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                        <i class="bi bi-people-fill"></i> <span>Người dùng</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.logs.index') }}"
+                        class="{{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
+                        <i class="bi bi-journal-text"></i> <span>Nhật ký</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
 
-        <div id="wrapper">
-            <!-- Sidebar -->
-            <nav id="sidebar">
-                <ul class="list-unstyled components" style="position: relative; z-index: 2;">
-                    <li>
-                        <a href="{{ route('admin.dashboard.index') }}"
-                            class="{{ request()->routeIs('admin.dashboard.*') ? 'active' : '' }}">
-                            <i class="bi bi-house-door-fill"></i> <span>Dashboard</span>
+        {{-- Backdrop cho mobile --}}
+        <div id="sidebar-backdrop" class="sidebar-backdrop d-lg-none"></div>
+
+        <!-- Page Content -->
+        <div id="content">
+            <!-- Top Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-light top-navbar">
+                <span id="text-admin-panel" class="fs-5 fw-bold" style="color: var(--text-dark);">Admin Panel</span>
+                <button id="mobileSidebarToggle" class="btn btn-link d-lg-none me-3" aria-label="Mở menu">
+                    <i class="bi bi-list fs-3"></i>
+                </button>
+                <div class="ms-auto profile-dropdown">
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
+                            data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle fs-5 me-2"></i>
+                            <span class="fw-medium">{{ auth()->user()->hoten ?? 'Admin' }}</span>
                         </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('admin.mau-khao-sat.index') }}"
-                            class="{{ request()->routeIs('admin.mau-khao-sat.*') ? 'active' : '' }}">
-                            <i class="bi bi-file-earmark-text-fill"></i> <span>Mẫu khảo sát</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('admin.dot-khao-sat.index') }}"
-                            class="{{ request()->routeIs('admin.dot-khao-sat.*') ? 'active' : '' }}">
-                            <i class="bi bi-calendar-check-fill"></i> <span>Đợt khảo sát</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('admin.bao-cao.index') }}"
-                            class="{{ request()->routeIs('admin.bao-cao.*') ? 'active' : '' }}">
-                            <i class="bi bi-graph-up-arrow"></i> <span>Báo cáo</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('admin.users.index') }}"
-                            class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                            <i class="bi bi-person-badge-fill"></i> <span>Người dùng</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('admin.logs.index') }}"
-                            class="{{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
-                            <i class="bi bi-journal-text"></i> <span>Nhật ký</span>
-                        </a>
-                    </li>
-                </ul>
-                <div id="sidebar-backdrop" class="sidebar-backdrop d-lg-none" style="z-index: 1;"></div>
+                        <ul class="dropdown-menu dropdown-menu-end glass-effect">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('admin.users.edit', auth()->user()->id) }}">
+                                    <i class="bi bi-person me-2"></i> Thông tin cá nhân
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </nav>
 
-            <!-- Page Content -->
-            <div id="content">
-                <!-- Top Navbar -->
-                <nav class="navbar navbar-expand-lg navbar-light">
-                    <button id="mobileSidebarToggle" class="navbar-btn me-2 d-lg-none" aria-controls="sidebar"
-                        aria-expanded="false" aria-label="Mở menu">
-                        <i class="bi bi-list fs-3"></i>
-                    </button>
-                    <div class="container-fluid">
-                        <!-- Tiêu đề trang web -->
-                        <h4 class="navbar-brand">
-                            <i class="bi bi-grid-1x2-fill"></i> <span id="admin-panel">Admin Panel</span>
-                        </h4>
-
-                        <div class="ms-auto profile-dropdown">
-                            <div class="dropdown">
-                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
-                                    data-bs-toggle="dropdown">
-                                    <i class="bi bi-person-circle fs-5 me-2"></i>
-                                    <span class="fw-medium">{{ auth()->user()->hoten ?? 'Admin' }}</span>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li>
-                                        <a class="dropdown-item"
-                                            href="{{ route('admin.users.edit', auth()->user()->id) }}">
-                                            <i class="bi bi-person me-2"></i> Thông tin cá nhân
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-                                    <li>
-                                        <form method="POST" action="{{ route('logout') }}">
-                                            @csrf
-                                            <button type="submit" class="dropdown-item text-danger">
-                                                <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
-                                            </button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
+            <!-- Main Content Area -->
+            <main id="main-content">
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                </nav>
+                @endif
+                @if(session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
 
-                <!-- Main Content -->
-                <div class="main-content">
-                    <!-- Alerts -->
-                    @if(session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
-
-                    @if(session('error'))
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="bi bi-exclamation-circle-fill me-2"></i>
-                            {{ session('error') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
-
-                    @if(session('info'))
-                        <div class="alert alert-info alert-dismissible fade show" role="alert">
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                            {{ session('info') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    @endif
-
-                    <!-- Page Content -->
-                    @yield('content')
-                </div>
-            </div>
+                @yield('content')
+            </main>
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        $(document).ready(function () {
-            // Sidebar thu nhỏ khi load
-            $('#sidebar').addClass('collapsed');
-            $('#content').addClass('active')
-            // Hover để mở rộng
-            $('#sidebar').on('mouseenter', function () {
-                $(this).removeClass('collapsed');
-                $('#content').removeClass('active')
-            }).on('mouseleave', function () {
-                $(this).addClass('collapsed');
-                $('#content').addClass('active')
-            });
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            const toggleBtn = document.getElementById('mobileSidebarToggle');
+            const textAdminPanel = document.getElementById('text-admin-panel');
+            const isDesktop = () => window.innerWidth >= 992;
 
-            // Auto hide alerts after 5 seconds
-            // setTimeout(function () {
-            //     $('.alert:not(.alert-permanent)').fadeOut('slow', function () {
-            //         $(this).alert('close');
-            //     });
-            // }, 5000);
+            function setupDesktopHover() {
+                sidebar.addEventListener('mouseenter', () => sidebar.classList.remove('collapsed'));
+                sidebar.addEventListener('mouseleave', () => sidebar.classList.add('collapsed'));
+            }
 
-            // Add smooth scrolling
-            $('a[href*="#"]').on('click', function (e) {
-                if ($(this).attr('href').length > 1 && $(this).attr('href').charAt(0) === '#') {
-                    e.preventDefault();
-                    $('html, body').animate({
-                        scrollTop: $($(this).attr('href')).offset().top
-                    }, 500, 'linear');
+            function removeDesktopHover() {
+                // jQuery cần thiết để gỡ bỏ event listener đã được thêm bằng jQuery cũ
+                $(sidebar).off('mouseenter mouseleave');
+            }
+
+            function handleResize() {
+                if (isDesktop()) {
+                    sidebar.classList.add('collapsed');
+                    sidebar.classList.remove('active');
+                    backdrop.classList.remove('show');
+                    document.body.style.overflow = '';
+                    setupDesktopHover();
+                } else {
+                    textAdminPanel.style = "display: none;"
+                    sidebar.classList.remove('collapsed');
+                    removeDesktopHover();
                 }
-            });
-        });
-    </script>
-    <script>
-        $(function () {
-            const $sidebar = $('#sidebar');
-            const $content = $('#content');
-            const $backdrop = $('#sidebar-backdrop');
-            const $toggleBtn = $('#mobileSidebarToggle');
-            const $navbarBrand = $('#admin-panel');
-            const isMobile = () => window.matchMedia('(max-width: 992px)').matches;
-
-            function openSidebarMobile() {
-                $sidebar.removeClass('collapsed')
-                    .addClass('active');
-                $backdrop.addClass('show');
-                $('body').addClass('overflow-hidden');
-                $toggleBtn.attr('aria-expanded', 'true');
-            }
-            function closeSidebarMobile() {
-                $sidebar.removeClass('active');
-                $backdrop.removeClass('show');
-                $('body').removeClass('overflow-hidden');
-                $toggleBtn.attr('aria-expanded', 'false');
             }
 
-            // --- Init state
-            if (isMobile()) {
-                $sidebar.removeClass('collapsed');
-                $content.removeClass('active');
-                $navbarBrand.hide();
-            } else {
-                $sidebar.addClass('collapsed');
-                $content.addClass('active');
-                $navbarBrand.show();
-
-                $sidebar.on('mouseenter.desktop', function () {
-                    if (!isMobile()) {
-                        $sidebar.removeClass('collapsed');
-                        $content.removeClass('active');
-                    }
-                }).on('mouseleave.desktop', function () {
-                    if (!isMobile()) {
-                        $sidebar.addClass('collapsed');
-                        $content.addClass('active');
-                    }
+            // Mobile toggle
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                    backdrop.classList.toggle('show');
+                    document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+                });
+            }
+            if (backdrop) {
+                backdrop.addEventListener('click', () => {
+                    sidebar.classList.remove('active');
+                    backdrop.classList.remove('show');
+                    document.body.style.overflow = '';
                 });
             }
 
-            // --- Toggle button (mobile)
-            $toggleBtn.on('click', function () {
-                if ($sidebar.hasClass('active')) closeSidebarMobile();
-                else openSidebarMobile();
-            });
-
-            // --- Backdrop click để đóng
-            $backdrop.on('click', closeSidebarMobile);
-
-            // --- Đóng khi bấm Esc (mobile)
-            $(document).on('keydown', function (e) {
-                if (e.key === 'Escape' && isMobile() && $sidebar.hasClass('active')) {
-                    closeSidebarMobile();
-                }
-            });
-
-            // --- Bấm vào 1 link trong sidebar thì đóng (mobile)
-            $('#sidebar a').on('click', function () {
-                if (isMobile()) closeSidebarMobile();
-            });
-
-            // --- Khi thay đổi kích thước màn hình, reset trạng thái phù hợp
-            $(window).on('resize', function () {
-                if (isMobile()) {
-                    // Tắt behavior hover desktop
-                    $sidebar.off('.desktop');
-                    // Đưa về trạng thái đóng khi vừa chuyển xuống mobile
-                    closeSidebarMobile();
-                    $sidebar.removeClass('collapsed');
-                    $content.removeClass('active');
-                } else {
-                    // Desktop: đảm bảo hover hoạt động
-                    $backdrop.removeClass('show');
-                    $('body').removeClass('overflow-hidden');
-                    $toggleBtn.attr('aria-expanded', 'false');
-
-                    // Thiết lập lại hover nếu bị remove trước đó
-                    $sidebar.addClass('collapsed');
-                    $content.addClass('active');
-                    $sidebar.off('.desktop').on('mouseenter.desktop', function () {
-                        if (!isMobile()) {
-                            $sidebar.removeClass('collapsed');
-                            $content.removeClass('active');
-                        }
-                    }).on('mouseleave.desktop', function () {
-                        if (!isMobile()) {
-                            $sidebar.addClass('collapsed');
-                            $content.addClass('active');
-                        }
-                    });
-                }
-            });
-
-            // --- Tự ẩn alerts sau 5s (giữ như cũ)
-            // setTimeout(function () {
-            //     $('.alert:not(.alert-permanent)').fadeOut('slow', function () {
-            //         $(this).alert('close');
-            //     });
-            // }, 5000);
-
-            // --- Smooth scroll (giữ như cũ)
-            $('a[href*="#"]').on('click', function (e) {
-                if ($(this).attr('href').length > 1 && $(this).attr('href').charAt(0) === '#') {
-                    e.preventDefault();
-                    $('html, body').animate({ scrollTop: $($(this).attr('href')).offset().top }, 500, 'linear');
-                }
-            });
+            window.addEventListener('resize', handleResize);
+            handleResize();
         });
     </script>
     <script src="/js/protected.js"></script>

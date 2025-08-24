@@ -13,7 +13,7 @@ use App\Http\Controllers\Admin\CauHoiController;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     // Dashboard
-    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard.index');
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // User Management
     Route::get('users', [UserManagementController::class, 'index'])->name('users.index');

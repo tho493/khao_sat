@@ -6,316 +6,228 @@
 <style>
     .progress-section {
         position: sticky;
-        top: 80px;
+        top: 100px;
     }
-    
-    input[type="text"],
-        input[type="email"],
-        input[type="number"],
-        input[type="date"],
-        textarea,
-        select,
-        .form-input,
-        .form-textarea {
-            border: 1px solid #d1d5db !important;
-        }
+
+    .form-input, .form-textarea, .form-radio, .form-checkbox {
+        transition: all 0.2s ease-in-out;
+    }
 </style>
 @endpush
 
-
 @section('content')
-    <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
-        <div class="flex flex-col lg:flex-row gap-8">
-            <!-- Main Content -->
-            <div class="w-full lg:w-2/3">
-                <div class="flex items-center justify-between mb-4">
-                <!-- Breadcrumb navigation -->
-                    <nav class="flex items-center text-sm text-gray-500 mb-2" aria-label="Breadcrumb">
-                        <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                            <li class="inline-flex items-center">
-                                <a href="{{ url('/') }}" class="inline-flex items-center text-gray-500 hover:text-blue-600">
-                                    <i class="bi bi-house-door-fill mr-1"></i> Trang chủ
-                                </a>
-                            </li>
-                            <li>
-                                <div class="flex items-center">
-                                    <i class="bi bi-chevron-right mx-1"></i>
-                                    <a href="{{ route('khao-sat.index') }}" class="text-gray-500 hover:text-blue-600">
-                                        Khảo sát
-                                    </a>
-                                </div>
-                            </li>
-                            <li>
-                                <div class="flex items-center">
-                                    <i class="bi bi-chevron-right mx-1"></i>
-                                    <span class="text-blue-700 font-semibold" aria-current="page">
-                                        {{ $dotKhaoSat->ten_dot }}
-                                    </span>
-                                </div>
-                            </li>
-                        </ol>
+    <div class="container mx-auto py-12 px-4 bg-gradient-to-br from-blue-200 to-slate-50 -z-10">
+        <div class="flex flex-col lg:flex-row gap-8 xl:gap-12">
+
+            <!-- Nội dung khảo sát -->
+            <div class="w-full lg:w-2/3 space-y-6">
+                
+                {{-- Header của khảo sát --}}
+                <div class="glass-effect p-6 text-center">
+                    <nav class="text-sm text-slate-600 mb-4">
+                        <a href="{{ url('/') }}" class="hover:text-blue-700">Trang chủ</a>
+                        <span class="mx-2">/</span>
+                        <a href="{{ route('khao-sat.index') }}" class="hover:text-blue-700">Khảo sát</a>
+                        <span class="mx-2">/</span>
+                        <span class="font-semibold text-slate-800">{{ Str::limit($dotKhaoSat->ten_dot, 30) }}</span>
                     </nav>
-                    <!-- <button type="button" class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition" onclick="history.back()">
-                        <i class="bi bi-arrow-left mr-2"></i> Quay lại
-                    </button> -->
-                </div>
-                <div class="bg-white shadow rounded-lg mb-6">
-                    <div class="p-6">
-                        <h2 class="text-2xl font-bold mb-2">{{ $dotKhaoSat->ten_dot }}</h2>
-                        <p class="text-gray-500 flex items-center gap-2 mb-2">
-                            <i class="bi bi-tag"></i> {{ $mauKhaoSat->ten_mau }} | 
-                            <i class="bi bi-calendar"></i> Hạn cuối: {{ \Carbon\Carbon::parse($dotKhaoSat->denngay)->format('d/m/Y') }}
-                        </p>
-                        @if($dotKhaoSat->mota)
-                            <p class="text-gray-700">{{ $dotKhaoSat->mota }}</p>
-                        @endif
-                    </div>
+                    <h1 class="text-3xl font-extrabold text-slate-800 mb-2">{{ $dotKhaoSat->ten_dot }}</h1>
+                    <p class="text-slate-500">
+                        Hạn cuối: {{ \Carbon\Carbon::parse($dotKhaoSat->denngay)->format('d/m/Y') }}
+                    </p>
                 </div>
 
-                <form id="formKhaoSat" method="POST" action="{{ route('khao-sat.store', $dotKhaoSat) }}">
+                <form id="formKhaoSat" method="POST" action="{{ route('khao-sat.store', $dotKhaoSat) }}" class="space-y-6">
                     @csrf
-                    {!! \App\Http\Middleware\PreventDoubleSubmissions::tokenField() !!}
+                    {!! \App\Http\Middleware\PreventDoubleSubmissions::tokenField('survey_submission') !!}
                     
                     <!-- Thông tin người trả lời -->
-                    <div class="bg-white shadow rounded-lg mb-6">
-                        <div class="bg-blue-600 rounded-t-lg px-6 py-3">
-                            <h5 class="text-white font-semibold m-0">Thông tin của bạn</h5>
+                    <div class="glass-effect">
+                        <div class="bg-white/40 rounded-t-xl px-6 py-4 border-b border-white/30">
+                            <h5 class="text-slate-800 font-bold text-lg m-0">Thông tin của bạn</h5>
                         </div>
-                        <div class="p-6">
-                            <div class="flex flex-wrap -mx-2">
-                                <div class="w-full md:w-1/2 px-2 mb-4">
-                                    <label class="block font-medium mb-1">
-                                        Mã số <span class="text-red-600">*</span>
-                                    </label>
-                                    <input type="text" class="form-input w-full rounded focus:ring-blue-500 focus:border-blue-500" name="ma_nguoi_traloi" required>
-                                    <small class="text-gray-500">Mã sinh viên, mã nhân viên, mã doanh nghiệp...</small>
-                                </div>
-                                <div class="w-full md:w-1/2 px-2 mb-4">
-                                    <label class="block font-medium mb-1">
-                                        Họ và tên <span class="text-red-600">*</span>
-                                    </label>
-                                    <input type="text" class="form-input w-full rounded focus:ring-blue-500 focus:border-blue-500" name="metadata[hoten]" required>
-                                </div>
-                                <div class="w-full md:w-1/2 px-2 mb-4">
-                                    <label class="block font-medium mb-1">Đơn vị/Khoa</label>
-                                    <input type="text" class="form-input w-full rounded focus:ring-blue-500 focus:border-blue-500" name="metadata[donvi]">
-                                </div>
-                                <div class="w-full md:w-1/2 px-2 mb-4">
-                                    <label class="block font-medium mb-1">Email</label>
-                                    <input type="email" class="form-input w-full rounded focus:ring-blue-500 focus:border-blue-500" name="metadata[email]">
-                                </div>
-                                <input type="hidden" name="metadata[thoigian_batdau]" id="thoigian_batdau">
-                                <script>
-                                    document.addEventListener('DOMContentLoaded', function() {
-                                        // Set current datetime in ISO format for datetime-local (without seconds)
-                                        function getCurrentLocalDateTime() {
-                                            const now = new Date();
-                                            const year = now.getFullYear();
-                                            const month = String(now.getMonth() + 1).padStart(2, '0');
-                                            const day = String(now.getDate()).padStart(2, '0');
-                                            const hours = String(now.getHours()).padStart(2, '0');
-                                            const minutes = String(now.getMinutes()).padStart(2, '0');
-                                            const seconds = String(now.getSeconds()).padStart(2, '0');
-                                            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-                                        }
-                                        
-                                        document.getElementById('thoigian_batdau').value = getCurrentLocalDateTime();
-                                    });
-                                </script>
+                        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                            <div>
+                                <label class="block font-medium mb-1 text-slate-700">Mã số <span class="text-red-600">*</span></label>
+                                <input type="text" class="form-input w-full rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500" name="ma_nguoi_traloi" required>
+                            </div>
+                            <div>
+                                <label class="block font-medium mb-1 text-slate-700">Họ và tên <span class="text-red-600">*</span></label>
+                                <input type="text" class="form-input w-full rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500" name="metadata[hoten]" required>
+                            </div>
+                            <div>
+                                <label class="block font-medium mb-1 text-slate-700">Đơn vị/Khoa</label>
+                                <input type="text" class="form-input w-full rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500" name="metadata[donvi]">
+                            </div>
+                            <div>
+                                <label class="block font-medium mb-1 text-slate-700">Email</label>
+                                <input type="email" class="form-input w-full rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500" name="metadata[email]">
                             </div>
                         </div>
                     </div>
 
-                    <!-- Câu hỏi khảo sát -->
-                    @php $questionNumber = 0; @endphp
-                    @if(!empty($mauKhaoSat->cauHoi) && is_iterable($mauKhaoSat->cauHoi))
-                        @foreach($mauKhaoSat->cauHoi as $cauHoi)
-                            @php $questionNumber++; @endphp
-                            <div class="question-card bg-white shadow rounded-lg mb-4 border-l-4 border-blue-600" data-question-id="{{ $cauHoi->id }}">
-                                <div class="p-6">
-                                    <label class="block font-medium mb-2">
-                                        <strong>Câu {{ $questionNumber }}:</strong>
-                                        {{ $cauHoi->noidung_cauhoi }}
-                                        @if($cauHoi->batbuoc)
-                                            <span class="text-red-600">*</span>
-                                        @endif
-                                    </label>
+                    <!-- Các card câu hỏi -->
+                    @php $questionCounter = 0; @endphp
+                    @forelse($mauKhaoSat->cauHoi->sortBy('thutu') as $cauHoi)
+                        @php $questionCounter++; @endphp
+                        <div class="question-card glass-effect" data-question-id="{{ $cauHoi->id }}">
+                            <div class="p-6">
+                                <label class="block font-bold text-slate-800 mb-3 text-lg">
+                                    <span class="text-blue-600">Câu {{ $questionCounter }}:</span>
+                                    {{ $cauHoi->noidung_cauhoi }}
+                                    @if($cauHoi->batbuoc)
+                                        <span class="text-red-600">*</span>
+                                    @endif
+                                </label>
 
-                                    @switch($cauHoi->loai_cauhoi)
-                                        @case('single_choice')
-                                            <div class="mt-2 space-y-2">
-                                                @if(!empty($cauHoi->phuongAnTraLoi) && is_iterable($cauHoi->phuongAnTraLoi))
-                                                    @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
-                                                        <div class="flex items-center">
-                                                            <input class="form-radio text-blue-600 focus:ring-blue-500" type="radio"
-                                                                   name="cau_tra_loi[{{ $cauHoi->id }}]"
-                                                                   value="{{ $phuongAn->id }}"
-                                                                   id="pa_{{ $phuongAn->id }}"
-                                                                   {{ $cauHoi->batbuoc ? 'required' : '' }}>
-                                                            <label class="ml-2" for="pa_{{ $phuongAn->id }}">
-                                                                {{ $phuongAn->noidung }}
-                                                            </label>
-                                                        </div>
-                                                    @endforeach
-                                                @endif
-                                            </div>
-                                            @break
-
-                                        @case('multiple_choice')
-                                            <div class="mt-2 space-y-2">
-                                                @if(!empty($cauHoi->phuongAnTraLoi) && is_iterable($cauHoi->phuongAnTraLoi))
-                                                    @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
-                                                        <div class="flex items-center">
-                                                            <input class="form-checkbox text-blue-600 focus:ring-blue-500" type="checkbox"
-                                                                   name="cau_tra_loi[{{ $cauHoi->id }}][]"
-                                                                   value="{{ $phuongAn->id }}"
-                                                                   id="pa_{{ $phuongAn->id }}">
-                                                            <label class="ml-2" for="pa_{{ $phuongAn->id }}">
-                                                                {{ $phuongAn->noidung }}
-                                                            </label>
-                                                        </div>
-                                                    @endforeach
-                                                @endif
-                                            </div>
-                                            @break
-
-                                        @case('text')
-                                            <textarea class="form-textarea mt-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
-                                                  name="cau_tra_loi[{{ $cauHoi->id }}]"
-                                                  rows="3"
+                                @switch($cauHoi->loai_cauhoi)
+                                    @case('single_choice')
+                                        <div class="mt-2 space-y-3">
+                                            @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
+                                                <label class="flex items-center p-3 rounded-lg bg-white/30 hover:bg-white/50 cursor-pointer transition">
+                                                    <input type="radio" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500 border-slate-400"
+                                                           name="cau_tra_loi[{{ $cauHoi->id }}]" value="{{ $phuongAn->id }}"
+                                                           {{ $cauHoi->batbuoc ? 'required' : '' }}>
+                                                    <span class="ml-3 text-slate-700">{{ $phuongAn->noidung }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                        @break
+                                    
+                                    @case('multiple_choice')
+                                        <div class="mt-2 space-y-3">
+                                            @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
+                                                <label class="flex items-center p-3 rounded-lg bg-white/30 hover:bg-white/50 cursor-pointer transition">
+                                                    <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 focus:ring-blue-500 rounded border-slate-400"
+                                                           name="cau_tra_loi[{{ $cauHoi->id }}][]" value="{{ $phuongAn->id }}">
+                                                    <span class="ml-3 text-slate-700">{{ $phuongAn->noidung }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                        @break
+                                        
+                                    @case('text')
+                                        <textarea class="form-textarea mt-2 w-full rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
+                                                  name="cau_tra_loi[{{ $cauHoi->id }}]" rows="4"
                                                   placeholder="Nhập câu trả lời của bạn..."
                                                   {{ $cauHoi->batbuoc ? 'required' : '' }}></textarea>
-                                            @break
+                                        @break
+                                    
+                                     @case('likert')
+                                        <div class="flex flex-wrap justify-between items-center mt-3 gap-2">
+                                            @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
+                                                <label class="flex flex-col items-center flex-1 p-2 rounded-lg hover:bg-white/50 cursor-pointer transition min-w-[80px]">
+                                                    <input type="radio" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500"
+                                                        name="cau_tra_loi[{{ $cauHoi->id }}]"
+                                                        value="{{ $phuongAn->id }}"
+                                                        {{ $cauHoi->batbuoc ? 'required' : '' }}>
+                                                    <span class="mt-2 text-xs text-center text-slate-600">{{ $phuongAn->noidung }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                        @break
 
-                                        @case('likert')
-                                            <div class="flex justify-between items-center mt-3 gap-2">
-                                                @if(!empty($cauHoi->phuongAnTraLoi) && is_iterable($cauHoi->phuongAnTraLoi))
-                                                    @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
-                                                        <div class="flex flex-col items-center flex-1">
-                                                            <input type="radio" class="form-radio text-blue-600 focus:ring-blue-500"
-                                                                   name="cau_tra_loi[{{ $cauHoi->id }}]"
-                                                                   value="{{ $phuongAn->id }}"
-                                                                   id="pa_{{ $phuongAn->id }}"
-                                                                   {{ $cauHoi->batbuoc ? 'required' : '' }}>
-                                                            <label class="mt-1 text-xs" for="pa_{{ $phuongAn->id }}">
-                                                                {{ $phuongAn->noidung }}
-                                                            </label>
-                                                        </div>
-                                                    @endforeach
-                                                @endif
-                                            </div>
-                                            @break
-
-                                        @case('rating')
-                                            <div class="mt-2">
-                                                <div class="flex space-x-2">
-                                                    @for($i = 1; $i <= 5; $i++)
-                                                        <input type="radio" class="btn-check" 
+                                    @case('rating')
+                                        <div class="mt-3">
+                                            <div class="flex items-center justify-center space-x-2" role="group">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <div class="rating-item">
+                                                        <input type="radio" class="sr-only peer" 
                                                             name="cau_tra_loi[{{ $cauHoi->id }}]" 
-                                                            value="{{ $i }}" {{-- Giá trị là số --}}
+                                                            value="{{ $i }}"
                                                             id="rating_{{ $cauHoi->id }}_{{ $i }}"
                                                             {{ $cauHoi->batbuoc ? 'required' : '' }}>
-                                                        <label class="btn btn-outline-primary" 
-                                                            for="rating_{{ $cauHoi->id }}_{{ $i }}">
+                                                        <label for="rating_{{ $cauHoi->id }}_{{ $i }}"
+                                                            class="flex items-center justify-center w-12 h-12 rounded-full border border-slate-300 bg-white/40
+                                                                    cursor-pointer transition text-slate-600 font-bold text-lg
+                                                                    hover:bg-blue-200 hover:border-blue-400
+                                                                    peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600">
                                                             {{ $i }}
                                                         </label>
-                                                    @endfor
-                                                </div>
-                                                <small class="text-gray-500 block mt-1">1 = Rất không hài lòng, 5 = Rất hài lòng</small>
+                                                    </div>
+                                                @endfor
                                             </div>
-                                            @break
+                                            <div class="flex justify-between text-xs text-slate-500 mt-2 px-1">
+                                                <span>Rất không hài lòng</span>
+                                                <span>Rất hài lòng</span>
+                                            </div>
+                                        </div>
+                                        @break
 
-                                        @case('date')
-                                            <input type="date" class="form-input mt-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
-                                                   name="cau_tra_loi[{{ $cauHoi->id }}]"
-                                                   {{ $cauHoi->batbuoc ? 'required' : '' }}>
-                                            @break
+                                    @case('date')
+                                        <input type="date" class="form-input mt-2 w-full md:w-1/2 rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
+                                            name="cau_tra_loi[{{ $cauHoi->id }}]"
+                                            {{ $cauHoi->batbuoc ? 'required' : '' }}>
+                                        @break
 
-                                        @case('number')
-                                            <input type="number" class="form-input mt-2 w-full rounded focus:ring-blue-500 focus:border-blue-500"
-                                                   name="cau_tra_loi[{{ $cauHoi->id }}]"
-                                                   placeholder="Nhập số..."
-                                                   {{ $cauHoi->batbuoc ? 'required' : '' }}>
-                                            @break
-                                    @endswitch
-                                </div>
+                                    @case('number')
+                                        <input type="number" class="form-input mt-2 w-full  rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
+                                            name="cau_tra_loi[{{ $cauHoi->id }}]"
+                                            placeholder="Nhập số..."
+                                            {{ $cauHoi->batbuoc ? 'required' : '' }}>
+                                        @break
+
+                                @endswitch
                             </div>
-                        @endforeach
-                    @endif
+                        </div>
+                    @empty
+                        <div class="glass-effect p-6 text-center text-slate-600">
+                            Mẫu khảo sát này chưa có câu hỏi nào.
+                        </div>
+                    @endforelse
 
-                    <div class="mb-4 flex justify-center">
-                        <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div> 
-                    </div>
-
-                    <!-- Submit button -->
-                    <div class="flex justify-center my-8 gap-4">
-                        <button type="button" class="inline-flex items-center px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition" onclick="history.back()">
-                            <i class="bi bi-arrow-left mr-2"></i> Quay lại
-                        </button>
-                        <button type="submit" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition" id="submitBtn">
-                            <i class="bi bi-send mr-2"></i> Gửi khảo sát
-                        </button>
+                     <!-- Captcha và nút Submit -->
+                    <div class="glass-effect p-6">
+                        <div class="mb-4 flex justify-center">
+                            <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div> 
+                        </div>
+                        <div class="flex justify-center gap-4">
+                            <button type="submit" class="inline-flex items-center px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-lg font-semibold" id="submitBtn">
+                                <i class="bi bi-send mr-2"></i> Gửi khảo sát
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
 
             <!-- Sidebar Progress -->
             <div class="w-full lg:w-1/3">
-                <div class="progress-section">
-                    <div class="bg-white shadow rounded-lg mb-4">
-                        <div class="p-6 flex flex-col items-center">
-                            <h6 class="font-semibold mb-4">Thời gian làm khảo sát</h6>
-                            <div class="text-3xl font-bold text-blue-600" id="survey-timer">00:00</div>
-                            <small class="text-gray-500 mt-2">Thời gian bạn đã làm khảo sát, tính từ khi mở khảo sát này</small>
-                        </div>
+                <div class="progress-section space-y-6">
+                    <!-- Thời gian -->
+                    <div class="glass-effect p-6 flex flex-col items-center">
+                        <h6 class="font-bold text-slate-800 mb-3">Thời gian làm bài</h6>
+                        <div class="text-4xl font-extrabold text-blue-600" id="survey-timer">00:00</div>
                     </div>
-                    <script>
-                        let secondsElapsed = 0;
-                        function pad(n) { return n < 10 ? '0' + n : n; }
-
-                        function updateTimer() {
-                            const el = document.getElementById('survey-timer');
-                            if (!el) return;
-                            secondsElapsed++;
-                            const minutes = Math.floor(secondsElapsed / 60);
-                            const seconds = secondsElapsed % 60;
-                            el.textContent = pad(minutes) + ':' + pad(seconds);
-                        }
-
-                        document.addEventListener('DOMContentLoaded', function() {
-                            setInterval(updateTimer, 1000);
-                        });
-                    </script>
                 
-                    <div class="bg-white shadow rounded-lg mb-4">
-                        <div class="p-6">
-                            <h6 class="font-semibold mb-4">Tiến độ hoàn thành</h6>
-                            <div class="w-full bg-gray-200 rounded-full h-6 mb-3 overflow-hidden">
-                                <div class="bg-blue-600 h-6 rounded-full flex items-center justify-center text-white text-sm font-semibold transition-all duration-300"
-                                     id="progressBar" style="width: 0%;">0%</div>
-                            </div>
-                            <p class="text-gray-500 text-sm mb-0">
-                                Đã trả lời: <span id="answeredCount">0</span>/{{ $questionNumber + 2}} câu
-                            </p>
+                    <!-- Tiến độ -->
+                    <div class="glass-effect p-6">
+                        <h6 class="font-bold text-slate-800 mb-4">Tiến độ hoàn thành</h6>
+                        <div class="w-full bg-white/40 rounded-full h-6 mb-3 overflow-hidden border border-white/50">
+                            <div class="bg-blue-600 h-6 rounded-full flex items-center justify-center text-white text-sm font-semibold transition-all duration-300"
+                                 id="progressBar" style="width: 0%;">0%</div>
                         </div>
+                        <p class="text-slate-600 text-sm mb-0">
+                            Đã trả lời: <span id="answeredCount">0</span>/{{ $questionCounter + 2 }} câu
+                        </p>
                     </div>
 
-                    <div class="bg-white shadow rounded-lg mt-4">
-                        <div class="p-6">
-                            <h6 class="font-semibold mb-2">Lưu ý</h6>
-                            <ul class="text-sm text-gray-700 list-disc pl-5 mb-0">
-                                <li>Câu hỏi có dấu <span class="text-red-600">*</span> là bắt buộc</li>
-                                <li>Vui lòng kiểm tra kỹ trước khi gửi</li>
-                                <li>Mỗi người chỉ được tham gia 1 lần</li>
-                            </ul>
-                        </div>
+                    <!-- Lưu ý -->
+                    <div class="glass-effect p-6">
+                        <h6 class="font-bold text-slate-800 mb-2">Lưu ý</h6>
+                        <ul class="text-sm text-slate-700 list-disc pl-5 space-y-1 mb-0">
+                            <li>Câu hỏi có dấu <span class="text-red-600">*</span> là bắt buộc.</li>
+                            <li>Tiến trình của bạn được tự động lưu.</li>
+                            <li>Vui lòng kiểm tra kỹ trước khi gửi.</li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+@push('scripts')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
             // Update progress
@@ -424,4 +336,23 @@
         });
     </script>
     <script src="/js/autosave.js"></script>
+    <script>
+        // Cập nhật hiển thị thời gian làm bài
+        let secondsElapsed = 0;
+        function pad(n) { return n < 10 ? '0' + n : n; }
+
+        function updateTimer() {
+            const el = document.getElementById('survey-timer');
+            if (!el) return;
+            secondsElapsed++;
+            const minutes = Math.floor(secondsElapsed / 60);
+            const seconds = secondsElapsed % 60;
+            el.textContent = pad(minutes) + ':' + pad(seconds);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setInterval(updateTimer, 1000);
+        });
+    </script>
+@endpush
 @endsection

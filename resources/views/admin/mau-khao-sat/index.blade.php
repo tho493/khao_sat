@@ -16,35 +16,31 @@
         <div class="card-body">
             <form method="GET" action="{{ route('admin.mau-khao-sat.index') }}">
                 <div class="row g-3">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <input type="text" class="form-control" name="search" 
                                placeholder="Tìm kiếm theo tên mẫu..." 
                                value="{{ request('search') }}">
                     </div>
-                    <div class="col-md-4">
-                    <div class="row">
-                        <div class="col">
-                            <select class="form-select" name="nguoi_tao">
-                                <option value="">-- Người tạo --</option>
-                                @foreach($dsNguoiTao as $id => $ten)
-                                    <option value="{{ $id }}" {{ request('nguoi_tao') == $id ? 'selected' : '' }}>
-                                        {{ $ten }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col">
-                            <select class="form-select" name="trangthai">
-                                <option value="">-- Trạng thái --</option>
-                                <option value="active" {{ request('trangthai') == 'active' ? 'selected' : '' }}>Hoạt động</option>
-                                <option value="draft" {{ request('trangthai') == 'draft' ? 'selected' : '' }}>Nháp</option>
-                                <option value="closed" {{ request('trangthai') == 'closed' ? 'selected' : '' }}>Đã đóng</option>
-                            </select>
-                        </div>
-                        <div class="col">
-                            <input type="date" class="form-control" name="ngay_tao" value="{{ request('ngay_tao') }}" placeholder="Ngày tạo">
-                        </div>
+                    <div class="col-md-2">
+                        <select class="form-select" name="nguoi_tao">
+                            <option value="">-- Người tạo --</option>
+                            @foreach($dsNguoiTao as $id => $ten)
+                                <option value="{{ $id }}" {{ request('nguoi_tao') == $id ? 'selected' : '' }}>
+                                    {{ $ten }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
+                    <div class="col-md-2">
+                        <select class="form-select" name="trangthai">
+                            <option value="">-- Trạng thái --</option>
+                            <option value="active" {{ request('trangthai') == 'active' ? 'selected' : '' }}>Hoạt động</option>
+                            <option value="draft" {{ request('trangthai') == 'draft' ? 'selected' : '' }}>Nháp</option>
+                            <option value="closed" {{ request('trangthai') == 'closed' ? 'selected' : '' }}>Đã đóng</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" class="form-control" name="ngay_tao" value="{{ request('ngay_tao') }}" placeholder="Ngày tạo">
                     </div>
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">

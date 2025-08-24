@@ -10,7 +10,7 @@ require __DIR__ . '/admin.php';
 
 // Authentication
 Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('login', [LoginController::class, 'login'])->middleware('prevent.double.submit');
+Route::post('login', [LoginController::class, 'login'])->middleware('prevent.double.submit:admin_login');
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
 // Public routes
