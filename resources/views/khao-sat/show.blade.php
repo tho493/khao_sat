@@ -16,7 +16,7 @@
 @endpush
 
 @section('content')
-    <div class="container mx-auto py-12 px-8">
+    <div class="container mx-auto py-12 px-8 ">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row gap-8 xl:gap-12">
 
@@ -244,7 +244,6 @@
 
     
 @push('scripts')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
     $(document).ready(function() {

@@ -23,6 +23,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     {{-- CSS for Glassmorphism & Improvements --}}
     <style>
         :root {
@@ -154,11 +156,126 @@
                 transform: scale(1);
             }
         }
+
+        /* Chatbot */
+        .chatbot-toggler {
+            position: fixed;
+            bottom: 15px;
+            right: 80px;
+            width: 60px;
+            height: 60px;
+            background: var(--primary-color, #2a76c9);
+            color: white;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .chatbot-toggler:hover {
+            transform: scale(1.1);
+        }
+
+        .chatbot-container {
+            position: fixed;
+            bottom: 100px;
+            right: 35px;
+            width: 350px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 128px 0 rgba(0, 0, 0, 0.1), 0 32px 64px -48px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            transform: scale(0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .chatbot-container.show {
+            transform: scale(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .chatbot-header {
+            background: var(--primary-color, #2a76c9);
+            color: white;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .chatbot-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .chatbox {
+            height: 350px;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .chat {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        .chat p {
+            max-width: 75%;
+            font-size: 0.95rem;
+            padding: 12px;
+            border-radius: 10px;
+            background: #f2f2f2;
+            margin: 0;
+            word-wrap: break-word;
+        }
+
+        .chat.outgoing {
+            justify-content: flex-end;
+        }
+
+        .chat.outgoing p {
+            background: var(--primary-color, #2a76c9);
+            color: white;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 5px;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .chat-input textarea {
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            resize: none;
+            font-size: 0.95rem;
+            max-height: 100px;
+        }
+
+        .chat-input button {
+            border: none;
+            background: none;
+            font-size: 1.5rem;
+            color: var(--primary-color, #2a76c9);
+            cursor: pointer;
+        }
     </style>
     @stack('styles')
 </head>
 
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-gradient-to-br from-blue-500 to-slate-50 text-slate-800">
     <div id="devtools-blocker">
         <div class="blocker-content">
             <div class="blocker-icon">
@@ -168,6 +285,26 @@
             <p id="blocker-message" class="blocker-message">
                 Đóng DevTools và tải lại trang để tiếp tục.
             </p>
+        </div>
+    </div>
+
+    {{-- Chatbot Container --}}
+    <button class="chatbot-toggler">
+        <i class="bi bi-chat-dots-fill"></i>
+    </button>
+
+    <div class="chatbot-container">
+        <div class="chatbot-header">
+            <h2>Trợ lý ảo</h2>
+        </div>
+        <ul class="chatbox list-unstyled">
+            <li class="chat incoming">
+                <p>Xin chào 👋<br>Tôi có thể giúp gì cho bạn về các vấn đề thường gặp trong khảo sát?</p>
+            </li>
+        </ul>
+        <div class="chat-input">
+            <textarea placeholder="Nhập câu hỏi của bạn..." required></textarea>
+            <button id="send-btn"><i class="bi bi-send-fill"></i></button>
         </div>
     </div>
 
@@ -197,9 +334,7 @@
         </header>
 
         {{-- Page Content --}}
-        <section class="py-12 md:py-16 bg-gradient-to-br from-blue-100 to-slate-50">
-            @yield('content')
-        </section>
+        @yield('content')
 
         {{-- Footer --}}
         <footer class="relative text-white pt-16 pb-8 overflow-hidden bg-gradient-to-br from-[#174a7e] to-[#1f66b3]">
@@ -333,9 +468,63 @@
             sr.reveal('.reveal-section-title', { duration: 600, scale: 0.95 });
 
             // Hiệu ứng cho các card khảo sát (xuất hiện lần lượt)
-            sr.reveal('.reveal-survey-card', { interval: 100 }); // interval: độ trễ giữa mỗi card
+            sr.reveal('.reveal-survey-card', { interval: 100 });
         });
     </script>
+
+    <script>
+        $(document).ready(function () {
+            const chatbotToggler = $('.chatbot-toggler');
+            const chatbotContainer = $('.chatbot-container');
+            const chatInput = $('.chat-input textarea');
+            const sendChatBtn = $('#send-btn');
+            const chatbox = $('.chatbox');
+
+            chatbotToggler.on('click', () => chatbotContainer.toggleClass('show'));
+
+            const createChatLi = (message, className) => {
+                const chatLi = $('<li>').addClass(`chat ${className}`);
+                chatLi.append($('<p>').html(message));
+                return chatLi;
+            }
+
+            const generateResponse = (userMessage) => {
+                const API_URL = "{{ route('api.ask') }}";
+
+                const thinkingLi = createChatLi("...", "incoming");
+                chatbox.append(thinkingLi);
+                chatbox.scrollTop(chatbox[0].scrollHeight);
+
+                $.ajax({
+                    url: API_URL,
+                    method: 'POST',
+                    data: { _token: '{{ csrf_token() }}', message: userMessage },
+                    success: (response) => thinkingLi.find("p").html(response.answer),
+                    error: () => thinkingLi.find("p").html("Ôi! Server hỗ trợ có vẻ đang lỗi.")
+                });
+            }
+
+            const handleChat = () => {
+                const userMessage = chatInput.val().trim();
+                if (!userMessage) return;
+
+                chatInput.val("");
+                chatbox.append(createChatLi(userMessage, "outgoing"));
+                chatbox.scrollTop(chatbox[0].scrollHeight);
+
+                setTimeout(() => generateResponse(userMessage), 600);
+            }
+
+            sendChatBtn.on('click', handleChat);
+            chatInput.on('keydown', (e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleChat();
+                }
+            });
+        });
+    </script>
+
     @stack('scripts')
 
 </body>
