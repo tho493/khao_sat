@@ -39,7 +39,7 @@
 
                 <form id="formKhaoSat" method="POST" action="{{ route('khao-sat.store', $dotKhaoSat) }}" class="space-y-6">
                     @csrf
-                    {!! \App\Http\Middleware\PreventDoubleSubmissions::tokenField('survey_submission') !!}
+                    {!! \App\Http\Middleware\PreventDoubleSubmissions::tokenField() !!}
                     
                     <!-- Thông tin người trả lời -->
                     <div class="glass-effect">
@@ -325,6 +325,7 @@
                     },
                     error: function(xhr) {
                         alert('Có lỗi xảy ra: ' + (xhr.responseJSON?.message || 'Vui lòng thử lại'));
+                        location.reload(true); // submit rồi thì cần reload lại key submit
                         $('#submitBtn').prop('disabled', false)
                             .html('<i class="bi bi-send mr-2"></i> Gửi khảo sát');
                     }
