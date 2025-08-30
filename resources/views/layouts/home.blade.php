@@ -488,20 +488,121 @@
                 return chatLi;
             }
 
+            const scrollToBottom = () => {
+                chatbox.scrollTop(chatbox[0].scrollHeight);
+            };
+
             const generateResponse = (userMessage) => {
                 const API_URL = "{{ route('api.ask') }}";
 
+                const surveyForm = $('#formKhaoSat');
+                @php
+                    $surveyIdForJs = null;
+                    if (isset($dotKhaoSat) && $dotKhaoSat) {
+                        $surveyIdForJs = $dotKhaoSat->id;
+                    }
+                @endphp
+                const surveyId = surveyForm.length ? "{{ $surveyIdForJs }}" : null;
+
+                const requestData = {
+                    _token: '{{ csrf_token() }}',
+                    message: userMessage
+                };
+
+                if (surveyId) {
+                    requestData.survey_id = surveyId;
+                }
+
                 const thinkingLi = createChatLi("...", "incoming");
                 chatbox.append(thinkingLi);
-                chatbox.scrollTop(chatbox[0].scrollHeight);
+                scrollToBottom();
 
                 $.ajax({
                     url: API_URL,
                     method: 'POST',
-                    data: { _token: '{{ csrf_token() }}', message: userMessage },
-                    success: (response) => thinkingLi.find("p").html(response.answer),
-                    error: () => thinkingLi.find("p").html("Ôi! Server hỗ trợ có vẻ đang lỗi.")
+                    data: requestData,
+                    success: function (response) {
+                        if (response.success) {
+                            if (response.type === 'action') {
+                                thinkingLi.remove();
+                                handleAiAction(response.data);
+                            } else {
+                                thinkingLi.find("p").html(response.answer);
+                            }
+                        } else {
+                            thinkingLi.find("p").html(response.answer || "Có lỗi xảy ra.");
+                        }
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        console.log(xhr.responseText);
+                        thinkingLi.find("p").html("Ôi! Server hỗ trợ có vẻ đang lỗi rồi. Bạn thông cảm mình chưa nói chuyện với nhau được đâu nhé.");
+                    }
                 });
+            }
+
+            function handleAiAction(actionData) {
+                console.log("Executing AI Action:", actionData);
+                let feedbackMessage = "Đã hiểu!";
+
+                switch (actionData.action) {
+                    case 'fill_input':
+                        const inputElement = $(actionData.selector);
+                        if (inputElement.length) {
+                            inputElement.val(actionData.value).trigger('change');
+                            inputElement.addClass('flash-effect-input');
+                            setTimeout(() => inputElement.removeClass('flash-effect-input'), 4000);
+                            feedbackMessage = `Đã điền '${actionData.value}' giúp bạn.`;
+                        } else {
+                            feedbackMessage = `Xin lỗi, tôi không tìm thấy ô để điền thông tin đó.`;
+                        }
+                        break;
+
+                    case 'scroll_to_question':
+                        const questionCard = $(`.question-card:eq(${actionData.question_number - 1})`);
+                        if (questionCard.length) {
+                            questionCard[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // Thêm hiệu ứng
+                            questionCard.addClass('flash-effect');
+                            setTimeout(() => questionCard.removeClass('flash-effect'), 4000);
+                            feedbackMessage = `Ok, đã chuyển đến câu ${actionData.question_number}.`;
+                        } else {
+                            feedbackMessage = `Xin lỗi, tôi không tìm thấy câu hỏi số ${actionData.question_number}.`;
+                        }
+                        break;
+
+                    case 'check_missing':
+                        const missingRequired = [];
+                        $('#formKhaoSat [required]').each(function () {
+                            let isMissing = false;
+                            const name = $(this).attr('name');
+                            if ($(this).is(':radio')) {
+                                if ($(`input[name="${name}"]:checked`).length === 0) isMissing = true;
+                            } else if (!$(this).val().trim()) {
+                                isMissing = true;
+                            }
+
+                            if (isMissing) {
+                                const label = $(this).closest('.p-6, .grid').find('label').first().text().replace('*', '').trim();
+                                if (label && !missingRequired.includes(label)) {
+                                    missingRequired.push(label);
+                                }
+                            }
+                        });
+
+                        if (missingRequired.length > 0) {
+                            feedbackMessage = 'Bạn còn thiếu các câu bắt buộc sau:<ul class="list-disc ps-4 mt-2">';
+                            missingRequired.forEach(label => feedbackMessage += `<li>${label}</li>`);
+                            feedbackMessage += '</ul>';
+                        } else {
+                            feedbackMessage = 'Tuyệt vời! Bạn đã trả lời tất cả các câu hỏi bắt buộc rồi.';
+                        }
+                        break;
+                }
+
+                // Hiển thị tin nhắn khi hoàn thành
+                const botMessageLi = createChatLi(feedbackMessage, "incoming");
+                chatbox.append(botMessageLi);
+                chatbox.scrollTop(chatbox[0].scrollHeight);
             }
 
             const handleChat = () => {

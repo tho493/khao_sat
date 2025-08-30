@@ -12,6 +12,48 @@
     .form-input, .form-textarea, .form-radio, .form-checkbox {
         transition: all 0.2s ease-in-out;
     }
+
+     .flash-effect {
+            position: relative;
+            z-index: 1;
+        }
+
+    .flash-effect::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: inherit;
+        z-index: -1;
+        animation: flashAnimation 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 3 forwards;
+    }
+
+    @keyframes flashAnimation {
+        0% {
+            box-shadow: 0 0 0 0px rgba(79, 70, 229, 0.4);
+        }
+        100% {
+            box-shadow: 0 0 0 20px rgba(79, 70, 229, 0);
+        }
+    }
+
+    .flash-effect-input {
+        animation: flashInputAnimation 1s ease-out 3;
+    }
+
+    @keyframes flashInputAnimation {
+        0% {
+            box-shadow: 0 0 0 0px rgba(79, 70, 229, 0);
+        }
+        25% {
+            box-shadow: 0 0 0 5px rgba(79, 70, 229, 0.3);
+        }
+        100% {
+            box-shadow: 0 0 0 0px rgba(79, 70, 229, 0);
+        }
+    }
 </style>
 @endpush
 

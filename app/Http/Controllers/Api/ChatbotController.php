@@ -19,32 +19,30 @@ class ChatbotController extends Controller
 
     public function ask(Request $request)
     {
+        // 1. Validate: `survey_id` bây giờ là tùy chọn
         $validated = $request->validate([
             'message' => 'required|string|max:255',
-            'survey_id' => 'sometimes|exists:dot_khaosat,id',
+            'survey_id' => 'nullable|exists:dot_khaosat,id',
         ]);
 
         $userMessage = $validated['message'];
 
-        // $exactAnswer = $this->findExactAnswer($userMessage);
-
-        // if ($exactAnswer) {
-        //     return response()->json([
-        //         'success' => true,
-        //         'answer' => $exactAnswer,
-        //         'source' => 'database' // nguồn để trả lời
-        //     ]);
-        // }
-
-        $dotKhaoSat = DotKhaoSat::find($request->input('survey_id'));
-        if (!$dotKhaoSat) {
-            $dotKhaoSat = new DotKhaoSat(['ten_dot' => 'Chung', 'denngay' => now()->addDays(7)]);
+        $exactAnswer = $this->findExactAnswer($userMessage);
+        if ($exactAnswer) {
+            return response()->json([
+                'success' => true,
+                'answer' => $exactAnswer,
+                'source' => 'database'
+            ]);
         }
 
-        // tạo câu trả lời bằng Service AI
-        $response = $this->aiService->getSmartResponse($userMessage, $dotKhaoSat);
+        $dotKhaoSat = null;
+        if ($request->filled('survey_id')) {
+            $dotKhaoSat = DotKhaoSat::with('mauKhaoSat.cauHoi')->find($validated['survey_id']);
+        }
 
-        // $response['source'] = 'openai';
+        $response = $this->aiService->getSmartResponse($userMessage, $dotKhaoSat);
+        $response['source'] = 'gemini';
 
         $statusCode = $response['success'] ? 200 : 500;
         return response()->json($response, $statusCode);
