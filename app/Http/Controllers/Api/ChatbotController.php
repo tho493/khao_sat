@@ -19,7 +19,7 @@ class ChatbotController extends Controller
 
     public function ask(Request $request)
     {
-        // 1. Validate: `survey_id` bây giờ là tùy chọn
+        // `survey_id` là tùy chọn
         $validated = $request->validate([
             'message' => 'required|string|max:255',
             'survey_id' => 'nullable|exists:dot_khaosat,id',

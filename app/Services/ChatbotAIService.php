@@ -15,7 +15,7 @@ class ChatbotAIService
     /**
      * Lấy câu trả lời thông minh từ Google Gemini.
      */
-    public function getSmartResponse(string $userMessage, DotKhaoSat $dotKhaoSat): array
+    public function getSmartResponse(string $userMessage, ?DotKhaoSat $dotKhaoSat): array
     {
         // Kiểm tra xem API key có được cấu hình không
         $apiKey = env('GEMINI_API_KEY');
@@ -28,8 +28,15 @@ class ChatbotAIService
         }
 
         $faqData = $this->getFaqData();
-        $surveyContext = $this->getSurveyContext($dotKhaoSat);
-        $questionsContext = $this->getSurveyQuestionsContext($dotKhaoSat);
+
+        // Xử lý trường hợp dotKhaoSat = null
+        if (is_null($dotKhaoSat)) {
+            $surveyContext = "Không có thông tin về đợt khảo sát hiện tại.";
+            $questionsContext = "Không có câu hỏi khảo sát nào được cung cấp.";
+        } else {
+            $surveyContext = $this->getSurveyContext($dotKhaoSat);
+            $questionsContext = $this->getSurveyQuestionsContext($dotKhaoSat);
+        }
 
         $systemPrompt = <<<PROMPT
             BẠN LÀ MỘT API PHÂN TÍCH. Vai trò của bạn là phân tích yêu cầu của người dùng và trả về kết quả dưới dạng một chuỗi JSON hợp lệ để điều khiển giao diện form.
@@ -59,44 +66,47 @@ class ChatbotAIService
 
             Dựa vào yêu cầu của người dùng và cấu trúc form ở trên, hãy chọn và tạo JSON action phù hợp.
 
-            **1. Công cụ `fill_text` (Dành cho Nhập văn bản)**
-            -   **Mô tả:** Dùng để điền một chuỗi văn bản vào các ô input có `type: 'text'`, `textarea`, `number`, `date`.
-            -   **Kích hoạt khi:** Người dùng cung cấp thông tin như mã số, họ tên, hoặc câu trả lời tự luận.
-                -   *Ví dụ user:* "mã số của tôi là sv123"
-                -   *Ví dụ user:* "câu 2 tôi trả lời là abc xyz"
-            -   **Định dạng JSON:** `{"action": "fill_text", "selector": "[name='tên_thuộc_tính']", "value": "chuỗi văn bản"}`
-            -   **Ví dụ JSON:** `{"action": "fill_text", "selector": "[name='ma_nguoi_traloi']", "value": "sv123"}`
+            **Công cụ 1: `show_message`**
+            - **Mô tả:** Dùng để trả lời các câu hỏi thông thường hoặc khi không có công cụ nào khác phù hợp.
+            - **Kích hoạt khi:** Người dùng hỏi "khảo sát này để làm gì?", "hạn cuối là khi nào?", "chào bạn", v.v.
+            - **Kiến thức:** Sử dụng BỐI CẢNH và KIẾN THỨC NỀN (FAQ) dưới đây để trả lời.
+            - **Định dạng JSON:** `{"action": "show_message", "message": "Nội dung câu trả lời của bạn."}`
 
-            **2. Công cụ `select_single` (Dành cho Chọn một)**
-            -   **Mô tả:** Dùng để chọn MỘT phương án duy nhất cho các câu hỏi `single_choice` (radio button) hoặc `likert`.
-            -   **Kích hoạt khi:** Người dùng chỉ định MỘT lựa chọn cho một câu hỏi.
-                -   *Ví dụ user:* "câu 1 tôi chọn rất tốt"
-                -   *Ví dụ user:* "câu 3 là có"
-            -   **Định dạng JSON:** `{"action": "select_single", "selector": "[name='tên_thuộc_tính']", "value": "giá_trị_phương_án"}`
-            -   **Lưu ý:** `value` trong JSON phải là `value` của phương án (ví dụ: '201'), không phải là nội dung ('Rất tốt').
-            -   **Ví dụ JSON:** `{"action": "select_single", "selector": "[name='cau_tra_loi[101]']", "value": "201"}`
+            **Công cụ 2: `fill_text` (Nhập văn bản / số / ngày)**
+            - **Mô tả:** Dùng để điền giá trị vào các ô input loại `text`, `textarea`, `number`, `date`.
+            - **Kích hoạt khi:** Người dùng cung cấp thông tin cá nhân hoặc câu trả lời tự do.
+                - *Ví dụ:* "mã số của tôi là sv123"
+                - *Ví dụ:* "câu 2 tôi trả lời là..."
+                - *Ví dụ:* "cho câu 6 là ngày 25/12/2024"
+            - **Định dạng JSON:** `{"action": "fill_text", "selector": "[name='tên_thuộc_tính']", "value": "chuỗi_giá_trị"}`
+            - **Lưu ý:** Với ngày tháng, hãy cố gắng chuyển đổi thành định dạng `YYYY-MM-DD`. Ví dụ, "ngày mai" -> `{{ now()->addDay()->format('Y-m-d') }}`.
 
-            **3. Công cụ `select_multiple` (Dành cho Chọn nhiều)**
-            -   **Mô tả:** Dùng để chọn MỘT hoặc NHIỀU phương án cho câu hỏi `multiple_choice` (checkbox).
-            -   **Kích hoạt khi:** Người dùng chỉ định MỘT hoặc NHIỀU lựa chọn cho câu hỏi có thể chọn nhiều.
-                -   *Ví dụ user:* "câu 4 tôi chọn phương án A và B"
-                -   *Ví dụ user:* "ở câu 5, tick vào ô đầu tiên"
-            -   **Định dạng JSON:** `{"action": "select_multiple", "selector": "[name='tên_thuộc_tính[]']", "values": ["giá_trị_1", "giá_trị_2"]}`
-            -   **Lưu ý:** `values` trong JSON phải là một MẢNG chứa các `value` của phương án. Ngay cả khi chỉ có một lựa chọn, nó vẫn phải là một mảng.
-            -   **Ví dụ JSON:** `{"action": "select_multiple", "selector": "[name='cau_tra_loi[104][]']", "values": ["208", "209"]}`
+            **Công cụ 3: `select_single` (Chọn một)**
+            - **Mô tả:** Dùng để chọn MỘT phương án cho câu hỏi `single_choice`, `likert`, hoặc `rating`.
+            - **Kích hoạt khi:** Người dùng chỉ định MỘT lựa chọn.
+                - *Ví dụ:* "câu 1 tôi chọn rất tốt"
+                - *Ví dụ:* "câu 5 tôi đánh giá 4 sao"
+            - **Định dạng JSON:** `{"action": "select_single", "selector": "[name='tên_thuộc_tính']", "value": "giá_trị_phương_án"}`
+            - **Lưu ý:** `value` trong JSON phải là `value` số của phương án (ví dụ: '201'), không phải nội dung ('Rất tốt').
 
-            **4. Công cụ `scroll_to_question`**
-            -   **Mô tả:** Dùng để cuộn trang đến một câu hỏi cụ thể.
-            -   **Kích hoạt khi:** Người dùng yêu cầu di chuyển. Ví dụ: "đến câu 5", "tới câu hỏi số ba".
-            -   **Định dạng JSON:** `{"action": "scroll_to_question", "question_number": số_nguyên}`
-            -   **Lưu ý:** Tự động chuyển đổi chữ số ("một", "hai"...) thành số nguyên.
+            **Công cụ 4: `select_multiple` (Chọn nhiều)**
+            - **Mô tả:** Dùng để chọn MỘT hoặc NHIỀU phương án cho câu hỏi `multiple_choice`.
+            - **Kích hoạt khi:** Người dùng chỉ định MỘT hoặc NHIỀU lựa chọn.
+                - *Ví dụ:* "câu 4 tôi chọn phương án A và B"
+            - **Định dạng JSON:** `{"action": "select_multiple", "selector": "[name='tên_thuộc_tính[]']", "values": ["giá_trị_1", "giá_trị_2"]}`
 
-            **5. Công cụ `check_missing`**
-            -   **Mô tả:** Dùng để kiểm tra các câu hỏi bắt buộc chưa được trả lời.
-            -   **Kích hoạt khi:** Người dùng hỏi về việc hoàn thành. Ví dụ: "kiểm tra giúp tôi", "còn thiếu câu nào không".
-            -   **Định dạng JSON:** `{"action": "check_missing"}`
+            **Công cụ 5: `scroll_to_question`**
+            - **Mô tả:** Cuộn trang đến một câu hỏi.
+            - **Định dạng JSON:** `{"action": "scroll_to_question", "question_number": số_nguyên}`
+
+            **Công cụ 6: `check_missing`**
+            - **Mô tả:** Kiểm tra các câu bắt buộc còn thiếu.
+            - **Định dạng JSON:** `{"action": "check_missing"}`
 
             ---
+
+            ### **KIẾN THỨC FAQ**
+            {$faqData}
 
             ### **YÊU CẦU CỦA NGƯỜI DÙNG CẦN PHÂN TÍCH:**
             "{$userMessage}"
@@ -147,7 +157,7 @@ class ChatbotAIService
         foreach ($faqs as $faq) {
             $faqString .= "- Nếu người dùng hỏi về '{$faq->keywords}', hãy trả lời: '{$faq->answer}'\n";
         }
-        return $faqString;
+        return $faqString ? $faqString : null;
     }
 
     protected function getSurveyContext(DotKhaoSat $dotKhaoSat)
@@ -177,21 +187,19 @@ class ChatbotAIService
         }
 
         $questionString = "";
-
         foreach ($questions as $index => $question) {
-            $inputName = "cau_tra_loi[{$question->id}]";
+            $questionString .= "- Câu " . ($index + 1) . ": {$question->noidung_cauhoi}\n";
+            $questionString .= "  { \"type\": \"{$question->loai_cauhoi}\", \"name\": \"cau_tra_loi[{$question->id}]" . ($question->loai_cauhoi == 'multiple_choice' ? '[]' : '') . "\" }\n";
 
-            $questionString .= "- Câu " . ($index + 1) . ": {$question->noidung_cauhoi} (name attribute: '{$inputName}')\n";
-
-            if (in_array($question->loai_cauhoi, ['single_choice', 'multiple_choice', 'likert']) && $question->phuongAnTraLoi->isNotEmpty()) {
-
-                $questionString .= "  Các lựa chọn có thể:\n";
+            if (in_array($question->loai_cauhoi, ['single_choice', "multiple_choice", "likert"]) && $question->phuongAnTraLoi->isNotEmpty()) {
+                $questionString .= "  Lựa chọn:\n";
                 foreach ($question->phuongAnTraLoi->sortBy('thutu') as $pa) {
-                    $questionString .= "  - '{$pa->noidung}' (có value là: '{$pa->id}')\n";
+                    $questionString .= "  - '{$pa->noidung}' (value: '{$pa->id}')\n";
                 }
+            } elseif ($question->loai_cauhoi == 'rating') {
+                $questionString .= "  Lựa chọn: các số từ 1 đến 5 (1=Tệ, 5=Tốt)\n";
             }
         }
-
         return trim($questionString);
     }
 }

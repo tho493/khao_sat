@@ -115,79 +115,9 @@
             width: 80px;
             height: 80px;
         }
-
-        #devtools-blocker {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(26, 32, 44, 0.95);
-            z-index: 2147483647;
-
-            display: none;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-        }
-
-        .blocker-content {
-            max-width: 600px;
-            opacity: 1;
-        }
-
-        .blocker-icon {
-            font-size: 80px;
-            color: #e53e3e;
-            animation: pulse 1.5s infinite;
-        }
-
-        .blocker-title {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-top: 20px;
-            color: #ffffff;
-        }
-
-        .blocker-message {
-            font-size: 1.2rem;
-            margin-top: 15px;
-
-            color: #e2e8f0;
-            opacity: 1;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.1);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
     </style>
 </head>
 <body>
-    <div id="devtools-blocker">
-        <div class="blocker-content">
-            <div class="blocker-icon">
-                <img src="/image/mim_cry.gif" alt="Lỗi truy cập">
-            </div>
-            <h1 class="blocker-title">CÓ BIẾN RỒI!!!</h1>
-            <p id="blocker-message" class="blocker-message">
-                Đóng DevTools và tải lại trang để tiếp tục.
-            </p>
-        </div>
-    </div>
-
     <div class="container" id="main-content">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5 col-xl-4">
@@ -292,6 +222,5 @@
         });
     }, 5000);
 </script>
-<script src="/js/protected.js"></script>
 </body>
 </html>

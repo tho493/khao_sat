@@ -3,12 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\UserManagementController;
-use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\LogController;
 use App\Http\Controllers\Admin\MauKhaoSatController;
 use App\Http\Controllers\Admin\DotKhaoSatController;
 use App\Http\Controllers\Admin\BaoCaoController;
 use App\Http\Controllers\Admin\CauHoiController;
+use App\Http\Controllers\Admin\FaqController;
 
 
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
@@ -59,13 +59,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/export/{dotKhaoSat}', [BaoCaoController::class, 'export'])->name('export');
     });
 
-    // Reports
-    Route::prefix('reports')->name('reports.')->group(function () {
-        Route::get('/', [ReportController::class, 'index'])->name('index');
-        Route::get('/survey/{dotKhaoSat}', [ReportController::class, 'survey'])->name('survey');
-        Route::get('/export', [ReportController::class, 'export'])->name('export');
-        Route::get('/analytics', [ReportController::class, 'analytics'])->name('analytics');
-    });
+    // FAQ
+    Route::resource('faq', FaqController::class)->except(['show']);
 
     // System Logs
     Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');

@@ -99,143 +99,109 @@
             background-color: #ffffff;
         }
 
-        #devtools-blocker {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(26, 32, 44, 0.95);
-            z-index: 2147483647;
-
-            display: none;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-        }
-
-        .blocker-content {
-            max-width: 600px;
-            opacity: 1;
-        }
-
-        .blocker-icon {
-            font-size: 80px;
-            color: #e53e3e;
-            animation: pulse 1.5s infinite;
-        }
-
-        .blocker-title {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-top: 20px;
-            color: #ffffff;
-        }
-
-        .blocker-message {
-            font-size: 1.2rem;
-            margin-top: 15px;
-
-            color: #e2e8f0;
-            opacity: 1;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.1);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
         /* Chatbot */
         .chatbot-toggler {
             position: fixed;
             bottom: 15px;
-            right: 80px;
+            right: 75px;
             width: 60px;
             height: 60px;
-            background: var(--primary-color, #2a76c9);
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color, #6366f1));
             color: white;
             border-radius: 50%;
             border: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: 1.8rem;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
             transition: all 0.3s ease;
             z-index: 1000;
         }
 
         .chatbot-toggler:hover {
-            transform: scale(1.1);
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 12px 30px rgba(79, 70, 229, 0.4);
         }
 
         .chatbot-container {
             position: fixed;
-            bottom: 100px;
+            bottom: 110px;
+            /* Tăng khoảng cách với nút toggler */
             right: 35px;
-            width: 350px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 0 128px 0 rgba(0, 0, 0, 0.1), 0 32px 64px -48px rgba(0, 0, 0, 0.5);
+            width: 380px;
+            /* Tăng chiều rộng một chút */
+            max-height: 80vh;
+            /* Giới hạn chiều cao */
+            display: flex;
+            flex-direction: column;
+
+            /* Hiệu ứng Glassmorphism */
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+
+            border-radius: 1rem;
+            /* Bo góc */
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
             overflow: hidden;
-            transform: scale(0.5);
+
+            /* Hiệu ứng xuất hiện */
+            transform: scale(0.9) translateY(20px);
             opacity: 0;
             pointer-events: none;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
             z-index: 1000;
         }
 
         .chatbot-container.show {
-            transform: scale(1);
+            transform: scale(1) translateY(0);
             opacity: 1;
             pointer-events: auto;
         }
 
         .chatbot-header {
-            background: var(--primary-color, #2a76c9);
-            color: white;
-            padding: 16px;
+            /* Nền header trong suốt hơn một chút */
+            background: rgba(255, 255, 255, 0.3);
+            color: var(--text-dark);
+            padding: 1rem;
             text-align: center;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .chatbot-header h2 {
-            font-size: 1.2rem;
-            font-weight: 600;
+            font-size: 1.1rem;
             margin: 0;
         }
 
         .chatbox {
-            height: 350px;
+            flex-grow: 1;
+            /* Tự động co dãn theo chiều cao */
             overflow-y: auto;
-            padding: 20px;
+            padding: 1.25rem;
         }
 
         .chat {
             display: flex;
-            margin-bottom: 15px;
+            margin-bottom: 1rem;
         }
 
         .chat p {
-            max-width: 75%;
-            font-size: 0.95rem;
-            padding: 12px;
-            border-radius: 10px;
-            background: #f2f2f2;
-            margin: 0;
+            font-size: 0.9rem;
+            padding: 10px 15px;
+            border-radius: 12px;
             word-wrap: break-word;
+            max-width: 85%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .chat.incoming p {
+            background: #ffffff;
+            color: var(--text-dark);
+            border-radius: 12px 12px 12px 0;
         }
 
         .chat.outgoing {
@@ -243,51 +209,51 @@
         }
 
         .chat.outgoing p {
-            background: var(--primary-color, #2a76c9);
+            background: var(--primary-color);
             color: white;
+            border-radius: 12px 12px 0 12px;
         }
 
         .chat-input {
             display: flex;
-            gap: 5px;
-            padding: 15px;
-            border-top: 1px solid #ddd;
+            gap: 10px;
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .chat-input textarea {
-            width: 100%;
+            flex-grow: 1;
             border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 10px;
+            border-radius: 8px;
+            padding: 10px 15px;
             resize: none;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             max-height: 100px;
+            border-color: rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .chat-input textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
         }
 
         .chat-input button {
             border: none;
             background: none;
             font-size: 1.5rem;
-            color: var(--primary-color, #2a76c9);
+            color: var(--primary-color);
             cursor: pointer;
+            align-self: flex-end;
+            padding-bottom: 5px;
         }
     </style>
     @stack('styles')
 </head>
 
 <body class="bg-gradient-to-br from-blue-500 to-slate-50 text-slate-800">
-    <div id="devtools-blocker">
-        <div class="blocker-content">
-            <div class="blocker-icon">
-                <img src="/image/mim_cry.gif" alt="Lỗi truy cập" loop=infinite>
-            </div>
-            <h1 class="blocker-title">CÓ BIẾN RỒI!!!</h1>
-            <p id="blocker-message" class="blocker-message">
-                Đóng DevTools và tải lại trang để tiếp tục.
-            </p>
-        </div>
-    </div>
-
     {{-- Chatbot Container --}}
     <button class="chatbot-toggler">
         <i class="bi bi-chat-dots-fill"></i>
@@ -445,7 +411,6 @@
             });
         }
     </script>
-    <!-- <script src="/js/protected.js"></script> -->
     <script src="https://unpkg.com/scrollreveal"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -503,7 +468,6 @@
                     }
                 @endphp
                 const surveyId = surveyForm.length ? "{{ $surveyIdForJs }}" : null;
-
                 const requestData = {
                     _token: '{{ csrf_token() }}',
                     message: userMessage
@@ -539,50 +503,106 @@
                     }
                 });
             }
-
+            
             function handleAiAction(actionData) {
                 console.log("Executing AI Action:", actionData);
-                let feedbackMessage = "Đã hiểu!";
+                let feedbackMessage = null; // Mặc định không có phản hồi nếu hành động thành công
+                let error = false;
+
+                if (!actionData || !actionData.action) {
+                    console.error("Dữ liệu hành động không hợp lệ:", actionData);
+                    return;
+                }
+
+                let targetElementContainer = null;
+                if (actionData.selector) {
+                    targetElementContainer = $(actionData.selector).first().closest('.glass-effect, .question-card');
+                }
 
                 switch (actionData.action) {
-                    case 'fill_input':
-                        const inputElement = $(actionData.selector);
-                        if (inputElement.length) {
-                            inputElement.val(actionData.value).trigger('change');
-                            inputElement.addClass('flash-effect-input');
-                            setTimeout(() => inputElement.removeClass('flash-effect-input'), 4000);
-                            feedbackMessage = `Đã điền '${actionData.value}' giúp bạn.`;
+                    case 'show_message':
+                        feedbackMessage = actionData.message;
+                        break;
+                    case 'fill_text': {
+                        const element = $(actionData.selector);
+                        if (element.length) {
+                            element.val(actionData.value).trigger('change');
+                            feedbackMessage = `Đã điền "<strong>${actionData.value}</strong>" giúp bạn.`;
                         } else {
-                            feedbackMessage = `Xin lỗi, tôi không tìm thấy ô để điền thông tin đó.`;
+                            error = true;
+                            feedbackMessage = `Lỗi: Không tìm thấy ô nhập liệu với selector: ${actionData.selector}`;
                         }
                         break;
+                    }
 
-                    case 'scroll_to_question':
-                        const questionCard = $(`.question-card:eq(${actionData.question_number - 1})`);
+                    case 'select_single': {
+                        const selector = `${actionData.selector}[value="${actionData.value}"]`;
+                        const radioElement = $(selector);
+
+                        if (radioElement.length) {
+                            radioElement.prop('checked', true).trigger('change');
+                            feedbackMessage = `Đã chọn giúp bạn.`;
+                        } else {
+                            error = true;
+                            feedbackMessage = `Lỗi: Không tìm thấy lựa chọn với selector: ${selector}`;
+                        }
+                        break;
+                    }
+                    
+                    case 'select_multiple': {
+                        const checkboxGroup = $(actionData.selector);
+                        if (checkboxGroup.length) {
+                            const values = Array.isArray(actionData.values) ? actionData.values : [actionData.values];
+                            
+                            checkboxGroup.each(function() {
+                                if (!values.includes($(this).val())) {
+                                    $(this).prop('checked', false);
+                                }
+                            });
+
+                            values.forEach(val => {
+                                checkboxGroup.filter(`[value="${val}"]`).prop('checked', true);
+                            });
+
+                            checkboxGroup.first().trigger('change');
+                            feedbackMessage = `Đã chọn các phương án giúp bạn.`;
+                        } else {
+                            error = true;
+                            feedbackMessage = `Lỗi: Không tìm thấy nhóm lựa chọn với selector: ${actionData.selector}`;
+                        }
+                        break;
+                    }
+                        
+                    case 'scroll_to_question': {
+                        const qNumber = parseInt(actionData.question_number);
+                        if (isNaN(qNumber) || qNumber < 1) {
+                            feedbackMessage = `Số câu hỏi không hợp lệ.`;
+                            break;
+                        }
+                        const questionCard = $(`.question-card:eq(${qNumber - 1})`);
                         if (questionCard.length) {
+                            targetElementContainer = questionCard;
                             questionCard[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            // Thêm hiệu ứng
-                            questionCard.addClass('flash-effect');
-                            setTimeout(() => questionCard.removeClass('flash-effect'), 4000);
-                            feedbackMessage = `Ok, đã chuyển đến câu ${actionData.question_number}.`;
+                            feedbackMessage = `Ok, đã chuyển đến câu hỏi số <strong>${qNumber}</strong>.`;
                         } else {
-                            feedbackMessage = `Xin lỗi, tôi không tìm thấy câu hỏi số ${actionData.question_number}.`;
+                            error = true;
+                            feedbackMessage = `Lỗi: Không tìm thấy câu hỏi số ${qNumber}.`;
                         }
                         break;
+                    }
 
-                    case 'check_missing':
+                    case 'check_missing': {
                         const missingRequired = [];
-                        $('#formKhaoSat [required]').each(function () {
+                        $('#formKhaoSat [required]').each(function() {
                             let isMissing = false;
                             const name = $(this).attr('name');
                             if ($(this).is(':radio')) {
                                 if ($(`input[name="${name}"]:checked`).length === 0) isMissing = true;
-                            } else if (!$(this).val().trim()) {
+                            } else if (!$(this).val() || $(this).val().trim() === '') {
                                 isMissing = true;
                             }
-
                             if (isMissing) {
-                                const label = $(this).closest('.p-6, .grid').find('label').first().text().replace('*', '').trim();
+                                const label = $(this).closest('.p-6, .grid, .mb-4').find('label').first().text().replace('*', '').trim();
                                 if (label && !missingRequired.includes(label)) {
                                     missingRequired.push(label);
                                 }
@@ -590,39 +610,29 @@
                         });
 
                         if (missingRequired.length > 0) {
-                            feedbackMessage = 'Bạn còn thiếu các câu bắt buộc sau:<ul class="list-disc ps-4 mt-2">';
+                            feedbackMessage = 'Bạn còn thiếu các câu bắt buộc sau:<ul class="list-disc ps-4 mt-2 text-start">';
                             missingRequired.forEach(label => feedbackMessage += `<li>${label}</li>`);
                             feedbackMessage += '</ul>';
                         } else {
-                            feedbackMessage = 'Tuyệt vời! Bạn đã trả lời tất cả các câu hỏi bắt buộc rồi.';
+                            feedbackMessage = 'Tuyệt vời! Bạn đã trả lời tất cả các câu hỏi bắt buộc.';
                         }
                         break;
+                    }
                 }
 
-                // Hiển thị tin nhắn khi hoàn thành
-                const botMessageLi = createChatLi(feedbackMessage, "incoming");
-                chatbox.append(botMessageLi);
-                chatbox.scrollTop(chatbox[0].scrollHeight);
-            }
-
-            const handleChat = () => {
-                const userMessage = chatInput.val().trim();
-                if (!userMessage) return;
-
-                chatInput.val("");
-                chatbox.append(createChatLi(userMessage, "outgoing"));
-                chatbox.scrollTop(chatbox[0].scrollHeight);
-
-                setTimeout(() => generateResponse(userMessage), 600);
-            }
-
-            sendChatBtn.on('click', handleChat);
-            chatInput.on('keydown', (e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleChat();
+                // Áp dụng hiệu ứng flash nếu hành động thành công và tìm thấy container
+                if (!error && targetElementContainer && targetElementContainer.length) {
+                    targetElementContainer.addClass('flash-effect');
+                    setTimeout(() => targetElementContainer.removeClass('flash-effect'), 2000);
                 }
-            });
+
+                // Hiển thị tin nhắn phản hồi của bot nếu có
+                if (feedbackMessage) {
+                    const botMessageLi = createChatLi(feedbackMessage, "incoming");
+                    chatbox.append(botMessageLi);
+                    scrollToBottom();
+                }
+            }
         });
     </script>
 

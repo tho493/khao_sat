@@ -300,6 +300,12 @@
                     </a>
                 </li>
                 <li>
+                    <a href="{{ route('admin.faq.index') }}"
+                        class="{{ request()->routeIs('admin.faq.*') ? 'active' : '' }}" title="FAQ Chatbot">
+                        <i class="bi bi-chat-left-dots-fill"></i> <span>FAQ Chatbot</span>
+                    </a>
+                </li>
+                <li>
                     <a href="{{ route('admin.logs.index') }}"
                         class="{{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
                         <i class="bi bi-journal-text"></i> <span>Nhật ký</span>
@@ -422,7 +428,6 @@
             handleResize();
         });
     </script>
-    <script src="/js/protected.js"></script>
     @stack('scripts')
 </body>
 
