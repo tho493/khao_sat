@@ -363,11 +363,15 @@
 
                 <div class="lg:col-span-1">
                     <h5 class="font-bold text-lg mb-4 tracking-wider">BẢN ĐỒ</h5>
-                    <div class="w-full h-full min-h-[200px] rounded-lg overflow-hidden shadow-lg">
+                    <div class="rounded-lg overflow-hidden shadow-lg">
                         <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3725.321049289255!2d106.4259737153359!3d20.97960339463567!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31350b0b8c2c8f6b%3A0x52c286a2e24f46e5!2zVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBTYW8gxJDhu48!5e0!3m2!1svi!2s!4v1672322045678!5m2!1svi!2s"
-                            class="w-full h-full border-0" allowfullscreen="" loading="lazy"
-                            referrerpolicy="no-referrer-when-downgrade" title="Bản đồ Trường Đại học Sao Đỏ"></iframe>
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3722.080211255413!2d106.39125117529709!3d21.10936808500497!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31357909df4b3bff%3A0xd8784721e55d91ca!2zVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBTYW8gxJDhu48!5e0!3m2!1svi!2s!4v1757063624491!5m2!1svi!2s"
+                            class="w-full h-full"
+                            allowfullscreen="" 
+                            loading="lazy" 
+                            referrerpolicy="no-referrer-when-downgrade"
+                            title="Bản đồ vị trí Trường Đại học Sao Đỏ">
+                        </iframe>
                     </div>
                 </div>
             </div>
@@ -462,10 +466,10 @@
 
                 const surveyForm = $('#formKhaoSat');
                 @php
-                    $surveyIdForJs = null;
-                    if (isset($dotKhaoSat) && $dotKhaoSat) {
-                        $surveyIdForJs = $dotKhaoSat->id;
-                    }
+$surveyIdForJs = null;
+if (isset($dotKhaoSat) && $dotKhaoSat) {
+    $surveyIdForJs = $dotKhaoSat->id;
+}
                 @endphp
                 const surveyId = surveyForm.length ? "{{ $surveyIdForJs }}" : null;
                 const requestData = {
@@ -503,7 +507,28 @@
                     }
                 });
             }
-            
+
+            // Sửa lỗi: Gắn sự kiện click cho nút gửi
+            sendChatBtn.on('click', function (e) {
+                e.preventDefault();
+                const userMessage = chatInput.val().trim();
+                if (userMessage) {
+                    const userLi = createChatLi(userMessage, "outgoing");
+                    chatbox.append(userLi);
+                    scrollToBottom();
+                    chatInput.val('');
+                    generateResponse(userMessage);
+                }
+            });
+
+            // Gửi khi nhấn Enter (không phải Shift+Enter)
+            chatInput.on('keydown', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendChatBtn.click();
+                }
+            });
+
             function handleAiAction(actionData) {
                 console.log("Executing AI Action:", actionData);
                 let feedbackMessage = null; // Mặc định không có phản hồi nếu hành động thành công

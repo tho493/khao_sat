@@ -150,6 +150,42 @@ class ChatbotAIService
         }
     }
 
+
+    public function summarizeText(string $textToSummarize, string $questionContext): array
+    {
+        // prompt cho việc tóm tắt
+        $prompt = <<<PROMPT
+            BẠN LÀ MỘT CHUYÊN GIA PHÂN TÍCH DỮ LIỆU.
+            Nhiệm vụ của bạn là đọc tất cả các ý kiến phản hồi dưới đây cho câu hỏi khảo sát: "{$questionContext}"
+
+            Sau đó, hãy tóm tắt các ý kiến này thành 3 đến 5 gạch đầu dòng (bullet points) chính. Mỗi gạch đầu dòng cần nêu bật được một chủ đề hoặc một vấn đề nổi cộm được nhiều người đề cập nhất.
+            Sử dụng ngôn ngữ trang trọng, khách quan và trình bày dưới dạng HTML với thẻ `<ul>` và `<li>`.
+            **KHÔNG BAO GIỜ** được thêm giải thích hoặc thông tin không liên quan.
+
+            Dưới đây là danh sách các phản hồi cần tóm tắt:
+            - {$textToSummarize}
+        PROMPT;
+
+        try {
+            $response = Gemini::generativeModel(model: 'gemini-2.5-flash')->generateContent(
+                Content::parse(part: [trim($prompt)])
+            );
+
+            return [
+                'success' => true,
+                'text' => $response->text()
+            ];
+
+        } catch (\Exception $e) {
+            \Log::error("Gemini Summarize Error: " . $e->getMessage());
+
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
     protected function getFaqData()
     {
         $faqs = DB::table('chatbot_qa')->where('is_enabled', true)->get();

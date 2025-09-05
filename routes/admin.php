@@ -57,6 +57,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/', [BaoCaoController::class, 'index'])->name('index');
         Route::get('/dot-khao-sat/{dotKhaoSat}', [BaoCaoController::class, 'dotKhaoSat'])->name('dot-khao-sat');
         Route::get('/export/{dotKhaoSat}', [BaoCaoController::class, 'export'])->name('export');
+        Route::post('{dotKhaoSat}/summarize', [BaoCaoController::class, 'summarizeWithAi'])->name('summarize');
     });
 
     // FAQ
