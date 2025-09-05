@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\DotKhaoSat;
 use App\Models\PhieuKhaoSat;
+use App\Models\CauHoiKhaoSat;
+use App\Services\ChatbotAIService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
@@ -272,6 +274,56 @@ class BaoCaoController extends Controller
             ->groupBy('ngay')
             ->orderBy('ngay')
             ->get();
+    }
+
+    /**
+     * Tóm tắt câu trả lời bằng AI.
+     * @param Request $request
+     * @param DotKhaoSat $dotKhaoSat
+     * @param ChatbotAIService $aiService
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function summarizeWithAi(Request $request, DotKhaoSat $dotKhaoSat)
+    {
+        // Validate đầu vào
+        $validated = $request->validate([
+            'cauhoi_id' => 'required|exists:cauhoi_khaosat,id',
+        ]);
+
+        $cauHoi = CauHoiKhaoSat::find($validated['cauhoi_id']);
+
+        // Chỉ tóm tắt câu hỏi dạng text
+        if ($cauHoi->loai_cauhoi !== 'text') {
+            return response()->json(['summary' => 'Chức năng này chỉ áp dụng cho câu hỏi tự luận.'], 400);
+        }
+
+        $completedSurveyIds = $dotKhaoSat->phieuKhaoSat()->where('trangthai', 'completed')->pluck('id');
+
+        $answers = DB::table('phieu_khaosat_chitiet')
+            ->where('cauhoi_id', $cauHoi->id)
+            ->whereIn('phieu_khaosat_id', $completedSurveyIds)
+            ->whereNotNull('giatri_text')
+            ->where('giatri_text', '!=', '')
+            ->pluck('giatri_text');
+
+        if ($answers->count() < 3) { // Cần ít nhất vài câu trả lời để tóm tắt có ý nghĩa
+            return response()->json(['summary' => 'Không đủ dữ liệu để tạo tóm tắt (cần ít nhất 3 câu trả lời).'], 400);
+        }
+
+        // Ghép các câu trả lời lại
+        $fullText = $answers->implode("\n- ");
+        $aiService = app(ChatbotAIService::class);
+        $summary = $aiService->summarizeText($fullText, $cauHoi->noidung_cauhoi);
+
+        if ($summary['success']) {
+            return response()->json([
+                'summary' => $summary['text']
+            ]);
+        } else {
+            return response()->json([
+                'summary' => "<div class='alert alert-warning'><strong>Lỗi từ dịch vụ AI:</strong><br>" . e($summary['error']) . "</div>"
+            ], 503);
+        }
     }
 
     public function export(Request $request, DotKhaoSat $dotKhaoSat)

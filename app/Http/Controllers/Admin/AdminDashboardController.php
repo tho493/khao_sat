@@ -9,7 +9,8 @@ use App\Models\PhieuKhaoSat;
 use App\Models\MauKhaoSat;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
+// use Illuminate\Support\Facades\Auth;
+use App\Models\LichSuThayDoi;
 
 class AdminDashboardController extends Controller
 {
@@ -19,58 +20,75 @@ class AdminDashboardController extends Controller
         $stats = [
             'total_users' => User::count(),
             'active_surveys' => DotKhaoSat::where('trangthai', 'active')->count(),
-            'total_responses' => PhieuKhaoSat::whereMonth('thoigian_batdau', date('m'))->count(),
-            'total_templates' => MauKhaoSat::where('trangthai', 'active')->count(),
+            'total_responses' => PhieuKhaoSat::whereMonth('created_at', date('m'))
+                ->where('trangthai', 'completed')
+                ->count(),
+            'total_templates' => MauKhaoSat::count(),
         ];
 
         // Biểu đồ phản hồi 7 ngày gần nhất
-        $responseChart = $this->getResponseChart();
+        $responseChart = $this->getResponseChartData();
+
+        // Biểu đồ thống kê theo 5 đợt KS có nhiều phản hồi nhất
+        $surveyStatsChart = $this->getTopSurveyStats();
 
         // Hoạt động gần đây
+        // $recentActivities = LichSuThayDoi::with('nguoiThucHien')
+        //     ->orderBy('thoigian', 'desc')
+        //     ->take(5)
+        //     ->get();
+
         $recentActivities = $this->getRecentActivities();
 
-        // Thống kê theo đối tượng
-        $objectStats = $this->getObjectStats();
-
         // Người dùng hoạt động
-        $activeUsers = User::where('last_login', '>=', Carbon::now()->subDays(7))
+        $activeUsers = User::whereNotNull('last_login')
             ->orderBy('last_login', 'desc')
             ->take(5)
             ->get();
 
-        // dd($objectStats);
         return view('admin.dashboard.index', compact(
             'stats',
             'responseChart',
+            'surveyStatsChart',
             'recentActivities',
-            'objectStats',
             'activeUsers'
         ));
     }
 
-    private function getResponseChart()
+    private function getResponseChartData()
     {
-        $data = PhieuKhaoSat::selectRaw('DATE(thoigian_batdau) as date, COUNT(*) as count')
-            ->whereDate('thoigian_batdau', '>=', Carbon::now()->subDays(7))
+        $data = PhieuKhaoSat::where('trangthai', 'completed')
+            ->where('thoigian_hoanthanh', '>=', Carbon::now()->subDays(6)->startOfDay())
             ->groupBy('date')
+            ->orderBy('date', 'ASC')
+            ->get([
+                DB::raw('DATE(thoigian_hoanthanh) as date'),
+                DB::raw('COUNT(*) as count')
+            ])
             ->pluck('count', 'date');
 
         $labels = [];
-        $valuesCollection = collect();
-
+        $values = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i);
-            $dateString = $date->toDateString();
-
             $labels[] = $date->format('d/m');
-
-            $valuesCollection->push($data->get($dateString, 0));
+            $values[] = $data->get($date->toDateString(), 0);
         }
+        return ['labels' => $labels, 'values' => $values];
+    }
 
-        return [
-            'labels' => $labels,
-            'values' => $valuesCollection->all()
-        ];
+    private function getTopSurveyStats()
+    {
+        return DotKhaoSat::join('phieu_khaosat', 'dot_khaosat.id', '=', 'phieu_khaosat.dot_khaosat_id')
+            ->where('phieu_khaosat.trangthai', 'completed')
+            ->select(
+                'dot_khaosat.ten_dot',
+                DB::raw('COUNT(phieu_khaosat.id) as total_responses')
+            )
+            ->groupBy('dot_khaosat.id', 'dot_khaosat.ten_dot')
+            ->orderBy('total_responses', 'desc')
+            ->limit(5)
+            ->get();
     }
 
     private function getRecentActivities()

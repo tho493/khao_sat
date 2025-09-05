@@ -43,8 +43,6 @@
             background: rgba(255, 255, 255, 0.6);
             -webkit-backdrop-filter: blur(12px);
             backdrop-filter: blur(12px);
-
-            border-right: 1px solid rgba(0, 0, 0, 0.05);
             transition: var(--transition);
             position: fixed;
             z-index: 1000;
@@ -58,11 +56,11 @@
         #sidebar .sidebar-header {
             padding: 24px;
             text-align: center;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            height: 81px;
+            height: 79px;
             display: flex;
             align-items: center;
             justify-content: center;
+            border: none !important;
         }
 
         #sidebar .logo-expanded {
@@ -143,6 +141,7 @@
 
         #main-content {
             padding: 32px;
+            border-left: 1px solid #e2e8f0;
         }
 
         /* === Top Navbar === */
@@ -179,7 +178,6 @@
         .dropdown-menu.glass-effect .dropdown-item:hover,
         .dropdown-menu.glass-effect .dropdown-item:focus {
             background-color: rgba(79, 70, 229, 0.1);
-            /* Màu hover nhẹ nhàng */
             color: var(--primary-color);
         }
 
@@ -259,7 +257,7 @@
         <nav id="sidebar">
             <div class="sidebar-header">
                 <a href="{{ route('admin.dashboard') }}"
-                    class="d-flex align-items-center justify-content-center text-decoration-none">
+                    class="d-flex align-items-center justify-content-center text-decoration-none components">
                     <img src="/image/logo.png" alt="Logo" style="height: 40px;" class="logo-collapsed">
                     <div class="logo-expanded align-items-center gap-2">
                         <img src="/image/logo.png" alt="Logo" style="height: 40px;">
@@ -300,6 +298,12 @@
                     </a>
                 </li>
                 <li>
+                    <a href="{{ route('admin.faq.index') }}"
+                        class="{{ request()->routeIs('admin.faq.*') ? 'active' : '' }}" title="FAQ Chatbot">
+                        <i class="bi bi-chat-left-dots-fill"></i> <span>FAQ Chatbot</span>
+                    </a>
+                </li>
+                <li>
                     <a href="{{ route('admin.logs.index') }}"
                         class="{{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
                         <i class="bi bi-journal-text"></i> <span>Nhật ký</span>
@@ -314,8 +318,8 @@
         <!-- Page Content -->
         <div id="content">
             <!-- Top Navbar -->
-            <nav class="navbar navbar-expand-lg navbar-light top-navbar">
-                <span id="text-admin-panel" class="fs-5 fw-bold" style="color: var(--text-dark);">Admin Panel</span>
+            <nav class="navbar navbar-expand-lg navbar-light top-navbar" style="border-left: none !important">
+                <span id="text-admin-panel" class="fs-5 fw-bold">Admin Panel</span>
                 <button id="mobileSidebarToggle" class="btn btn-link d-lg-none me-3" aria-label="Mở menu">
                     <i class="bi bi-list fs-3"></i>
                 </button>
@@ -422,7 +426,6 @@
             handleResize();
         });
     </script>
-    <script src="/js/protected.js"></script>
     @stack('scripts')
 </body>
 

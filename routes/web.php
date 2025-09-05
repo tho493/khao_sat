@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Mail\SentMessage;
+use App\Http\Controllers\Api\ChatbotController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\KhaoSatController;
@@ -13,6 +13,10 @@ Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('login', [LoginController::class, 'login'])->middleware('prevent.double.submit:admin_login');
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
+Route::prefix('api')->name('api.')->group(function () {
+    Route::post('/chatbot/ask', [ChatbotController::class, 'ask'])->name('ask');
+});
+
 // Public routes
 Route::prefix('')->name('khao-sat.')->group(function () {
     Route::get('/', [KhaoSatController::class, 'index'])->name('index');
@@ -20,5 +24,4 @@ Route::prefix('')->name('khao-sat.')->group(function () {
     // Route::get('/review/{token}', [KhaoSatController::class, 'review'])->name('review');
     Route::get('/{dotKhaoSat}', [KhaoSatController::class, 'show'])->name('show');
     Route::post('/{dotKhaoSat}', [KhaoSatController::class, 'store'])->name('store')->middleware('prevent.double.submit');
-
 });

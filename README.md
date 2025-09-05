@@ -150,7 +150,18 @@ Hệ thống sử dụng Google reCAPTCHA v2 để bảo mật.
     RECAPTCHA_SECRET_KEY=YOUR_SECRET_KEY_HERE
     ```
 
-### 5. Khởi chạy ứng dụng
+### 5. Cấu hình Google AI (Chatbot)
+
+1.  **Đăng ký website:**
+    -   Truy cập [Google AI Studio](https://aistudio.google.com/apikey).
+    -   Nhấn nút `Get API key` và làm theo hướng dẫn để lấy key api.
+2.  **Cập nhật file `.env`:**
+    Mở file `.env` và thêm khóa này vào:
+    ```env
+    GEMINI_API_KEY="YOUR_GEMINI_API_KEY_HERE"
+    ```
+
+### 6. Khởi chạy ứng dụng
 
 1.  **Dọn dẹp cache và link storage (quan trọng):**
     ```sh
