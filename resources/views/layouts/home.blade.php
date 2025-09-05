@@ -448,7 +448,7 @@
             const chatInput = $('.chat-input textarea');
             const sendChatBtn = $('#send-btn');
             const chatbox = $('.chatbox');
-            const API_URL = "{{ route('api.ask') }}";
+            const API_URL = "/api/chatbot/ask";
 
             chatbotToggler.on('click', () => chatbotContainer.toggleClass('show'));
 

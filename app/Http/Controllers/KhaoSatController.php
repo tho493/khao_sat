@@ -75,12 +75,12 @@ class KhaoSatController extends Controller
 
     public function store(Request $request, DotKhaoSat $dotKhaoSat)
     {
-        if (Auth::check()) {
-            return view('khao-sat.closed', [
-                'dotKhaoSat' => $dotKhaoSat,
-                'message' => 'Quản trị viên đang ở chế độ xem trước và không thể nộp khảo sát.',
-                'reason' => 'Forbidden'
-            ]);
+        if (Auth::check() && !$dotKhaoSat->isActive()) {
+            return response()->json([
+                'redirect' => route('khao-sat.show', $dotKhaoSat),
+                'success' => false,
+                'message' => 'Quản trị viên đang ở chế độ xem trước và không thể nộp khảo sát.'
+            ], 403);
         }
 
         if (!$dotKhaoSat->isActive()) {
