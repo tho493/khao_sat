@@ -323,36 +323,62 @@
 
         function loadProgress() {
             const savedData = localStorage.getItem(storageKey);
+            
             if (savedData) {
-                try {
-                    const data = JSON.parse(savedData);
-                    
-                    for (const name in data) {
-                        const value = data[name];
-                        const element = surveyForm.find(`[name="${name}"]`);
-
-                        if (Array.isArray(value)) {
-                            const checkboxGroup = surveyForm.find(`[name="${name}[]"]`);
-                            checkboxGroup.prop('checked', false);
-                            value.forEach(val => {
-                                checkboxGroup.filter(`[value="${val}"]`).prop('checked', true);
-                            });
-                        } else if (element.is(':radio')) {
-                            surveyForm.find(`[name="${name}"][value="${value}"]`).prop('checked', true);
-                        } else {
-                            element.val(value);
-                        }
+                Swal.fire({
+                    title: 'Tìm thấy dữ liệu chưa hoàn thành!',
+                    text: "Bạn có muốn khôi phục lại các câu trả lời từ lần làm việc trước không?",
+                    icon: 'question',
+                    showDenyButton: true,
+                    confirmButtonText: '<i class="bi bi-arrow-clockwise"></i> Khôi phục',
+                    denyButtonText: '<i class="bi bi-trash"></i> Xóa & Bắt đầu lại',
+                    confirmButtonColor: '#3085d6',
+                    denyButtonColor: '#d33',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fillFormWithData(savedData);
+                        // Swal.fire('Đã khôi phục!', 'Các câu trả lời của bạn đã được tải lại.', 'success');
+                    } else if (result.isDenied) {
+                        clearProgress();
+                        // Swal.fire('Đã xóa!', 'Bạn có thể bắt đầu lại từ đầu.', 'info');
                     }
-                    console.log("Load Progress Success");
-                } catch (e) {
-                    console.error('Lỗi khi tải dữ liệu từ LocalStorage:', e);
-                    localStorage.removeItem(storageKey);
+                });
+            }
+        }
+        
+        function fillFormWithData(jsonData) {
+            try {
+                const data = JSON.parse(jsonData);
+                
+                for (const name in data) {
+                    const value = data[name];
+                    const element = surveyForm.find(`[name="${name}"]`);
+
+                    if (Array.isArray(value)) {
+                        const checkboxGroup = surveyForm.find(`[name="${name}[]"]`);
+                        checkboxGroup.prop('checked', false);
+                        value.forEach(val => {
+                            checkboxGroup.filter(`[value="${val}"]`).prop('checked', true);
+                        });
+                    } else if (element.is(':radio')) {
+                        surveyForm.find(`[name="${name}"][value="${value}"]`).prop('checked', true);
+                    } else {
+                        element.val(value);
+                    }
                 }
+                
+                if (typeof updateProgress === 'function') {
+                    updateProgress();
+                }
+            } catch (e) {
+                console.error('Lỗi khi tải dữ liệu từ LocalStorage:', e);
+                clearProgress();
             }
         }
 
         function clearProgress() {
             localStorage.removeItem(storageKey);
+            console.log('Survey progress cleared.');
         }
 
         loadProgress();

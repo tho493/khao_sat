@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\NamHoc;
 
@@ -20,8 +19,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Tạo năm học
-        NamHoc::create(['namhoc' => '2023-2024']);
-        NamHoc::create(['namhoc' => '2024-2025']);
         NamHoc::create(['namhoc' => '2025-2026']);
+        NamHoc::create(['namhoc' => '2026-2027']);
+        NamHoc::create(['namhoc' => '2027-2028']);
+        NamHoc::create(['namhoc' => '2028-2029']);
     }
+
 }

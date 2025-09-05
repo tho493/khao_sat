@@ -437,27 +437,29 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 -- Trigger kiểm tra đợt khảo sát còn hoạt động
-DELIMITER //
-CREATE TRIGGER trg_KiemTraDotKhaoSat
-BEFORE INSERT ON phieu_khaosat
+DELIMITER $$
+CREATE TRIGGER `trg_KiemTraDotKhaoSat` 
+BEFORE INSERT ON `phieu_khaosat`
 FOR EACH ROW
 BEGIN
-  DECLARE v_trangthai VARCHAR(20);
-  DECLARE v_denngay DATE;
-  
-  SELECT trangthai, denngay INTO v_trangthai, v_denngay
-  FROM dot_khaosat
-  WHERE id = NEW.dot_khaosat_id;
-  
-  IF v_trangthai != 'active' THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Đợt khảo sát không hoạt động';
-  END IF;
-  
-  IF CURDATE() > v_denngay THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Đợt khảo sát đã kết thúc';
-  END IF;
-END//
+    DECLARE v_trangthai VARCHAR(20);
+    DECLARE v_denngay DATE;
 
+    -- Chỉ thực thi trigger nếu biến @disable_triggers không được set
+    IF @disable_triggers IS NULL THEN
+        SELECT trangthai, denngay INTO v_trangthai, v_denngay
+        FROM dot_khaosat
+        WHERE id = NEW.dot_khaosat_id;
+
+        IF v_trangthai != 'active' THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Đợt khảo sát không hoạt động';
+        END IF;
+
+        IF CURDATE() > v_denngay THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Đợt khảo sát đã kết thúc';
+        END IF;
+    END IF;
+END$$
 DELIMITER ;
 
 -- Trigger tự động cập nhật trạng thái đợt khảo sát

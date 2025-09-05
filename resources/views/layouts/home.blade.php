@@ -9,6 +9,8 @@
 
     <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
 
+    {{-- CSS SweetAlert2 --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     {{-- Tailwind CSS & Scripts --}}
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -387,6 +389,9 @@
         </footer>
     </div>
 
+    {{-- JS SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script> // nút lướt lên đầu
         const backToTopButton = document.getElementById('back-to-top');
         if (backToTopButton) {
