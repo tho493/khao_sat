@@ -448,6 +448,7 @@
             const chatInput = $('.chat-input textarea');
             const sendChatBtn = $('#send-btn');
             const chatbox = $('.chatbox');
+            const API_URL = "{{ route('api.ask') }}";
 
             chatbotToggler.on('click', () => chatbotContainer.toggleClass('show'));
 
@@ -462,8 +463,6 @@
             };
 
             const generateResponse = (userMessage) => {
-                const API_URL = "{{ route('api.ask') }}";
-
                 const surveyForm = $('#formKhaoSat');
                 @php
 $surveyIdForJs = null;

@@ -346,7 +346,7 @@
             },
             error: function(xhr) {
                 let errorMessage = "Có lỗi không xác định xảy ra.";
-                
+
                 if (xhr.status === 503 && xhr.responseJSON && xhr.responseJSON.summary) {
                     $('#summaryContent').html(xhr.responseJSON.summary);
                 } else {

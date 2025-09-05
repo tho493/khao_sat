@@ -192,6 +192,7 @@
                                                                 value="{{ $i }}"
                                                                 id="rating_{{ $cauHoi->id }}_{{ $i }}"
                                                                 {{ $cauHoi->batbuoc ? 'required' : '' }}>
+                                                            
                                                             <label for="rating_{{ $cauHoi->id }}_{{ $i }}"
                                                                 class="flex items-center justify-center w-12 h-12 rounded-full border border-slate-300 bg-white/40
                                                                         cursor-pointer transition text-slate-600 font-bold text-lg
@@ -316,6 +317,7 @@
 
             if (Object.keys(data).length > 0) {
                 localStorage.setItem(storageKey, JSON.stringify(data));
+                console.log("AutoSave Success");
             }
         }
 
@@ -341,6 +343,7 @@
                             element.val(value);
                         }
                     }
+                    console.log("Load Progress Success");
                 } catch (e) {
                     console.error('Lỗi khi tải dữ liệu từ LocalStorage:', e);
                     localStorage.removeItem(storageKey);

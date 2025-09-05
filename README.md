@@ -129,7 +129,7 @@ Trước khi cài đặt, bạn cần đảm bảo môi trường PHP đã đư�
         ```sh
         php artisan db:seed --class=DatabaseSeeder
         ```
-        -   Tài khoản mặc định: `admin` / `admin123`
+        -   Tài khoản mặc định: `tho493` / `tho493`
 
 ### 4. Cấu hình Google reCAPTCHA (Bắt buộc)
 

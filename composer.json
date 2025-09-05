@@ -76,8 +76,7 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
-        },
-        "cafile": "C:/cacert.pem"
+        }
     },
     "minimum-stability": "stable",
     "prefer-stable": true
