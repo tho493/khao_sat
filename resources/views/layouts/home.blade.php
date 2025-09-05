@@ -26,6 +26,7 @@
         rel="stylesheet">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="{{ asset('css/splash-screen.css') }}">
 
     {{-- CSS for Glassmorphism & Improvements --}}
     <style>
@@ -34,7 +35,6 @@
             --secondary-color: #1f66b3;
         }
 
-        /* Sử dụng font chữ hiện đại hơn */
         body {
             font-family: 'Be Vietnam Pro', sans-serif;
             background-color: #e8f1fe;
@@ -130,27 +130,18 @@
         .chatbot-container {
             position: fixed;
             bottom: 110px;
-            /* Tăng khoảng cách với nút toggler */
             right: 35px;
             width: 380px;
-            /* Tăng chiều rộng một chút */
             max-height: 80vh;
-            /* Giới hạn chiều cao */
             display: flex;
             flex-direction: column;
-
-            /* Hiệu ứng Glassmorphism */
             background: rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-
             border-radius: 1rem;
-            /* Bo góc */
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
             overflow: hidden;
-
-            /* Hiệu ứng xuất hiện */
             transform: scale(0.9) translateY(20px);
             opacity: 0;
             pointer-events: none;
@@ -165,7 +156,6 @@
         }
 
         .chatbot-header {
-            /* Nền header trong suốt hơn một chút */
             background: rgba(255, 255, 255, 0.3);
             color: var(--text-dark);
             padding: 1rem;
@@ -181,7 +171,6 @@
 
         .chatbox {
             flex-grow: 1;
-            /* Tự động co dãn theo chiều cao */
             overflow-y: auto;
             padding: 1.25rem;
         }
@@ -255,29 +244,34 @@
     @stack('styles')
 </head>
 
-<body class="bg-gradient-to-br from-blue-500 to-slate-50 text-slate-800">
-    {{-- Chatbot Container --}}
-    <button class="chatbot-toggler">
-        <i class="bi bi-chat-dots-fill"></i>
-    </button>
+<body>
+<!-- Splash (overlay) -->
+@include('layouts.splash-screen')
 
-    <div class="chatbot-container">
-        <div class="chatbot-header">
-            <h2>Trợ lý ảo</h2>
-        </div>
-        <ul class="chatbox list-unstyled">
-            <li class="chat incoming">
-                <p>Xin chào 👋<br>Tôi có thể giúp gì cho bạn về các vấn đề thường gặp trong khảo sát?</p>
-            </li>
-        </ul>
-        <div class="chat-input">
-            <textarea placeholder="Nhập câu hỏi của bạn..." required></textarea>
-            <button id="send-btn"><i class="bi bi-send-fill"></i></button>
-        </div>
-    </div>
-
+<div class="bg-gradient-to-br from-blue-500 to-slate-50 text-slate-800">
     {{-- Main Content Wrapper --}}
-    <div id="main-content">
+    <div id="main-content" style="visibility: hidden;">
+
+        {{-- Chatbot Container --}}
+        <button class="chatbot-toggler">
+            <i class="bi bi-chat-dots-fill"></i>
+        </button>
+
+        <div class="chatbot-container">
+            <div class="chatbot-header">
+                <h2>Trợ lý ảo</h2>
+            </div>
+            <ul class="chatbox list-unstyled">
+                <li class="chat incoming">
+                    <p>Xin chào 👋<br>Tôi có thể giúp gì cho bạn về các vấn đề thường gặp trong khảo sát?</p>
+                </li>
+            </ul>
+            <div class="chat-input">
+                <textarea placeholder="Nhập câu hỏi của bạn..." required></textarea>
+                <button id="send-btn"><i class="bi bi-send-fill"></i></button>
+            </div>
+        </div>
+        
         <header class="sticky-header">
             <div class="mx-auto px-4" style="max-width: 90%;">
                 <div class="flex items-center justify-between py-2">
@@ -388,6 +382,7 @@
             </button>
         </footer>
     </div>
+</div>
 
     {{-- JS SweetAlert2 --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -649,13 +644,11 @@ if (isset($dotKhaoSat) && $dotKhaoSat) {
                     }
                 }
 
-                // Áp dụng hiệu ứng flash nếu hành động thành công và tìm thấy container
                 if (!error && targetElementContainer && targetElementContainer.length) {
                     targetElementContainer.addClass('flash-effect');
                     setTimeout(() => targetElementContainer.removeClass('flash-effect'), 2000);
                 }
 
-                // Hiển thị tin nhắn phản hồi của bot nếu có
                 if (feedbackMessage) {
                     const botMessageLi = createChatLi(feedbackMessage, "incoming");
                     chatbox.append(botMessageLi);
@@ -663,6 +656,62 @@ if (isset($dotKhaoSat) && $dotKhaoSat) {
                 }
             }
         });
+    </script>
+
+    <script>
+    (function() {
+        'use strict';
+
+        function initSplashScreen() {
+            const splashScreen = document.getElementById('splash-screen');
+            const mainContent = document.getElementById('main-content');
+            const progressBar = document.getElementById('splash-progress-bar');
+            
+            if (!splashScreen || !mainContent || !progressBar) {
+                console.error("Splash screen elements not found. Aborting splash screen logic.");
+                if(splashScreen) splashScreen.style.display = 'none';
+                if(mainContent) mainContent.style.visibility = 'visible';
+                return;
+            }
+
+            let progress = 0;
+            let progressInterval;
+
+            function updateProgress() {
+                progress += Math.random() * 5 + 1;
+                
+                if (progress > 95) {
+                    progress = 95;
+                }
+                
+                progressBar.style.width = progress + '%';
+                
+                if (progress >= 95) {
+                    clearInterval(progressInterval);
+                }
+            }
+
+            progressInterval = setInterval(updateProgress, 100);
+
+            window.addEventListener('load', function() {
+                clearInterval(progressInterval);
+                
+                progressBar.style.width = '100%';
+
+                setTimeout(function() {
+                    splashScreen.classList.add('hidden');
+                    mainContent.style.visibility = 'visible';
+                    
+                    setTimeout(function() {
+                        splashScreen.remove();
+                    }, 800);
+
+                }, 400);
+            });
+        }
+
+    document.addEventListener('DOMContentLoaded', initSplashScreen);
+})();
     </script>
 
     @stack('scripts')

@@ -252,6 +252,8 @@
 </head>
 
 <body>
+    @yield('splash-screen')
+
     <div id="wrapper">
         <!-- Sidebar -->
         <nav id="sidebar">
@@ -426,6 +428,7 @@
             handleResize();
         });
     </script>
+
     @stack('scripts')
 </body>
 
