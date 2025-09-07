@@ -2,6 +2,23 @@
 
 @section('title', 'Chỉnh sửa mẫu khảo sát')
 
+@push('styles')
+    <style>
+        .sortable-ghost {
+            opacity: 0.4;
+            background: #f0f0f0;
+        }
+
+        .question-item {
+            cursor: grab;
+        }
+
+        .handle {
+            cursor: move;
+        }
+    </style>
+@endpush
+
 @section('content')
         <div class="container-fluid">
             <nav aria-label="breadcrumb">
@@ -58,59 +75,20 @@
                     <!-- Danh sách câu hỏi -->
                     <div class="card shadow">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Danh sách câu hỏi ({{ $mauKhaoSat->cauHoi->count() ?? 0 }} câu)</h5>
+                            <h5 class="mb-0">Danh sách câu hỏi (<span id="question-count">{{ $mauKhaoSat->cauHoi->count() ?? 0 }}</span> câu)</h5>
                             <button class="btn btn-primary btn-sm"
-                                onclick="@if($isLocked) alert('Mẫu khảo sát này đang trong trạng thái hoạt động nên không được thêm câu hỏi'); @else showModalThemCauHoi(); @endif">
+                                onclick="@if($isLocked) alert('Mẫu khảo sát đang bị khóa, không thể thêm câu hỏi.'); @else showModalThemCauHoi(); @endif">
                                 <i class="bi bi-plus"></i> Thêm câu hỏi
                             </button>
-                            <!-- @ elseif($mauKhaoSat->dotKhaoSat->first()->trangthai == 'active') alert('Đang có đợt khảo sát hoạt động nên không được thêm câu hỏi') -->
                         </div>
                         <div class="card-body">
-                            @if(($mauKhaoSat->cauHoi->count() ?? 0) == 0)
-                                <div class="text-center py-5">
-                                    <i class="bi bi-question-circle fs-1 text-muted"></i>
-                                    <p class="text-muted">Chưa có câu hỏi nào</p>
-                                    <button class="btn btn-primary" onclick="showModalThemCauHoi()"><i class="bi bi-plus"></i> Thêm
-                                        câu hỏi đầu tiên</button>
+                            {{-- DIV NÀY JAVASCRIPT ĐIỀN MẤY CÂU HỎI --}}
+                            <div id="danhSachCauHoi" class="{{ $isLocked ? '' : 'sortable' }}">
+                                <div id="questions-loading" class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                    <p class="mt-2 text-muted">Đang tải câu hỏi...</p>
                                 </div>
-                            @else
-                                <div id="danhSachCauHoi" class="sortable">
-                                    @php $stt = 1; @endphp
-                                    @foreach($mauKhaoSat->cauHoi->sortBy('thutu') as $cauHoi)
-                                        <div class="card mb-3 question-item" data-id="{{ $cauHoi->id }}">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between align-items-start">
-                                                    <div class="flex-grow-1">
-                                                        <div class="d-flex align-items-center mb-2">
-                                                            <span class="badge bg-secondary me-2">Câu {{ $stt++ }}</span>
-                                                            <h6 class="mb-0">{{ $cauHoi->noidung_cauhoi }} @if($cauHoi->batbuoc)<span
-                                                            class="text-danger">*</span>@endif</h6>
-                                                        </div>
-                                                        <div class="mb-2"><span class="badge bg-info">{{-- ... switch case ...
-                                                                --}}</span></div>
-                                                        @if(in_array($cauHoi->loai_cauhoi, ['single_choice', 'multiple_choice', 'likert']))
-                                                            <ol class="mb-0 ps-3 small text-muted">
-                                                                @foreach($cauHoi->phuongAnTraLoi as $pa)
-                                                                    <li>{{ $pa->noidung }}</li>
-                                                                @endforeach
-                                                            </ol>
-                                                        @endif
-                                                    </div>
-                                                    <div class="btn-group btn-group-sm">
-                                                        <button class="btn btn-outline-secondary handle" title="Kéo để sắp xếp"><i
-                                                                class="bi bi-grip-vertical"></i></button>
-                                                        <button class="btn btn-outline-primary"
-                                                            onclick="showModalSuaCauHoi({{ $cauHoi->id }})" title="Sửa"><i
-                                                                class="bi bi-pencil"></i></button>
-                                                        <button class="btn btn-outline-danger" onclick="deleteCauHoi({{ $cauHoi->id }})"
-                                                            title="Xóa"><i class="bi bi-trash"></i></button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endif
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -314,191 +292,314 @@
                 @method('DELETE')</form>
 @endsection
 
-    @push('styles')
-        <style>
-            .sortable-ghost {
-                opacity: 0.4;
-                background: #f0f0f0;
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script>
+        const mauKhaoSatId = {{ $mauKhaoSat->id }};
+        const isLocked = {{ $isLocked ? "true" : "false" }};
+        const modalCauHoi = new bootstrap.Modal(document.getElementById('modalCauHoi'));
+        let questionsData = [];
+
+        // =======================================================
+        // ==         HELPER FUNCTIONS                          ==
+        // =======================================================
+
+        /**
+         * Chuyển đổi các ký tự HTML đặc biệt để tránh lỗi XSS
+         */
+        function escapeHtml(text) {
+            if (typeof text !== 'string') return '';
+            var map = {
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function (m) { return map[m]; });
+        }
+
+        /**
+         * Chuyển đổi 'key' của loại câu hỏi thành tên tiếng Việt
+         */
+        function getQuestionTypeName(type) {
+            const names = {
+                'single_choice': 'Chọn một',
+                'multiple_choice': 'Chọn nhiều',
+                'text': 'Văn bản',
+                'likert': 'Thang đo Likert',
+                'rating': 'Đánh giá',
+                'date': 'Ngày tháng',
+                'number': 'Số'
+            };
+            return names[type] || type;
+        }
+
+        // =======================================================
+        // ==         RENDER QUESTIONS                          ==
+        // =======================================================
+        function renderQuestions() {
+            const container = $('#danhSachCauHoi');
+            container.empty(); // Xóa nội dung cũ
+
+            $('#question-count').text(questionsData.length); // Cập nhật số lượng
+
+            if (questionsData.length === 0) {
+                container.html(`
+            <div class="text-center py-5">
+                <i class="bi bi-question-circle fs-1 text-muted"></i>
+                <p class="text-muted">Chưa có câu hỏi nào</p>
+                <button class="btn btn-primary" onclick="showModalThemCauHoi()"><i class="bi bi-plus"></i> Thêm câu hỏi đầu tiên</button>
+            </div>
+        `);
+                return;
             }
 
-            .question-item {
-                cursor: grab;
+            // Sắp xếp dữ liệu trước khi render
+            questionsData.sort((a, b) => a.thutu - b.thutu);
+
+            $.each(questionsData, function (index, cauHoi) {
+                const stt = index + 1;
+                let optionsHtml = '';
+                if (['single_choice', 'multiple_choice', 'likert'].includes(cauHoi.loai_cauhoi) && cauHoi.phuong_an_tra_loi.length > 0) {
+                    optionsHtml = '<ol class="mb-0 ps-3 small text-muted">';
+                    $.each(cauHoi.phuong_an_tra_loi, function (i, pa) {
+                        optionsHtml += `<li>${escapeHtml(pa.noidung)}</li>`;
+                    });
+                    optionsHtml += '</ol>';
+                }
+
+            const questionHtml = `
+            <div class="card mb-3 question-item" data-id="${cauHoi.id}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-secondary me-2">Câu ${stt}</span>
+                                <h6 class="mb-0">${escapeHtml(cauHoi.noidung_cauhoi)} ${cauHoi.batbuoc ? '<span class="text-danger">*</span>' : ''}</h6>
+                            </div>
+                            <div class="mb-2"><span class="badge bg-info">${getQuestionTypeName(cauHoi.loai_cauhoi)}</span></div>
+                            ${optionsHtml}
+                        </div>
+                        ${!isLocked ? `
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary handle" title="Kéo để sắp xếp"><i class="bi bi-grip-vertical"></i></button>
+                            <button class="btn btn-outline-primary" onclick="showModalSuaCauHoi(${cauHoi.id})" title="Sửa"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-outline-danger" onclick="deleteCauHoi(${cauHoi.id})" title="Xóa"><i class="bi bi-trash"></i></button>
+                        </div>`
+                        : ` <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary handle" title="Kéo để sắp xếp"><i class="bi bi-grip-vertical"></i></button>
+                        </div >`
+                        }
+                    </div>
+                </div>
+            </div>
+        `;
+                container.append(questionHtml);
+            });
+        }
+
+        function loadInitialQuestions() {
+            $.get(`/admin/mau-khao-sat/${mauKhaoSatId}/questions`)
+                .done(function (data) {
+                    questionsData = data;
+                    renderQuestions();
+                })
+                .fail(function () {
+                    $('#danhSachCauHoi').html('<div class="alert alert-danger">Không thể tải danh sách câu hỏi.</div>');
+                });
+        }
+
+        // --- LOGIC CHUNG CHO MODAL ---
+        function showModalThemCauHoi() {
+            $('#modalTitle').text('Thêm câu hỏi mới');
+            $('#formCauHoi')[0].reset();
+            $('#cauHoiId').val('');
+            $('#batBuoc').prop('checked', true);
+            $('#validation-errors').addClass('d-none').html('');
+            $('#danhSachPhuongAn').html('');
+            togglePhuongAnContainer();
+            modalCauHoi.show();
+        }
+
+        function showModalSuaCauHoi(cauHoiId) {
+            if (isLocked) {
+                alert('Mẫu khảo sát đang bị khóa, không thể chỉnh sửa câu hỏi này.');
+                return;
             }
 
-            .handle {
-                cursor: move;
-            }
-        </style>
-    @endpush
+            $.get(`/admin/cau-hoi/${cauHoiId}`, function (cauHoi) {
+                $('#modalTitle').text('Sửa câu hỏi');
+                $('#formCauHoi')[0].reset();
+                $('#validation-errors').addClass('d-none').html('');
 
-    @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-        <script>
-            const mauKhaoSatId = {{ $mauKhaoSat->id }};
-            const modalCauHoi = new bootstrap.Modal(document.getElementById('modalCauHoi'));
+                $('#cauHoiId').val(cauHoi.id);
+                $('#noiDungCauHoi').val(cauHoi.noidung_cauhoi);
+                $('#loaiCauHoi').val(cauHoi.loai_cauhoi);
+                $('#thuTu').val(cauHoi.thutu);
+                $('#batBuoc').prop('checked', cauHoi.batbuoc);
 
-            // --- CHỨC NĂNG SẮP XẾP ---
-            document.addEventListener('DOMContentLoaded', function () {
-                const el = document.getElementById('danhSachCauHoi');
-                if (el) {
-                    Sortable.create(el, {
-                        handle: '.handle',
-                        animation: 150,
-                        ghostClass: 'sortable-ghost',
-                        onEnd: function (evt) {
-                            const order = Array.from(el.children).map(item => item.dataset.id);
-                            $.ajax({
-                                url: "{{ route('admin.cau-hoi.update-order') }}",
-                                method: 'POST',
-                                data: { order: order },
-                                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                                success: function (response) { location.reload(); },
-                                error: function () { alert('Lỗi khi cập nhật thứ tự.'); }
-                            });
-                        },
+                const phuongAnContainer = $('#danhSachPhuongAn');
+                phuongAnContainer.html(''); // Xóa các phương án cũ
+                togglePhuongAnContainer(); // Cập nhật hiển thị container
+
+                if (cauHoi.phuong_an_tra_loi && cauHoi.phuong_an_tra_loi.length > 0) {
+                    const isLikert = cauHoi.loai_cauhoi === 'likert';
+                    // Sắp xếp phương án theo thứ tự trước khi hiển thị
+                    cauHoi.phuong_an_tra_loi.sort((a, b) => a.thutu - b.thutu).forEach(function (pa) {
+                        addPhuongAn(pa.noidung, isLikert);
                     });
                 }
-            });
 
-            // --- LOGIC CHUNG CHO MODAL ---
-            function showModalThemCauHoi() {
-                $('#modalTitle').text('Thêm câu hỏi mới');
-                $('#formCauHoi')[0].reset();
-                $('#cauHoiId').val('');
-                $('#batBuoc').prop('checked', true);
-                $('#validation-errors').addClass('d-none').html('');
-                $('#danhSachPhuongAn').html('');
-                togglePhuongAnContainer();
                 modalCauHoi.show();
-            }
+            }).fail(function (xhr) {
+                console.error(xhr);
+                alert('Không thể tải dữ liệu câu hỏi. Vui lòng kiểm tra Console (F12).');
+            });
+        }
 
-            function showModalSuaCauHoi(cauHoiId) {
-                locked = '{{$isLocked}}';
-                if(locked) return alert('Mẫu khảo sát đang bị khóa, hiện tại bạn không thể chỉnh sửa câu hỏi này.');
-                $.get(`/admin/cau-hoi/${cauHoiId}`, function (cauHoi) {
-                    $('#modalTitle').text('Sửa câu hỏi');
-                    $('#formCauHoi')[0].reset();
-                    $('#validation-errors').addClass('d-none').html('');
 
-                    $('#cauHoiId').val(cauHoi.id);
-                    $('#noiDungCauHoi').val(cauHoi.noidung_cauhoi);
-                    $('#loaiCauHoi').val(cauHoi.loai_cauhoi);
-                    $('#thuTu').val(cauHoi.thutu);
-                    $('#batBuoc').prop('checked', cauHoi.batbuoc);
+        function togglePhuongAnContainer() {
+            const loai = $('#loaiCauHoi').val();
+            const container = $('#phuongAnContainer');
+            const isChoiceType = ['single_choice', 'multiple_choice', 'likert'].includes(loai);
 
-                    const phuongAnContainer = $('#danhSachPhuongAn');
-                    phuongAnContainer.html('');
-                    togglePhuongAnContainer();
-
-                    if (cauHoi.phuong_an_tra_loi && cauHoi.phuong_an_tra_loi.length > 0) {
-                        const isLikert = cauHoi.loai_cauhoi === 'likert';
-                        cauHoi.phuong_an_tra_loi.forEach(function (pa) {
-                            addPhuongAn(pa.noidung, isLikert);
-                        });
-                    }
-
-                    modalCauHoi.show();
-                }).fail(function () {
-                    console.error(xhr);
-                    alert('Không thể tải dữ liệu câu hỏi.');
-                });
-            }
-
-            function togglePhuongAnContainer() {
-                const loai = $('#loaiCauHoi').val();
-                const container = $('#phuongAnContainer');
-                const isChoiceType = ['single_choice', 'multiple_choice', 'likert'].includes(loai);
-
-                container.toggle(isChoiceType);
-
-                if (isChoiceType && $('#danhSachPhuongAn').is(':empty')) {
+            if (isChoiceType) {
+                container.show();
+                if ($('#danhSachPhuongAn').is(':empty')) {
                     if (loai === 'likert') {
                         const likertOptions = ['Rất không hài lòng', 'Không hài lòng', 'Bình thường', 'Hài lòng', 'Rất hài lòng'];
                         likertOptions.forEach(option => addPhuongAn(option, true));
                     } else {
-                        addPhuongAn(''); addPhuongAn('');
+                        addPhuongAn(''); 
+                        addPhuongAn('');
                     }
                 }
+            } else {
+                container.hide();
             }
+        }
 
-            function addPhuongAn(value = '', isReadonly = false) {
-                const count = $('#danhSachPhuongAn .input-group').length + 1;
-                const readonlyAttr = isReadonly ? 'readonly' : '';
-                const html = `<div class="input-group mb-2"><span class="input-group-text">${count}</span><input type="text" class="form-control phuong-an" value="${value}" ${readonlyAttr}><button class="btn btn-outline-danger" type="button" onclick="removePhuongAn(this)"><i class="bi bi-trash"></i></button></div>`;
-                $('#danhSachPhuongAn').append(html);
-            }
+        function addPhuongAn(value = '', isReadonly = false) {
+            const count = $('#danhSachPhuongAn .input-group').length + 1;
+            const readonlyAttr = isReadonly ? 'readonly' : '';
+            const html = `<div class="input-group mb-2"><span class="input-group-text">${count}</span><input type="text" class="form-control phuong-an" value="${value}" ${readonlyAttr}><button class="btn btn-outline-danger" type="button" onclick="removePhuongAn(this)"><i class="bi bi-trash"></i></button></div>`;
+            $('#danhSachPhuongAn').append(html);
+        }
 
-            function removePhuongAn(btn) {
-                if ($('#danhSachPhuongAn .input-group').length > 2) {
-                    $(btn).closest('.input-group').remove();
-                    $('#danhSachPhuongAn .input-group').each(function (index) {
-                        $(this).find('.input-group-text').text(index + 1);
-                    });
-                } else {
-                    alert('Phải có ít nhất 2 phương án trả lời.');
-                }
-            }
-
-            function saveCauHoi(event) {
-                event.preventDefault();
-                const btn = $('#btnSaveCauHoi');
-                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Đang lưu...');
-
-                const cauHoiId = $('#cauHoiId').val();
-                const data = {
-                    noidung_cauhoi: $('#noiDungCauHoi').val(),
-                    loai_cauhoi: $('#loaiCauHoi').val(),
-                    thutu: $('#thuTu').val() || 0,
-                    batbuoc: $('#batBuoc').is(':checked') ? 1 : 0,
-                    phuong_an: []
-                };
-
-                $('.phuong-an').each(function () {
-                    if ($(this).val().trim() !== '') data.phuong_an.push($(this).val().trim());
+        function removePhuongAn(btn) {
+            if ($('#danhSachPhuongAn .input-group').length > 2) {
+                $(btn).closest('.input-group').remove();
+                $('#danhSachPhuongAn .input-group').each(function (index) {
+                    $(this).find('.input-group-text').text(index + 1);
                 });
+            } else {
+                alert('Phải có ít nhất 2 phương án trả lời.');
+            }
+        }
 
-                const url = cauHoiId ? `/admin/cau-hoi/${cauHoiId}` : `/admin/mau-khao-sat/${mauKhaoSatId}/cau-hoi`;
-                const method = cauHoiId ? 'PUT' : 'POST';
+        function saveCauHoi(event) {
+            event.preventDefault();
+            const btn = $('#btnSaveCauHoi');
+            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Đang lưu...');
+
+            const cauHoiId = $('#cauHoiId').val();
+            const data = {
+                noidung_cauhoi: $('#noiDungCauHoi').val(),
+                loai_cauhoi: $('#loaiCauHoi').val(),
+                thutu: $('#thuTu').val() || 0,
+                batbuoc: $('#batBuoc').is(':checked') ? 1 : 0,
+                phuong_an: []
+            };
+
+            $('.phuong-an').each(function () {
+                if ($(this).val().trim() !== '') data.phuong_an.push($(this).val().trim());
+            });
+
+            const url = cauHoiId ? `/admin/cau-hoi/${cauHoiId}` : `/admin/mau-khao-sat/${mauKhaoSatId}/cau-hoi`;
+            const method = cauHoiId ? 'PUT' : 'POST';
+
+            $.ajax({
+                url: url, method: method, data: data,
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                success: function (response) {
+                    if (response.success) {
+                        modalCauHoi.hide();
+                        loadInitialQuestions();
+                    }
+                },
+                error: function (xhr) {
+                    if (xhr.status === 422) {
+                        let errorHtml = '<ul>';
+                        $.each(xhr.responseJSON.errors, (key, value) => { errorHtml += `<li>${value[0]}</li>`; });
+                        errorHtml += '</ul>';
+                        $('#validation-errors').html(errorHtml).removeClass('d-none');
+                    } else {
+                        alert('Đã xảy ra lỗi không mong muốn.');
+                    }
+                },
+                complete: function () {
+                    btn.prop('disabled', false).html('<i class="bi bi-save"></i> Lưu câu hỏi');
+                }
+            });
+        }
+
+        // --- CÁC HÀM KHÁC ---
+        function deleteCauHoi(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa câu hỏi này?')) return;
+            if (isLocked) {
+                alert('Mẫu khảo sát đang bị khóa, không thể chỉnh sửa câu hỏi này.');
+                return;
+            }
+            
+            $.ajax({
+                url: `/admin/cau-hoi/${id}`, method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                success: function (response) {
+                    questionsData = questionsData.filter(q => q.id !== id);
+                    renderQuestions();
+                },
+                error: function (xhr) { alert('Lỗi: ' + (xhr.responseJSON?.message || 'Vui lòng thử lại')); }
+            });
+        }
+
+        function copyMauKhaoSat() {
+            if (confirm('Bạn có chắc chắn muốn sao chép mẫu này?')) $('#formCopyMau').submit();
+        }
+
+        function deleteMauKhaoSat() {
+            if (confirm('Bạn có chắc chắn muốn xóa mẫu khảo sát này? Hành động này không thể hoàn tác!')) $('#formDeleteMau').submit();
+        }
+
+    // =======================================================
+    // ==         KHỞI CHẠY                                 ==
+    // =======================================================
+    $(document).ready(function () {
+        loadInitialQuestions();
+        const el = document.getElementById('danhSachCauHoi');
+        Sortable.create(el, {
+            handle: '.handle', animation: 150, ghostClass: 'sortable-ghost',
+            onEnd: function (evt) {
+                const order = Array.from(el.children).map(item => parseInt(item.dataset.id));
+                const sortableInstance = Sortable.get(el);
+                sortableInstance.option("disabled", true);
 
                 $.ajax({
-                    url: url, method: method, data: data,
+                    url: "{{ route('admin.cau-hoi.update-order') }}",
                     headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                    method: 'POST', data: { order: order },
                     success: function (response) {
-                        if (response.success) {
-                            modalCauHoi.hide();
-                            location.reload();
-                        }
+                        order.forEach((id, index) => {
+                            const question = questionsData.find(q => q.id === id);
+                            if (question) question.thutu = index + 1;
+                        });
+                        renderQuestions();
                     },
-                    error: function (xhr) {
-                        btn.prop('disabled', false).html('<i class="bi bi-save"></i> Lưu câu hỏi');
-                        if (xhr.status === 422) {
-                            let errorHtml = '<ul>';
-                            $.each(xhr.responseJSON.errors, (key, value) => { errorHtml += '<li>' + value[0] + '</li>'; });
-                            errorHtml += '</ul>';
-                            $('#validation-errors').html(errorHtml).removeClass('d-none');
-                        } else {
-                            alert('Đã xảy ra lỗi không mong muốn.');
-                        }
+                    error: function () {
+                        alert('Lỗi khi cập nhật thứ tự. Vui lòng tải lại trang.');
+                    },
+                    complete: function () {
+                        sortableInstance.option("disabled", false);
                     }
                 });
-            }
-
-            // --- CÁC HÀM KHÁC ---
-            function deleteCauHoi(id) {
-                if (!confirm('Bạn có chắc chắn muốn xóa câu hỏi này?')) return;
-                $.ajax({
-                    url: `/admin/cau-hoi/${id}`, method: 'DELETE',
-                    success: function (response) { location.reload(); },
-                    error: function (xhr) { alert('Lỗi: ' + (xhr.responseJSON?.message || 'Vui lòng thử lại')); }
-                });
-            }
-
-            function copyMauKhaoSat() {
-                if (confirm('Bạn có chắc chắn muốn sao chép mẫu này?')) $('#formCopyMau').submit();
-            }
-
-            function deleteMauKhaoSat() {
-                if (confirm('Bạn có chắc chắn muốn xóa mẫu khảo sát này? Hành động này không thể hoàn tác!')) $('#formDeleteMau').submit();
-            }
-        </script>
-    @endpush
+            },
+        });
+    });
+    </script>
+@endpush

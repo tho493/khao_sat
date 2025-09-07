@@ -27,6 +27,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::prefix('mau-khao-sat')->name('mau-khao-sat.')->group(function () {
         Route::get('/', [MauKhaoSatController::class, 'index'])->name('index');
         Route::get('/create', [MauKhaoSatController::class, 'create'])->name('create');
+        Route::get('/{mauKhaoSat}/questions', [MauKhaoSatController::class, 'getQuestionsJson'])->name('questions');
         Route::post('/store', [MauKhaoSatController::class, 'store'])->name('store');
         Route::get('/{mauKhaoSat}/edit', [MauKhaoSatController::class, 'edit'])->name('edit');
         Route::post('/{mauKhaoSat}/copy', [MauKhaoSatController::class, 'copy'])->name('copy')->middleware('prevent.double.submit:copy_template');

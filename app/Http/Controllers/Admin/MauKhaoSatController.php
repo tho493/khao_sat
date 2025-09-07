@@ -98,6 +98,14 @@ class MauKhaoSatController extends Controller
         return view('admin.mau-khao-sat.edit', compact('mauKhaoSat', 'isLocked'));
     }
 
+    public function getQuestionsJson(MauKhaoSat $mauKhaoSat)
+    {
+        $questions = $mauKhaoSat->cauHoi()
+            ->with('phuongAnTraLoi')
+            ->orderBy('thutu')
+            ->get();
+        return response()->json($questions);
+    }
     /**
      * Update the specified resource in storage.
      */

@@ -101,7 +101,8 @@ class BaoCaoController extends Controller
         $tongQuan = [
             'tong_phieu' => $dotKhaoSat->phieuKhaoSat()->count(),
             'phieu_hoan_thanh' => $dotKhaoSat->phieuKhaoSat()->where('trangthai', 'completed')->count(),
-            'ty_le' => $dotKhaoSat->getTyLeHoanThanh()
+            'ty_le' => $dotKhaoSat->getTyLeHoanThanh(),
+            'thoi_gian_tb' => $this->getThoiGianTraLoiTrungBinh($dotKhaoSat)
         ];
 
         // Thống kê từng câu hỏi
@@ -123,7 +124,7 @@ class BaoCaoController extends Controller
             'tongQuan',
             'thongKeCauHoi',
             'thongKeTheoNgay',
-            'danhSachPhieu'
+            'danhSachPhieu',
         ));
     }
 

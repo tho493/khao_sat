@@ -7,7 +7,14 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title> @yield('title', "Trang chủ") - Hệ thống khảo sát trực tuyến </title>
 
+    <script type="module">
+        import 'https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.4/dist/turbo.es2017-esm.js'
+    </script>
+
     <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
+
+    <!-- CSS NProgress -->
+    <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css" />
 
     {{-- CSS SweetAlert2 --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -39,6 +46,18 @@
             font-family: 'Be Vietnam Pro', sans-serif;
             background-color: #e8f1fe;
             /* background-image: linear-gradient(to top right, #1f66b3, #2a76c9, #6aa8f7); */
+        }
+
+        #nprogress .bar {
+            background: #FF2D20 !important;
+            height: 3px !important;
+        }
+        #nprogress .peg {
+            box-shadow: 0 0 10px #FF2D20, 0 0 5px #FF2D20 !important;
+        }
+        #nprogress .spinner-icon {
+            border-top-color: #FF2D20 !important;
+            border-left-color: #FF2D20 !important;
         }
 
         .glass-effect {
@@ -248,7 +267,7 @@
 <!-- Splash (overlay) -->
 @include('layouts.splash-screen')
 
-<div class="bg-gradient-to-br from-blue-500 to-slate-50 text-slate-800">
+<div>
     {{-- Main Content Wrapper --}}
     <div id="main-content" style="visibility: hidden;">
 
@@ -301,7 +320,6 @@
         {{-- Footer --}}
         <footer class="relative text-white pt-16 pb-8 overflow-hidden bg-gradient-to-br from-[#174a7e] to-[#1f66b3]">
             <!-- <div class="absolute inset-0 -z-10"></div> -->
-
             <div class="absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-white/5"></div>
             <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5"></div>
 
@@ -343,7 +361,7 @@
                     <div class="text-white/80 space-y-3 text-sm">
                         <p class="flex items-start">
                             <i class="bi bi-geo-alt-fill mr-3 mt-1 flex-shrink-0"></i>
-                            <span>Số 76, Nguyễn Thị Duệ, P. Sao Đỏ, TP. Chí Linh, T. Hải Dương</span>
+                            <span>Số 76, Nguyễn Thị Duệ, Thái Học 2, phường Chu Văn An, thành phố Hải Phòng.</span>
                         </p>
                         <p class="flex items-start">
                             <i class="bi bi-telephone-fill mr-3 mt-1 flex-shrink-0"></i>
@@ -383,10 +401,29 @@
         </footer>
     </div>
 </div>
-
-    {{-- JS SweetAlert2 --}}
+    <script src="https://unpkg.com/scrollreveal"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+    <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
+    <script>
+        NProgress.start();
+
+        window.addEventListener('load', function () {
+            NProgress.done();
+        });
+
+        document.addEventListener("turbo:load", () => NProgress.done());
+        document.addEventListener("turbo:before-visit", () => NProgress.start());
+        document.addEventListener("turbo:submit-start", () => NProgress.start());
+        document.addEventListener("turbo:submit-end", () => NProgress.done());
+        
+        document.addEventListener('ajax:send', () => NProgress.start());
+        document.addEventListener('ajax:complete', () => NProgress.done());
+        if (window.jQuery) {
+            $(document).on('ajaxStart', () => NProgress.start());
+            $(document).on('ajaxStop', () => NProgress.done());
+        }
+    </script>
+
     <script> // nút lướt lên đầu
         const backToTopButton = document.getElementById('back-to-top');
         if (backToTopButton) {
@@ -402,8 +439,7 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         }
-    </script>
-    <script>
+
         const header = document.querySelector('header.sticky-header');
         if (header) {
             window.addEventListener('scroll', () => {
@@ -414,9 +450,7 @@
                 }
             });
         }
-    </script>
-    <script src="https://unpkg.com/scrollreveal"></script>
-    <script>
+        
         document.addEventListener('DOMContentLoaded', function () {
             const sr = ScrollReveal({
                 origin: 'bottom',    // Xuất hiện từ phía dưới
@@ -439,9 +473,7 @@
             // Hiệu ứng cho các card khảo sát (xuất hiện lần lượt)
             sr.reveal('.reveal-survey-card', { interval: 100 });
         });
-    </script>
 
-    <script>
         $(document).ready(function () {
             const chatbotToggler = $('.chatbot-toggler');
             const chatbotContainer = $('.chatbot-container');
@@ -599,7 +631,7 @@ if (isset($dotKhaoSat) && $dotKhaoSat) {
                         
                     case 'scroll_to_question': {
                         const qNumber = parseInt(actionData.question_number);
-                        if (isNaN(qNumber) || qNumber < 1) {
+                        if (isNaN(qNumber) || qNumber <script 1) {
                             feedbackMessage = `Số câu hỏi không hợp lệ.`;
                             break;
                         }
@@ -657,63 +689,7 @@ if (isset($dotKhaoSat) && $dotKhaoSat) {
             }
         });
     </script>
-
-    <script>
-    (function() {
-        'use strict';
-
-        function initSplashScreen() {
-            const splashScreen = document.getElementById('splash-screen');
-            const mainContent = document.getElementById('main-content');
-            const progressBar = document.getElementById('splash-progress-bar');
-            
-            if (!splashScreen || !mainContent || !progressBar) {
-                console.error("Splash screen elements not found. Aborting splash screen logic.");
-                if(splashScreen) splashScreen.style.display = 'none';
-                if(mainContent) mainContent.style.visibility = 'visible';
-                return;
-            }
-
-            let progress = 0;
-            let progressInterval;
-
-            function updateProgress() {
-                progress += Math.random() * 5 + 1;
-                
-                if (progress > 95) {
-                    progress = 95;
-                }
-                
-                progressBar.style.width = progress + '%';
-                
-                if (progress >= 95) {
-                    clearInterval(progressInterval);
-                }
-            }
-
-            progressInterval = setInterval(updateProgress, 100);
-
-            window.addEventListener('load', function() {
-                clearInterval(progressInterval);
-                
-                progressBar.style.width = '100%';
-
-                setTimeout(function() {
-                    splashScreen.classList.add('hidden');
-                    mainContent.style.visibility = 'visible';
-                    
-                    setTimeout(function() {
-                        splashScreen.remove();
-                    }, 800);
-
-                }, 400);
-            });
-        }
-
-    document.addEventListener('DOMContentLoaded', initSplashScreen);
-})();
-    </script>
-
+    <script src="{{ asset('js/splash-screen.js') }}"></script>
     @stack('scripts')
 
 </body>

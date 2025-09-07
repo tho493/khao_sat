@@ -32,7 +32,7 @@
     </section>
 
     <section class="relative overflow-hidden py-16 md:py-20">
-        <div class="absolute inset-0 bg-gradient-to-br from-slate-50 to-blue-100 -z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-300 to-slate-50 -z-10"></div>
 
         <div class="mx-auto px-4" style="max-width: 90%;">
             <div class="text-center mb-12 reveal-section-title">

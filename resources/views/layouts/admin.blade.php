@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Panel') - Hệ thống khảo sát</title>
+    <script type="module" data-turbo-track="reload">
+        import 'https://cdn.jsdelivr.net/npm/@hotwired/turbo@8.0.4/dist/turbo.es2017-esm.js'
+    </script>
+    <!-- CSS NProgress -->
+    <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css" />
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -34,6 +39,21 @@
 
         #wrapper {
             display: flex;
+        }
+
+
+        #nprogress .bar {
+            background: #FF2D20 !important;
+            height: 3px !important;
+        }
+
+        #nprogress .peg {
+            box-shadow: 0 0 10px #FF2D20, 0 0 5px #FF2D20 !important;
+        }
+
+        #nprogress .spinner-icon {
+            border-top-color: #FF2D20 !important;
+            border-left-color: #FF2D20 !important;
         }
 
         /* === Sidebar === */
@@ -374,7 +394,25 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        NProgress.start();
+
+        window.addEventListener('load', function () {
+            NProgress.done();
+        });
+
+        document.addEventListener('ajax:send', () => NProgress.start());
+        document.addEventListener('ajax:complete', () => NProgress.done());
+        if (window.jQuery) {
+            $(document).on('ajaxStart', () => NProgress.start());
+            $(document).on('ajaxStop', () => NProgress.done());
+        }
+        $(document).on('page:fetch', function () { NProgress.start(); });
+        $(document).on('page:change', function () { NProgress.done(); });
+        $(document).on('page:restore', function () { NProgress.remove(); });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -390,7 +428,6 @@
             }
 
             function removeDesktopHover() {
-                // jQuery cần thiết để gỡ bỏ event listener đã được thêm bằng jQuery cũ
                 $(sidebar).off('mouseenter mouseleave');
             }
 
@@ -428,7 +465,6 @@
             handleResize();
         });
     </script>
-
     @stack('scripts')
 </body>
 
