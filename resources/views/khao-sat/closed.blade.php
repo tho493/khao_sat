@@ -1,6 +1,6 @@
 @extends('layouts.home')
 
-@section('title', 'Khảo sát đã đóng')
+@section('title', $message)
 
 @push('styles')
     <style>
@@ -89,14 +89,14 @@
             </div>
 
             @if($reason == 'not_started_yet')
-                <div class="alert alert-info mt-3">
+                <div class="alert alert-info mt-3 text-blue-400">
                     Vui lòng quay lại sau thời gian bắt đầu để tham gia.
                 </div>
             @endif
 
             <div class="mt-4">
                 <a href="{{ route('khao-sat.index') }}" class="btn btn-primary">
-                    <i class="bi bi-arrow-left"></i> Quay về danh sách khảo sát
+                    <i class="bi bi-arrow-left "></i> Quay về danh sách khảo sát
                 </a>
             </div>
         </div>

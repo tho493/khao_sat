@@ -99,10 +99,32 @@
         </div>
     </div>
 
-    <!-- Hàng 3: Danh sách các đợt khảo sát để xem chi tiết -->
     <div class="card shadow">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Danh sách đợt khảo sát</h6>
+        <div class="card-header py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3" style="background: linear-gradient(90deg, #f8fafc 60%, #e3f0ff 100%); border-bottom: 1px solid #e3e6f0;">
+            <h6 class="m-0 font-weight-bold text-primary" style="font-size: 1.15rem;">
+                <i class="bi bi-list-task me-2 text-info"></i>Danh sách đợt khảo sát
+            </h6>
+            <form method="GET" action="{{ route('admin.bao-cao.index') }}" class="w-100 w-md-auto" style="max-width: 420px;">
+                <div class="input-group shadow-sm">
+                    <input 
+                        type="text" 
+                        class="form-control border-primary" 
+                        name="search" 
+                        placeholder="Tìm theo tên đợt hoặc tên mẫu..." 
+                        value="{{ request('search') }}"
+                        style="background: #f8fafc;"
+                        autocomplete="off"
+                    >
+                    <button class="btn btn-primary" type="submit" title="Tìm kiếm">
+                        <i class="bi bi-search"></i>
+                    </button>
+                    @if(request('search'))
+                        <a href="{{ route('admin.bao-cao.index') }}" class="btn btn-outline-secondary" title="Xóa bộ lọc">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    @endif
+                </div>
+            </form>
         </div>
         <div class="card-body">
             <div class="table-responsive">

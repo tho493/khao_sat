@@ -124,8 +124,22 @@
                         <!-- Các card câu hỏi -->
                         @php $questionCounter = 0; @endphp
                         @forelse($mauKhaoSat->cauHoi->sortBy('thutu') as $cauHoi)
-                            @php $questionCounter++; @endphp
-                            <div class="question-card glass-effect" data-question-id="{{ $cauHoi->id }}">
+                            @php
+                                $questionCounter++;
+                                $conditionalAttributes = '';
+                                $isRequired = $cauHoi->batbuoc;
+                                if ($cauHoi->cau_dieukien_id && $cauHoi->dieukien_hienthi) {
+                                    $conditionData = json_decode($cauHoi->dieukien_hienthi);
+                                    $conditionValue = $conditionData->value ?? null;
+                                    
+                                    if ($conditionValue) {
+                                        $conditionalAttributes = "data-conditional-parent-id='{$cauHoi->cau_dieukien_id}' data-conditional-required-value='{$conditionValue}'";
+                                        $isRequired = false;
+                                    }
+                                }
+                            @endphp
+                            <div class="question-card glass-effect" id="question-{{ $cauHoi->id }}" data-question-id="{{ $cauHoi->id }}" {!! $conditionalAttributes !!}
+                                                            data-originally-required="{{ $cauHoi->batbuoc ? 'true' : 'false' }}">
                                 <div class="p-6">
                                     <label class="block font-bold text-slate-800 mb-3 text-lg">
                                         <span class="text-blue-600">Câu {{ $questionCounter }}:</span>
@@ -142,7 +156,7 @@
                                                     <label class="flex items-center p-3 rounded-lg bg-white/30 hover:bg-white/50 cursor-pointer transition">
                                                         <input type="radio" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500 border-slate-400"
                                                             name="cau_tra_loi[{{ $cauHoi->id }}]" value="{{ $phuongAn->id }}"
-                                                            {{ $cauHoi->batbuoc ? 'required' : '' }}>
+                                                            {{ $isRequired ? 'required' : '' }}>
                                                         <span class="ml-3 text-slate-700">{{ $phuongAn->noidung }}</span>
                                                     </label>
                                                 @endforeach
@@ -165,7 +179,7 @@
                                             <textarea class="form-textarea mt-2 w-full rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
                                                     name="cau_tra_loi[{{ $cauHoi->id }}]" rows="4"
                                                     placeholder="Nhập câu trả lời của bạn..."
-                                                    {{ $cauHoi->batbuoc ? 'required' : '' }}></textarea>
+                                                    {{ $isRequired ? 'required' : '' }}></textarea>
                                             @break
                                         
                                         @case('likert')
@@ -175,7 +189,7 @@
                                                         <input type="radio" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500"
                                                             name="cau_tra_loi[{{ $cauHoi->id }}]"
                                                             value="{{ $phuongAn->id }}"
-                                                            {{ $cauHoi->batbuoc ? 'required' : '' }}>
+                                                            {{ $isRequired ? 'required' : '' }}>
                                                         <span class="mt-2 text-xs text-center text-slate-600">{{ $phuongAn->noidung }}</span>
                                                     </label>
                                                 @endforeach
@@ -191,7 +205,7 @@
                                                                 name="cau_tra_loi[{{ $cauHoi->id }}]" 
                                                                 value="{{ $i }}"
                                                                 id="rating_{{ $cauHoi->id }}_{{ $i }}"
-                                                                {{ $cauHoi->batbuoc ? 'required' : '' }}>
+                                                                {{ $isRequired ? 'required' : '' }}>
                                                             
                                                             <label for="rating_{{ $cauHoi->id }}_{{ $i }}"
                                                                 class="flex items-center justify-center w-12 h-12 rounded-full border border-slate-300 bg-white/40
@@ -213,14 +227,14 @@
                                         @case('date')
                                             <input type="date" class="form-input mt-2 w-full md:w-1/2 rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
                                                 name="cau_tra_loi[{{ $cauHoi->id }}]"
-                                                {{ $cauHoi->batbuoc ? 'required' : '' }}>
+                                                {{ $isRequired ? 'required' : '' }}>
                                             @break
 
                                         @case('number')
                                             <input type="number" class="form-input mt-2 w-full  rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
                                                 name="cau_tra_loi[{{ $cauHoi->id }}]"
                                                 placeholder="Nhập số..."
-                                                {{ $cauHoi->batbuoc ? 'required' : '' }}>
+                                                {{ $isRequired ? 'required' : '' }}>
                                             @break
 
                                     @endswitch
@@ -263,10 +277,10 @@
                             <h6 class="font-bold text-slate-800 mb-4">Tiến độ hoàn thành</h6>
                             <div class="w-full bg-white/40 rounded-full h-6 mb-3 overflow-hidden border border-white/50">
                                 <div class="bg-blue-600 h-6 rounded-full flex items-center justify-center text-white text-sm font-semibold transition-all duration-300"
-                                    id="progressBar" style="width: 0%;">0%</div>
+                                    id="progressBar" style="width: 0%;"></div>
                             </div>
                             <p class="text-slate-600 text-sm mb-0">
-                                Đã trả lời: <span id="answeredCount">0</span>/{{ $questionCounter + 2 }} câu
+                                Đã trả lời: <span id="answeredCount">0</span> câu
                             </p>
                         </div>
 
@@ -288,38 +302,61 @@
     
 @push('scripts')
 
+@php
+    $conditionalMap = [];
+    foreach($mauKhaoSat->cauHoi as $cauHoi) {
+        if ($cauHoi->cau_dieukien_id && $cauHoi->dieukien_hienthi) {
+            $conditionData = json_decode($cauHoi->dieukien_hienthi, true);
+            $conditionalMap[$cauHoi->id] = [
+                'parentId'      => $cauHoi->cau_dieukien_id,
+                'requiredValue' => (string)($conditionData['value'] ?? null),
+                'isOriginallyRequired' => (bool)$cauHoi->batbuoc
+            ];
+        }
+    }
+@endphp
+
 <script>
-    $(document).ready(function() {
+    const surveyConditionalMap = @json($conditionalMap);
+
+     $(document).ready(function() {
         const surveyForm = $('#formKhaoSat');
         const submitBtn = $('#submitBtn');
         const storageKey = `survey_progress_{{ $dotKhaoSat->id }}`;
-        const totalQuestions = $('.question-card').length + 2; // +2 cho Mã số và Họ tên
+        let debounceTimer;
 
-        function saveProgress() {
-            const formData = surveyForm.serializeArray();
-            let data = {};
-            
-            $.each(formData, function(i, field) {
-                if (field.name === '_token' || field.name === '_submission_token') {
-                    return; // Bỏ qua
-                }
-
-                if (field.name.endsWith('[]')) {
-                    const cleanName = field.name.slice(0, -2);
-                    if (!data[cleanName]) {
-                        data[cleanName] = [];
-                    }
-                    data[cleanName].push(field.value);
-                } else {
-                    data[field.name] = field.value;
-                }
-            });
-
-            if (Object.keys(data).length > 0) {
-                localStorage.setItem(storageKey, JSON.stringify(data));
-                console.log("AutoSave Success");
-            }
+        function updateUI() {
+            saveProgress();
+            updateProgress();
+            checkAllConditions();
         }
+
+        // --- CÁC HÀM CHỨC NĂNG ---
+        function saveProgress() {
+        const formData = surveyForm.serializeArray();
+        let data = {};
+        
+        $.each(formData, function(i, field) {
+            if (field.name === '_token' || field.name === '_submission_token') {
+                return; // Bỏ qua
+            }
+
+            if (field.name.endsWith('[]')) {
+                const cleanName = field.name.slice(0, -2);
+                if (!data[cleanName]) {
+                    data[cleanName] = [];
+                }
+                data[cleanName].push(field.value);
+            } else {
+                data[field.name] = field.value;
+            }
+        });
+
+        if (Object.keys(data).length > 0) {
+            localStorage.setItem(storageKey, JSON.stringify(data));
+            console.log("AutoSave Success");
+        }
+    }
 
         function loadProgress() {
             const savedData = localStorage.getItem(storageKey);
@@ -367,9 +404,10 @@
                     }
                 }
                 
-                if (typeof updateProgress === 'function') {
-                    updateProgress();
+                if (typeof updateUI === 'function') {
+                    updateUI();
                 }
+                console.log("Load question success")
             } catch (e) {
                 console.error('Lỗi khi tải dữ liệu từ LocalStorage:', e);
                 clearProgress();
@@ -380,41 +418,108 @@
             localStorage.removeItem(storageKey);
             console.log('Survey progress cleared.');
         }
-
-        loadProgress();
-        surveyForm.on('input change', saveProgress);
-
+        
         function updateProgress() {
-            let answeredQuestions = 0;
+            const answeredNames = {};
+            const requiredNames = {};
 
-            surveyForm.find('input[name="ma_nguoi_traloi"][required]').each(function() {
-                if ($(this).val().trim() !== '') answeredQuestions++;
-            });
-            surveyForm.find('input[name="metadata[hoten]"][required]').each(function() {
-                if ($(this).val().trim() !== '') answeredQuestions++;
-            });
-            
-            $('.question-card').each(function() {
-                const inputs = $(this).find('input[name^="cau_tra_loi"], textarea[name^="cau_tra_loi"]');
+            surveyForm.find('input, textarea').each(function() {
+                const field = $(this);
+                const name = field.attr('name');
+
+                if (!name || name.startsWith('_')  || name.startsWith('g-recaptcha')) {
+                    return;
+                }
+
+                if (field.prop('required') && field.is(':visible')) {
+                    requiredNames[name] = true;
+                }
+
                 let isAnswered = false;
-                inputs.each(function() {
-                    if (($(this).is(':radio') || $(this).is(':checkbox'))) {
-                        if ($(this).is(':checked')) isAnswered = true;
-                    } else {
-                        if ($(this).val().trim() !== '') isAnswered = true;
+                if (field.is(':radio') || field.is(':checkbox')) {
+                    if (field.is(':checked')) {
+                        isAnswered = true;
                     }
-                });
-                if (isAnswered) answeredQuestions++;
+                } else {
+                    if (field.val() && field.val().trim() !== '') {
+                        isAnswered = true;
+                    }
+                }
+                if (isAnswered) {
+                    answeredNames[name] = true;
+                }
             });
 
-            const progress = totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
-            $('#progressBar').css('width', progress + '%').text(progress + '%');
-            $('#answeredCount').text(answeredQuestions);
+            const totalVisibleRequiredCount = Object.keys(requiredNames).length;
+            const answeredRequiredCount = Object.keys(answeredNames).filter(name => requiredNames[name]).length;
+            const progress = totalVisibleRequiredCount > 0 
+                ? Math.round((answeredRequiredCount / totalVisibleRequiredCount) * 100)
+                : 100;
+
+            $('#progressBar').css('width', progress + '%').text(progress);
+            $('#answeredCount').text(`${answeredRequiredCount} / ${totalVisibleRequiredCount}`);
         }
 
-        surveyForm.on('input change', updateProgress);
+        function checkAllConditions() {
+            $('.question-card[data-conditional-parent-id]').each(function() {
+                const childCard = $(this);
+                const parentId = childCard.data('conditional-parent-id');
+                const requiredValue = String(childCard.data('conditional-required-value'));
+                const isOriginallyRequired = childCard.data('originally-required');
+
+                const parentCheckedInput = $(`#question-${parentId} input:checked`);
+                let parentSelectedValue = parentCheckedInput.length ? parentCheckedInput.val() : null;
+
+                let shouldShow = false;
+                if (parentSelectedValue !== null && String(parentSelectedValue) === requiredValue) {
+                    shouldShow = true;
+                }
+
+                const childInputs = childCard.find('input[name^="cau_tra_loi"], textarea[name^="cau_tra_loi"]');
+
+                if (shouldShow) {
+                    if (!childCard.is(':visible')) {
+                        childCard.slideDown(300);
+                    }
+                    if (isOriginallyRequired) {
+                        childInputs.prop('required', true);
+                    }
+                } else {
+                    if (childCard.is(':visible')) {
+                        childCard.slideUp(300, function() {
+                            clearQuestionValues($(this));
+                        });
+                    }
+                    childInputs.prop('required', false);
+                }
+            });
+            
+            if (typeof updateProgress === 'function') {
+                updateProgress();
+            }
+        }
+
+
+        /**
+         * Helper: Xóa câu trả lời của một card câu hỏi.
+         * @param {jQuery} questionCard - Đối tượng jQuery của .question-card
+         */
+        function clearQuestionValues(questionCard) {
+            questionCard.find('input:checked').prop('checked', false);
+            questionCard.find('textarea, input[type="text"], input[type="number"], input[type="date"]').val('');
+        }
+
+        // Chạy lần đầu khi load
+        loadProgress();
+        checkAllConditions();
         updateProgress();
+        $('.question-card[data-conditional-parent-id]').hide();
         
+        surveyForm.on('input change', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(updateUI, 250);
+        });
+
         // Thời gian làm bài
         let secondsElapsed = 0;
         function pad(n) { return n < 10 ? '0' + n : n; }

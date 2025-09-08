@@ -94,8 +94,12 @@ class MauKhaoSatController extends Controller
     {
         $mauKhaoSat->load(['cauHoi.phuongAnTraLoi']);
         $isLocked = $mauKhaoSat->dotKhaoSat->where('trangthai', 'active')->isNotEmpty();
+        $conditionalQuestions = $mauKhaoSat->cauHoi()
+            ->whereIn('loai_cauhoi', ['single_choice', 'likert', 'rating'])
+            ->orderBy('thutu')
+            ->get();
 
-        return view('admin.mau-khao-sat.edit', compact('mauKhaoSat', 'isLocked'));
+        return view('admin.mau-khao-sat.edit', compact('mauKhaoSat', 'isLocked', 'conditionalQuestions'));
     }
 
     public function getQuestionsJson(MauKhaoSat $mauKhaoSat)

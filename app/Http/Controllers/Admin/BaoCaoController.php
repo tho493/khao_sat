@@ -16,17 +16,30 @@ use PDF;
 
 class BaoCaoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $dotKhaoSats = DotKhaoSat::with(['mauKhaoSat'])
+        $query = DotKhaoSat::with(['mauKhaoSat'])
             ->withCount([
-                'phieuKhaoSat as phieu_hoan_thanh' => function ($query) {
-                    $query->where('trangthai', 'completed');
+                'phieuKhaoSat as phieu_hoan_thanh' => function ($q) {
+                    $q->where('trangthai', 'completed');
                 }
             ])
-            ->where('trangthai', '!=', 'draft')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->where('trangthai', '!=', 'draft');
+
+        if ($request->filled('search')) {
+            $searchTerm = $request->input('search');
+
+            // Tìm kiếm trong tên đợt khảo sát HOẶC tên mẫu khảo sát liên quan
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('ten_dot', 'LIKE', "%{$searchTerm}%")
+                    ->orWhereHas('mauKhaoSat', function ($subQuery) use ($searchTerm) {
+                        $subQuery->where('ten_mau', 'LIKE', "%{$searchTerm}%");
+                    });
+            });
+        }
+
+        // Sắp xếp và phân trang
+        $dotKhaoSats = $query->orderBy('created_at', 'desc')->paginate(10);
 
         // Thống kê tổng quan
         $tongQuan = [
@@ -39,7 +52,7 @@ class BaoCaoController extends Controller
         // Thống kê theo tháng (12 tháng gần nhất)
         $thongKeThang = $this->getThongKeThang();
 
-        // Thống kê theo mẫu khảo sát
+        // Thống kê theo mẫu khảo sát 
         $thongKeMauKhaoSat = DB::table('dot_khaosat as dk')
             ->join('mau_khaosat as mk', 'dk.mau_khaosat_id', '=', 'mk.id')
             ->leftJoin('phieu_khaosat as pk', function ($join) {

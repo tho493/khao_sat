@@ -16,8 +16,6 @@ class KhaoSatController extends Controller
     public function index()
     {
         $dotKhaoSats = DotKhaoSat::with(['mauKhaoSat'])
-            ->where('trangthai', 'active')
-            ->whereDate('tungay', '<=', now())
             ->whereDate('denngay', '>=', now())
             ->get();
 

@@ -16,56 +16,41 @@ class CauHoiController extends Controller
             'noidung_cauhoi' => 'required|string',
             'loai_cauhoi' => 'required|in:single_choice,multiple_choice,text,likert,rating,date,number',
             'batbuoc' => 'boolean',
-            'thutu' => 'integer|min:0',
-            // Yêu cầu mảng phuong_an nếu loại câu hỏi là lựa chọn
             'phuong_an' => 'required_if:loai_cauhoi,single_choice,multiple_choice,likert|array|min:2',
-            'phuong_an.*' => 'required|string|max:500' // Mỗi phương án không quá 500 ký tự
-        ], [
-            'phuong_an.required_if' => 'Vui lòng cung cấp các phương án trả lời.',
-            'phuong_an.min' => 'Phải có ít nhất 2 phương án trả lời.'
+            'phuong_an.*' => 'required|string|max:500',
+            // Validation cho các trường điều kiện
+            'cau_dieukien_id' => 'nullable|exists:cauhoi_khaosat,id',
+            'dieukien_hienthi' => 'nullable|json',
         ]);
 
         DB::beginTransaction();
         try {
-            // Lấy thứ tự lớn nhất hiện tại và cộng thêm 1
             $thutu = $mauKhaoSat->cauHoi()->max('thutu') + 1;
 
-            // Tạo câu hỏi
             $cauHoi = $mauKhaoSat->cauHoi()->create([
                 'noidung_cauhoi' => $validated['noidung_cauhoi'],
                 'loai_cauhoi' => $validated['loai_cauhoi'],
                 'batbuoc' => $validated['batbuoc'] ?? true,
-                'thutu' => $validated['thutu'] > 0 ? $validated['thutu'] : $thutu
+                'thutu' => $thutu,
+                'trangthai' => 1,
+                // Lưu dữ liệu điều kiện
+                'cau_dieukien_id' => $validated['cau_dieukien_id'] ?? null,
+                'dieukien_hienthi' => $validated['dieukien_hienthi'] ?? null,
             ]);
 
-            // Tạo các phương án trả lời nếu có
             if (isset($validated['phuong_an'])) {
                 $phuongAnData = [];
                 foreach ($validated['phuong_an'] as $index => $phuongAn) {
-                    $phuongAnData[] = [
-                        'noidung' => $phuongAn,
-                        'giatri' => $index + 1, // Giá trị có thể dùng để phân tích
-                        'thutu' => $index + 1
-                    ];
+                    $phuongAnData[] = ['noidung' => $phuongAn, 'thutu' => $index + 1];
                 }
                 $cauHoi->phuongAnTraLoi()->createMany($phuongAnData);
             }
 
             DB::commit();
-
-            // Trả về JSON để JavaScript xử lý
-            return response()->json([
-                'success' => true,
-                'message' => 'Thêm câu hỏi thành công!',
-                'cauHoi' => $cauHoi->load('phuongAnTraLoi') // Gửi lại dữ liệu câu hỏi vừa tạo
-            ]);
-
+            return response()->json(['success' => true, 'message' => 'Thêm câu hỏi thành công!', 'cauHoi' => $cauHoi->load('phuongAnTraLoi')]);
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json([
-                'success' => false,
-                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => 'Lỗi: ' . $e->getMessage()], 500);
         }
     }
 
@@ -86,60 +71,53 @@ class CauHoiController extends Controller
             'noidung_cauhoi' => 'required|string',
             'loai_cauhoi' => 'required|in:single_choice,multiple_choice,text,likert,rating,date,number',
             'batbuoc' => 'boolean',
-            'thutu' => 'integer|min:0',
-            'phuong_an' => 'sometimes|array|min:2',
-            'phuong_an.*' => 'required|string|max:500'
+            'phuong_an' => 'sometimes|array',
+            'phuong_an.*' => 'required|string|max:500',
+            'cau_dieukien_id' => 'nullable|exists:cauhoi_khaosat,id',
+            'dieukien_hienthi' => 'nullable|json',
         ]);
 
         DB::beginTransaction();
         try {
-            // Cập nhật thông tin chính của câu hỏi
             $cauHoi->update([
                 'noidung_cauhoi' => $validated['noidung_cauhoi'],
                 'loai_cauhoi' => $validated['loai_cauhoi'],
                 'batbuoc' => $validated['batbuoc'] ?? true,
-                'thutu' => $validated['thutu']
+                'cau_dieukien_id' => $validated['cau_dieukien_id'] ?? null,
+                'dieukien_hienthi' => $validated['dieukien_hienthi'] ?? null,
             ]);
 
-            // Xóa các phương án cũ và tạo lại nếu có phương án mới
-            if (isset($validated['phuong_an'])) {
-                $cauHoi->phuongAnTraLoi()->delete(); // Xóa hết phương án cũ
-
-                $phuongAnData = [];
-                foreach ($validated['phuong_an'] as $index => $phuongAn) {
-                    $phuongAnData[] = [
-                        'noidung' => $phuongAn,
-                        'giatri' => $index + 1,
-                        'thutu' => $index + 1
-                    ];
+            if ($request->has('phuong_an')) {
+                $cauHoi->phuongAnTraLoi()->delete();
+                if (!empty($validated['phuong_an'])) {
+                    $phuongAnData = [];
+                    foreach ($validated['phuong_an'] as $index => $phuongAn) {
+                        $phuongAnData[] = ['noidung' => $phuongAn, 'thutu' => $index + 1];
+                    }
+                    $cauHoi->phuongAnTraLoi()->createMany($phuongAnData);
                 }
-                $cauHoi->phuongAnTraLoi()->createMany($phuongAnData);
             }
 
             DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Cập nhật câu hỏi thành công!'
-            ]);
-
+            return response()->json(['success' => true, 'message' => 'Cập nhật câu hỏi thành công!']);
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json([
-                'success' => false,
-                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => 'Lỗi: ' . $e->getMessage()], 500);
         }
     }
 
     public function destroy(CauHoiKhaoSat $cauHoi)
     {
-        $cauHoi->delete();
+        $dependentCount = CauHoiKhaoSat::where('cau_dieukien_id', $cauHoi->id)->count();
+        if ($dependentCount > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => "Không thể xóa. Có {$dependentCount} câu hỏi khác đang phụ thuộc vào câu hỏi này."
+            ], 409); // Conflict
+        }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Xóa câu hỏi thành công'
-        ]);
+        $cauHoi->delete();
+        return response()->json(['success' => true, 'message' => 'Xóa câu hỏi thành công.']);
     }
 
     public function updateOrder(Request $request)
