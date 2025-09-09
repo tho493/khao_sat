@@ -52,23 +52,24 @@ class KhaoSatController extends Controller
             }
         }
 
-        $mauKhaoSat = $dotKhaoSat->mauKhaoSat()
-            ->with([
-                'cauHoi' => function ($query) {
-                    $query->where('trangthai', 1)->orderBy('thutu', 'asc');
-                },
-                'cauHoi.phuongAnTraLoi' => function ($query) {
-                    $query->orderBy('thutu', 'asc');
-                }
-            ])
-            ->first();
+        $mauKhaoSat = $dotKhaoSat->mauKhaoSat()->with([
+            'cauHoi' => function ($query) {
+                $query->where('trangthai', 1)->orderBy('page', 'asc')->orderBy('thutu', 'asc');
+            },
+            'cauHoi.phuongAnTraLoi' => function ($query) {
+                $query->orderBy('thutu', 'asc');
+            }
+        ])->first();
+
+        // GOM NHÓM CÂU HỎI THEO TRANG
+        $questionsByPage = $mauKhaoSat->cauHoi->groupBy('page');
 
         if (!$mauKhaoSat) {
             return redirect()->route('khao-sat.index')
                 ->with('error', 'Không tìm thấy mẫu khảo sát cho đợt này.');
         }
 
-        return view('khao-sat.show', compact('dotKhaoSat', 'mauKhaoSat'));
+        return view('khao-sat.show', compact('dotKhaoSat', 'mauKhaoSat', 'questionsByPage'));
     }
 
     public function store(Request $request, DotKhaoSat $dotKhaoSat)

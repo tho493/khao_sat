@@ -6,6 +6,8 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 use App\Models\User;
 use App\Models\MauKhaoSat;
 use App\Models\DotKhaoSat;
+use App\Models\ChatbotQa;
+use App\Models\CauHoiKhaoSat;
 use App\Observers\ActivityLogObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -35,6 +37,8 @@ class AppServiceProvider extends ServiceProvider
         User::observe(ActivityLogObserver::class);
         MauKhaoSat::observe(ActivityLogObserver::class);
         DotKhaoSat::observe(ActivityLogObserver::class);
+        ChatbotQa::observe(ActivityLogObserver::class);
+        CauHoiKhaoSat::observe(ActivityLogObserver::class);
 
         Paginator::useBootstrapFive();
     }

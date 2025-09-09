@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS `cauhoi_khaosat` (
   `loai_cauhoi` ENUM('single_choice', 'multiple_choice', 'text', 'likert', 'rating', 'date', 'number') DEFAULT 'single_choice',
   `batbuoc` TINYINT(1) DEFAULT 1,
   `thutu` INT DEFAULT 0,
+  `page` INT UNSIGNED DEFAULT(1),
   `cau_dieukien_id` INT(11), -- Câu hỏi phụ thuộc
   `dieukien_hienthi` JSON, -- Điều kiện hiển thị câu hỏi
   `trangthai` TINYINT(1) DEFAULT 1,
@@ -335,8 +336,8 @@ BEGIN
   SET v_mau_moi_id = LAST_INSERT_ID();
   
   -- Sao chép câu hỏi và phương án
-  INSERT INTO cauhoi_khaosat (mau_khaosat_id, noidung_cauhoi, loai_cauhoi, batbuoc, thutu)
-  SELECT v_mau_moi_id, noidung_cauhoi, loai_cauhoi, batbuoc, thutu
+  INSERT INTO cauhoi_khaosat (mau_khaosat_id, noidung_cauhoi, loai_cauhoi, batbuoc, thutu, page)
+  SELECT v_mau_moi_id, noidung_cauhoi, loai_cauhoi, batbuoc, thutu, page
   FROM cauhoi_khaosat c WHERE mau_khaosat_id = p_mau_goc_id;
   
   -- Ghi log
@@ -495,19 +496,19 @@ END//
 
 DELIMITER ;
 
--- Trigger ghi log thay đổi mẫu khảo sát
-DELIMITER //
-CREATE TRIGGER trg_LogThayDoiMauKhaoSat
-AFTER UPDATE ON mau_khaosat
-FOR EACH ROW
-BEGIN
-  INSERT INTO lichsu_thaydoi (bang_thaydoi, id_banghi, hanhdong, noidung_cu, noidung_moi)
-  VALUES ('mau_khaosat', NEW.id, 'update',
-          JSON_OBJECT('ten_mau', OLD.ten_mau, 'trangthai', OLD.trangthai),
-          JSON_OBJECT('ten_mau', NEW.ten_mau, 'trangthai', NEW.trangthai));
-END//
+-- -- Trigger ghi log thay đổi mẫu khảo sát
+-- DELIMITER //
+-- CREATE TRIGGER trg_LogThayDoiMauKhaoSat
+-- AFTER UPDATE ON mau_khaosat
+-- FOR EACH ROW
+-- BEGIN
+--   INSERT INTO lichsu_thaydoi (bang_thaydoi, id_banghi, hanhdong, noidung_cu, noidung_moi)
+--   VALUES ('mau_khaosat', NEW.id, 'update',
+--           JSON_OBJECT('ten_mau', OLD.ten_mau, 'trangthai', OLD.trangthai),
+--           JSON_OBJECT('ten_mau', NEW.ten_mau, 'trangthai', NEW.trangthai));
+-- END//
 
-DELIMITER ;
+-- DELIMITER ;
 
 -- --------------------------------------------------------
 -- CÁC FUNCTION HỖ TRỢ

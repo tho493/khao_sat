@@ -16,6 +16,7 @@ class CauHoiController extends Controller
             'noidung_cauhoi' => 'required|string',
             'loai_cauhoi' => 'required|in:single_choice,multiple_choice,text,likert,rating,date,number',
             'batbuoc' => 'boolean',
+            'page' => 'required|integer|min:1',
             'phuong_an' => 'required_if:loai_cauhoi,single_choice,multiple_choice,likert|array|min:2',
             'phuong_an.*' => 'required|string|max:500',
             // Validation cho các trường điều kiện
@@ -32,6 +33,7 @@ class CauHoiController extends Controller
                 'loai_cauhoi' => $validated['loai_cauhoi'],
                 'batbuoc' => $validated['batbuoc'] ?? true,
                 'thutu' => $thutu,
+                'page' => $validated['page'],
                 'trangthai' => 1,
                 // Lưu dữ liệu điều kiện
                 'cau_dieukien_id' => $validated['cau_dieukien_id'] ?? null,
@@ -71,6 +73,7 @@ class CauHoiController extends Controller
             'noidung_cauhoi' => 'required|string',
             'loai_cauhoi' => 'required|in:single_choice,multiple_choice,text,likert,rating,date,number',
             'batbuoc' => 'boolean',
+            'page' => 'required|integer|min:1',
             'phuong_an' => 'sometimes|array',
             'phuong_an.*' => 'required|string|max:500',
             'cau_dieukien_id' => 'nullable|exists:cauhoi_khaosat,id',
@@ -83,6 +86,7 @@ class CauHoiController extends Controller
                 'noidung_cauhoi' => $validated['noidung_cauhoi'],
                 'loai_cauhoi' => $validated['loai_cauhoi'],
                 'batbuoc' => $validated['batbuoc'] ?? true,
+                'page' => $validated['page'],
                 'cau_dieukien_id' => $validated['cau_dieukien_id'] ?? null,
                 'dieukien_hienthi' => $validated['dieukien_hienthi'] ?? null,
             ]);

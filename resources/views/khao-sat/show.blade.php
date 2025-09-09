@@ -57,6 +57,20 @@
 </style>
 @endpush
 
+@php
+    $conditionalMap = $mauKhaoSat->cauHoi
+        ->whereNotNull('cau_dieukien_id')
+        ->mapWithKeys(function ($item) {
+            $condition = json_decode($item->dieukien_hienthi, true);
+            return [$item->id => [
+                'parentId' => $item->cau_dieukien_id,
+                'requiredValue' => (string)($condition['value'] ?? null),
+                'isOriginallyRequired' => (bool)$item->batbuoc
+            ]];
+        });
+    $questionCounterGlobal = 0;
+@endphp
+
 @section('content')
     <div class="container mx-auto py-12 px-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -121,141 +135,156 @@
                             </div>
                         </div>
 
-                        <!-- Các card câu hỏi -->
-                        @php $questionCounter = 0; @endphp
-                        @forelse($mauKhaoSat->cauHoi->sortBy('thutu') as $cauHoi)
-                            @php
-                                $questionCounter++;
-                                $conditionalAttributes = '';
-                                $isRequired = $cauHoi->batbuoc;
-                                if ($cauHoi->cau_dieukien_id && $cauHoi->dieukien_hienthi) {
-                                    $conditionData = json_decode($cauHoi->dieukien_hienthi);
-                                    $conditionValue = $conditionData->value ?? null;
-                                    
-                                    if ($conditionValue) {
-                                        $conditionalAttributes = "data-conditional-parent-id='{$cauHoi->cau_dieukien_id}' data-conditional-required-value='{$conditionValue}'";
-                                        $isRequired = false;
-                                    }
-                                }
-                            @endphp
-                            <div class="question-card glass-effect" id="question-{{ $cauHoi->id }}" data-question-id="{{ $cauHoi->id }}" {!! $conditionalAttributes !!}
-                                                            data-originally-required="{{ $cauHoi->batbuoc ? 'true' : 'false' }}">
-                                <div class="p-6">
-                                    <label class="block font-bold text-slate-800 mb-3 text-lg">
-                                        <span class="text-blue-600">Câu {{ $questionCounter }}:</span>
-                                        {{ $cauHoi->noidung_cauhoi }}
-                                        @if($cauHoi->batbuoc)
-                                            <span class="text-red-600">*</span>
-                                        @endif
-                                    </label>
-
-                                    @switch($cauHoi->loai_cauhoi)
-                                        @case('single_choice')
-                                            <div class="mt-2 space-y-3">
-                                                @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
-                                                    <label class="flex items-center p-3 rounded-lg bg-white/30 hover:bg-white/50 cursor-pointer transition">
-                                                        <input type="radio" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500 border-slate-400"
-                                                            name="cau_tra_loi[{{ $cauHoi->id }}]" value="{{ $phuongAn->id }}"
-                                                            {{ $isRequired ? 'required' : '' }}>
-                                                        <span class="ml-3 text-slate-700">{{ $phuongAn->noidung }}</span>
+                        <div id="survey-pages-container">
+                            @forelse($questionsByPage as $pageNumber => $questionsOnPage)
+                                <div class="survey-page" id="survey-page-{{ $pageNumber }}" style="{{ !$loop->first ? 'display: none;' : '' }}">
+                                    <div class="glass-effect">
+                                        <div class="bg-white/40 rounded-t-xl px-6 py-4 border-b border-white/30">
+                                            <h5 class="text-slate-800 font-bold text-lg m-0">Phần {{ $pageNumber }} / {{ $questionsByPage->count() }}</h5>
+                                        </div>
+                                        <div class="p-6 space-y-6">
+                                            @foreach($questionsOnPage as $cauHoi)
+                                                @php
+                                                    $questionCounterGlobal++;
+                                                    $isConditionalChild = isset($conditionalMap[$cauHoi->id]);
+                                                    $isRequired = $cauHoi->batbuoc && !$isConditionalChild;
+                                                @endphp
+                                                <div class="question-card bg-white/30 p-4 rounded-lg border border-white/30"
+                                                     id="question-{{ $cauHoi->id }}"
+                                                     data-question-id="{{ $cauHoi->id }}"
+                                                     data-originally-required="{{ $cauHoi->batbuoc ? 'true' : 'false' }}"
+                                                     @if($isConditionalChild)
+                                                        data-conditional-parent-id="{{ $conditionalMap[$cauHoi->id]['parentId'] }}"
+                                                        data-conditional-required-value="{{ $conditionalMap[$cauHoi->id]['requiredValue'] }}"
+                                                     @endif>
+                                                    
+                                                    <label class="block font-bold text-slate-800 mb-3 text-lg">
+                                                        <span class="text-blue-600">Câu {{ $questionCounterGlobal }}:</span>
+                                                        {{ $cauHoi->noidung_cauhoi }}
+                                                        @if($cauHoi->batbuoc)<span class="text-red-600">*</span>@endif
                                                     </label>
-                                                @endforeach
-                                            </div>
-                                            @break
-                                        
-                                        @case('multiple_choice')
-                                            <div class="mt-2 space-y-3">
-                                                @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
-                                                    <label class="flex items-center p-3 rounded-lg bg-white/30 hover:bg-white/50 cursor-pointer transition">
-                                                        <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 focus:ring-blue-500 rounded border-slate-400"
-                                                            name="cau_tra_loi[{{ $cauHoi->id }}][]" value="{{ $phuongAn->id }}">
-                                                        <span class="ml-3 text-slate-700">{{ $phuongAn->noidung }}</span>
-                                                    </label>
-                                                @endforeach
-                                            </div>
-                                            @break
-                                            
-                                        @case('text')
-                                            <textarea class="form-textarea mt-2 w-full rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
-                                                    name="cau_tra_loi[{{ $cauHoi->id }}]" rows="4"
-                                                    placeholder="Nhập câu trả lời của bạn..."
-                                                    {{ $isRequired ? 'required' : '' }}></textarea>
-                                            @break
-                                        
-                                        @case('likert')
-                                            <div class="flex flex-wrap justify-between items-center mt-3 gap-2">
-                                                @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
-                                                    <label class="flex flex-col items-center flex-1 p-2 rounded-lg hover:bg-white/50 cursor-pointer transition min-w-[80px]">
-                                                        <input type="radio" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500"
-                                                            name="cau_tra_loi[{{ $cauHoi->id }}]"
-                                                            value="{{ $phuongAn->id }}"
-                                                            {{ $isRequired ? 'required' : '' }}>
-                                                        <span class="mt-2 text-xs text-center text-slate-600">{{ $phuongAn->noidung }}</span>
-                                                    </label>
-                                                @endforeach
-                                            </div>
-                                            @break
-
-                                        @case('rating')
-                                            <div class="mt-3">
-                                                <div class="flex items-center justify-center space-x-2" role="group">
-                                                    @for($i = 1; $i <= 5; $i++)
-                                                        <div class="rating-item">
-                                                            <input type="radio" class="sr-only peer" 
-                                                                name="cau_tra_loi[{{ $cauHoi->id }}]" 
-                                                                value="{{ $i }}"
-                                                                id="rating_{{ $cauHoi->id }}_{{ $i }}"
-                                                                {{ $isRequired ? 'required' : '' }}>
+                                                    @switch($cauHoi->loai_cauhoi)
+                                                        @case('single_choice')
+                                                            <div class="mt-2 space-y-3">
+                                                                @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
+                                                                    <label class="flex items-center p-3 rounded-lg bg-white/30 hover:bg-white/50 cursor-pointer transition">
+                                                                        <input type="radio" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500 border-slate-400"
+                                                                            name="cau_tra_loi[{{ $cauHoi->id }}]" value="{{ $phuongAn->id }}"
+                                                                            {{ $isRequired ? 'required' : '' }}>
+                                                                        <span class="ml-3 text-slate-700">{{ $phuongAn->noidung }}</span>
+                                                                    </label>
+                                                                @endforeach
+                                                            </div>
+                                                            @break
+                                                        
+                                                        @case('multiple_choice')
+                                                            <div class="mt-2 space-y-3">
+                                                                @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
+                                                                    <label class="flex items-center p-3 rounded-lg bg-white/30 hover:bg-white/50 cursor-pointer transition">
+                                                                        <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 focus:ring-blue-500 rounded border-slate-400"
+                                                                            name="cau_tra_loi[{{ $cauHoi->id }}][]" value="{{ $phuongAn->id }}">
+                                                                        <span class="ml-3 text-slate-700">{{ $phuongAn->noidung }}</span>
+                                                                    </label>
+                                                                @endforeach
+                                                            </div>
+                                                            @break
                                                             
-                                                            <label for="rating_{{ $cauHoi->id }}_{{ $i }}"
-                                                                class="flex items-center justify-center w-12 h-12 rounded-full border border-slate-300 bg-white/40
-                                                                        cursor-pointer transition text-slate-600 font-bold text-lg
-                                                                        hover:bg-blue-200 hover:border-blue-400
-                                                                        peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600">
-                                                                {{ $i }}
-                                                            </label>
-                                                        </div>
-                                                    @endfor
+                                                        @case('text')
+                                                            <textarea class="form-textarea mt-2 w-full rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
+                                                                    name="cau_tra_loi[{{ $cauHoi->id }}]" rows="4"
+                                                                    placeholder="Nhập câu trả lời của bạn..."
+                                                                    {{ $isRequired ? 'required' : '' }}></textarea>
+                                                            @break
+                                                        
+                                                        @case('likert')
+                                                            <div class="flex flex-wrap justify-between items-center mt-3 gap-2">
+                                                                @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
+                                                                    <label class="flex flex-col items-center flex-1 p-2 rounded-lg hover:bg-white/50 cursor-pointer transition min-w-[80px]">
+                                                                        <input type="radio" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500"
+                                                                            name="cau_tra_loi[{{ $cauHoi->id }}]"
+                                                                            value="{{ $phuongAn->id }}"
+                                                                            {{ $isRequired ? 'required' : '' }}>
+                                                                        <span class="mt-2 text-xs text-center text-slate-600">{{ $phuongAn->noidung }}</span>
+                                                                    </label>
+                                                                @endforeach
+                                                            </div>
+                                                            @break
+                
+                                                        @case('rating')
+                                                            <div class="mt-3">
+                                                                <div class="flex items-center justify-center space-x-2" role="group">
+                                                                    @for($i = 1; $i <= 5; $i++)
+                                                                        <div class="rating-item">
+                                                                            <input type="radio" class="sr-only peer" 
+                                                                                name="cau_tra_loi[{{ $cauHoi->id }}]" 
+                                                                                value="{{ $i }}"
+                                                                                id="rating_{{ $cauHoi->id }}_{{ $i }}"
+                                                                                {{ $isRequired ? 'required' : '' }}>
+                                                                            
+                                                                            <label for="rating_{{ $cauHoi->id }}_{{ $i }}"
+                                                                                class="flex items-center justify-center w-12 h-12 rounded-full border border-slate-300 bg-white/40
+                                                                                        cursor-pointer transition text-slate-600 font-bold text-lg
+                                                                                        hover:bg-blue-200 hover:border-blue-400
+                                                                                        peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600">
+                                                                                {{ $i }}
+                                                                            </label>
+                                                                        </div>
+                                                                    @endfor
+                                                                </div>
+                                                                <div class="flex justify-between text-xs text-slate-500 mt-2 px-1">
+                                                                    <span>Rất không hài lòng</span>
+                                                                    <span>Rất hài lòng</span>
+                                                                </div>
+                                                            </div>
+                                                            @break
+                
+                                                        @case('date')
+                                                            <input type="date" class="form-input mt-2 w-full md:w-1/2 rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
+                                                                name="cau_tra_loi[{{ $cauHoi->id }}]"
+                                                                {{ $isRequired ? 'required' : '' }}>
+                                                            @break
+                
+                                                        @case('number')
+                                                            <input type="number" class="form-input mt-2 w-full  rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
+                                                                name="cau_tra_loi[{{ $cauHoi->id }}]"
+                                                                placeholder="Nhập số..."
+                                                                {{ $isRequired ? 'required' : '' }}>
+                                                            @break
+                
+                                                    @endswitch
                                                 </div>
-                                                <div class="flex justify-between text-xs text-slate-500 mt-2 px-1">
-                                                    <span>Rất không hài lòng</span>
-                                                    <span>Rất hài lòng</span>
-                                                </div>
-                                            </div>
-                                            @break
-
-                                        @case('date')
-                                            <input type="date" class="form-input mt-2 w-full md:w-1/2 rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
-                                                name="cau_tra_loi[{{ $cauHoi->id }}]"
-                                                {{ $isRequired ? 'required' : '' }}>
-                                            @break
-
-                                        @case('number')
-                                            <input type="number" class="form-input mt-2 w-full  rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
-                                                name="cau_tra_loi[{{ $cauHoi->id }}]"
-                                                placeholder="Nhập số..."
-                                                {{ $isRequired ? 'required' : '' }}>
-                                            @break
-
-                                    @endswitch
+                                            @endforeach
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        @empty
-                            <div class="glass-effect p-6 text-center text-slate-600">
-                                Mẫu khảo sát này chưa có câu hỏi nào.
-                            </div>
-                        @endforelse
+                                @empty
+                                <div class="glass-effect p-6 text-center text-slate-600">
+                                    Trang khảo sát này chưa có câu hỏi nào.
+                                </div>
+                            @endforelse
+                        </div>
 
-                        <!-- Captcha và nút Submit -->
+                        <!-- Captcha, nút Submit và điều hướng -->
                         <div class="glass-effect p-6">
-                            <div class="mb-4 flex justify-center">
+                            {{-- Captcha --}}
+                            <div id="captcha-container" class="mb-4 flex justify-center" style="display: none;">
                                 <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div> 
                             </div>
-                            @error('g-recaptcha-response')
-                                <p class="text-red-500 text-center text-sm mb-3">{{ $message }}</p>
-                            @enderror
-                            <div class="flex justify-center gap-4">
-                                <button type="submit" class="inline-flex items-center px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-lg font-semibold" id="submitBtn">
+                            
+                            {{-- Nút điều hướng --}}
+                            <div class="flex justify-between items-center">
+                                <button type="button" class="btn-nav btn-prev inline-flex items-center px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition" id="prevBtn" style="display: none;">
+                                    <i class="bi bi-arrow-left mr-2"></i> Quay lại
+                                </button>
+                                
+                                {{-- Placeholder để giữ layout cân bằng --}}
+                                <div id="prev-placeholder"></div>
+
+                                <button type="button" class="btn-nav btn-next inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition" id="nextBtn">
+                                    Tiếp theo <i class="bi bi-arrow-right ml-2"></i>
+                                </button>
+                                
+                                <button type="submit" class="inline-flex items-center px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-lg font-semibold" id="submitBtn" style="display: none;">
                                     <i class="bi bi-send mr-2"></i> Gửi khảo sát
                                 </button>
                             </div>
@@ -301,21 +330,6 @@
 
     
 @push('scripts')
-
-@php
-    $conditionalMap = [];
-    foreach($mauKhaoSat->cauHoi as $cauHoi) {
-        if ($cauHoi->cau_dieukien_id && $cauHoi->dieukien_hienthi) {
-            $conditionData = json_decode($cauHoi->dieukien_hienthi, true);
-            $conditionalMap[$cauHoi->id] = [
-                'parentId'      => $cauHoi->cau_dieukien_id,
-                'requiredValue' => (string)($conditionData['value'] ?? null),
-                'isOriginallyRequired' => (bool)$cauHoi->batbuoc
-            ];
-        }
-    }
-@endphp
-
 <script>
     const surveyConditionalMap = @json($conditionalMap);
 
@@ -420,44 +434,40 @@
         }
         
         function updateProgress() {
-            const answeredNames = {};
+            let answeredRequiredCount = 0;
+            const visibleRequiredFields = surveyForm.find('[required]:visible');
+            
             const requiredNames = {};
+            visibleRequiredFields.each(function() {
+                requiredNames[$(this).attr('name')] = true;
+            });
+            const totalVisibleRequiredCount = Object.keys(requiredNames).length;
 
-            surveyForm.find('input, textarea').each(function() {
+            const answeredNames = {};
+            visibleRequiredFields.each(function() {
                 const field = $(this);
                 const name = field.attr('name');
-
-                if (!name || name.startsWith('_')  || name.startsWith('g-recaptcha')) {
-                    return;
-                }
-
-                if (field.prop('required') && field.is(':visible')) {
-                    requiredNames[name] = true;
-                }
+                if (answeredNames[name]) return;
 
                 let isAnswered = false;
                 if (field.is(':radio') || field.is(':checkbox')) {
-                    if (field.is(':checked')) {
-                        isAnswered = true;
-                    }
+                    if ($(`input[name="${name}"]:checked`).length > 0) isAnswered = true;
                 } else {
-                    if (field.val() && field.val().trim() !== '') {
-                        isAnswered = true;
-                    }
+                    if (field.val() && field.val().trim() !== '') isAnswered = true;
                 }
                 if (isAnswered) {
                     answeredNames[name] = true;
                 }
             });
+            answeredRequiredCount = Object.keys(answeredNames).length;
 
-            const totalVisibleRequiredCount = Object.keys(requiredNames).length;
-            const answeredRequiredCount = Object.keys(answeredNames).filter(name => requiredNames[name]).length;
             const progress = totalVisibleRequiredCount > 0 
                 ? Math.round((answeredRequiredCount / totalVisibleRequiredCount) * 100)
                 : 100;
 
-            $('#progressBar').css('width', progress + '%').text(progress);
-            $('#answeredCount').text(`${answeredRequiredCount} / ${totalVisibleRequiredCount}`);
+            $('#progressBar').css('width', progress + '%').text(progress + '%');
+            $('#answeredCount').text(answeredRequiredCount);
+            $('#totalRequiredCount').text(totalVisibleRequiredCount);
         }
 
         function checkAllConditions() {
@@ -581,7 +591,60 @@
                 }
             });
         });
+
+        // Hàm điều khiển trang khảo sát
+            let currentPage = 1;
+    const totalPages = $('.survey-page').length;
+
+    function updateNavigationButtons() {
+        // Ẩn/hiện nút Quay lại
+        $('#prevBtn').toggle(currentPage > 1);
+        $('#prev-placeholder').toggle(currentPage <= 1);
+
+        if (currentPage === totalPages) {
+            $('#nextBtn').hide();
+            $('#captcha-container').show();
+            $('#submitBtn').show();
+        } else {
+            $('#nextBtn').show();
+            $('#captcha-container').hide();
+            $('#submitBtn').hide();
+        }
+    }
+
+    function goToPage(pageNumber) {
+        if (pageNumber < 1 || pageNumber > totalPages) return;
+
+        let isValid = true;
+        $(`#survey-page-${currentPage} [required]`).each(function() {
+            if (!this.checkValidity() && pageNumber > currentPage) {
+                isValid = false;
+            }
+        });
+        
+        if (!isValid) {
+            alert('Vui lòng hoàn thành tất cả các câu hỏi bắt buộc trong trang này trước khi tiếp tục.');
+            return;
+        }
+
+        $('.survey-page').hide();
+        $(`#survey-page-${pageNumber}`).fadeIn();
+        currentPage = pageNumber;
+        updateNavigationButtons();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Gắn sự kiện
+    $('#nextBtn').on('click', () => goToPage(currentPage + 1));
+    $('#prevBtn').on('click', () => goToPage(currentPage - 1));
+
+    updateNavigationButtons();
     });
+</script>
+<script>
+$(document).ready(function() {
+
+});
 </script>
 @endpush
 @endsection

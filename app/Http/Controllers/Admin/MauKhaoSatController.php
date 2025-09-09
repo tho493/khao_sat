@@ -94,12 +94,15 @@ class MauKhaoSatController extends Controller
     {
         $mauKhaoSat->load(['cauHoi.phuongAnTraLoi']);
         $isLocked = $mauKhaoSat->dotKhaoSat->where('trangthai', 'active')->isNotEmpty();
-        $conditionalQuestions = $mauKhaoSat->cauHoi()
-            ->whereIn('loai_cauhoi', ['single_choice', 'likert', 'rating'])
-            ->orderBy('thutu')
-            ->get();
+        $allQuestions = $mauKhaoSat->cauHoi()->orderBy('thutu')->get();
 
-        return view('admin.mau-khao-sat.edit', compact('mauKhaoSat', 'isLocked', 'conditionalQuestions'));
+        // Lấy danh sách các câu hỏi có thể làm điều kiện cha
+        $conditionalQuestions = $allQuestions->whereIn('loai_cauhoi', ['single_choice', 'likert', 'rating']);
+
+        // TẠO MỘT MAP TỪ ID -> NỘI DUNG CÂU HỎI
+        $questionContentMap = $allQuestions->pluck('noidung_cauhoi', 'id');
+
+        return view('admin.mau-khao-sat.edit', compact('mauKhaoSat', 'isLocked', 'conditionalQuestions', 'questionContentMap'));
     }
 
     public function getQuestionsJson(MauKhaoSat $mauKhaoSat)
@@ -113,41 +116,37 @@ class MauKhaoSatController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    // app/Http/Controllers/Admin/MauKhaoSatController.php
+
     public function update(Request $request, MauKhaoSat $mauKhaoSat)
     {
-        // Nếu có một đợt đang active thì không cho sửa gì, chỉ closed hoặc draft thì được
-        $isActiveInSurvey = $mauKhaoSat->dotKhaoSat()->where('trangthai', 'active')->exists();
+        $isLocked = $mauKhaoSat->dotKhaoSat()->where('trangthai', 'active')->exists();
 
-        if ($isActiveInSurvey) {
-            // Không cho sửa thông tin mẫu. 
-            if ($request->input('ten_mau') != null || $request->input('mota') != null) {
-                // Ở FE đã disabled 2 cái này, nếu không phải là null thì đã sửa. Báo lỗi nếu vẫn sửa được
-                return back()
-                    ->with('error', 'Không thể sửa tên hoặc mô tả. Mẫu khảo sát này đang được sử dụng trong một đợt khảo sát đang hoạt động.')
-                    ->withInput();
-            }
-            $validated = $request->validate([
-                'trangthai' => 'in:draft,active,inactive'
-            ], [
-                'trangthai.in' => 'Trạng thái không hợp lệ'
-            ]);
-        } else {
-            $validated = $request->validate([
-                'ten_mau' => 'required|max:255',
-                'mota' => 'nullable',
-                'trangthai' => 'in:draft,active,inactive'
-            ], [
-                'ten_mau.required' => 'Vui lòng nhập tên mẫu khảo sát',
-                'trangthai.in' => 'Trạng thái không hợp lệ'
-            ]);
+        $rules = [
+            'trangthai' => 'required|in:draft,active,inactive',
+        ];
+
+        if (!$isLocked) {
+            $rules['ten_mau'] = 'required|string|max:255';
+            $rules['mota'] = 'nullable|string';
+        }
+
+        $validated = $request->validate($rules);
+        $dataToUpdate = [
+            'trangthai' => $validated['trangthai'],
+        ];
+
+        if (!$isLocked) {
+            $dataToUpdate['ten_mau'] = $validated['ten_mau'];
+            $dataToUpdate['mota'] = $validated['mota'];
         }
 
         try {
-            $mauKhaoSat->update($validated);
-
+            $mauKhaoSat->update($dataToUpdate);
             return back()->with('success', 'Cập nhật mẫu khảo sát thành công');
 
         } catch (\Exception $e) {
+            \Log::error('Lỗi khi cập nhật mẫu khảo sát: ' . $e->getMessage());
             return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }

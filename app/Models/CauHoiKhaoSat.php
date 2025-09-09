@@ -14,6 +14,7 @@ class CauHoiKhaoSat extends Model
         'loai_cauhoi',
         'batbuoc',
         'thutu',
+        'page',
         'cau_dieukien_id',
         'dieukien_hienthi',
         'trangthai'
