@@ -17,7 +17,7 @@
 
 -   **Quản lý Khảo sát Động:** Dễ dàng tạo, sửa, xóa, và sao chép các mẫu khảo sát.
 -   **Quản lý Đợt khảo sát:** Lên lịch và quản lý các đợt khảo sát theo thời gian.
--   **Xác thực người tham gia:** Hỗ trợ import danh sách (Excel) để giới hạn người được phép làm khảo sát.
+-   ~~**Xác thực người tham gia:** Hỗ trợ import danh sách (Excel) để giới hạn người được phép làm khảo sát.~~
 -   **Báo cáo & Thống kê:** Giao diện báo cáo trực quan với biểu đồ, bảng biểu và chức năng xuất file Excel/PDF.
 -   **Phân tích nâng cao:** Hỗ trợ phân tích chéo (cross-tabulation) để tìm ra mối liên hệ giữa các câu trả lời.
 -   **Bảo mật:** Tích hợp Google reCAPTCHA v2 để chống spam và bot.
@@ -123,6 +123,7 @@ Trước khi cài đặt, bạn cần đảm bảo môi trường PHP đã đư�
     ```
 
 5.  **Import & Seed Database:**
+
     -   Tạo một database rỗng với tên bạn đã khai báo trong `.env` (ví dụ: `khao_sat_db`).
     -   Import file `khao_sat_db.sql` được cung cấp vào database vừa tạo.
     -   Chạy seeder để tạo tài khoản admin mặc định:

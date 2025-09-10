@@ -139,7 +139,7 @@
         </tr>
         <tr>
             <td>Số phiếu đã hoàn thành</td>
-            <td>{{ $tongQuan['phieu_hoan_thanh'] }} / {{ $tongQuan['tong_phieu'] }} ({{ $tongQuan['ty_le'] }}%)</td>
+            <td>{{ $tongQuan['tong_phieu'] }}</td>
         </tr>
         <tr>
             <td>Thời gian trả lời trung bình</td>

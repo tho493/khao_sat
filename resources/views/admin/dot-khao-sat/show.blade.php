@@ -88,7 +88,7 @@
             </div>
 
             <!-- Thống kê -->
-            <div class="card shadow mb-4">
+            <!-- <div class="card shadow mb-4">
                 <div class="card-header">
                     <h5 class="mb-0">Thống kê phản hồi</h5>
                 </div>
@@ -115,7 +115,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Thống kê theo đơn vị -->
             @if(!empty($thongKeTheoDonVi))

@@ -82,116 +82,54 @@
         </div>
 
         {{-- Thống kê tổng quan --}}
-        <div class="row mb-4">
-            <!-- Card Tổng số phiếu -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-primary shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    Tổng phiếu đã nhận
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    {{ number_format($tongQuan['tong_phieu'] ?? 0) }}
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="bi bi-file-earmark-text fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card Phiếu hoàn thành -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-success shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                    Phiếu hoàn thành
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    {{ number_format($tongQuan['phieu_hoan_thanh'] ?? 0) }}
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="bi bi-check2-circle fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card Tỷ lệ hoàn thành -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-info shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tỷ lệ hoàn thành</div>
-                                <div class="row g-0 align-items-center">
-                                    <div class="col-auto">
-                                        <div class="h5 mb-0 me-3 font-weight-bold text-gray-800">{{ $tongQuan['ty_le'] ?? 0 }}%
-                                        </div>
-                                    </div>
-                                    <div class="col">
-                                        <div class="progress progress-sm">
-                                            <div class="progress-bar bg-info" role="progressbar"
-                                                style="width: {{ $tongQuan['ty_le'] ?? 0 }}%"
-                                                aria-valuenow="{{ $tongQuan['ty_le'] ?? 0 }}" aria-valuemin="0"
-                                                aria-valuemax="100"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="bi bi-clipboard-check fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card Thời gian làm bài trung bình -->
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card border-left-warning shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                    Thời gian làm bài (TB)
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    {{ $tongQuan['thoi_gian_tb'] ?? 'N/A' }}
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="bi bi-clock-history fa-2x text-gray-300"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Biểu đồ phản hồi theo ngày --}}
         <div class="card shadow mb-4">
             <div class="card-header">
-                <h6 class="mb-0 fw-bold text-primary">Phản hồi theo ngày</h6>
+                <h6 class="m-0 font-weight-bold text-primary">Tổng quan Kết quả</h6>
             </div>
             <div class="card-body">
-                <div class="chart-responsive">
-                    <canvas id="dailyResponseChart" height="100"></canvas>
+                <div class="row text-center">
+                    <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                        <i class="bi bi-check2-all fs-1 text-success"></i>
+                        <div class="h4 mt-2 font-weight-bold text-gray-800">{{ number_format($tongQuan['phieu_hoan_thanh']) }}
+                        </div>
+                        <div class="text-xs font-weight-bold text-success text-uppercase">Phiếu hoàn thành</div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                        <i class="bi bi-card-checklist fs-1 text-info"></i>
+                        <div class="h4 mt-2 font-weight-bold text-gray-800">{{ $tongQuan['tong_cau_hoi'] }}</div>
+                        <div class="text-xs font-weight-bold text-info text-uppercase">Tổng số câu hỏi</div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                        <i class="bi bi-clock-history fs-1 text-warning"></i>
+                        <div class="h4 mt-2 font-weight-bold text-gray-800">{{ $tongQuan['thoi_gian_tb'] }}</div>
+                        <div class="text-xs font-weight-bold text-warning text-uppercase">Thời gian làm bài (TB)</div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <i class="bi bi-stopwatch fs-1 text-secondary"></i>
+                        <div class="mt-2 font-weight-bold text-gray-800">
+                            <div><small>Nhanh nhất: {{ $tongQuan['thoi_gian_nhanh_nhat'] }}</small></div>
+                            <div><small>Lâu nhất: {{ $tongQuan['thoi_gian_lau_nhat'] }}</small></div>
+                        </div>
+                        <div class="text-xs font-weight-bold text-secondary text-uppercase mt-1">Biên độ thời gian</div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Biểu đồ Xu hướng Phản hồi -->
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">Xu hướng phản hồi theo ngày</h6>
+            </div>
+            <div class="card-body">
+                <div style="height: 300px;"><canvas id="responseTrendChart"></canvas></div>
+            </div>
+        </div>
+
 
         {{-- Thống kê chi tiết từng câu hỏi --}}
         <h3 class="h4 mb-3">Phân tích câu trả lời</h3>
-        @forelse($dotKhaoSat->mauKhaoSat->cauHoi->sortBy('thutu') as $index => $cauHoi)
+        @forelse($dotKhaoSat->mauKhaoSat->cauHoi as $index => $cauHoi)
             <div class="card shadow mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
@@ -233,7 +171,6 @@
                                                     <tr>
                                                         <td>{{ $item->noidung ?? 'Không xác định' }}</td>
                                                         <td class="text-center">{{ $item->so_luong }}</td>
-                                                        <td class="text-center">{{ $item->ty_le }}%</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
@@ -360,94 +297,94 @@
 @endsection
 
 @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                // Biểu đồ phản hồi theo ngày
-                const dailyCtx = document.getElementById('dailyResponseChart')?.getContext('2d');
-                if (dailyCtx) {
-                    const dailyData = @json($thongKeTheoNgay);
-                    new Chart(dailyCtx, {
-                        type: 'line',
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Biểu đồ Xu hướng Phản hồi
+        const trendCtx = document.getElementById('responseTrendChart')?.getContext('2d');
+        if(trendCtx) {
+            const trendData = @json($responseTrendChart);
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: trendData.labels,
+                    datasets: [{
+                        label: 'Số phiếu hoàn thành',
+                        data: trendData.values,
+                        borderColor: '#4e73df', backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                        fill: true, tension: 0.3
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }, plugins: { legend: { display: false } } }
+            });
+        }
+
+        // Biểu đồ cho từng câu hỏi
+        @foreach($dotKhaoSat->mauKhaoSat->cauHoi as $cauHoi)
+            @php $stats = $thongKeCauHoi[$cauHoi->id]; @endphp
+            @if($stats['type'] == 'chart' && !empty($stats['data']) && $stats['data']->isNotEmpty())
+                const ctx{{ $cauHoi->id }} = document.getElementById('chart-cauhoi-{{ $cauHoi->id }}')?.getContext('2d');
+                if (ctx{{ $cauHoi->id }}) {
+                    new Chart(ctx{{ $cauHoi->id }}, {
+                        // SỬ DỤNG BIỂU ĐỒ CỘT NGANG (BAR) ĐỂ DỄ ĐỌC PHƯƠNG ÁN DÀI
+                        type: 'pie',
                         data: {
-                            labels: dailyData.map(item => new Date(item.ngay).toLocaleDateString('vi-VN')),
+                            labels: {!! json_encode($stats['data']->pluck('noidung')) !!},
                             datasets: [{
-                                label: 'Số phiếu hoàn thành',
-                                data: dailyData.map(item => item.so_luong),
-                                borderColor: '#4e73df',
-                                backgroundColor: 'rgba(78, 115, 223, 0.1)',
-                                fill: true,
-                                tension: 0.3
+                                label: 'Số lượt chọn',
+                                data: {!! json_encode($stats['data']->pluck('so_luong')) !!},
+                                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'],
+                                borderRadius: 4
                             }]
                         },
-                        options: { responsive: true, maintainAspectRatio: true }
+                        options: {
+                            indexAxis: 'y', // <-- Chuyển thành biểu đồ cột ngang
+                            responsive: true, maintainAspectRatio: false,
+                            scales: { x: { beginAtZero: true, ticks: { precision: 0 } } },
+                            plugins: { legend: { display: false } }
+                        }
                     });
                 }
+            @endif
+        @endforeach
+    });
+    const summaryModal = new bootstrap.Modal(document.getElementById('summaryModal'));
 
-                // Biểu đồ cho từng câu hỏi
-                @foreach($dotKhaoSat->mauKhaoSat->cauHoi as $cauHoi)
-                    @php $stats = $thongKeCauHoi[$cauHoi->id]; @endphp
-                    @if($stats['type'] == 'chart' && !$stats['data']->isEmpty())
-                        const ctx{{ $cauHoi->id }} = document.getElementById('chart-cauhoi-{{ $cauHoi->id }}')?.getContext('2d');
-                        if (ctx{{ $cauHoi->id }}) {
-                            new Chart(ctx{{ $cauHoi->id }}, {
-                                type: 'pie', // hoặc 'bar'
-                                data: {
-                                    labels: {!! json_encode($stats['data']->pluck('noidung')) !!},
-                                    datasets: [{
-                                        data: {!! json_encode($stats['data']->pluck('so_luong')) !!},
-                                        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796']
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    plugins: { legend: { display: false } }
-                                }
-                            });
-                        }
-                    @endif
-                @endforeach
-            });
-        </script>
+    function requestSummary(questionId, questionContext) {
+        // Reset modal content
+        $('#summaryQuestionContext').text('Câu hỏi: ' + questionContext + '.');
+        $('#summaryContent').html(`
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-3">AI đang phân tích và tóm tắt... Vui lòng chờ trong giây lát.</p>
+            </div>
+        `);
+        summaryModal.show();
 
-        <script>
-        const summaryModal = new bootstrap.Modal(document.getElementById('summaryModal'));
-
-        function requestSummary(questionId, questionContext) {
-            // Reset modal content
-            $('#summaryQuestionContext').text('Câu hỏi: ' + questionContext + '.');
-            $('#summaryContent').html(`
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <p class="mt-3">AI đang phân tích và tóm tắt... Vui lòng chờ trong giây lát.</p>
-                </div>
-            `);
-            summaryModal.show();
-
-            // Gửi request AJAX
-            $.ajax({
-                url: "/admin/bao-cao/{{ $dotKhaoSat->id }}/summarize",
-                method: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    cauhoi_id: questionId
-                },
-                 success: function(response) {
-            $('#summaryContent').html(response.summary);
+        // Gửi request AJAX
+        $.ajax({
+            url: "/admin/bao-cao/{{ $dotKhaoSat->id }}/summarize",
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                cauhoi_id: questionId
             },
-            error: function(xhr) {
-                let errorMessage = "Có lỗi không xác định xảy ra.";
+                success: function(response) {
+        $('#summaryContent').html(response.summary);
+        },
+        error: function(xhr) {
+            let errorMessage = "Có lỗi không xác định xảy ra.";
 
-                if (xhr.status === 503 && xhr.responseJSON && xhr.responseJSON.summary) {
-                    $('#summaryContent').html(xhr.responseJSON.summary);
-                } else {
-                    if (xhr.responseJSON && xhr.responseJSON.summary) {
-                        errorMessage = xhr.responseJSON.summary;
-                    }
-                    $('#summaryContent').html(`<div class="alert alert-danger">${errorMessage}</div>`);
+            if (xhr.status === 503 && xhr.responseJSON && xhr.responseJSON.summary) {
+                $('#summaryContent').html(xhr.responseJSON.summary);
+            } else {
+                if (xhr.responseJSON && xhr.responseJSON.summary) {
+                    errorMessage = xhr.responseJSON.summary;
                 }
+                $('#summaryContent').html(`<div class="alert alert-danger">${errorMessage}</div>`);
             }
-                });
-            }
+        }
+            });
+        }
     </script>
 @endpush

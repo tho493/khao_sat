@@ -81,14 +81,8 @@
                                     </small>
                                 </td>
                                 <td>
-                                    <!-- <div class="progress" style="height: 20px;">
-                                        <div class="progress-bar" role="progressbar" 
-                                             style="width: {{-- $dot->getTyLeHoanThanh()--}}">
-                                            {{ $dot->getTyLeHoanThanh() }}%
-                                        </div>
-                                    </div> -->
                                     <small class="text-muted">
-                                        {{ $dot->phieu_hoan_thanh ?? 0 }} {{-- $dot->phieu_khao_sat_count ?? 0 --}} phiếu
+                                        {{ $dot->phieu_hoan_thanh ?? 0 }} phiếu
                                     </small>
                                 </td>
                                 <td>

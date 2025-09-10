@@ -4,6 +4,10 @@
 
 @section('content')
 <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Báo cáo khảo sát</h1>
+    </div>
+
     <!-- Hàng 1: Các thẻ thống kê tổng quan -->
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-4">

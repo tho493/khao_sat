@@ -113,7 +113,6 @@ class DotKhaoSatController extends Controller
         $thongKe = [
             'tong_phieu' => $dotKhaoSat->phieuKhaoSat()->count(),
             'phieu_hoan_thanh' => $dotKhaoSat->phieuKhaoSat()->where('trangthai', 'completed')->count(),
-            'ty_le' => $dotKhaoSat->getTyLeHoanThanh()
         ];
 
         // Thống kê theo đơn vị (nếu có metadata)

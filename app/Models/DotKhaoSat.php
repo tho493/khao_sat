@@ -27,17 +27,6 @@ class DotKhaoSat extends Model
 
     protected $dates = ['tungay', 'denngay'];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            if (empty($model->{$model->getKeyName()})) {
-                $model->{$model->getKeyName()} = (string) Str::uuid();
-            }
-        });
-    }
-
     public function mauKhaoSat()
     {
         return $this->belongsTo(MauKhaoSat::class, 'mau_khaosat_id');
@@ -75,15 +64,15 @@ class DotKhaoSat extends Model
         return asset('image/logo.png');
     }
 
-    public function getTyLeHoanThanh()
-    {
-        $total = $this->phieuKhaoSat()->count();
-        if ($total == 0)
-            return 0;
+    // public function getTyLeHoanThanh()
+    // {
+    //     $total = $this->phieuKhaoSat()->count();
+    //     if ($total == 0)
+    //         return 0;
 
-        $completed = $this->phieuKhaoSat()->where('trangthai', 'completed')->count();
-        return round(($completed / $total) * 100, 2);
-    }
+    //     $completed = $this->phieuKhaoSat()->where('trangthai', 'completed')->count();
+    //     return round(($completed / $total) * 100, 2);
+    // }
 
     /**
      * Kiểm tra xem đợt khảo sát có phải là bản nháp không.

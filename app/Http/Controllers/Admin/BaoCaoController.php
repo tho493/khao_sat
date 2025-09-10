@@ -82,15 +82,59 @@ class BaoCaoController extends Controller
         ));
     }
 
-    private function getThoiGianTraLoiTrungBinh(DotKhaoSat $dotKhaoSat)
+    public function dotKhaoSat(DotKhaoSat $dotKhaoSat)
     {
-        $avgSeconds = $dotKhaoSat->phieuKhaoSat()
-            ->where('trangthai', 'completed')
-            ->whereNotNull('thoigian_hoanthanh')
-            ->whereNotNull('thoigian_batdau')
-            ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, thoigian_batdau, thoigian_hoanthanh)) as avg_time')
-            ->value('avg_time');
+        $dotKhaoSat->load([
+            'mauKhaoSat.cauHoi' => function ($query) {
+                $query->orderBy('thutu');
+            },
+            'mauKhaoSat.cauHoi.phuongAnTraLoi' => function ($query) {
+                $query->orderBy('thutu');
+            },
+            'phieuKhaoSat' => function ($query) {
+                $query->where('trangthai', 'completed');
+            }
+        ]);
 
+        // Thống kê Tổng quan
+        $completedSurveys = $dotKhaoSat->phieuKhaoSat;
+        $completedCount = $completedSurveys->count();
+
+        $tongQuan = [
+            'phieu_hoan_thanh' => $completedCount,
+            'tong_cau_hoi' => $dotKhaoSat->mauKhaoSat->cauHoi->count(),
+            'thoi_gian_tb' => $this->getAverageCompletionTimeForSurvey($completedSurveys),
+            'thoi_gian_nhanh_nhat' => $this->getExtremeCompletionTime($completedSurveys, 'MIN'),
+            'thoi_gian_lau_nhat' => $this->getExtremeCompletionTime($completedSurveys, 'MAX'),
+        ];
+
+        // --- 2. Dữ liệu Biểu đồ Xu hướng Phản hồi ---
+        $responseTrendChart = $this->getResponseTrendForSurvey($dotKhaoSat);
+
+        // Chi tiết từng Câu hỏi
+        $thongKeCauHoi = [];
+        foreach ($dotKhaoSat->mauKhaoSat->cauHoi as $cauHoi) {
+            $thongKeCauHoi[$cauHoi->id] = $this->thongKeCauHoi($dotKhaoSat->id, $cauHoi);
+        }
+
+        // Danh sách Phiếu đã nộp
+        $danhSachPhieu = $dotKhaoSat->phieuKhaoSat()
+            ->where('trangthai', 'completed')
+            ->orderBy('thoigian_hoanthanh', 'desc')
+            ->paginate(15);
+
+        return view('admin.bao-cao.dot-khao-sat', compact(
+            'dotKhaoSat',
+            'tongQuan',
+            'responseTrendChart',
+            'thongKeCauHoi',
+            'danhSachPhieu'
+        ));
+    }
+
+    // FUNCTION
+    protected function formatSeconds(?int $avgSeconds): string
+    {
         if ($avgSeconds === null || $avgSeconds <= 0) {
             return 'N/A';
         }
@@ -105,40 +149,56 @@ class BaoCaoController extends Controller
         return "{$minutes} phút {$seconds} giây";
     }
 
-
-    public function dotKhaoSat(DotKhaoSat $dotKhaoSat)
+    private function getAverageCompletionTimeForSurvey($completedSurveys)
     {
-        $dotKhaoSat->load(['mauKhaoSat.cauHoi.phuongAnTraLoi']);
+        if ($completedSurveys->isEmpty())
+            return 'N/A';
+        $avgSeconds = $completedSurveys->avg(function ($phieu) {
+            return $phieu->thoigian_batdau ? $phieu->thoigian_batdau->diffInSeconds($phieu->thoigian_hoanthanh) : 0;
+        });
+        return $this->formatSeconds($avgSeconds);
+    }
 
-        // Thống kê tổng quan
-        $tongQuan = [
-            'tong_phieu' => $dotKhaoSat->phieuKhaoSat()->count(),
-            'phieu_hoan_thanh' => $dotKhaoSat->phieuKhaoSat()->where('trangthai', 'completed')->count(),
-            'ty_le' => $dotKhaoSat->getTyLeHoanThanh(),
-            'thoi_gian_tb' => $this->getThoiGianTraLoiTrungBinh($dotKhaoSat)
-        ];
+    private function getExtremeCompletionTime($completedSurveys, $type = 'MIN')
+    {
+        if ($completedSurveys->isEmpty())
+            return 'N/A';
+        $seconds = $completedSurveys->map(function ($phieu) {
+            return $phieu->thoigian_batdau ? $phieu->thoigian_batdau->diffInSeconds($phieu->thoigian_hoanthanh) : null;
+        })->filter();
 
-        // Thống kê từng câu hỏi
-        $thongKeCauHoi = [];
-        foreach ($dotKhaoSat->mauKhaoSat->cauHoi as $cauHoi) {
-            $thongKeCauHoi[$cauHoi->id] = $this->thongKeCauHoi($dotKhaoSat->id, $cauHoi);
+        return $type === 'MIN' ? $this->formatSeconds($seconds->min()) : $this->formatSeconds($seconds->max());
+    }
+
+    private function getResponseTrendForSurvey(DotKhaoSat $dotKhaoSat)
+    {
+        $data = $dotKhaoSat->phieuKhaoSat()
+            ->where('trangthai', 'completed')
+            ->select(DB::raw('DATE(thoigian_hoanthanh) as date'), DB::raw('COUNT(*) as count'))
+            ->groupBy('date')
+            ->orderBy('date', 'ASC')
+            ->pluck('count', 'date');
+
+        $labels = [];
+        $values = [];
+        $period = \Carbon\CarbonPeriod::create($dotKhaoSat->tungay, $dotKhaoSat->denngay);
+        foreach ($period as $date) {
+            $labels[] = $date->format('d/m');
+            $values[] = $data->get($date->toDateString(), 0);
         }
+        return ['labels' => $labels, 'values' => $values];
+    }
 
-        // Thống kê theo ngày
-        $thongKeTheoNgay = $this->getThongKeTheoNgay($dotKhaoSat);
+    private function getThoiGianTraLoiTrungBinh(DotKhaoSat $dotKhaoSat)
+    {
+        $avgSeconds = $dotKhaoSat->phieuKhaoSat()
+            ->where('trangthai', 'completed')
+            ->whereNotNull('thoigian_hoanthanh')
+            ->whereNotNull('thoigian_batdau')
+            ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, thoigian_batdau, thoigian_hoanthanh)) as avg_time')
+            ->value('avg_time');
 
-        // Danh sách phiếu khảo sát (có thể phân trang nếu nhiều)
-        $danhSachPhieu = $dotKhaoSat->phieuKhaoSat()
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
-
-        return view('admin.bao-cao.dot-khao-sat', compact(
-            'dotKhaoSat',
-            'tongQuan',
-            'thongKeCauHoi',
-            'thongKeTheoNgay',
-            'danhSachPhieu',
-        ));
+        return $this->formatSeconds($avgSeconds);
     }
 
     private function thongKeCauHoi($dotKhaoSatId, $cauHoi)
@@ -153,13 +213,11 @@ class BaoCaoController extends Controller
                 return (object) [
                     'noidung' => $item->noidung,
                     'so_luong' => 0,
-                    'ty_le' => 0,
                 ];
             });
             return ['type' => 'chart', 'data' => $data, 'total' => 0];
         }
 
-        // Tạo câu query cơ sở
         $baseQuery = DB::table('phieu_khaosat_chitiet')
             ->where('phieu_khaosat_chitiet.cauhoi_id', $cauHoi->id)
             ->whereIn('phieu_khaosat_id', $completedSurveyIds);
@@ -184,7 +242,6 @@ class BaoCaoController extends Controller
                     return (object) [
                         'noidung' => $phuongAn->noidung,
                         'so_luong' => $soLuong,
-                        'ty_le' => $totalResponses > 0 ? round(($soLuong / $totalResponses) * 100, 2) : 0,
                     ];
                 });
 
@@ -226,7 +283,6 @@ class BaoCaoController extends Controller
                     return (object) [
                         'noidung' => "{$rating} sao",
                         'so_luong' => $soLuong,
-                        'ty_le' => $totalResponses > 0 ? round(($soLuong / $totalResponses) * 100, 2) : 0,
                     ];
                 });
 
@@ -299,14 +355,12 @@ class BaoCaoController extends Controller
      */
     public function summarizeWithAi(Request $request, DotKhaoSat $dotKhaoSat)
     {
-        // Validate đầu vào
         $validated = $request->validate([
             'cauhoi_id' => 'required|exists:cauhoi_khaosat,id',
         ]);
 
         $cauHoi = CauHoiKhaoSat::find($validated['cauhoi_id']);
 
-        // Chỉ tóm tắt câu hỏi dạng text
         if ($cauHoi->loai_cauhoi !== 'text') {
             return response()->json(['summary' => 'Chức năng này chỉ áp dụng cho câu hỏi tự luận.'], 400);
         }
@@ -324,7 +378,6 @@ class BaoCaoController extends Controller
             return response()->json(['summary' => 'Không đủ dữ liệu để tạo tóm tắt (cần ít nhất 3 câu trả lời).'], 400);
         }
 
-        // Ghép các câu trả lời lại
         $fullText = $answers->implode("\n- ");
         $aiService = app(ChatbotAIService::class);
         $summary = $aiService->summarizeText($fullText, $cauHoi->noidung_cauhoi);
@@ -346,16 +399,12 @@ class BaoCaoController extends Controller
         $fileName = 'bao-cao-' . Str::slug($dotKhaoSat->ten_dot) . '-' . date('Ymd');
 
         if ($format == 'excel') {
-            // Sử dụng lớp KhaoSatExport đã tạo
             return Excel::download(new KhaoSatExport($dotKhaoSat), $fileName . '.xlsx');
         }
 
         if ($format == 'pdf') {
-            // Lấy dữ liệu cần thiết cho view PDF
             $tongQuan = [
-                'tong_phieu' => $dotKhaoSat->phieuKhaoSat()->count(),
-                'phieu_hoan_thanh' => $dotKhaoSat->phieuKhaoSat()->where('trangthai', 'completed')->count(),
-                'ty_le' => $dotKhaoSat->getTyLeHoanThanh(),
+                'tong_phieu' => $dotKhaoSat->phieuKhaoSat()->where('trangthai', 'completed')->count(),
                 'thoi_gian_tb' => $this->getThoiGianTraLoiTrungBinh($dotKhaoSat)
             ];
             $thongKeCauHoi = [];
@@ -363,13 +412,10 @@ class BaoCaoController extends Controller
                 $thongKeCauHoi[$cauHoi->id] = $this->thongKeCauHoi($dotKhaoSat->id, $cauHoi);
             }
 
-            // Tải view PDF với dữ liệu
             $pdf = PDF::loadView('admin.bao-cao.pdf', compact('dotKhaoSat', 'tongQuan', 'thongKeCauHoi'));
 
-            // Có thể set khổ giấy và hướng
             $pdf->setPaper('a4', 'portrait');
 
-            // Tải file về
             return $pdf->download($fileName . '.pdf');
         }
 
