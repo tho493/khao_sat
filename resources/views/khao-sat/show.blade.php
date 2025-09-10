@@ -245,10 +245,12 @@
                                                             @break
                 
                                                         @case('number')
-                                                            <input type="number" class="form-input mt-2 w-full  rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
+                                                            <input inputmode="decimal" pattern="[0-9]*" type="text" 
+                                                                class="form-input mt-2 w-full rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
                                                                 name="cau_tra_loi[{{ $cauHoi->id }}]"
                                                                 placeholder="Nhập số..."
-                                                                {{ $isRequired ? 'required' : '' }}>
+                                                                {{ $isRequired ? 'required' : '' }}
+                                                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                                                             @break
                 
                                                     @endswitch
@@ -337,6 +339,7 @@
         const surveyForm = $('#formKhaoSat');
         const submitBtn = $('#submitBtn');
         const storageKey = `survey_progress_{{ $dotKhaoSat->id }}`;
+        const totalQuestions = $('.question-card').length + 2; // +2 cho Mã số và Họ tên
         let debounceTimer;
 
         function updateUI() {
@@ -434,40 +437,31 @@
         }
         
         function updateProgress() {
-            let answeredRequiredCount = 0;
-            const visibleRequiredFields = surveyForm.find('[required]:visible');
+            let answeredQuestions = 0;
+
+            surveyForm.find('input[name="ma_nguoi_traloi"][required]').each(function() {
+                if ($(this).val().trim() !== '') answeredQuestions++;
+            });
+            surveyForm.find('input[name="metadata[hoten]"][required]').each(function() {
+                if ($(this).val().trim() !== '') answeredQuestions++;
+            });
             
-            const requiredNames = {};
-            visibleRequiredFields.each(function() {
-                requiredNames[$(this).attr('name')] = true;
-            });
-            const totalVisibleRequiredCount = Object.keys(requiredNames).length;
-
-            const answeredNames = {};
-            visibleRequiredFields.each(function() {
-                const field = $(this);
-                const name = field.attr('name');
-                if (answeredNames[name]) return;
-
+            $('.question-card').each(function() {
+                const inputs = $(this).find('input[name^="cau_tra_loi"], textarea[name^="cau_tra_loi"]');
                 let isAnswered = false;
-                if (field.is(':radio') || field.is(':checkbox')) {
-                    if ($(`input[name="${name}"]:checked`).length > 0) isAnswered = true;
-                } else {
-                    if (field.val() && field.val().trim() !== '') isAnswered = true;
-                }
-                if (isAnswered) {
-                    answeredNames[name] = true;
-                }
+                inputs.each(function() {
+                    if (($(this).is(':radio') || $(this).is(':checkbox'))) {
+                        if ($(this).is(':checked')) isAnswered = true;
+                    } else {
+                        if ($(this).val().trim() !== '') isAnswered = true;
+                    }
+                });
+                if (isAnswered) answeredQuestions++;
             });
-            answeredRequiredCount = Object.keys(answeredNames).length;
 
-            const progress = totalVisibleRequiredCount > 0 
-                ? Math.round((answeredRequiredCount / totalVisibleRequiredCount) * 100)
-                : 100;
-
+            const progress = totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
             $('#progressBar').css('width', progress + '%').text(progress + '%');
-            $('#answeredCount').text(answeredRequiredCount);
-            $('#totalRequiredCount').text(totalVisibleRequiredCount);
+            $('#answeredCount').text(`${answeredQuestions}/${totalQuestions}`);
         }
 
         function checkAllConditions() {

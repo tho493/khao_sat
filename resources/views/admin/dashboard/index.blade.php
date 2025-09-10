@@ -214,7 +214,8 @@
                                         class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                                         <div>
                                             <div>{{ Str::limit($dot->ten_dot, 45) }}</div>
-                                            <small class="text-muted">Hạn cuối: {{ $dot->denngay->format('d/m/Y') }}</small>
+                                            <small class="text-muted">Hạn cuối:
+                                                {{ \Carbon\Carbon::parse($dot->denngay)->format('d/m/Y') }}</small>
                                         </div>
                                         <span class="badge bg-warning text-dark rounded-pill">Còn
                                             {{ now()->diffInHours($dot->denngay) }} giờ</span>
