@@ -213,6 +213,7 @@ class BaoCaoController extends Controller
                 return (object) [
                     'noidung' => $item->noidung,
                     'so_luong' => 0,
+                    'ty_le' => 0,
                 ];
             });
             return ['type' => 'chart', 'data' => $data, 'total' => 0];
@@ -242,6 +243,7 @@ class BaoCaoController extends Controller
                     return (object) [
                         'noidung' => $phuongAn->noidung,
                         'so_luong' => $soLuong,
+                        'ty_le' => $totalResponses > 0 ? round(($soLuong / $totalResponses) * 100, 2) : 0,
                     ];
                 });
 
@@ -283,6 +285,7 @@ class BaoCaoController extends Controller
                     return (object) [
                         'noidung' => "{$rating} sao",
                         'so_luong' => $soLuong,
+                        'ty_le' => $totalResponses > 0 ? round(($soLuong / $totalResponses) * 100, 2) : 0,
                     ];
                 });
 

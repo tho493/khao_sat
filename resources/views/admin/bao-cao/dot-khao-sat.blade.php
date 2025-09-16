@@ -171,6 +171,7 @@
                                                     <tr>
                                                         <td>{{ $item->noidung ?? 'Không xác định' }}</td>
                                                         <td class="text-center">{{ $item->so_luong }}</td>
+                                                        <td class="text-center">{{ $item->ty_le }}%</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>

@@ -5,7 +5,7 @@
             const splashScreen = document.getElementById('splash-screen');
             const mainContent = document.getElementById('main-content');
             const progressBar = document.getElementById('splash-progress-bar');
-            
+
             if (!splashScreen || !mainContent || !progressBar) {
                 console.error("Splash screen elements not found. Aborting splash screen logic.");
                 if(splashScreen) splashScreen.style.display = 'none';
@@ -50,4 +50,11 @@
         }
 
     document.addEventListener('DOMContentLoaded', initSplashScreen);
+})();
+
+(function(){
+    const progressBar = document.getElementById('progress-bar');
+    if (progressBar) progressBar.style.display = "block";
+    const warningTitle = document.getElementById('warning-title');
+    if (warningTitle) warningTitle.style.display = 'none';
 })();

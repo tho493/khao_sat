@@ -88,6 +88,7 @@
    }
 
    .progress-bar-container {
+       display: none;
        width: 250px;
        height: 8px;
        background-color: #e2e8f0;
@@ -97,6 +98,15 @@
        opacity: 0;
        transform: translateY(20px);
        animation: slideUp 0.8s 0.8s ease-out forwards;
+   }
+
+   #warning-title {
+        font-size: 1rem;
+        color: #eec06a;
+        margin-bottom: 32px;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: slideUp 0.8s 2s ease-out forwards;
    }
 
    .progress-bar-fill {
