@@ -65,11 +65,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::resource('faq', FaqController::class)->except(['show']);
 
     // System Logs
-    Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
+    // Route::get('log', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
     Route::prefix('logs')->name('logs.')->group(function () {
         Route::get('/', [LogController::class, 'index'])->name('index');
         Route::get('/user', [LogController::class, 'userLogs'])->name('user');
-        Route::get('/system', [LogController::class, 'systemLogs'])->name('system');
+        Route::get('/system', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index')->name('system');
         Route::get('/download', [LogController::class, 'download'])->name('download');
         Route::get('/{id}', [LogController::class, 'show'])->name('show');
         Route::delete('/clear', [LogController::class, 'clear'])->name('clear');

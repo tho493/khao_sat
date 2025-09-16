@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Middleware\PreventDoubleSubmissions;
 
 class MauKhaoSatController extends Controller
 {
@@ -120,6 +121,7 @@ class MauKhaoSatController extends Controller
 
     public function update(Request $request, MauKhaoSat $mauKhaoSat)
     {
+        PreventDoubleSubmissions::clearToken('update_thongtin_maukahosat');
         $isLocked = $mauKhaoSat->dotKhaoSat()->where('trangthai', 'active')->exists();
 
         $rules = [
@@ -156,6 +158,7 @@ class MauKhaoSatController extends Controller
      */
     public function destroy(MauKhaoSat $mauKhaoSat)
     {
+        PreventDoubleSubmissions::clearToken('delete_form');
         // Kiểm tra có đợt khảo sát nào đang sử dụng không
         if ($mauKhaoSat->dotKhaoSat()->count() > 0) {
             return back()->with('error', 'Không thể xóa mẫu khảo sát đã được sử dụng trong đợt khảo sát');
@@ -188,6 +191,7 @@ class MauKhaoSatController extends Controller
      */
     public function copy(MauKhaoSat $mauKhaoSat)
     {
+        PreventDoubleSubmissions::clearToken('copy_template');
         DB::beginTransaction();
         $mauKhaoSat->load('cauHoi.phuongAnTraLoi');
         try {
