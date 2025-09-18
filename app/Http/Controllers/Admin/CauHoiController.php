@@ -19,7 +19,6 @@ class CauHoiController extends Controller
             'page' => 'required|integer|min:1',
             'phuong_an' => 'required_if:loai_cauhoi,single_choice,multiple_choice,likert|array|min:2',
             'phuong_an.*' => 'required|string|max:500',
-            // Validation cho các trường điều kiện
             'cau_dieukien_id' => 'nullable|exists:cauhoi_khaosat,id',
             'dieukien_hienthi' => 'nullable|json',
         ]);
@@ -35,7 +34,6 @@ class CauHoiController extends Controller
                 'thutu' => $thutu,
                 'page' => $validated['page'],
                 'trangthai' => 1,
-                // Lưu dữ liệu điều kiện
                 'cau_dieukien_id' => $validated['cau_dieukien_id'] ?? null,
                 'dieukien_hienthi' => $validated['dieukien_hienthi'] ?? null,
             ]);

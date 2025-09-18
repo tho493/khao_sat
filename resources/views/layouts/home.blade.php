@@ -30,7 +30,6 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="{{ asset('css/splash-screen.css') }}">
-
     {{-- CSS for Glassmorphism & Improvements --}}
     <style>
         :root {
@@ -264,6 +263,7 @@
 <body>
     <!-- Splash (overlay) -->
     @include('layouts.splash-screen')
+    <script src="{{ asset('js/splash-screen.js') }}"></script>
 
     <div class="bg-gradient-to-br from-blue-500 to-slate-50 text-slate-800">
         {{-- Main Content Wrapper --}}
@@ -686,8 +686,6 @@ if (isset($dotKhaoSat) && $dotKhaoSat) {
             }
         });
     </script>
-
-<script src="{{ asset('js/splash-screen.js') }}"></script>
 @stack('scripts')
 
 </body >

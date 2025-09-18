@@ -6,8 +6,10 @@
     <link rel="stylesheet" href="{{ asset('css/splash-screen.css') }}">
 @endpush
 
+
 @section('splash-screen')
     @include('layouts.splash-screen')
+    <script src="{{ asset('js/splash-screen.js') }}"></script>
 @endsection
 
 @section('content')
@@ -304,6 +306,4 @@
                 }
             });
         </script>
-
-        <script src="{{ asset('js/splash-screen.js') }}"></script>
     @endpush
