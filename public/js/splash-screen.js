@@ -1,60 +1,31 @@
 (function() {
-        'use strict';
+function initSplashScreen() {
+    const splashScreen = document.getElementById('splash-screen');
+    const mainContent = document.getElementById('main-content');
+    // Progress bar removed
 
-        function initSplashScreen() {
-            const splashScreen = document.getElementById('splash-screen');
-            const mainContent = document.getElementById('main-content');
-            const progressBar = document.getElementById('splash-progress-bar');
+    if (!splashScreen || !mainContent) {
+        console.error("Splash screen elements not found.");
+        if(splashScreen) splashScreen.style.display = 'none';
+        if(mainContent) mainContent.style.visibility = 'visible';
+        return;
+    }
 
-            if (!splashScreen || !mainContent || !progressBar) {
-                console.error("Splash screen elements not found. Aborting splash screen logic.");
-                if(splashScreen) splashScreen.style.display = 'none';
-                if(mainContent) mainContent.style.visibility = 'visible';
-                return;
-            }
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            splashScreen.classList.add('hidden');
+            mainContent.style.visibility = 'visible';
+            
+            setTimeout(function() {
+                splashScreen.remove();
+            }, 400);
 
-            let progress = 0;
-            let progressInterval;
+        }, 1200);
+    });
+}
 
-            function updateProgress() {
-                progress += Math.random() * 5 + 1;
-                
-                if (progress > 95) {
-                    progress = 95;
-                }
-                
-                progressBar.style.width = progress + '%';
-                
-                if (progress >= 95) {
-                    clearInterval(progressInterval);
-                }
-            }
-
-            progressInterval = setInterval(updateProgress, 100);
-
-            window.addEventListener('load', function() {
-                clearInterval(progressInterval);
-                
-                progressBar.style.width = '100%';
-
-                setTimeout(function() {
-                    splashScreen.classList.add('hidden');
-                    mainContent.style.visibility = 'visible';
-                    
-                    setTimeout(function() {
-                        splashScreen.remove();
-                    }, 800);
-
-                }, 400);
-            });
-        }
-
-    document.addEventListener('DOMContentLoaded', initSplashScreen);
-})();
-
-(function(){
-    const progressBar = document.getElementById('progress-bar');
-    if (progressBar) progressBar.style.display = "block";
-    const warningTitle = document.getElementById('warning-title');
-    if (warningTitle) warningTitle.style.display = 'none';
+document.addEventListener('DOMContentLoaded', initSplashScreen);
+// Hide warning if JS is enabled
+const warningTitle = document.getElementById('warning-title');
+if (warningTitle) warningTitle.style.display = 'none';
 })();

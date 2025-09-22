@@ -85,7 +85,6 @@ class DotKhaoSatController extends Controller
             ];
 
             if ($request->hasFile('image')) {
-                // Lưu file vào thư mục 'storage/app/public/survey_images' và lấy về đường dẫn tương đối
                 $path = $request->file('image')->store('survey_images', 'public');
                 $dataToCreate['image_url'] = $path;
             }

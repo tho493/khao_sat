@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
+    
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title> @yield('title', "Trang chủ") - Hệ thống khảo sát trực tuyến </title>
+    <link rel="stylesheet" href="{{ asset('css/splash-screen.css') }}">
 
     <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
 
@@ -16,7 +17,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     {{-- Tailwind CSS & Scripts --}}
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     {{-- Icons --}}
@@ -29,7 +30,6 @@
         rel="stylesheet">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="{{ asset('css/splash-screen.css') }}">
     {{-- CSS for Glassmorphism & Improvements --}}
     <style>
         :root {

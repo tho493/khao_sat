@@ -16,12 +16,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // User Management
-    Route::get('users', [UserManagementController::class, 'index'])->name('users.index');
-    Route::get('users/create', [UserManagementController::class, 'create'])->name('users.create');
-    Route::post('users', [UserManagementController::class, 'store'])->name('users.store');
-    Route::get('users/{tendangnhap}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
-    Route::put('users/{tendangnhap}', [UserManagementController::class, 'update'])->name('users.update')->middleware('prevent.double.submit:update_users');
-    Route::delete('users/{tendangnhap}', [UserManagementController::class, 'destroy'])->name('users.destroy');
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/', [UserManagementController::class, 'index'])->name('index');
+        Route::get('/create', [UserManagementController::class, 'create'])->name('create');
+        Route::post('/', [UserManagementController::class, 'store'])->name('store');
+        Route::get('/{tendangnhap}/edit', [UserManagementController::class, 'edit'])->name('edit');
+        Route::put('/{tendangnhap}', [UserManagementController::class, 'update'])->name('update')->middleware('prevent.double.submit:update_users');
+        Route::delete('/{tendangnhap}', [UserManagementController::class, 'destroy'])->name('destroy');
+    });
 
     // Mẫu khảo sát
     Route::prefix('mau-khao-sat')->name('mau-khao-sat.')->group(function () {
@@ -33,14 +35,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::post('/{mauKhaoSat}/copy', [MauKhaoSatController::class, 'copy'])->name('copy')->middleware('prevent.double.submit:copy_template');
         Route::put('/{mauKhaoSat}', [MauKhaoSatController::class, 'update'])->name('update')->middleware('prevent.double.submit:update_thongtin_maukahosat');
         Route::delete('/{mauKhaoSat}', [MauKhaoSatController::class, 'destroy'])->name('destroy')->middleware('prevent.double.submit:delete_form');
+        Route::post('/{mauKhaoSat}/cau-hoi', [CauHoiController::class, 'store'])->name('cau-hoi.store');
     });
 
     // Câu hỏi
-    Route::post('mau-khao-sat/{mauKhaoSat}/cau-hoi', [CauHoiController::class, 'store'])->name('cau-hoi.store');
-    Route::get('cau-hoi/{cauHoi}', [CauHoiController::class, 'show'])->name('cau-hoi.show');
-    Route::put('cau-hoi/{cauHoi}', [CauHoiController::class, 'update'])->name('cau-hoi.update');
-    Route::delete('cau-hoi/{cauHoi}', [CauHoiController::class, 'destroy'])->name('cau-hoi.destroy');
-    Route::post('cau-hoi/update-order', [CauHoiController::class, 'updateOrder'])->name('cau-hoi.update-order');
+    Route::prefix('cau-hoi')->name('cau-hoi.')->group(function () {
+        Route::get('/{cauHoi}', [CauHoiController::class, 'show'])->name('show');
+        Route::put('/{cauHoi}', [CauHoiController::class, 'update'])->name('update');
+        Route::delete('/{cauHoi}', [CauHoiController::class, 'destroy'])->name('destroy');
+        Route::post('/update-order', [CauHoiController::class, 'updateOrder'])->name('update-order');
+    });
 
 
     // Đợt khảo sát
