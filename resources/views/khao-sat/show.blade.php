@@ -624,12 +624,29 @@
         if (pageNumber < 1 || pageNumber > totalPages) return;
 
         let isValid = true;
+
+        const checkedNames = new Set();
         $(`#survey-page-${currentPage} [required]`).each(function() {
-            if (!this.checkValidity() && pageNumber > currentPage) {
-                isValid = false;
+            const $input = $(this);
+            const inputType = $input.attr('type');
+            const inputName = $input.attr('name');
+
+            if ((inputType === 'radio' || inputType === 'checkbox') && !checkedNames.has(inputName)) {
+                checkedNames.add(inputName);
+                if (
+                    $(`#survey-page-${currentPage} input[name="${inputName}"]:checked`).length === 0 &&
+                    pageNumber > currentPage
+                ) {
+                    isValid = false;
+                    return false;
+                }
+            } else if (inputType !== 'radio' && inputType !== 'checkbox') {
+                if (!this.checkValidity() && pageNumber > currentPage) {
+                    isValid = false;
+                }
             }
         });
-        
+
         if (!isValid) {
             alert('Vui lòng hoàn thành tất cả các câu hỏi bắt buộc trong trang này trước khi tiếp tục.');
             return;

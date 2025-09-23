@@ -49,12 +49,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
     // Đợt khảo sát
     Route::prefix('dot-khao-sat')->name('dot-khao-sat.')->group(function () {
-        Route::resource('/', DotKhaoSatController::class)->parameters(['' => 'dotKhaoSat']);
+        Route::get('/', [DotKhaoSatController::class, 'index'])->name('index');
+        Route::get('/create', [DotKhaoSatController::class, 'create'])->name('create');
         Route::post('/store', [DotKhaoSatController::class, 'store'])->name('store');
-        Route::get('/{dotKhaoSat}/edit', [DotKhaoSatController::class, 'edit'])->name('edit');
         Route::get('/{dotKhaoSat}', [DotKhaoSatController::class, 'show'])->name('show');
+        Route::get('/{dotKhaoSat}/edit', [DotKhaoSatController::class, 'edit'])->name('edit');
+        Route::put('/{dotKhaoSat}', [DotKhaoSatController::class, 'update'])->name('update');
         Route::post('/{dotKhaoSat}/activate', [DotKhaoSatController::class, 'activate'])->name('activate');
         Route::post('/{dotKhaoSat}/close', [DotKhaoSatController::class, 'close'])->name('close');
+        // Route::resource('/', DotKhaoSatController::class)->parameters(['' => 'dotKhaoSat']);
     });
 
     // Báo cáo

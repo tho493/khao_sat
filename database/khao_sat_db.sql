@@ -10,7 +10,7 @@
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
-SET time_zone = "+00:00";
+SET time_zone = "+07:00";
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -198,7 +198,7 @@ CREATE TABLE IF NOT EXISTS `phieu_khaosat_chitiet` (
 CREATE TABLE IF NOT EXISTS `lichsu_thaydoi` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `bang_thaydoi` VARCHAR(50) NOT NULL,
-  `id_banghi` INT(11) NOT NULL,
+  `id_banghi` INT(11),
   `nguoi_thuchien_id` INT(11),
   `hanhdong` ENUM('create', 'update', 'delete', 'publish', 'close') NOT NULL,
   `noidung_cu` JSON,
@@ -594,7 +594,7 @@ INSERT INTO `namhoc` (`namhoc`) VALUES
 ('2025-2026');
 
 
---Import dữ liệu cho bảng `chatbot_qa`
+-- Import dữ liệu cho bảng `chatbot_qa`
 INSERT INTO `chatbot_qa` (`id`, `keywords`, `question`, `answer`, `is_enabled`, `created_at`, `updated_at`) VALUES
 (1, 'bảo mật,an toàn,dữ liệu,cá nhân', 'Thông tin của tôi có được bảo mật không?', 'Chào bạn, chúng tôi cam kết mọi thông tin cá nhân và câu trả lời của bạn đều được <strong>bảo mật tuyệt đối</strong> và chỉ được sử dụng cho mục đích thống kê, nghiên cứu tổng hợp.', 1, '2025-08-24 22:43:59', '2025-09-05 14:42:25'),
 (2, 'hạn,cuối,hạn chót,kết thúc', 'Khi nào là hạn cuối của khảo sát này?', 'Chào bạn, mỗi đợt khảo sát sẽ có thời gian kết thúc riêng. Bạn có thể xem hạn cuối được ghi rõ ở đầu trang khảo sát nhé!', 1, '2025-08-24 22:43:59', NULL),

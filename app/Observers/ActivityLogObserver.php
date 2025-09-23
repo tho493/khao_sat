@@ -15,7 +15,7 @@ class ActivityLogObserver
      * @return void
      */
     public function created(Model $model)
-    {
+    { 
         $this->logActivity($model, 'create');
     }
 
@@ -27,25 +27,7 @@ class ActivityLogObserver
      */
     public function updated(Model $model)
     {
-        // $this->logActivity($model, 'update');
-
-        static $updateCallCount = 0;
-        $updateCallCount++;
-
-        // Ghi lại log chi tiết
-        \Log::info("Observer 'updated' triggered for model: " . get_class($model) .
-            " | ID: " . $model->getKey() .
-            " | Call Count in this request: " . $updateCallCount);
-
-        // In ra những thay đổi
-        \Log::info("Changes detected: " . json_encode($model->getChanges()));
-
-        // Chỉ ghi log vào DB ở lần gọi ĐẦU TIÊN
-        if ($updateCallCount === 1) {
-            $this->logActivity($model, 'update');
-        } else {
-            \Log::warning("DUPLICATE 'updated' event detected. Log to DB skipped.");
-        }
+        $this->logActivity($model, 'update');
     }
 
     /**
@@ -56,8 +38,6 @@ class ActivityLogObserver
      */
     public function deleted(Model $model)
     {
-        // Sử dụng sự kiện "deleting" tốt hơn để lấy được dữ liệu trước khi xóa
-        // nhưng "deleted" cũng hoạt động.
         $this->logActivity($model, 'delete');
     }
 
@@ -88,28 +68,28 @@ class ActivityLogObserver
             return;
         }
 
+        $modelName = class_basename($model);
+
+        $logIdentifierKey = property_exists($model, 'logIdentifier') ? $model->logIdentifier : $model->getKeyName();
+        $recordIdentifier = $model->{$logIdentifierKey};
+
         LichSuThayDoi::create([
-            'bang_thaydoi' => $model->getTable(),
-            'id_banghi' => $model->getKey(),
+            'bang_thaydoi' => $modelName,
+            'id_banghi' => $recordIdentifier,
             'nguoi_thuchien_id' => Auth::user()->id,
             'hanhdong' => $action,
             'noidung_cu' => $oldData,
             'noidung_moi' => $newData,
-            'ghi_chu' => $this->generateLogMessage($model, $action),
+            'ghi_chu' => $this->generateLogMessage($model, $action, $modelName, $logIdentifierKey, $recordIdentifier),
         ]);
     }
 
     /**
      * Tạo một thông điệp log mô tả hành động.
      */
-    protected function generateLogMessage(Model $model, string $action): string
+    protected function generateLogMessage(Model $model, string $action, string $modelName, string $logIdentifierKey, string $recordIdentifier): string
     {
         $userName = Auth::user()->hoten;
-        $modelName = class_basename($model);
-
-        // Sử dụng thuộc tính $logIdentifier nếu có, nếu không thì dùng khóa chính
-        $logIdentifierKey = property_exists($model, 'logIdentifier') ? $model->logIdentifier : $model->getKeyName();
-        $recordIdentifier = $model->{$logIdentifierKey};
 
         switch ($action) {
             case 'create':
