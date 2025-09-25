@@ -6,6 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title> @yield('title', "Trang chủ") - Hệ thống khảo sát trực tuyến </title>
+    <meta name="description" content="Hệ thống khảo sát trực tuyến - Nền tảng khảo sát hiện đại, bảo mật và dễ sử dụng." />
+    <meta name="keywords" content="khảo sát, survey, trực tuyến, online, hệ thống, khảo sát trực tuyến" />
+    <meta name="author" content="Hệ thống khảo sát trực tuyến" />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="@yield('title', 'Trang chủ') - Hệ thống khảo sát trực tuyến" />
+    <meta property="og:description" content="Hệ thống khảo sát trực tuyến - Nền tảng khảo sát hiện đại, bảo mật và dễ sử dụng." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ url()->current() }}" />
+    <meta property="og:image" content="{{ asset('image/logo.png') }}" />
     <link rel="stylesheet" href="{{ asset('css/splash-screen.css') }}">
 
     <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->

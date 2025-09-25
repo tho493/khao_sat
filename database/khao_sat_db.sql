@@ -27,7 +27,7 @@ USE `khao_sat_db`;
 CREATE TABLE IF NOT EXISTS `taikhoan` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `tendangnhap` VARCHAR(50) NOT NULL UNIQUE,
-  `matkhau` VARCHAR(255) NOT NULL, -- Tăng độ dài để hỗ trợ hash mạnh hơn
+  `matkhau` VARCHAR(255) NOT NULL,
   `hoten` VARCHAR(100) NOT NULL,
   `email` VARCHAR(100),
   `sodienthoai` VARCHAR(20),
@@ -126,8 +126,8 @@ CREATE TABLE IF NOT EXISTS `dot_khaosat` (
   `ten_dot` VARCHAR(255) NOT NULL,
   `mau_khaosat_id` INT(11) NOT NULL,
   `namhoc_id` INT(11),
-  `tungay` DATE NOT NULL,
-  `denngay` DATE NOT NULL,
+  `tungay` DATETIME NOT NULL,
+  `denngay` DATETIME NOT NULL,
   `trangthai` ENUM('draft', 'active', 'closed') DEFAULT 'draft',
   `mota` TEXT,
   `image_url` VARCHAR(255),

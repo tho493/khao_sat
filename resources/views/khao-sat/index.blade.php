@@ -72,9 +72,9 @@
                                         <span>
                                             @php
                                                 $now = now();
-                                                $startDate = \Carbon\Carbon::parse($dot->tungay)->startOfDay();
-                                                $endDate = \Carbon\Carbon::parse($dot->denngay)->endOfDay();
-                                                $timeString = 'Từ ' . $startDate->format('d/m/Y') . ' đến ' . $endDate->format('d/m/Y');
+                                                $startDate = $dot->tungay;
+                                                $endDate = $dot->denngay;
+                                                $timeString = 'Từ ' . $startDate . ' đến ' . $endDate;
                                                 $colorClass = 'text-gray-200';
                                             @endphp
                                             @if($dot->isClosed())
@@ -83,46 +83,18 @@
                                                     $colorClass = 'text-gray-400';
                                                 @endphp
                                             @elseif($now->lt($startDate))
-                                                @php
-                                                    $diff = $now->diff($startDate);
-                                                    $timeString = 'Bắt đầu sau ';
-                                                    if ($diff->days > 0) {
-                                                        $timeString .= $diff->format('%a ngày');
-                                                    } elseif ($diff->h > 0) {
-                                                        $timeString .= $diff->format('%h giờ');
-                                                    } else {
-                                                        $timeString .= $diff->format('%i phút');
-                                                    }
-                                                    $colorClass = 'text-cyan-300';
-                                                @endphp
-                                            @elseif($now->gt($endDate))
-                                                @php
-                                                    $timeString = 'Đã kết thúc';
-                                                    $colorClass = 'text-gray-400';
-                                                @endphp
+                                                <span class="font-semibold text-cyan-300">
+                                                    Bắt đầu sau {{ $startDate->diffForHumans(['parts' => 2, 'short' => true]) }}
+                                                </span>
+                                            @elseif($now->between($startDate, $endDate))
+                                                <span class="font-semibold text-yellow-300">
+                                                    Còn lại {{ $endDate->diffForHumans(null, true, true, 2) }}
+                                                </span>
                                             @else
-                                                @php
-                                                    $diff = $now->diff($endDate);
-                                                    $daysLeft = $diff->days;
-                                                    $hoursLeft = $diff->h;
-                                                    if ($daysLeft > 0) {
-                                                        // hiển thị cả ngày và giờ
-                                                        $timeString = "Còn {$daysLeft} ngày {$hoursLeft} giờ";
-                                                        $colorClass = 'text-yellow-300';
-                                                    } elseif ($hoursLeft > 0) {
-                                                        // còn vài giờ
-                                                        $timeString = "Còn {$hoursLeft} giờ";
-                                                        $colorClass = 'text-orange-400';
-                                                    } else {
-                                                        // còn dưới 1 giờ
-                                                        $timeString = "Còn {$diff->i} phút!";
-                                                        $colorClass = 'text-red-400';
-                                                    }
-                                                @endphp
+                                                <span class="font-semibold text-red-400">
+                                                    Hết hạn trong {{ $endDate->diffForHumans(['parts' => 2, 'short' => true]) }}
+                                                </span>
                                             @endif
-                                            <span class="font-semibold {{ $colorClass }}">
-                                                {{ $timeString }}
-                                            </span>
                                         </span>
                                     </div>
                                 </div>

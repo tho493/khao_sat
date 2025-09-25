@@ -86,10 +86,10 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
                                     <input
-                                        type="date"
+                                        type="datetime-local"
                                         name="tungay"
                                         class="form-control @error('tungay') is-invalid @enderror"
-                                        value="{{ $errors->any() ? old('tungay') : ($dotKhaoSat->tungay ? \Illuminate\Support\Carbon::parse($dotKhaoSat->tungay)->toDateString() : '') }}"
+                                        value="{{ old('tungay', isset($dotKhaoSat) ? $dotKhaoSat->tungay->format('Y-m-d\TH:i') : '') }}" 
                                         required
                                     >
                                     @error('tungay')
@@ -100,10 +100,10 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
                                     <input
-                                        type="date"
+                                        type="datetime-local"
                                         name="denngay"
                                         class="form-control @error('denngay') is-invalid @enderror"
-                                        value="{{ $errors->any() ? old('denngay') : ($dotKhaoSat->denngay ? \Illuminate\Support\Carbon::parse($dotKhaoSat->denngay)->toDateString() : '') }}"
+                                        value="{{ old('denngay', isset($dotKhaoSat) ? $dotKhaoSat->denngay->format('Y-m-d\TH:i') : '') }}" 
                                         required
                                     >
                                     @error('denngay')

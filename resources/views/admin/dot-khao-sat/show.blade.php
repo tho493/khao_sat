@@ -34,13 +34,10 @@
                             <tr>
                                 <td><strong>Thời gian:</strong></td>
                                 <td>
-                                    {{ \Carbon\Carbon::parse($dotKhaoSat->tungay)->format('d/m/Y') }} - 
-                                    {{ \Carbon\Carbon::parse($dotKhaoSat->denngay)->format('d/m/Y') }}
-                                    @php
-                                        $daysLeft = now()->diffInDays($dotKhaoSat->denngay, false);
-                                    @endphp
-                                    @if($dotKhaoSat->trangthai == 'active' && $daysLeft >= 0)
-                                        <span class="badge bg-warning ms-2">Còn {{ number_format($daysLeft, 1) }} ngày</span>
+                                {{ $dotKhaoSat->tungay->format('H:i d/m/Y') }} - 
+                                {{ $dotKhaoSat->denngay->format('H:i d/m/Y') }}
+                                    @if($dotKhaoSat->trangthai == 'active')
+                                        <span class="badge bg-warning ms-2">Còn {{ $dotKhaoSat->denngay->diffForHumans(now(), null, true, 2) }}</span>
                                     @endif
                                 </td>
                             </tr>

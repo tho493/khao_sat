@@ -36,6 +36,10 @@ class DotKhaoSat extends Model
     ];
 
     protected $dates = ['tungay', 'denngay'];
+    protected $casts = [
+    'tungay' => 'datetime',
+    'denngay' => 'datetime',
+];
 
     public function mauKhaoSat()
     {
@@ -101,10 +105,7 @@ class DotKhaoSat extends Model
      */
     public function isInActivePeriod(): bool
     {
-        return Carbon::now()->between(
-            $this->tungay->startOfDay(),
-            $this->denngay->endOfDay()
-        );
+        return Carbon::now()->between($this->tungay, $this->denngay);
     }
 
     /**
@@ -123,7 +124,7 @@ class DotKhaoSat extends Model
      */
     public function isExpired(): bool
     {
-        return Carbon::now()->gt($this->denngay->endOfDay());
+        return Carbon::now()->gt($this->denngay);
     }
 
     /**
@@ -133,6 +134,6 @@ class DotKhaoSat extends Model
      */
     public function isUpcoming(): bool
     {
-        return Carbon::now()->lt($this->tungay->startOfDay());
+        return Carbon::now()->lt($this->tungay);
     }
 }

@@ -76,8 +76,8 @@
                                 <td>{{ $dot->mauKhaoSat->ten_mau ?? 'N/A' }}</td>
                                 <td>
                                     <small>
-                                        {{ \Carbon\Carbon::parse($dot->tungay)->format('d/m/Y') }} - 
-                                        {{ \Carbon\Carbon::parse($dot->denngay)->format('d/m/Y') }}
+                                        {{ $dot->tungay }} - 
+                                        {{ $dot->denngay }}
                                     </small>
                                 </td>
                                 <td>

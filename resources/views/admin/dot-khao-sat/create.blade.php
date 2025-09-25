@@ -78,7 +78,7 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control @error('tungay') is-invalid @enderror" 
+                                    <input type="datetime-local" class="form-control @error('tungay') is-invalid @enderror" 
                                            name="tungay" value="{{ old('tungay') }}" required>
                                     @error('tungay')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -86,7 +86,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control @error('denngay') is-invalid @enderror" 
+                                    <input type="datetime-local" class="form-control @error('denngay') is-invalid @enderror" 
                                            name="denngay" value="{{ old('denngay') }}" required>
                                     @error('denngay')
                                         <div class="invalid-feedback">{{ $message }}</div>
