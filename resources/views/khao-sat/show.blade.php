@@ -72,6 +72,15 @@
 @endphp
 
 @section('content')
+    @if(!empty($adminModeWarning))
+        <div class="mb-6" style="position: sticky; top:80px ; z-index: 50;">
+            <div class="glass-effect bg-yellow-100/70 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded shadow flex items-center backdrop-blur-md">
+                <i class="bi bi-exclamation-triangle-fill mr-2"></i>
+                <span>{{ $adminModeWarning }}</span>
+            </div>
+        </div>
+    @endif
+
     <div class="container mx-auto py-12 px-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row gap-8 xl:gap-12">
@@ -91,7 +100,7 @@
                         <h1 class="text-3xl font-extrabold text-slate-800 mb-2">{{ $dotKhaoSat->ten_dot }}</h1>
                         <h3 class="text-xl font-extrabold text-slate-700 mb-2">{{ $dotKhaoSat->mota ? $dotKhaoSat->mota : "Khảo sát này không có mô tả" }}</h3>
                         <p class="text-slate-500">
-                            Hạn cuối: {{ \Carbon\Carbon::parse($dotKhaoSat->denngay)->format('d/m/Y') }}
+                            Hạn cuối: {{ $dotKhaoSat->denngay }}
                         </p>
                     </div>
 

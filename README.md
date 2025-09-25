@@ -173,7 +173,12 @@ Hệ thống sử dụng Google reCAPTCHA v2 để bảo mật.
     ```sh
     php artisan serve
     ```
-3.  Truy cập vào địa chỉ được cung cấp (thường là `http://127.0.0.1:8000`).
+3.  **Chạy lệnh cập nhật trạng thái đợt khảo sát:**(Quan trọng, nó giúp bạn tự động cập nhật trạng thái dựa theo giờ bắt đầu của khảo sát)
+    ```sh
+    php artisan surveys:update-status
+    ```
+    -   Nếu bạn muốn chạy server trên môi trường production, hãy thay `serve` bằng `serve --port=80`.
+4.  **Truy cập vào địa chỉ được cung cấp (thường là `http://127.0.0.1:8000`).**
 
 ---
 

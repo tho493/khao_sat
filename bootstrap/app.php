@@ -23,7 +23,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withSchedule(function (Schedule $schedule) {
-        $schedule->command('surveys:update-status')->daily()->at('00:05');
+        $schedule->command('surveys:update-status')->everyFiveMinutes();
     })
     ->create();
 

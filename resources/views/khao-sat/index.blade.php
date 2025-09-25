@@ -12,10 +12,11 @@
         <div class="mx-auto px-4 relative z-10" style="max-width: 90%;">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-12 md:py-16">
                 <div class="order-2 md:order-1 text-center md:text-left reveal-banner-text">
-                    <h1 class="text-white drop-shadow-lg text-3xl md:text-5xl font-extrabold leading-tight">
-                        HỆ THỐNG KHẢO SÁT TRỰC&nbsp;TUYẾN
+                    <h1
+                        class="text-white drop-shadow-lg text-3xl md:text-5xl font-extrabold leading-tight mb-3 tracking-wider"  style="line-height: 1.3;">
+                        HỆ THỐNG KHẢO SÁT TRỰC TUYẾN
                     </h1>
-                    <p class="text-white/90 text-xl md:text-2xl font-semibold mt-3">
+                    <p class="text-white/90 text-xl md:text-2xl font-semibold">
                         TRƯỜNG ĐẠI HỌC SAO&nbsp;ĐỎ
                     </p>
                 </div>
@@ -71,28 +72,25 @@
                                         <i class="bi bi-hourglass-split me-2"></i>
                                         <span>
                                             @php
-                                                $now = now();
-                                                $startDate = $dot->tungay;
-                                                $endDate = $dot->denngay;
-                                                $timeString = 'Từ ' . $startDate . ' đến ' . $endDate;
-                                                $colorClass = 'text-gray-200';
+        $now = now();
+        $startDate = $dot->tungay;
+        $endDate = $dot->denngay;
                                             @endphp
                                             @if($dot->isClosed())
-                                                @php
-                                                    $timeString = 'Đã kết thúc';
-                                                    $colorClass = 'text-gray-400';
-                                                @endphp
+                                                <span class="font-semibold text-gray-400">
+                                                    Đợt khảo sát này đã kết thúc
+                                                </span>
                                             @elseif($now->lt($startDate))
                                                 <span class="font-semibold text-cyan-300">
-                                                    Bắt đầu sau {{ $startDate->diffForHumans(['parts' => 2, 'short' => true]) }}
+                                                    {{ $startDate->diffForHumans(now(), null, true, 2) }} sẽ bắt đầu
                                                 </span>
                                             @elseif($now->between($startDate, $endDate))
                                                 <span class="font-semibold text-yellow-300">
-                                                    Còn lại {{ $endDate->diffForHumans(null, true, true, 2) }}
+                                                    {{ $endDate->diffForHumans(now(), null, true, 2) }} sẽ kết thúc
                                                 </span>
                                             @else
                                                 <span class="font-semibold text-red-400">
-                                                    Hết hạn trong {{ $endDate->diffForHumans(['parts' => 2, 'short' => true]) }}
+                                                    {{ $endDate->diffForHumans(now(), null, true, 2) }} đã kết thúc
                                                 </span>
                                             @endif
                                         </span>

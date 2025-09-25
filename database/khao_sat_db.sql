@@ -469,28 +469,12 @@ CREATE TRIGGER trg_CapNhatTrangThaiDot
 BEFORE UPDATE ON dot_khaosat
 FOR EACH ROW
 BEGIN
-  -- Tự động chuyển sang active nếu đến ngày
-  IF NEW.trangthai = 'draft' AND CURDATE() >= NEW.tungay THEN
+  IF NEW.trangthai = 'draft' AND NOW() >= NEW.tungay THEN
     SET NEW.trangthai = 'active';
   END IF;
   
-  -- Tự động đóng nếu quá hạn
-  IF NEW.trangthai = 'active' AND CURDATE() > NEW.denngay THEN
+  IF NEW.trangthai = 'active' AND NOW() > NEW.denngay THEN
     SET NEW.trangthai = 'closed';
-  END IF;
-END//
-
-DELIMITER ;
-
-DELIMITER //
-
--- Trigger cập nhật thời gian hoàn thành phiếu
-CREATE TRIGGER trg_CapNhatThoiGianHoanThanh
-BEFORE UPDATE ON phieu_khaosat
-FOR EACH ROW
-BEGIN
-  IF OLD.trangthai = 'draft' AND NEW.trangthai = 'completed' THEN
-    SET NEW.thoigian_hoanthanh = NOW();
   END IF;
 END//
 

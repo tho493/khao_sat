@@ -16,7 +16,7 @@ class KhaoSatController extends Controller
     public function index()
     {
         $dotKhaoSats = DotKhaoSat::with(['mauKhaoSat'])
-            ->whereDate('denngay', '>=', now())
+            ->where('denngay', '>=', now())
             ->get();
 
         return view('khao-sat.index', compact('dotKhaoSats'));
@@ -24,32 +24,49 @@ class KhaoSatController extends Controller
 
     public function show(DotKhaoSat $dotKhaoSat)
     {
-
-        // Check thời gian hoạt động của đợt
-        if (!Auth::check()) { // Nếu admin đang login thì xem bình thường
-            if ($dotKhaoSat->isClosed()) { // Case đóng thủ công
-                return view('khao-sat.closed', [
-                    'dotKhaoSat' => $dotKhaoSat,
-                    'message' => 'Đợt khảo sát này đã được đóng lại sớm hơn dự kiến.',
-                    'reason' => 'closed_manually'
-                ]);
-            }
-
-            if (now()->lt($dotKhaoSat->tungay)) { // Case chưa đến ngày bắt đầu
-                return view('khao-sat.closed', [
-                    'dotKhaoSat' => $dotKhaoSat,
+        $isAdminMode = Auth::check();
+        if (
+            !$isAdminMode &&
+            (
+                $dotKhaoSat->isClosed() ||
+                $dotKhaoSat->isDraft() ||
+                $dotKhaoSat->isUpcoming() ||
+                $dotKhaoSat->isExpired()
+            )
+        ) {
+            $statusMap = [
+                'closed' => [
+                    'message' => 'Đợt khảo sát này đã được đóng lại.',
+                    'reason' => 'closed'
+                ],
+                'draft' => [
+                    'message' => 'Đợt khảo sát này đang trong quá trình chỉnh sửa.',
+                    'reason' => 'draft'
+                ],
+                'upcoming' => [
                     'message' => 'Đợt khảo sát này chưa bắt đầu.',
                     'reason' => 'not_started_yet'
-                ]);
-            }
-
-            if (now()->gt($dotKhaoSat->denngay)) { // Case hết hạn
-                return view('khao-sat.closed', [
-                    'dotKhaoSat' => $dotKhaoSat,
+                ],
+                'expired' => [
                     'message' => 'Đợt khảo sát này đã kết thúc.',
                     'reason' => 'expired'
-                ]);
+                ],
+            ];
+
+            if ($dotKhaoSat->isClosed()) {
+                $status = 'closed';
+            } elseif ($dotKhaoSat->isDraft()) {
+                $status = 'draft';
+            } elseif ($dotKhaoSat->isUpcoming()) {
+                $status = 'upcoming';
+            } else {
+                $status = 'expired';
             }
+
+            return view('khao-sat.closed', array_merge(
+                ['dotKhaoSat' => $dotKhaoSat],
+                $statusMap[$status]
+            ));
         }
 
         $mauKhaoSat = $dotKhaoSat->mauKhaoSat()->with([
@@ -61,32 +78,34 @@ class KhaoSatController extends Controller
             }
         ])->first();
 
-        // GOM NHÓM CÂU HỎI THEO TRANG
-        $questionsByPage = $mauKhaoSat->cauHoi->groupBy('page');
-
         if (!$mauKhaoSat) {
             return redirect()->route('khao-sat.index')
                 ->with('error', 'Không tìm thấy mẫu khảo sát cho đợt này.');
         }
 
-        return view('khao-sat.show', compact('dotKhaoSat', 'mauKhaoSat', 'questionsByPage'));
+        // Gom nhóm câu hỏi theo trang
+        $questionsByPage = $mauKhaoSat->cauHoi->groupBy('page');
+
+        // Nếu là admin (đăng nhập), hiển thị cảnh báo chế độ admin
+        $adminModeWarning = ($isAdminMode) ? 'Bạn đang ở chế độ quản trị viên (Admin) nên có thể xem trước. Khảo sát đang ở chế độ ' . $dotKhaoSat->trangthai : null;
+        return view('khao-sat.show', compact('dotKhaoSat', 'mauKhaoSat', 'questionsByPage', 'adminModeWarning'));
     }
 
     public function store(Request $request, DotKhaoSat $dotKhaoSat)
     {
-        if (Auth::check() && !$dotKhaoSat->isActive()) {
-            return response()->json([
-                'redirect' => route('khao-sat.show', $dotKhaoSat),
-                'success' => false,
-                'message' => 'Quản trị viên đang ở chế độ xem trước và không thể nộp khảo sát.'
-            ], 403);
-        }
-
+        $isAdmin = Auth::check();
         if (!$dotKhaoSat->isActive()) {
-            return response()->json([
+            $message = $isAdmin
+                ? 'Quản trị viên đang ở chế độ xem trước và không thể nộp khảo sát.'
+                : 'Đợt khảo sát không hoạt động';
+            $response = [
                 'success' => false,
-                'message' => 'Đợt khảo sát không hoạt động'
-            ], 403);
+                'message' => $message
+            ];
+            if ($isAdmin) {
+                $response['redirect'] = route('khao-sat.show', $dotKhaoSat);
+            }
+            return response()->json($response, 403);
         }
 
         // Validate reCAPTCHA

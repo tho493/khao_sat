@@ -13,7 +13,7 @@ class DotKhaoSat extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-        protected static function boot()
+    protected static function boot()
     {
         parent::boot();
         static::creating(function ($model) {
@@ -37,9 +37,9 @@ class DotKhaoSat extends Model
 
     protected $dates = ['tungay', 'denngay'];
     protected $casts = [
-    'tungay' => 'datetime',
-    'denngay' => 'datetime',
-];
+        'tungay' => 'datetime',
+        'denngay' => 'datetime',
+    ];
 
     public function mauKhaoSat()
     {
@@ -124,7 +124,7 @@ class DotKhaoSat extends Model
      */
     public function isExpired(): bool
     {
-        return Carbon::now()->gt($this->denngay);
+        return now()->greaterThan($this->denngay);
     }
 
     /**
@@ -134,6 +134,6 @@ class DotKhaoSat extends Model
      */
     public function isUpcoming(): bool
     {
-        return Carbon::now()->lt($this->tungay);
+        return now()->lt($this->tungay);
     }
 }

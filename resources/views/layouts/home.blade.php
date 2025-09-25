@@ -17,7 +17,7 @@
     <meta property="og:image" content="{{ asset('image/logo.png') }}" />
     <link rel="stylesheet" href="{{ asset('css/splash-screen.css') }}">
 
-    <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
+    <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script>
 
     <!-- CSS NProgress -->
     <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css" />
