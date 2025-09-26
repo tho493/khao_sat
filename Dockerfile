@@ -6,13 +6,16 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
     zip \
     unzip \
     netcat-openbsd \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j"$(nproc)" pdo_mysql mbstring exif pcntl bcmath gd zip \
     && pecl install redis \
     && docker-php-ext-enable redis \
     && apt-get clean \
@@ -41,9 +44,9 @@ COPY . .
 RUN composer run-script post-autoload-dump
 
 # Thiết lập quyền sở hữu
-RUN chown -R www:www /var/www
-RUN chmod -R 755 /var/www/storage
-RUN chmod -R 755 /var/www/bootstrap/cache
+RUN chown -R www-data:www-data /var/www
+RUN chmod -R 775 /var/www/storage
+RUN chmod -R 775 /var/www/bootstrap/cache
 
 # Copy PHP-FPM config
 COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
@@ -55,9 +58,6 @@ RUN chmod +x /usr/local/bin/start.sh
 
 # Expose port
 EXPOSE 9000
-
-# Switch to non-root user
-USER www
 
 # Start PHP-FPM
 CMD ["/usr/local/bin/start.sh"]

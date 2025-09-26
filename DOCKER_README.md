@@ -38,10 +38,11 @@ cp .env.docker.example .env
 # - RECAPTCHA_SECRET_KEY
 ```
 
-### 3. Chạy script build
+### 3. Chạy script build và run
 
 ```bash
-docker-compose up -d --build
+docker compose build --no-cache app
+docker compose up -d
 ```
 
 ### 4. Khởi tạo database
