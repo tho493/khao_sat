@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tho493/khao-sat:latest
+    container_name: khao_sat_app
+    restart: unless-stopped
+    working_dir: /var/www
+    env_file:
+      - .env
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - khao_sat_network
+    depends_on:
+      - db
+      - redis
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY:-}
+      - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY:-}
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=khao_sat_db
+      - DB_USERNAME=khao_sat_user
+      - DB_PASSWORD=khao_sat_password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_CLIENT=phpredis
+      - REDIS_PASSWORD=null
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+      - QUEUE_CONNECTION=redis
+
+  nginx:
+    image: nginx:alpine
+    container_name: khao_sat_nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+    networks:
+      - khao_sat_network
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    container_name: khao_sat_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: khao_sat_db
+      MYSQL_USER: khao_sat_user
+      MYSQL_PASSWORD: khao_sat_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/khao_sat_db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - khao_sat_network
+
+  redis:
+    image: redis:alpine
+    container_name: khao_sat_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - khao_sat_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: khao_sat_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: khao_sat_user
+      PMA_PASSWORD: khao_sat_password
+    ports:
+      - "8081:80"
+    networks:
+      - khao_sat_network
+    depends_on:
+      - db
+
+volumes:
+  db_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  khao_sat_network:
+    driver: bridge

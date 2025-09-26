@@ -18,7 +18,7 @@ class Recaptcha implements Rule
     {
         // Gửi request đến Google để xác thực
         $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
-            'secret' => env('RECAPTCHA_SECRET_KEY'),
+            'secret' => config('services.recaptcha.secret_key'),
             'response' => $value,
             'remoteip' => request()->ip(),
         ]);

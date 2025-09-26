@@ -27,7 +27,16 @@
 
 ## 🛠️ Hướng dẫn Cài đặt & Triển khai
 
-### 1. Yêu cầu hệ thống
+Bạn có thể cài đặt hệ thống theo **2 cách**:
+
+-   **Cách truyền thống (thủ công) với PHP/Composer**
+-   **Cách sử dụng Docker (khuyên dùng cho môi trường production hoặc muốn setup nhanh)**
+
+---
+
+### 🚩 **A. Cài đặt truyền thống (PHP/Composer)**
+
+#### 1. Yêu cầu hệ thống
 
 -   **Git**
 -   **Web Server:** Apache/Nginx (XAMPP, Laragon, WAMP được hỗ trợ)
@@ -35,7 +44,7 @@
 -   **Composer:** `2.x` trở lên
 -   **Database:** MySQL hoặc MariaDB
 
-### 2. Cấu hình môi trường PHP
+#### 2. Cấu hình môi trường PHP
 
 Trước khi cài đặt, bạn cần đảm bảo môi trường PHP đã được cấu hình đúng.
 
@@ -87,7 +96,7 @@ Trước khi cài đặt, bạn cần đảm bảo môi trường PHP đã đư�
 4.  **Khởi động lại Web Server:**
     Sau khi lưu file `php.ini`, hãy **khởi động lại Apache** trong XAMPP/Laragon/WAMP để áp dụng các thay đổi.
 
-### 3. Cài đặt Project
+#### 3. Cài đặt Project
 
 1.  **Clone repository:**
 
@@ -132,7 +141,7 @@ Trước khi cài đặt, bạn cần đảm bảo môi trường PHP đã đư�
         ```
         -   Tài khoản mặc định: `tho493` / `tho493`
 
-### 4. Cấu hình Google reCAPTCHA (Bắt buộc)
+#### 4. Cấu hình Google reCAPTCHA (Bắt buộc)
 
 Hệ thống sử dụng Google reCAPTCHA v2 để bảo mật.
 
@@ -151,7 +160,7 @@ Hệ thống sử dụng Google reCAPTCHA v2 để bảo mật.
     RECAPTCHA_SECRET_KEY=YOUR_SECRET_KEY_HERE
     ```
 
-### 5. Cấu hình Google AI (Chatbot)
+#### 5. Cấu hình Google AI (Chatbot)
 
 1.  **Đăng ký website:**
     -   Truy cập [Google AI Studio](https://aistudio.google.com/apikey).
@@ -162,7 +171,7 @@ Hệ thống sử dụng Google reCAPTCHA v2 để bảo mật.
     GEMINI_API_KEY="YOUR_GEMINI_API_KEY_HERE"
     ```
 
-### 6. Khởi chạy ứng dụng
+#### 6. Khởi chạy ứng dụng
 
 1.  **Dọn dẹp cache và link storage (quan trọng):**
     ```sh
@@ -173,14 +182,51 @@ Hệ thống sử dụng Google reCAPTCHA v2 để bảo mật.
     ```sh
     php artisan serve
     ```
-3.  **Chạy lệnh cập nhật trạng thái đợt khảo sát:**(Quan trọng, nó giúp bạn tự động cập nhật trạng thái dựa theo giờ bắt đầu của khảo sát)
+3.  **Chạy lệnh cập nhật trạng thái đợt khảo sát:** (Quan trọng, nó giúp bạn tự động cập nhật trạng thái dựa theo giờ bắt đầu của khảo sát)
     ```sh
-    php artisan surveys:update-status
+    php artisan schedule:work
     ```
     -   Nếu bạn muốn chạy server trên môi trường production, hãy thay `serve` bằng `serve --port=80`.
 4.  **Truy cập vào địa chỉ được cung cấp (thường là `http://127.0.0.1:8000`).**
 
 ---
+
+### 🚩 **B. Cài đặt bằng Docker (Nhanh & Đơn giản)**
+
+#### 1. Yêu cầu hệ thống
+
+-   **Docker** và **Docker Compose** (tải tại [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/))
+-   Tối thiểu 4GB RAM, 10GB dung lượng trống
+
+#### 2. Cách cài đặt
+
+Bạn có thể cài đặt theo 2 cách:
+
+-   **Cách 1: Build từ source**
+
+    -   Xem hướng dẫn chi tiết trong file `DOCKER_README.md` đi kèm repo để biết cách clone, build, cấu hình môi trường, khởi tạo database và chạy ứng dụng.
+    -   Một số lệnh phổ biến:
+        -   `docker-compose up -d --build` — Khởi động và build containers
+        -   `docker-compose exec app php artisan migrate` — Chạy migrations
+        -   `docker-compose logs -f` — Xem logs real-time
+        -   `docker-compose down` — Dừng toàn bộ dịch vụ
+
+-   **Cách 2: Sử dụng image có sẵn**
+
+        -   Bạn có thể pull image đã build sẵn từ Docker Hub:
+            ```sh
+            docker pull tho493/khao-sat:latest
+            ```
+        -   Sau đó khởi chạy các image cần thiết:
+            ```sh
+
+            ```
+
+    > **Lưu ý:** Bạn nên chỉnh sửa file `.env` (hoặc `env.docker.example`) trước khi chạy lần đầu để cấu hình các API key và thông tin kết nối database.
+
+#### 3. Tham khảo thêm
+
+-   Để biết chi tiết về backup, restore, production, SSL, monitoring... hãy đọc file `DOCKER_README.md` trong repo.
 
 ## 👨‍💻 Thông tin liên hệ
 

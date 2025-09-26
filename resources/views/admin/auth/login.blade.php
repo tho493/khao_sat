@@ -164,7 +164,7 @@
                         </div>
                         
                         <div class="mb-4 d-flex justify-content-center">
-                            <div class="g-recaptcha" data-theme="dark" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div>
+                            <div class="g-recaptcha" data-theme="dark" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
                         </div>
 
                         <button type="submit" class="btn btn-login" id="loginBtn">
