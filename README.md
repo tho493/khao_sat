@@ -134,8 +134,8 @@ Trước khi cài đặt, bạn cần đảm bảo môi trường PHP đã đư�
 5.  **Import & Seed Database:**
 
     -   Tạo một database rỗng với tên bạn đã khai báo trong `.env` (ví dụ: `khao_sat_db`).
-    -   Import file `khao_sat_db.sql` được cung cấp vào database vừa tạo.
-    -   Chạy seeder để tạo tài khoản admin mặc định:
+    -   Import file [`khao_sat_db.sql`](./database/khao_sat_db.sql) được cung cấp vào database vừa tạo.
+    -   Chạy seeder để tạo tài khoản admin mặc định (option):
         ```sh
         php artisan db:seed --class=DatabaseSeeder
         ```
@@ -213,20 +213,63 @@ Bạn có thể cài đặt theo 2 cách:
 
 -   **Cách 2: Sử dụng image có sẵn**
 
-        -   Bạn có thể pull image đã build sẵn từ Docker Hub:
-            ```sh
-            docker pull tho493/khao-sat:latest
-            ```
-        -   Sau đó khởi chạy các image cần thiết:
-            ```sh
+    -   Bạn có thể pull image đã build sẵn từ Docker Hub:
+        ```sh
+        docker pull tho493/khao-sat:latest
+        ```
+    -   Copy file [`.env.docker.example`](.env.docker.example) thành `.env` và chỉnh sửa lại `GEMINI_API_KEY`, `RECAPTCHA_SITE_KEY`, `RECAPTCHA_SECRET_KEY`, `APP_URL` .
 
-            ```
+    -   Sau đó khởi chạy các image cần thiết:
 
-    > **Lưu ý:** Bạn nên chỉnh sửa file `.env` (hoặc `env.docker.example`) trước khi chạy lần đầu để cấu hình các API key và thông tin kết nối database.
+        ```sh
+        docker network create khao_sat_network
+        docker volume create db_data
+        docker volume create redis_data
+
+        docker run -d --name khao_sat_db --network khao_sat_network \
+            -e MYSQL_DATABASE=khao_sat_db \
+            -e MYSQL_USER=khao_sat_user \
+            -e MYSQL_PASSWORD=khao_sat_password \
+            -e MYSQL_ROOT_PASSWORD=root_password \
+            -v db_data:/var/lib/mysql \
+            -v $(pwd)/database/khao_sat_db.sql:/docker-entrypoint-initdb.d/init.sql \
+            mysql:8.0
+
+        docker run -d --name khao_sat_redis --network khao_sat_network \
+            -v redis_data:/data \
+            -p 6379:6379 \
+            redis:alpine
+
+        docker run -d --name khao_sat_app --network khao_sat_network \
+            --env-file .env \
+            -v $(pwd):/var/www \
+            -v $(pwd)/docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini \
+            tho493/khao-sat:latest
+
+        docker run -d --name khao_sat_nginx --network khao_sat_network \
+            -v $(pwd):/var/www \
+            -v $(pwd)/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf \
+            -v $(pwd)/docker/nginx/ssl:/etc/nginx/ssl \
+            -p 8080:80 \
+            --depends-on khao_sat_app \
+            nginx:alpine
+
+        docker run -d --name khao_sat_phpmyadmin --network khao_sat_network \
+            -e PMA_HOST=db \
+            -e PMA_PORT=3306 \
+            -e PMA_USER=khao_sat_user \
+            -e PMA_PASSWORD=khao_sat_password \
+            -p 8081:80 \
+            --depends-on khao_sat_db \
+            phpmyadmin/phpmyadmin
+        ```
+
+    > **Lưu ý:** Bạn cần chỉnh sửa file `.env` (hoặc `env.docker.example`) trước khi chạy lần đầu để cấu hình các API key và thông tin kết nối database.
+    > Bạn hãy đổi port 8080 và 8081 sang port khác nếu bạn đã có dịch vụ chạy trên port 8080 hoặc 8081.
 
 #### 3. Tham khảo thêm
 
--   Để biết chi tiết về backup, restore, production, SSL, monitoring... hãy đọc file `DOCKER_README.md` trong repo.
+-   Để biết chi tiết về backup, restore, production, SSL, monitoring... hãy đọc file [`DOCKER_README.md`](./DOCKER_README.md) trong repo.
 
 ## 👨‍💻 Thông tin liên hệ
 

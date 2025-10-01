@@ -47,6 +47,23 @@ php artisan config:cache || true
 php artisan route:cache || true
 php artisan view:cache || true
 
-php-fpm
+# Start PHP-FPM and Laravel scheduler concurrently
+echo "[start] Launching PHP-FPM and scheduler (php artisan schedule:work)"
 
+# Run PHP-FPM in background
+php-fpm &
+PHP_FPM_PID=$!
 
+# Run Laravel scheduler worker in background
+php artisan schedule:work --verbose --no-interaction &
+SCHEDULER_PID=$!
+
+# Forward termination signals to child processes
+trap 'echo "[start] Shutting down..."; kill -TERM ${PHP_FPM_PID} ${SCHEDULER_PID} 2>/dev/null; wait' SIGINT SIGTERM
+
+# Wait for any process to exit, then exit with that status
+wait -n ${PHP_FPM_PID} ${SCHEDULER_PID}
+EXIT_CODE=$?
+
+echo "[start] One of the processes exited with code ${EXIT_CODE}. Exiting."
+exit ${EXIT_CODE}

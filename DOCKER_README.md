@@ -60,8 +60,8 @@ docker-compose exec app php artisan db:seed
 
 ## Truy cập ứng dụng
 
--   **Ứng dụng chính**: http://localhost
--   **phpMyAdmin**: http://localhost:8080
+-   **Ứng dụng chính**: http://localhost:8080
+-   **phpMyAdmin**: http://localhost:8081
     -   Username: `khao_sat_user`
     -   Password: `khao_sat_password`
 -   **Database**: localhost:3306

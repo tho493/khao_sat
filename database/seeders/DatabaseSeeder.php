@@ -12,14 +12,13 @@ class DatabaseSeeder extends Seeder
     {
         // Tạo tài khoản admin nếu database trống
         User::firstOrCreate([
-            'tendangnhap' => 'tho493',
-            'matkhau' => md5('tho493'),
+            'tendangnhap' => 'admin',
+            'matkhau' => md5('123456'),
             'hoten' => 'Administrator',
-            'email' => 'tho493@admin.com'
+            'email' => 'admin@admin.com'
         ]);
 
         // Tạo năm học
-        NamHoc::create(['namhoc' => '2025-2026']);
         NamHoc::create(['namhoc' => '2026-2027']);
         NamHoc::create(['namhoc' => '2027-2028']);
         NamHoc::create(['namhoc' => '2028-2029']);
