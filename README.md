@@ -264,8 +264,7 @@ Bạn có thể cài đặt theo 2 cách:
             phpmyadmin/phpmyadmin
         ```
 
-    > **Lưu ý:** Bạn cần chỉnh sửa file `.env` (hoặc `env.docker.example`) trước khi chạy lần đầu để cấu hình các API key và thông tin kết nối database.
-    > Bạn hãy đổi port 8080 và 8081 sang port khác nếu bạn đã có dịch vụ chạy trên port 8080 hoặc 8081.
+    > **Lưu ý:** Bạn cần chỉnh sửa file `.env` (hoặc `env.docker.example`) trước khi chạy lần đầu để cấu hình các API key và thông tin kết nối database. Bạn hãy đổi port 8080 và 8081 sang port khác nếu bạn đã có dịch vụ chạy trên port 8080 hoặc 8081.
 
 #### 3. Tham khảo thêm
 
