@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title> @yield('title', "Trang chủ") - Hệ thống khảo sát trực tuyến </title>
-    <meta name="description" content="Hệ thống khảo sát trực tuyến - Nền tảng khảo sát hiện đại, bảo mật và dễ sử dụng." />
+    <meta name="description"
+        content="Hệ thống khảo sát trực tuyến - Nền tảng khảo sát hiện đại, bảo mật và dễ sử dụng." />
     <meta name="keywords" content="khảo sát, survey, trực tuyến, online, hệ thống, khảo sát trực tuyến" />
     <meta name="author" content="Hệ thống khảo sát trực tuyến" />
     <meta name="robots" content="index, follow" />
     <meta property="og:title" content="@yield('title', 'Trang chủ') - Hệ thống khảo sát trực tuyến" />
-    <meta property="og:description" content="Hệ thống khảo sát trực tuyến - Nền tảng khảo sát hiện đại, bảo mật và dễ sử dụng." />
+    <meta property="og:description"
+        content="Hệ thống khảo sát trực tuyến - Nền tảng khảo sát hiện đại, bảo mật và dễ sử dụng." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="{{ url()->current() }}" />
     <meta property="og:image" content="{{ asset('image/logo.png') }}" />
     <link rel="stylesheet" href="{{ asset('css/splash-screen.css') }}">
 
-    <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script>
+    <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
+
+    {{-- CSS for Glassmorphism & Improvements --}}
+    <link rel="stylesheet" href={{ asset("css/home.css") }}>
 
     <!-- CSS NProgress -->
     <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css" />
@@ -39,233 +44,6 @@
         rel="stylesheet">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    {{-- CSS for Glassmorphism & Improvements --}}
-    <style>
-        :root {
-            --primary-color: #2a76c9;
-            --secondary-color: #1f66b3;
-        }
-
-        body {
-            font-family: 'Be Vietnam Pro', sans-serif;
-            background-color: #e8f1fe;
-            /* background-image: linear-gradient(to top right, #1f66b3, #2a76c9, #6aa8f7); */
-        }
-
-        #nprogress .bar {
-            background: #FF2D20 !important;
-            height: 3px !important;
-        }
-
-        #nprogress .peg {
-            box-shadow: 0 0 10px #FF2D20, 0 0 5px #FF2D20 !important;
-        }
-
-        #nprogress .spinner-icon {
-            border-top-color: #FF2D20 !important;
-            border-left-color: #FF2D20 !important;
-        }
-
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 1rem;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        header.sticky-header {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            padding: 0.5rem 0;
-            background-color: #1f66b3;
-            transition: background-color 0.4s ease-in-out, box-shadow 0.4s ease-in-out, backdrop-filter 0.4s ease-in-out;
-        }
-
-        header.sticky-header.scrolled {
-            background-color: rgba(31, 102, 179, 0.35);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .background-shapes {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: -1;
-        }
-
-        .shape {
-            position: absolute;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
-        }
-
-        .shape1 {
-            width: 400px;
-            height: 400px;
-            top: -150px;
-            left: -100px;
-        }
-
-        .shape2 {
-            width: 300px;
-            height: 300px;
-            bottom: -100px;
-            right: -50px;
-        }
-
-        footer {
-            background-color: #ffffff;
-        }
-
-        /* Chatbot */
-        .chatbot-toggler {
-            position: fixed;
-            bottom: 15px;
-            right: 75px;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color, #6366f1));
-            color: white;
-            border-radius: 50%;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            cursor: pointer;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-            z-index: 1000;
-        }
-
-        .chatbot-toggler:hover {
-            transform: scale(1.1) rotate(15deg);
-            box-shadow: 0 12px 30px rgba(79, 70, 229, 0.4);
-        }
-
-        .chatbot-container {
-            position: fixed;
-            bottom: 110px;
-            right: 35px;
-            width: 380px;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 1rem;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-            overflow: hidden;
-            transform: scale(0.9) translateY(20px);
-            opacity: 0;
-            pointer-events: none;
-            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-            z-index: 1000;
-        }
-
-        .chatbot-container.show {
-            transform: scale(1) translateY(0);
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .chatbot-header {
-            background: rgba(255, 255, 255, 0.3);
-            color: var(--text-dark);
-            padding: 1rem;
-            text-align: center;
-            font-weight: 600;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .chatbot-header h2 {
-            font-size: 1.1rem;
-            margin: 0;
-        }
-
-        .chatbox {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 1.25rem;
-        }
-
-        .chat {
-            display: flex;
-            margin-bottom: 1rem;
-        }
-
-        .chat p {
-            font-size: 0.9rem;
-            padding: 10px 15px;
-            border-radius: 12px;
-            word-wrap: break-word;
-            max-width: 85%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .chat.incoming p {
-            background: #ffffff;
-            color: var(--text-dark);
-            border-radius: 12px 12px 12px 0;
-        }
-
-        .chat.outgoing {
-            justify-content: flex-end;
-        }
-
-        .chat.outgoing p {
-            background: var(--primary-color);
-            color: white;
-            border-radius: 12px 12px 0 12px;
-        }
-
-        .chat-input {
-            display: flex;
-            gap: 10px;
-            padding: 1rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .chat-input textarea {
-            flex-grow: 1;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 10px 15px;
-            resize: none;
-            font-size: 0.9rem;
-            max-height: 100px;
-            border-color: rgba(0, 0, 0, 0.1);
-            background: rgba(255, 255, 255, 0.5);
-        }
-
-        .chat-input textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-        }
-
-        .chat-input button {
-            border: none;
-            background: none;
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            cursor: pointer;
-            align-self: flex-end;
-            padding-bottom: 5px;
-        }
-    </style>
     @stack('styles')
 </head>
 
@@ -411,6 +189,7 @@
     <script src="https://unpkg.com/scrollreveal"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
+    <script src="https://unpkg.com/scrollreveal"></script>
     <script>
         NProgress.start();
 
@@ -423,9 +202,8 @@
             $(document).on('ajaxStart', () => NProgress.start());
             $(document).on('ajaxStop', () => NProgress.done());
         }
-    </script>
-    
-    <script> // nút lướt lên đầu
+        
+        // nút lướt lên đầu
         const backToTopButton = document.getElementById('back-to-top');
         if (backToTopButton) {
             window.addEventListener('scroll', () => {
@@ -440,8 +218,7 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         }
-    </script>
-    <script>
+
         const header = document.querySelector('header.sticky-header');
         if (header) {
             window.addEventListener('scroll', () => {
@@ -452,9 +229,7 @@
                 }
             });
         }
-    </script>
-    <script src="https://unpkg.com/scrollreveal"></script>
-    <script>
+
         document.addEventListener('DOMContentLoaded', function () {
             const sr = ScrollReveal({
                 origin: 'bottom',    // Xuất hiện từ phía dưới
@@ -477,9 +252,7 @@
             // Hiệu ứng cho các card khảo sát (xuất hiện lần lượt)
             sr.reveal('.reveal-survey-card', { interval: 100 });
         });
-    </script>
 
-    <script>
         $(document).ready(function () {
             const chatbotToggler = $('.chatbot-toggler');
             const chatbotContainer = $('.chatbot-container');
@@ -503,10 +276,10 @@
             const generateResponse = (userMessage) => {
                 const surveyForm = $('#formKhaoSat');
                 @php
-$surveyIdForJs = null;
-if (isset($dotKhaoSat) && $dotKhaoSat) {
-    $surveyIdForJs = $dotKhaoSat->id;
-}
+                    $surveyIdForJs = null;
+                    if (isset($dotKhaoSat) && $dotKhaoSat) {
+                        $surveyIdForJs = $dotKhaoSat->id;
+                    }
                 @endphp
                 const surveyId = surveyForm.length ? "{{ $surveyIdForJs }}" : null;
                 const requestData = {
@@ -545,7 +318,6 @@ if (isset($dotKhaoSat) && $dotKhaoSat) {
                 });
             }
 
-            // Sửa lỗi: Gắn sự kiện click cho nút gửi
             sendChatBtn.on('click', function (e) {
                 e.preventDefault();
                 const userMessage = chatInput.val().trim();
@@ -695,8 +467,9 @@ if (isset($dotKhaoSat) && $dotKhaoSat) {
             }
         });
     </script>
-@stack('scripts')
 
-</body >
+    @stack('scripts')
 
-</html >
+</body>
+
+</html>

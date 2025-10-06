@@ -562,10 +562,27 @@
                 // Điền phương án trả lời
                 const phuongAnContainer = $('#danhSachPhuongAn');
                 phuongAnContainer.html('');
-                togglePhuongAnContainer();
-                if (cauHoi.phuong_an_tra_loi && cauHoi.phuong_an_tra_loi.length > 0) {
-                    const isLikert = cauHoi.loai_cauhoi === 'likert';
-                    cauHoi.phuong_an_tra_loi.sort((a,b) => a.thutu - b.thutu).forEach(pa => addPhuongAn(pa.noidung, isLikert));
+                const loaiHienTai = $('#loaiCauHoi').val();
+                const container = $('#phuongAnContainer');
+                $('#danhSachPhuongAn').empty();
+                if (['single_choice','multiple_choice','likert'].includes(loaiHienTai)) {
+                    container.show();
+                    if (cauHoi.phuong_an_tra_loi && cauHoi.phuong_an_tra_loi.length > 0) {
+                        const isLikert = loaiHienTai === 'likert';
+                        cauHoi.phuong_an_tra_loi
+                            .sort((a,b) => a.thutu - b.thutu)
+                            .forEach(pa => addPhuongAn(pa.noidung, isLikert));
+                    } else {
+                        if (loaiHienTai === 'likert') {
+                            const likertOptions = ['Rất không hài lòng', 'Không hài lòng', 'Bình thường', 'Hài lòng', 'Rất hài lòng'];
+                            likertOptions.forEach(option => addPhuongAn(option, true));
+                        } else {
+                            addPhuongAn();
+                            addPhuongAn();
+                        }
+                    }
+                } else {
+                    container.hide();
                 }
 
                 if (cauHoi.cau_dieukien_id && cauHoi.dieukien_hienthi) {

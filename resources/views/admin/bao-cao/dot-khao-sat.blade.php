@@ -62,8 +62,8 @@
                     <span class="mx-2">|</span>
                     <span class="fw-semibold">Thời gian:</span>
                     <span class="fw-bold">
-                        {{ \Carbon\Carbon::parse($dotKhaoSat->tungay)->format('d/m/Y') }} -
-                        {{ \Carbon\Carbon::parse($dotKhaoSat->denngay)->format('d/m/Y') }}
+                        {{ $dotKhaoSat->tungay }} -
+                        {{ $dotKhaoSat->denngay }}
                     </span>
                 </p>
             </div>

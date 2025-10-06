@@ -175,6 +175,7 @@ Hệ thống sử dụng Google reCAPTCHA v2 để bảo mật.
 
 1.  **Dọn dẹp cache và link storage (quan trọng):**
     ```sh
+    php artisan migrate
     php artisan optimize:clear
     php artisan storage:link
     ```
