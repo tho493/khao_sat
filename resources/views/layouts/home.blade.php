@@ -120,7 +120,7 @@
                             </div>
                             <div>
                                 <h4 class="font-extrabold text-xl">Trường Đại học Sao Đỏ</h4>
-                                <p class="text-white/80 text-sm">Chất lượng - Hợp tác - Phát triển</p>
+                                <p class="text-white/80 text-sm">Chất lượng toàn diện - Hợp tác sâu rộng - Phát triển bền vững</p>
                             </div>
                         </div>
                         <p class="text-white/70 text-sm mb-6">
@@ -153,7 +153,11 @@
                             </p>
                             <p class="flex items-start">
                                 <i class="bi bi-telephone-fill mr-3 mt-1 flex-shrink-0"></i>
-                                <span>(0220) 3882 402</span>
+                                <span>Điện thoại: (0220) 3882 402</span>
+                            </p>
+                            <p class="flex items-start">
+                                <i class="bi bi-printer-fill mr-3 mt-1 flex-shrink-0"></i>
+                                <span>Fax: (0220) 3882 921</span>
                             </p>
                             <p class="flex items-start">
                                 <i class="bi bi-globe2 mr-3 mt-1 flex-shrink-0"></i>
@@ -276,10 +280,10 @@
             const generateResponse = (userMessage) => {
                 const surveyForm = $('#formKhaoSat');
                 @php
-                    $surveyIdForJs = null;
-                    if (isset($dotKhaoSat) && $dotKhaoSat) {
-                        $surveyIdForJs = $dotKhaoSat->id;
-                    }
+$surveyIdForJs = null;
+if (isset($dotKhaoSat) && $dotKhaoSat) {
+    $surveyIdForJs = $dotKhaoSat->id;
+}
                 @endphp
                 const surveyId = surveyForm.length ? "{{ $surveyIdForJs }}" : null;
                 const requestData = {

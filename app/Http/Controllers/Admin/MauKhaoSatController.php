@@ -93,23 +93,26 @@ class MauKhaoSatController extends Controller
      */
     public function edit(MauKhaoSat $mauKhaoSat)
     {
-        $mauKhaoSat->load(['cauHoi.phuongAnTraLoi']);
-        $isLocked = $mauKhaoSat->dotKhaoSat->where('trangthai', 'active')->isNotEmpty();
+        $mauKhaoSat->load(['cauHoi', 'dotKhaoSat']);
+        $isLocked = $mauKhaoSat->dotKhaoSat()->where('trangthai', 'active')->exists();
+
         $allQuestions = $mauKhaoSat->cauHoi()->orderBy('thutu')->get();
 
-        // Lấy danh sách các câu hỏi có thể làm điều kiện cha
         $conditionalQuestions = $allQuestions->whereIn('loai_cauhoi', ['single_choice', 'likert', 'rating']);
-
-        // TẠO MỘT MAP TỪ ID -> NỘI DUNG CÂU HỎI
         $questionContentMap = $allQuestions->pluck('noidung_cauhoi', 'id');
 
-        return view('admin.mau-khao-sat.edit', compact('mauKhaoSat', 'isLocked', 'conditionalQuestions', 'questionContentMap'));
+        return view('admin.mau-khao-sat.edit', compact(
+            'mauKhaoSat',
+            'isLocked',
+            'conditionalQuestions',
+            'questionContentMap'
+        ));
     }
 
     public function getQuestionsJson(MauKhaoSat $mauKhaoSat)
     {
         $questions = $mauKhaoSat->cauHoi()
-            ->with('phuongAnTraLoi')
+            ->with(['phuongAnTraLoi' => fn($q) => $q->orderBy('thutu')])
             ->orderBy('thutu')
             ->get();
         return response()->json($questions);

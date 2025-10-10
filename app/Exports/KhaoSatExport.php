@@ -16,6 +16,8 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
     protected $dotKhaoSat;
     protected $cauHoiHeaders = [];
     protected $cauHoiCollection;
+    protected $personalInfoQuestions;
+    protected $nonPersonalQuestions;
 
     public function __construct(DotKhaoSat $dotKhaoSat)
     {
@@ -30,9 +32,17 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
             }
         ]);
 
-        // Tạo mảng header cho các câu hỏi
-        $this->cauHoiCollection = $this->dotKhaoSat->mauKhaoSat->cauHoi;
-        foreach ($this->cauHoiCollection as $index => $cauHoi) {
+        // Phân nhóm câu hỏi và tạo header
+        $allQuestions = $this->dotKhaoSat->mauKhaoSat->cauHoi;
+        $this->personalInfoQuestions = $allQuestions->where('is_personal_info', true)->values();
+        $this->nonPersonalQuestions = $allQuestions->where('is_personal_info', false)->values();
+
+        // Header cho câu hỏi thông tin cá nhân (đặt lên trước)
+        foreach ($this->personalInfoQuestions as $cauHoi) {
+            $this->cauHoiHeaders[] = '[TT cá nhân] ' . $cauHoi->noidung_cauhoi;
+        }
+        // Header cho các câu hỏi còn lại
+        foreach ($this->nonPersonalQuestions as $index => $cauHoi) {
             $this->cauHoiHeaders[] = "Câu " . ($index + 1) . ": " . $cauHoi->noidung_cauhoi;
         }
     }
@@ -43,7 +53,7 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
     public function collection()
     {
         // Trả về collection các phiếu khảo sát đã hoàn thành
-        return $this->dotKhaoSat->phieuKhaoSat;
+        return $this->dotKhaoSat->phieuKhaoSat()->get();
     }
 
     /**
@@ -54,10 +64,7 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
         // Ghép các header cố định với header câu hỏi
         return array_merge([
             'ID Phiếu',
-            'Mã người trả lời',
-            'Họ tên',
-            'Đơn vị',
-            'Email',
+            'Thời gian bắt đầu',
             'Thời gian hoàn thành',
         ], $this->cauHoiHeaders);
     }
@@ -72,49 +79,91 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
         $answersByQuestionId = $phieu->chiTiet->groupBy('cauhoi_id');
         $rowAnswers = [];
 
-        // Lặp qua danh sách câu hỏi CỐ ĐỊNH để đảm bảo các cột luôn đúng thứ tự
-        foreach ($this->cauHoiCollection as $cauHoi) {
-            $cellValue = ''; // Giá trị mặc định cho ô
-
-            // Lấy ra các câu trả lời cho câu hỏi hiện tại
-            $answersForThisQuestion = $answersByQuestionId->get($cauHoi->id);
-
-            if ($answersForThisQuestion) {
-                if ($cauHoi->loai_cauhoi === 'multiple_choice') {
-                    // --- PHẦN SỬA LỖI ---
-                    // Nếu là câu hỏi chọn nhiều, lấy nội dung của từng phương án và nối lại
-                    $cellValue = $answersForThisQuestion
-                        ->map(fn($answer) => $answer->phuongAn->noidung ?? '')
-                        ->implode('; '); // Nối các câu trả lời bằng dấu '; '
-                } else {
-                    // Với các loại câu hỏi khác, chỉ có 1 câu trả lời
-                    $firstAnswer = $answersForThisQuestion->first();
-                    if ($firstAnswer) {
-                        if ($firstAnswer->phuongan_id) {
-                            $cellValue = $firstAnswer->phuongAn->noidung ?? '';
-                        } elseif ($firstAnswer->giatri_text) {
-                            $cellValue = $firstAnswer->giatri_text;
-                        } elseif ($firstAnswer->giatri_number !== null) {
-                            $cellValue = $firstAnswer->giatri_number;
-                        } elseif ($firstAnswer->giatri_date) {
-                            $cellValue = $firstAnswer->giatri_date;
-                        }
-                    }
-                }
-            }
-
-            $rowAnswers[] = $cellValue;
+        // Điền câu trả lời cho nhóm TT cá nhân trước
+        foreach ($this->personalInfoQuestions as $cauHoi) {
+            $rowAnswers[] = $this->mapAnswerForQuestionWithCdtLookup($answersByQuestionId, $cauHoi);
+        }
+        // Sau đó là các câu hỏi còn lại
+        foreach ($this->nonPersonalQuestions as $cauHoi) {
+            $rowAnswers[] = $this->mapAnswerForQuestionWithCdtLookup($answersByQuestionId, $cauHoi);
         }
 
         // Ghép thông tin phiếu với các câu trả lời
         return array_merge([
             $phieu->id,
-            $phieu->ma_nguoi_traloi,
-            $phieu->metadata['hoten'] ?? '',
-            $phieu->metadata['donvi'] ?? '',
-            $phieu->metadata['email'] ?? '',
+            $phieu->thoigian_batdau ? $phieu->thoigian_batdau->format('d/m/Y H:i') : '',
             $phieu->thoigian_hoanthanh ? $phieu->thoigian_hoanthanh->format('d/m/Y H:i') : '',
         ], $rowAnswers);
+    }
+
+    /**
+     * Trả về giá trị hiển thị cho từng câu hỏi, riêng 'select_ctdt' thì lấy mã -> tên
+     */
+    private function mapAnswerForQuestionWithCdtLookup($answersByQuestionId, $cauHoi)
+    {
+        $cellValue = '';
+        $answersForThisQuestion = $answersByQuestionId->get($cauHoi->id);
+
+        // Nếu câu hỏi là 'select_ctdt' thì lấy giá trị mã và tra tên từ bảng ctdt
+        if ($cauHoi->loai_cauhoi === 'select_ctdt') {
+            if ($answersForThisQuestion && $answersForThisQuestion->count() > 0) {
+                // giá trị mã nằm ở giatri_text hoặc giatri_number
+                $firstAnswer = $answersForThisQuestion->first();
+                $ma = $firstAnswer->giatri_text ?? $firstAnswer->giatri_number ?? null;
+                if ($ma) {
+                    // Tìm trong bảng ctdt
+                    $ten = \App\Models\Ctdt::where('mactdt', $ma)->value('tenctdt');
+                    $cellValue = $ten ?: $ma;
+                } else {
+                    $cellValue = '';
+                }
+            }
+        } else if ($answersForThisQuestion && $answersForThisQuestion->count() > 0) {
+            if ($cauHoi->loai_cauhoi === 'multiple_choice') {
+                $cellValue = $answersForThisQuestion
+                    ->map(fn($answer) => $answer->phuongAn->noidung ?? '')
+                    ->filter()
+                    ->implode('; ');
+            } else {
+                $firstAnswer = $answersForThisQuestion->first();
+                if ($firstAnswer->phuongan_id) {
+                    $cellValue = $firstAnswer->phuongAn->noidung ?? '';
+                } elseif (!empty($firstAnswer->giatri_text)) {
+                    $cellValue = $firstAnswer->giatri_text;
+                } elseif (!is_null($firstAnswer->giatri_number)) {
+                    $cellValue = (string) $firstAnswer->giatri_number;
+                } elseif (!empty($firstAnswer->giatri_date)) {
+                    $cellValue = (string) $firstAnswer->giatri_date;
+                }
+            }
+        }
+        return $cellValue;
+    }
+
+    private function mapAnswerForQuestion($answersByQuestionId, $cauHoi)
+    {
+        $cellValue = '';
+        $answersForThisQuestion = $answersByQuestionId->get($cauHoi->id);
+        if ($answersForThisQuestion && $answersForThisQuestion->count() > 0) {
+            if ($cauHoi->loai_cauhoi === 'multiple_choice') {
+                $cellValue = $answersForThisQuestion
+                    ->map(fn($answer) => $answer->phuongAn->noidung ?? '')
+                    ->filter()
+                    ->implode('; ');
+            } else {
+                $firstAnswer = $answersForThisQuestion->first();
+                if ($firstAnswer->phuongan_id) {
+                    $cellValue = $firstAnswer->phuongAn->noidung ?? '';
+                } elseif (!empty($firstAnswer->giatri_text)) {
+                    $cellValue = $firstAnswer->giatri_text;
+                } elseif (!is_null($firstAnswer->giatri_number)) {
+                    $cellValue = (string) $firstAnswer->giatri_number;
+                } elseif (!empty($firstAnswer->giatri_date)) {
+                    $cellValue = (string) $firstAnswer->giatri_date;
+                }
+            }
+        }
+        return $cellValue;
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DotKhaoSat;
 use App\Models\PhieuKhaoSat;
 use App\Models\PhieuKhaoSatChiTiet;
+use App\Models\Ctdt;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\CauHoiKhaoSat;
@@ -83,12 +84,18 @@ class KhaoSatController extends Controller
                 ->with('error', 'Không tìm thấy mẫu khảo sát cho đợt này.');
         }
 
-        // Gom nhóm câu hỏi theo trang
-        $questionsByPage = $mauKhaoSat->cauHoi->groupBy('page');
+        // Phân loại câu hỏi: thông tin cá nhân và câu hỏi thường, rồi gom nhóm theo trang
+        $personalInfoQuestions = $mauKhaoSat->cauHoi->where('is_personal_info', true)->values();
+        $questionsByPage = $mauKhaoSat->cauHoi
+            ->where('is_personal_info', false)
+            ->groupBy('page');
+
+        // Danh sách CTDT cho kiểu select_ctdt
+        $ctdtList = Ctdt::orderBy('tenctdt', 'asc')->get(['mactdt', 'tenctdt']);
 
         // Nếu là admin (đăng nhập), hiển thị cảnh báo chế độ admin
         $adminModeWarning = ($isAdminMode) ? 'Bạn đang ở chế độ quản trị viên (Admin) nên có thể xem trước. Khảo sát đang ở chế độ ' . $dotKhaoSat->trangthai : null;
-        return view('khao-sat.show', compact('dotKhaoSat', 'mauKhaoSat', 'questionsByPage', 'adminModeWarning'));
+        return view('khao-sat.show', compact('dotKhaoSat', 'mauKhaoSat', 'questionsByPage', 'personalInfoQuestions', 'ctdtList', 'adminModeWarning'));
     }
 
     public function store(Request $request, DotKhaoSat $dotKhaoSat)
@@ -176,6 +183,11 @@ class KhaoSatController extends Controller
 
                     case 'date':
                         $data['giatri_date'] = $traLoi;
+                        PhieuKhaoSatChiTiet::create($data);
+                        break;
+
+                    case 'select_ctdt':
+                        $data['giatri_text'] = $traLoi;
                         PhieuKhaoSatChiTiet::create($data);
                         break;
 

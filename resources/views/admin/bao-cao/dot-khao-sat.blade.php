@@ -204,7 +204,11 @@
                                 </div>
                             </div>
                         @else
-                            <p class="text-muted text-center mb-0">Không có dữ liệu phù hợp để hiển thị cho loại câu hỏi này.</p>
+                            @if($cauHoi->loai_cauhoi === 'select_ctdt')
+                                <p class="text-muted text-center mb-0">Không có dữ liệu CTĐT để hiển thị.</p>
+                            @else
+                                <p class="text-muted text-center mb-0">Không có dữ liệu phù hợp để hiển thị cho loại câu hỏi này.</p>
+                            @endif
                         @endif
                     @else
                         <p class="text-muted text-center mb-0">Chưa có dữ liệu cho câu hỏi này.</p>
@@ -229,9 +233,11 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th scope="col">Mã người trả lời</th>
-                                <th scope="col">Họ tên</th>
-                                <th scope="col">Đơn vị</th>
+                                @if(isset($personalInfoQuestions) && $personalInfoQuestions->count())
+                                    @foreach($personalInfoQuestions as $q)
+                                        <th scope="col">{{ $q->noidung_cauhoi }}</th>
+                                    @endforeach
+                                @endif
                                 <th scope="col">Thời gian làm bài</th>
                                 <!-- <th scope="col">Thao tác</th> -->
                             </tr>
@@ -239,9 +245,11 @@
                         <tbody>
                             @forelse($danhSachPhieu as $phieu)
                                 <tr>
-                                    <td>{{ $phieu->ma_nguoi_traloi }}</td>
-                                    <td>{{ $phieu->metadata['hoten'] ?? 'N/A' }}</td>
-                                    <td>{{ $phieu->metadata['donvi'] ?? 'N/A' }}</td>
+                                    @if(isset($personalInfoQuestions) && $personalInfoQuestions->count())
+                                        @foreach($personalInfoQuestions as $q)
+                                            <td>{{ $personalInfoAnswers[$phieu->id][$q->id] ?? 'N/A' }}</td>
+                                        @endforeach
+                                    @endif
                                     <td>
                                         {{ $phieu->thoigian_batdau ? $phieu->thoigian_batdau->format('d/m/Y H:i') : 'N/A' }} - {{ $phieu->thoigian_hoanthanh ? $phieu->thoigian_hoanthanh->format('d/m/Y H:i') : 'N/A' }}
                                     </td>
@@ -253,7 +261,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center">Chưa có phiếu nào được hoàn thành.</td>
+                                    <td colspan="{{ (isset($personalInfoQuestions) ? $personalInfoQuestions->count() : 0) + 1 }}" class="text-center">Chưa có phiếu nào được hoàn thành.</td>
                                 </tr>
                             @endforelse
                         </tbody>

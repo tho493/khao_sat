@@ -120,15 +120,58 @@ class BaoCaoController extends Controller
         // Danh sách Phiếu đã nộp
         $danhSachPhieu = $dotKhaoSat->phieuKhaoSat()
             ->where('trangthai', 'completed')
+            ->with(['chiTiet.phuongAn'])
             ->orderBy('thoigian_hoanthanh', 'desc')
             ->paginate(15);
+
+        // Câu hỏi thông tin cá nhân của mẫu khảo sát này
+        $personalInfoQuestions = $dotKhaoSat->mauKhaoSat->cauHoi->where('is_personal_info', true)->values();
+
+        // Trích xuất câu trả lời thông tin cá nhân theo từng phiếu, chuẩn hóa dạng chuỗi để hiển thị
+        $personalInfoAnswers = [];
+        $personalQuestionIds = $personalInfoQuestions->pluck('id')->all();
+        foreach ($danhSachPhieu as $phieu) {
+            $answersByQuestionId = $phieu->chiTiet->groupBy('cauhoi_id');
+            foreach ($personalInfoQuestions as $q) {
+                $display = '';
+                $answers = $answersByQuestionId->get($q->id);
+                if ($answers && $answers->count() > 0) {
+                    if ($q->loai_cauhoi === 'multiple_choice') {
+                        $display = $answers->map(function ($ans) {
+                            return $ans->phuongAn->noidung ?? '';
+                        })->filter()->implode('; ');
+                    } elseif ($q->loai_cauhoi === 'select_ctdt') {
+                        $first = $answers->first();
+                        $ma = $first->giatri_text ?? $first->giatri_number ?? null;
+                        if ($ma !== null) {
+                            $ten = \App\Models\Ctdt::where('mactdt', $ma)->value('tenctdt');
+                            $display = $ten ?: (string) $ma;
+                        }
+                    } else {
+                        $first = $answers->first();
+                        if ($first->phuongan_id) {
+                            $display = $first->phuongAn->noidung ?? '';
+                        } elseif (!empty($first->giatri_text)) {
+                            $display = $first->giatri_text;
+                        } elseif (!is_null($first->giatri_number)) {
+                            $display = (string) $first->giatri_number;
+                        } elseif (!empty($first->giatri_date)) {
+                            $display = (string) $first->giatri_date;
+                        }
+                    }
+                }
+                $personalInfoAnswers[$phieu->id][$q->id] = $display !== '' ? $display : 'N/A';
+            }
+        }
 
         return view('admin.bao-cao.dot-khao-sat', compact(
             'dotKhaoSat',
             'tongQuan',
             'responseTrendChart',
             'thongKeCauHoi',
-            'danhSachPhieu'
+            'danhSachPhieu',
+            'personalInfoQuestions',
+            'personalInfoAnswers'
         ));
     }
 
@@ -295,6 +338,40 @@ class BaoCaoController extends Controller
                     'total' => $totalResponses,
                 ];
 
+            case 'select_ctdt':
+                $rawCounts = (clone $baseQuery)
+                    ->select(
+                        DB::raw('COALESCE(NULLIF(TRIM(giatri_text), ""), giatri_number) as ma_ctdt'),
+                        DB::raw('COUNT(id) as so_luong')
+                    )
+                    ->where(function ($q) {
+                        $q->whereNotNull('giatri_text')->where('giatri_text', '!=', '');
+                    })
+                    ->orWhereNotNull('giatri_number')
+                    ->groupBy('ma_ctdt')
+                    ->pluck('so_luong', 'ma_ctdt');
+
+                $totalResponses = $rawCounts->sum();
+
+                // Lấy tên CTĐT theo mã
+                $codes = $rawCounts->keys()->filter()->values();
+                $codeToName = \App\Models\Ctdt::whereIn('mactdt', $codes)->pluck('tenctdt', 'mactdt');
+
+                $data = $rawCounts->map(function ($count, $code) use ($codeToName, $totalResponses) {
+                    $ten = $codeToName->get((string) $code);
+                    return (object) [
+                        'noidung' => $ten ?: (string) $code,
+                        'so_luong' => $count,
+                        'ty_le' => $totalResponses > 0 ? round(($count / $totalResponses) * 100, 2) : 0,
+                    ];
+                })->values();
+
+                return [
+                    'type' => 'chart',
+                    'data' => $data,
+                    'total' => $totalResponses,
+                ];
+
             case 'number':
                 $stats = (clone $baseQuery)
                     ->whereNotNull('giatri_number')
@@ -314,7 +391,35 @@ class BaoCaoController extends Controller
 
             default:
                 $totalResponses = (clone $baseQuery)->count();
-                $data = (clone $baseQuery)->limit(20)->get();
+                $rows = (clone $baseQuery)->limit(20)->get();
+                // Chuẩn hóa dữ liệu dạng chuỗi để hiển thị trong PDF
+                $data = $rows->map(function ($row) use ($cauHoi) {
+                    // Trường hợp chọn CTĐT: ánh xạ mã -> tên
+                    if ($cauHoi->loai_cauhoi === 'select_ctdt') {
+                        $ma = $row->giatri_text ?? $row->giatri_number ?? null;
+                        if ($ma !== null) {
+                            $ten = \App\Models\Ctdt::where('mactdt', $ma)->value('tenctdt');
+                            return $ten ?: (string) $ma;
+                        }
+                    }
+
+                    // Nếu là phương án lựa chọn, tìm nội dung phương án
+                    if (!is_null($row->phuongan_id)) {
+                        $noiDung = optional($cauHoi->phuongAnTraLoi->firstWhere('id', $row->phuongan_id))->noidung;
+                        if (!empty($noiDung))
+                            return $noiDung;
+                    }
+
+                    if (!empty($row->giatri_text))
+                        return $row->giatri_text;
+                    if (!is_null($row->giatri_number))
+                        return (string) $row->giatri_number;
+                    if (!empty($row->giatri_date))
+                        return (string) $row->giatri_date;
+
+                    return '';
+                })->filter();
+
                 return ['type' => 'list', 'data' => $data, 'total' => $totalResponses];
         }
     }

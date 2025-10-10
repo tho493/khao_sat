@@ -13,6 +13,7 @@ class CauHoiKhaoSat extends Model
         'noidung_cauhoi',
         'loai_cauhoi',
         'batbuoc',
+        'is_personal_info',
         'thutu',
         'page',
         'cau_dieukien_id',
@@ -23,6 +24,7 @@ class CauHoiKhaoSat extends Model
     protected $casts = [
         'dieukien_hienthi' => 'array',
         'batbuoc' => 'boolean',
+        'is_personal_info' => 'boolean',
         'trangthai' => 'boolean'
     ];
 

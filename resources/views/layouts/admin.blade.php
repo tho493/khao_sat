@@ -61,6 +61,18 @@
                         <i class="bi bi-graph-up-arrow"></i> <span>Báo cáo</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('admin.ctdt.index') }}"
+                        class="{{ request()->routeIs('admin.ctdt.*') ? 'active' : '' }}" title="Chương trình đào tạo">
+                        <i class="bi bi-journal-bookmark-fill"></i> <span>Chương trình ĐT</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.nam-hoc.index') }}"
+                        class="{{ request()->routeIs('admin.nam-hoc.*') ? 'active' : '' }}" title="Năm học">
+                        <i class="bi bi-calendar-range-fill"></i> <span>Năm học</span>
+                    </a>
+                </li>
                 <hr class="my-3" style="border-color: rgba(0,0,0,0.07);">
                 <li>
                     <a href="{{ route('admin.users.index') }}"

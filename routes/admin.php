@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\DotKhaoSatController;
 use App\Http\Controllers\Admin\BaoCaoController;
 use App\Http\Controllers\Admin\CauHoiController;
 use App\Http\Controllers\Admin\FaqController;
+use App\Http\Controllers\Admin\NamHocController;
+use App\Http\Controllers\Admin\CtdtController;
 
 
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
@@ -67,6 +69,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/export/{dotKhaoSat}', [BaoCaoController::class, 'export'])->name('export');
         Route::post('{dotKhaoSat}/summarize', [BaoCaoController::class, 'summarizeWithAi'])->name('summarize');
     });
+
+    // Năm học
+    Route::resource('nam-hoc', NamHocController::class)->except(['show', 'create', 'edit']);
+
+    // Chương trình đào tạo
+    Route::resource('ctdt', CtdtController::class)->except(['show', 'create', 'edit'])->parameters([
+        'ctdt' => 'mactdt' // parameter name là mactdt
+    ]);
 
     // FAQ
     Route::resource('faq', FaqController::class)->except(['show']);

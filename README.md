@@ -271,7 +271,9 @@ Bạn có thể cài đặt theo 2 cách:
 
 -   Để biết chi tiết về backup, restore, production, SSL, monitoring... hãy đọc file [`DOCKER_README.md`](./DOCKER_README.md) trong repo.
 
-## 👨‍💻 Thông tin liên hệ
+> **Lưu ý:** Nếu gặp lỗi 500 khi truy cập ứng dụng, hãy thử khởi động lại MySQL và chạy lệnh `php artisan optimize:clear` trong để xóa cache Laravel.
+
+## Thông tin liên hệ
 
 -   **Sinh viên thực hiện:** Nguyễn Chí Thọ
 -   **Email:** [chitho040903@gmail.com](mailto:chitho040903@gmail.com)
@@ -279,7 +281,7 @@ Bạn có thể cài đặt theo 2 cách:
 
 ---
 
-## 📝 Notes
+## Notes
 
 -   **Giáo viên hướng dẫn:** ThS. Phạm Văn Kiên
 -   Phần mềm là sản phẩm thử nghiệm.

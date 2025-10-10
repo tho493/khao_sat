@@ -58,9 +58,42 @@ CREATE TABLE IF NOT EXISTS `namhoc` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `namhoc` VARCHAR(10) NOT NULL UNIQUE,
   `trangthai` TINYINT(1) DEFAULT 1,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_namhoc` (`namhoc`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Bảng chương trình đào tạo
+CREATE TABLE IF NOT EXISTS `ctdt` (
+  `mactdt` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
+  `tenctdt` varchar(255) COLLATE utf8_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Dumping data for table `ctdt`
+--
+
+INSERT INTO `ctdt` (`mactdt`, `tenctdt`) VALUES
+('7140234', 'Sư phạm Tiếng Trung Quốc'),
+('7140246', 'Sư phạm công nghệ'),
+('7220201', 'Ngôn ngữ Anh'),
+('7220204', 'Ngôn ngữ Trung Quốc'),
+('7310630', 'Việt Nam học (Hướng dẫn Du lịch)'),
+('7340101', 'Quản trị kinh doanh'),
+('7340301', 'Kế toán'),
+('7380101', 'Luật'),
+('7480201', 'Công nghệ thông tin'),
+('7510201', 'Kỹ thuật điều khiển và tự động hóa'),
+('7510205', 'Công nghệ kỹ thuật ô tô'),
+('7510301', 'Công nghệ kỹ thuật điện, điện tử'),
+('7510302', 'Công nghệ kỹ thuật điện tử, viễn thông'),
+('7520114', 'Kỹ thuật cơ điện tử'),
+('7520216', 'Công nghệ kỹ thuật cơ khí'),
+('7540101', 'Công nghệ thực phẩm'),
+('7540106', 'Đảm bảo chất lượng và an toàn thực phẩm'),
+('7540204', 'Công nghệ dệt, may'),
+('7810103', 'Quản trị dịch vụ du lịch và lữ hành');
 
 -- --------------------------------------------------------
 -- CÁC BẢNG QUẢN LÝ KHẢO SÁT
@@ -88,8 +121,9 @@ CREATE TABLE IF NOT EXISTS `cauhoi_khaosat` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `mau_khaosat_id` INT(11) NOT NULL,
   `noidung_cauhoi` TEXT NOT NULL,
-  `loai_cauhoi` ENUM('single_choice', 'multiple_choice', 'text', 'likert', 'rating', 'date', 'number') DEFAULT 'single_choice',
+  `loai_cauhoi` ENUM('single_choice', 'multiple_choice', 'text', 'likert', 'rating', 'date', 'number', 'select_ctdt') DEFAULT 'single_choice',
   `batbuoc` TINYINT(1) DEFAULT 1,
+  `is_personal_info` TINYINT(1) DEFAULT 0, -- để xác định câu hỏi dành cho thông tin người khảo sát
   `thutu` INT DEFAULT 0,
   `page` INT UNSIGNED DEFAULT(1),
   `cau_dieukien_id` INT(11), -- Câu hỏi phụ thuộc
@@ -150,8 +184,8 @@ CREATE TABLE IF NOT EXISTS `dot_khaosat` (
 CREATE TABLE IF NOT EXISTS `phieu_khaosat` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `dot_khaosat_id` VARCHAR(50) NOT NULL,
-  `ma_nguoi_traloi` VARCHAR(50), -- Mã SV, mã NV, mã DN...
-  `metadata` JSON, -- Thông tin người trả lời (họ tên, đơn vị, email...)
+  -- `ma_nguoi_traloi` VARCHAR(50), -- Mã SV, mã NV, mã DN...
+  -- `metadata` JSON, -- Thông tin người trả lời (họ tên, đơn vị, email...)
   `trangthai` ENUM('draft', 'completed') DEFAULT 'draft',
   `thoigian_batdau` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `thoigian_hoanthanh` DATETIME,
@@ -161,7 +195,7 @@ CREATE TABLE IF NOT EXISTS `phieu_khaosat` (
   `updated_at` DATETIME ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_dot_khaosat` (`dot_khaosat_id`),
-  KEY `idx_ma_nguoi_traloi` (`ma_nguoi_traloi`),
+  -- KEY `idx_ma_nguoi_traloi` (`ma_nguoi_traloi`),
   KEY `idx_trangthai` (`trangthai`),
   KEY `idx_thoigian` (`thoigian_hoanthanh`),
   CONSTRAINT `fk_phieu_dot` FOREIGN KEY (`dot_khaosat_id`) 
@@ -594,7 +628,7 @@ INSERT INTO `chatbot_qa` (`id`, `keywords`, `question`, `answer`, `is_enabled`, 
 -- --------------------------------------------------------
 
 -- Index cho tìm kiếm và thống kê
-CREATE INDEX idx_phieu_metadata_khoa ON phieu_khaosat((CAST(JSON_EXTRACT(metadata, '$.khoa') AS CHAR(50))));
+-- CREATE INDEX idx_phieu_metadata_khoa ON phieu_khaosat((CAST(JSON_EXTRACT(metadata, '$.khoa') AS CHAR(50))));
 CREATE INDEX idx_lichsu_thoigian_bang ON lichsu_thaydoi(thoigian, bang_thaydoi);
 CREATE INDEX idx_chitiet_composite ON phieu_khaosat_chitiet(phieu_khaosat_id, cauhoi_id, phuongan_id);
 

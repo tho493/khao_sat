@@ -14,8 +14,9 @@ class CauHoiController extends Controller
     {
         $validated = $request->validate([
             'noidung_cauhoi' => 'required|string',
-            'loai_cauhoi' => 'required|in:single_choice,multiple_choice,text,likert,rating,date,number',
+            'loai_cauhoi' => 'required|in:single_choice,multiple_choice,text,likert,rating,date,number,select_ctdt',
             'batbuoc' => 'boolean',
+            'is_personal_info' => 'boolean',
             'page' => 'required|integer|min:1',
             'phuong_an' => 'required_if:loai_cauhoi,single_choice,multiple_choice,likert|array|min:2',
             'phuong_an.*' => 'required|string|max:500',
@@ -31,6 +32,7 @@ class CauHoiController extends Controller
                 'noidung_cauhoi' => $validated['noidung_cauhoi'],
                 'loai_cauhoi' => $validated['loai_cauhoi'],
                 'batbuoc' => $validated['batbuoc'] ?? true,
+                'is_personal_info' => $validated['is_personal_info'] ?? false,
                 'thutu' => $thutu,
                 'page' => $validated['page'],
                 'trangthai' => 1,
@@ -69,8 +71,9 @@ class CauHoiController extends Controller
     {
         $validated = $request->validate([
             'noidung_cauhoi' => 'required|string',
-            'loai_cauhoi' => 'required|in:single_choice,multiple_choice,text,likert,rating,date,number',
+            'loai_cauhoi' => 'required|in:single_choice,multiple_choice,text,likert,rating,date,number,select_ctdt',
             'batbuoc' => 'boolean',
+            'is_personal_info' => 'boolean',
             'page' => 'required|integer|min:1',
             'phuong_an' => 'sometimes|array',
             'phuong_an.*' => 'required|string|max:500',
@@ -84,6 +87,7 @@ class CauHoiController extends Controller
                 'noidung_cauhoi' => $validated['noidung_cauhoi'],
                 'loai_cauhoi' => $validated['loai_cauhoi'],
                 'batbuoc' => $validated['batbuoc'] ?? true,
+                'is_personal_info' => $validated['is_personal_info'] ?? false,
                 'page' => $validated['page'],
                 'cau_dieukien_id' => $validated['cau_dieukien_id'] ?? null,
                 'dieukien_hienthi' => $validated['dieukien_hienthi'] ?? null,

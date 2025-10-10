@@ -200,7 +200,7 @@
                         <td>{{ number_format($stats['data']->stddev, 2) }}</td>
                     </tr>
                 </table>
-            @elseif($stats['type'] == 'text' && !$stats['data']->isEmpty())
+            @elseif(($stats['type'] == 'text' || $stats['type'] == 'list') && !$stats['data']->isEmpty())
                 <ul style="padding-left: 20px;">
                     @foreach($stats['data'] as $item)
                         <li>{{ $item }}</li>
@@ -214,6 +214,63 @@
             @endif
         </div>
     @endforeach
+
+    <h3>III. DANH SÁCH PHIẾU HOÀN THÀNH</h3>
+    @php
+        $personalInfoQuestions = $dotKhaoSat->mauKhaoSat->cauHoi->where('is_personal_info', true)->values();
+    @endphp
+    <table class="answer-table">
+        <thead>
+            <tr>
+                @foreach($personalInfoQuestions as $q)
+                    <th>{{ $q->noidung_cauhoi }}</th>
+                @endforeach
+                <th>Thời gian làm bài</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($dotKhaoSat->phieuKhaoSat()->where('trangthai', 'completed')->with(['chiTiet.phuongAn'])->orderBy('thoigian_hoanthanh', 'desc')->get() as $phieu)
+                @php $answersByQuestionId = $phieu->chiTiet->groupBy('cauhoi_id'); @endphp
+                <tr>
+                    @foreach($personalInfoQuestions as $q)
+                        @php
+                            $display = '';
+                            $answers = $answersByQuestionId->get($q->id);
+                            if ($answers && $answers->count() > 0) {
+                                if ($q->loai_cauhoi === 'multiple_choice') {
+                                    $display = $answers->map(fn($a) => $a->phuongAn->noidung ?? '')->filter()->implode('; ');
+                                } elseif ($q->loai_cauhoi === 'select_ctdt') {
+                                    $first = $answers->first();
+                                    $ma = $first->giatri_text ?? $first->giatri_number ?? null;
+                                    if ($ma) {
+                                        $ten = \App\Models\Ctdt::where('mactdt', $ma)->value('tenctdt');
+                                        $display = $ten ?: $ma;
+                                    }
+                                } else {
+                                    $first = $answers->first();
+                                    if ($first->phuongan_id) {
+                                        $display = $first->phuongAn->noidung ?? '';
+                                    } elseif (!empty($first->giatri_text)) {
+                                        $display = $first->giatri_text;
+                                    } elseif (!is_null($first->giatri_number)) {
+                                        $display = (string) $first->giatri_number;
+                                    } elseif (!empty($first->giatri_date)) {
+                                        $display = (string) $first->giatri_date;
+                                    }
+                                }
+                            }
+                        @endphp
+                        <td>{{ $display !== '' ? $display : 'N/A' }}</td>
+                    @endforeach
+                    <td>
+                        {{ $phieu->thoigian_batdau ? \Carbon\Carbon::parse($phieu->thoigian_batdau)->format('d/m/Y H:i') : 'N/A' }}
+                        -
+                        {{ $phieu->thoigian_hoanthanh ? \Carbon\Carbon::parse($phieu->thoigian_hoanthanh)->format('d/m/Y H:i') : 'N/A' }}
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
 </body>
 
 </html>
