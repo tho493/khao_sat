@@ -10,8 +10,6 @@ class PhieuKhaoSat extends Model
 
     protected $fillable = [
         'dot_khaosat_id',
-        'ma_nguoi_traloi',
-        'metadata',
         'trangthai',
         'thoigian_batdau',
         'thoigian_hoanthanh',
@@ -20,7 +18,6 @@ class PhieuKhaoSat extends Model
     ];
 
     protected $casts = [
-        'metadata' => 'array',
         'thoigian_batdau' => 'datetime',
         'thoigian_hoanthanh' => 'datetime'
     ];

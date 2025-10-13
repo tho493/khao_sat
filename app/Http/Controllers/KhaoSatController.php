@@ -129,8 +129,6 @@ class KhaoSatController extends Controller
             // Tạo phiếu khảo sát
             $phieuKhaoSat = PhieuKhaoSat::create([
                 'dot_khaosat_id' => $dotKhaoSat->id,
-                'ma_nguoi_traloi' => $request->ma_nguoi_traloi,
-                'metadata' => collect($request->metadata)->except('thoigian_batdau'),
                 'thoigian_batdau' => $request->metadata['thoigian_batdau'] ?? null,
                 'trangthai' => 'draft',
                 'ip_address' => $request->ip(),
