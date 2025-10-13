@@ -23,7 +23,7 @@
                 <div class="order-1 md:order-2 reveal-banner-image">
                     <div class="glass-effect p-3">
                         <div class="aspect-[4/3] w-full bg-slate-100 rounded-lg overflow-hidden">
-                            <img src="/image/img_sdu.jpg" alt="Hình ảnh trường Đại học Sao Đỏ"
+                            <img src="{{ asset('image/img_sdu.jpg') }}" alt="Hình ảnh trường Đại học Sao Đỏ"
                                 class="w-full h-full object-cover object-center">
                         </div>
                     </div>

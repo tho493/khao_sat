@@ -34,18 +34,22 @@ else
     fi
 fi
 
-# Generate or repair APP_KEY if missing or invalid (must be base64:* for CBC/GCM)
-CURRENT_KEY=$(grep -E '^APP_KEY=' .env | cut -d'=' -f2- || true)
-if [ -z "${CURRENT_KEY}" ] || ! echo "${CURRENT_KEY}" | grep -Eq '^base64:[A-Za-z0-9+/=]+$'; then
-    echo "[start] Generating APP_KEY (missing or invalid)"
-    php artisan key:generate --force || echo "[start] WARNING: key:generate failed"
+# Ensure APP_KEY is present and properly formatted in .env (should be base64:... for CBC/GCM)
+if ! grep -q "^APP_KEY=" .env; then
+    echo "[start] APP_KEY is missing in .env"
+    php artisan key:generate
 fi
 
-# Refresh caches after ensuring key exists
-php artisan config:clear || true
-php artisan config:cache || true
-php artisan route:cache || true
-php artisan view:cache || true
+# Run database migrations (non-interactive); do not block startup on failure
+php artisan migrate --force --no-interaction || echo "[start] Migrate failed; continuing startup"
+
+# Refresh all caches
+php artisan config:clear
+php artisan config:cache
+php artisan cache:clear
+php artisan route:cache
+php artisan view:clear
+php artisan view:cache
 
 # Start PHP-FPM and Laravel scheduler concurrently
 echo "[start] Launching PHP-FPM and scheduler (php artisan schedule:work)"

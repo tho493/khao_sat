@@ -71,12 +71,20 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     });
 
     // Năm học
-    Route::resource('nam-hoc', NamHocController::class)->except(['show', 'create', 'edit']);
+    Route::prefix('nam-hoc')->name('nam-hoc.')->group(function () {
+        Route::get('/', [NamHocController::class, 'index'])->name('index');
+        Route::post('/', [NamHocController::class, 'store'])->name('store');
+        Route::put('/{nam_hoc}', [NamHocController::class, 'update'])->name('update');
+        Route::delete('/{nam_hoc}', [NamHocController::class, 'destroy'])->name('destroy');
+    });
 
     // Chương trình đào tạo
-    Route::resource('ctdt', CtdtController::class)->except(['show', 'create', 'edit'])->parameters([
-        'ctdt' => 'mactdt' // parameter name là mactdt
-    ]);
+    Route::prefix('ctdt')->name('ctdt.')->group(function () {
+        Route::get('/', [CtdtController::class, 'index'])->name('index');
+        Route::post('/', [CtdtController::class, 'store'])->name('store');
+        Route::put('/{mactdt}', [CtdtController::class, 'update'])->name('update');
+        Route::delete('/{mactdt}', [CtdtController::class, 'destroy'])->name('destroy');
+    });
 
     // FAQ
     Route::resource('faq', FaqController::class)->except(['show']);

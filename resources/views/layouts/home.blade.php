@@ -81,7 +81,7 @@
                     <div class="flex items-center justify-between py-2">
                         <a href="{{ route('khao-sat.index') }}" class="flex items-center gap-3">
                             <div class="h-12 w-12 rounded-full bg-white/95 grid place-items-center shadow-md p-1">
-                                <img src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ"
+                                <img src="{{ asset('image/logo.png') }}" alt="Logo Trường Đại học Sao Đỏ"
                                     class="h-full w-full object-contain">
                             </div>
                             <span class="hidden sm:block text-white font-bold text-lg">Đại học Sao Đỏ</span>
@@ -115,7 +115,7 @@
                     <div class="lg:col-span-1">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="h-14 w-14 rounded-full bg-white/95 grid place-items-center shadow-md p-1">
-                                <img src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ"
+                                <img src="{{ asset('image/logo.png') }}" alt="Logo Trường Đại học Sao Đỏ"
                                     class="h-full w-full object-contain">
                             </div>
                             <div>
@@ -263,7 +263,7 @@
             const chatInput = $('.chat-input textarea');
             const sendChatBtn = $('#send-btn');
             const chatbox = $('.chatbox');
-            const API_URL = "/api/chatbot/ask";
+            const API_URL = "{{ route('api.ask') }}";
 
             chatbotToggler.on('click', () => chatbotContainer.toggleClass('show'));
 

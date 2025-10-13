@@ -488,7 +488,8 @@
 
         function loadInitialQuestions() {
             $('#questions-loading').show();
-            $.get("{{ route('admin.mau-khao-sat.questions', $mauKhaoSat) }}")
+            // $.get("{{-- route('admin.mau-khao-sat.questions', $mauKhaoSat->id) --}}")
+            $.get("/admin/mau-khao-sat/{{ $mauKhaoSat->id }}/questions")
                 .done(data => {
                     allQuestionsData = data;
                     renderAllLists();
@@ -635,7 +636,8 @@
                 data.cau_dieukien_id = null;
                 data.dieukien_hienthi = null;
             }
-            const url = cauHoiId ? `/admin/cau-hoi/${cauHoiId}` : `/admin/mau-khao-sat/${mauKhaoSatId}/cau-hoi`;
+            const url = cauHoiId ? `{{ url('admin/cau-hoi') }}/${cauHoiId}` : `/admin/mau-khao-sat/{{ $mauKhaoSat->id }}/cau-hoi`;
+            // const url = cauHoiId ? `{{ url('admin/cau-hoi') }}/${cauHoiId}` : `{{ route('admin.mau-khao-sat.cau-hoi.store', $mauKhaoSat->id) }}`;
             const method = cauHoiId ? 'PUT' : 'POST';
 
             $.ajax({
@@ -670,7 +672,7 @@
                 return;
             }
             $.ajax({
-                url: `/admin/cau-hoi/${id}`, method: 'DELETE',
+                url: `{{ url('admin/cau-hoi') }}/${id}`, method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
                 success: function (response) {
                     allQuestionsData = allQuestionsData.filter(q => q.id !== id);
@@ -732,7 +734,7 @@
 
                         // Gửi thứ tự mới lên server
                         $.ajax({
-                            url: "{{ route('admin.cau-hoi.update-order') }}",
+                            url: "/admin/cau-hoi/update-order",
                             method: 'POST', data: { order: order },
                             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
                             error: () => alert('Lỗi khi lưu thứ tự, vui lòng tải lại trang.'),

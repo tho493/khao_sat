@@ -133,7 +133,7 @@
     <script>
         function openEditModal(namHoc) {
             const form = document.getElementById('editNamHocForm');
-            form.action = `/admin/nam-hoc/${namHoc.id}`;
+            form.action = `{{ route('admin.nam-hoc.update', $namHoc->id) }}`;
             document.getElementById('edit_namhoc').value = namHoc.namhoc;
             document.getElementById('edit_trangthai').checked = namHoc.trangthai;
 

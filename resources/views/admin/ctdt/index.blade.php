@@ -138,7 +138,7 @@
 
             // Cập nhật action của form
             const form = document.getElementById('editCtdtForm');
-            form.action = `/admin/ctdt/${ctdt.mactdt}`;
+            form.action = `{{ route('admin.ctdt.update', $ctdt->mactdt) }}`;
 
             // Điền dữ liệu vào các input
             document.getElementById('edit_mactdt').value = ctdt.mactdt;

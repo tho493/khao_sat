@@ -79,10 +79,10 @@
                                                     <td>
                                                         <span
                                                             class="badge bg-{{ 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    $log->hanhdong == 'create' ? 'success' :
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    $log->hanhdong == 'create' ? 'success' :
                                 ($log->hanhdong == 'update' ? 'info' :
                                     ($log->hanhdong == 'delete' ? 'danger' : 'secondary')) 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }}">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                }}">
                                                             {{ ucfirst($log->hanhdong) }}
                                                         </span>
                                                     </td>
@@ -180,44 +180,44 @@
             document.getElementById('logDetailContent').innerHTML = '<div class="text-center py-3"><div class="spinner-border"></div></div>';
 
             // Gọi AJAX để lấy chi tiết log
-            fetch(`/admin/logs/${logId}`)
+            fetch(`{{ route('admin.logs.show', ':id') }}`.replace(':id', logId))
                 .then(response => {
                     if (!response.ok) throw new Error('Không thể tải chi tiết log');
                     return response.json();
                 })
                 .then(data => {
                     let html = `
-                                                                                                <table class="table table-sm">
-                                                                                                    <tr>
-                                                                                                        <td width="20%"><strong>Thời gian:</strong></td>
-                                                                                                        <td>${data.thoigian || 'N/A'}</td>
-                                                                                                    </tr>
-                                                                                                    <tr>
-                                                                                                        <td><strong>Người thực hiện:</strong></td>
-                                                                                                        <td>${data.nguoi_thuchien || 'N/A'}</td>
-                                                                                                    </tr>
-                                                                                                    <tr>
-                                                                                                        <td><strong>Hành động:</strong></td>
-                                                                                                        <td>${data.hanhdong || 'N/A'}</td>
-                                                                                                    </tr>
-                                                                                                    <tr>
-                                                                                                        <td><strong>Bảng thay đổi:</strong></td>
-                                                                                                        <td>${data.bang_thaydoi || 'N/A'}</td>
-                                                                                                    </tr>
-                                                                                                    <tr>
-                                                                                                        <td><strong>ID bản ghi:</strong></td>
-                                                                                                        <td>${data.id_banghi || 'N/A'}</td>
-                                                                                                    </tr>
-                                                                                                    <tr>
-                                                                                                        <td><strong>Ghi chú:</strong></td>
-                                                                                                        <td>${data.ghi_chu || ''}</td>
-                                                                                                    </tr>
-                                                                                                </table>
-                                                                                                <h6 class="mt-3">Nội dung cũ:</h6>
-                                                                                                <pre>${typeof data.noidung_cu === 'object' ? JSON.stringify(data.noidung_cu, null, 2) : (data.noidung_cu || '')}</pre>
-                                                                                                <h6 class="mt-3">Nội dung mới:</h6>
-                                                                                                <pre>${typeof data.noidung_moi === 'object' ? JSON.stringify(data.noidung_moi, null, 2) : (data.noidung_moi || '')}</pre>
-                                                                                            `;
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td width="20%"><strong>Thời gian:</strong></td>
+                                        <td>${data.thoigian || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Người thực hiện:</strong></td>
+                                        <td>${data.nguoi_thuchien || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Hành động:</strong></td>
+                                        <td>${data.hanhdong || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Bảng thay đổi:</strong></td>
+                                        <td>${data.bang_thaydoi || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>ID bản ghi:</strong></td>
+                                        <td>${data.id_banghi || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Ghi chú:</strong></td>
+                                        <td>${data.ghi_chu || ''}</td>
+                                    </tr>
+                                </table>
+                                <h6 class="mt-3">Nội dung cũ:</h6>
+                                <pre>${typeof data.noidung_cu === 'object' ? JSON.stringify(data.noidung_cu, null, 2) : (data.noidung_cu || '')}</pre>
+                                <h6 class="mt-3">Nội dung mới:</h6>
+                                <pre>${typeof data.noidung_moi === 'object' ? JSON.stringify(data.noidung_moi, null, 2) : (data.noidung_moi || '')}</pre>
+                            `;
                     document.getElementById('logDetailContent').innerHTML = html;
                 })
                 .catch(err => {

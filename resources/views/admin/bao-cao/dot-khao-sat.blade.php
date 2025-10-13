@@ -372,7 +372,7 @@
 
         // Gửi request AJAX
         $.ajax({
-            url: "/admin/bao-cao/{{ $dotKhaoSat->id }}/summarize",
+            url: "{{ route('admin.bao-cao.summarize', $dotKhaoSat->id) }}",
             method: 'POST',
             data: {
                 _token: '{{ csrf_token() }}',

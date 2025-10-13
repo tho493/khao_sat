@@ -29,9 +29,9 @@
             <div class="sidebar-header">
                 <a href="{{ route('admin.dashboard') }}"
                     class="d-flex align-items-center justify-content-center text-decoration-none components">
-                    <img src="/image/logo.png" alt="Logo" style="height: 40px;" class="logo-collapsed">
+                    <img src="{{ asset('image/logo.png') }}" alt="Logo" style="height: 40px;" class="logo-collapsed">
                     <div class="logo-expanded align-items-center gap-2">
-                        <img src="/image/logo.png" alt="Logo" style="height: 40px;">
+                        <img src="{{ asset('image/logo.png') }}" alt="Logo" style="height: 40px;">
                     </div>
                 </a>
             </div>
