@@ -16,13 +16,13 @@
         content="Hệ thống khảo sát trực tuyến - Nền tảng khảo sát hiện đại, bảo mật và dễ sử dụng." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="{{ url()->current() }}" />
-    <meta property="og:image" content="{{ asset('image/logo.png') }}" />
-    <link rel="stylesheet" href="{{ asset('css/splash-screen.css') }}">
+    <meta property="og:image" content="/image/logo.png" />
+    <link rel="stylesheet" href="/css/splash-screen.css">
 
     <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
 
     {{-- CSS for Glassmorphism & Improvements --}}
-    <link rel="stylesheet" href={{ asset("css/home.css") }}>
+    <link rel="stylesheet" href="/css/home.css">
 
     <!-- CSS NProgress -->
     <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css" />
@@ -50,7 +50,7 @@
 <body>
     <!-- Splash (overlay) -->
     @include('layouts.splash-screen')
-    <script src="{{ asset('js/splash-screen.js') }}"></script>
+    <script src="/js/splash-screen.js"></script>
 
     <div class="bg-gradient-to-br from-blue-500 to-slate-50 text-slate-800">
         {{-- Main Content Wrapper --}}
@@ -81,7 +81,7 @@
                     <div class="flex items-center justify-between py-2">
                         <a href="{{ route('khao-sat.index') }}" class="flex items-center gap-3">
                             <div class="h-12 w-12 rounded-full bg-white/95 grid place-items-center shadow-md p-1">
-                                <img src="{{ asset('image/logo.png') }}" alt="Logo Trường Đại học Sao Đỏ"
+                                <img src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ"
                                     class="h-full w-full object-contain">
                             </div>
                             <span class="hidden sm:block text-white font-bold text-lg">Đại học Sao Đỏ</span>
@@ -115,7 +115,7 @@
                     <div class="lg:col-span-1">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="h-14 w-14 rounded-full bg-white/95 grid place-items-center shadow-md p-1">
-                                <img src="{{ asset('image/logo.png') }}" alt="Logo Trường Đại học Sao Đỏ"
+                                <img src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ"
                                     class="h-full w-full object-contain">
                             </div>
                             <div>
@@ -263,7 +263,7 @@
             const chatInput = $('.chat-input textarea');
             const sendChatBtn = $('#send-btn');
             const chatbox = $('.chatbox');
-            const API_URL = "{{ route('api.ask') }}";
+            const API_URL = "/api/ask";
 
             chatbotToggler.on('click', () => chatbotContainer.toggleClass('show'));
 

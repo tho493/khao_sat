@@ -123,7 +123,7 @@
             <div class="col-md-6 col-lg-5 col-xl-4">
                 <div class="login-card p-4 p-md-5">
                     <div class="logo-section text-center mb-4">
-                        <img src="{{ asset('image/logo.png') }}" alt="Logo Trường Đại học Sao Đỏ">
+                        <img src="image/logo.png" alt="Logo Trường Đại học Sao Đỏ">
                     </div>
 
                     <div class="login-header text-center mb-4">
@@ -137,7 +137,7 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('login') }}" id="loginForm">
+                    <form method="POST" action="/login" id="loginForm">
                         @csrf
                         {!! \App\Http\Middleware\PreventDoubleSubmissions::tokenField('admin_login') !!}
 

@@ -17,7 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
-    <link rel="stylesheet" href="{{ asset("css/admin.css") }}">
+    <link rel="stylesheet" href="/css/admin.css">
 </head>
 
 <body>
@@ -29,9 +29,9 @@
             <div class="sidebar-header">
                 <a href="{{ route('admin.dashboard') }}"
                     class="d-flex align-items-center justify-content-center text-decoration-none components">
-                    <img src="{{ asset('image/logo.png') }}" alt="Logo" style="height: 40px;" class="logo-collapsed">
+                    <img src="/image/logo.png" alt="Logo" style="height: 40px;" class="logo-collapsed">
                     <div class="logo-expanded align-items-center gap-2">
-                        <img src="{{ asset('image/logo.png') }}" alt="Logo" style="height: 40px;">
+                        <img src="/image/logo.png" alt="Logo" style="height: 40px;">
                     </div>
                 </a>
             </div>

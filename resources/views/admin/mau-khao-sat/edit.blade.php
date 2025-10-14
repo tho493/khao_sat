@@ -637,7 +637,6 @@
                 data.dieukien_hienthi = null;
             }
             const url = cauHoiId ? `admin/cau-hoi/${cauHoiId}` : `/admin/mau-khao-sat/{{ $mauKhaoSat->id }}/cau-hoi`;
-            // const url = cauHoiId ? `{{ url('admin/cau-hoi') }}/${cauHoiId}` : `{{ route('admin.mau-khao-sat.cau-hoi.store', $mauKhaoSat->id) }}`;
             const method = cauHoiId ? 'PUT' : 'POST';
 
             $.ajax({

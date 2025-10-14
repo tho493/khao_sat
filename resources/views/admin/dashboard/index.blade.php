@@ -3,13 +3,13 @@
 @section('title', 'Admin Dashboard')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/splash-screen.css') }}">
+    <link rel="stylesheet" href="/css/splash-screen.css">
 @endpush
 
 
 @section('splash-screen')
     @include('layouts.splash-screen')
-    <script src="{{ asset('js/splash-screen.js') }}"></script>
+    <script src="/js/splash-screen.js"></script>
 @endsection
 
 @section('content')
