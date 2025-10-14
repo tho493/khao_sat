@@ -18,6 +18,14 @@
     pointer-events: none;
 }
 
+#splash-screen.shrinking {
+    animation: fadeOut 0.3s 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+#splash-screen.shrinking .splash-content {
+    animation: expandOut 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 .splash-content {
     text-align: center;
 }
@@ -91,5 +99,32 @@
     }
     100% {
         background-position: -100% 0;
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+    60% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes expandOut {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0;
+        transform: scale(1.8);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2);
     }
 }
