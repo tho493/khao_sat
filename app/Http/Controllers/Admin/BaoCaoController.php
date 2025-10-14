@@ -13,6 +13,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\KhaoSatExport;
 use Illuminate\Support\Str;
 use PDF;
+use App\Models\Ctdt;
 
 class BaoCaoController extends Controller
 {
@@ -82,7 +83,7 @@ class BaoCaoController extends Controller
         ));
     }
 
-    public function dotKhaoSat(DotKhaoSat $dotKhaoSat)
+    public function dotKhaoSat(DotKhaoSat $dotKhaoSat, Request $request)
     {
         $dotKhaoSat->load([
             'mauKhaoSat.cauHoi' => function ($query) {
@@ -144,7 +145,7 @@ class BaoCaoController extends Controller
                         $first = $answers->first();
                         $ma = $first->giatri_text ?? $first->giatri_number ?? null;
                         if ($ma !== null) {
-                            $ten = \App\Models\Ctdt::where('mactdt', $ma)->value('tenctdt');
+                            $ten = Ctdt::where('mactdt', $ma)->value('tenctdt');
                             $display = $ten ?: (string) $ma;
                         }
                     } else {
@@ -164,6 +165,41 @@ class BaoCaoController extends Controller
             }
         }
 
+
+
+        $ctdtQuestion = $dotKhaoSat->mauKhaoSat->cauHoi
+            ->where('loai_cauhoi', 'select_ctdt')
+            ->first();
+
+        $availableCtdts = collect();
+        if ($ctdtQuestion) {
+            $usedCtdtIds = DB::table('phieu_khaosat_chitiet')
+                ->where('cauhoi_id', $ctdtQuestion->id)
+                ->whereIn('phieu_khaosat_id', $completedSurveys->pluck('id'))
+                ->distinct()
+                ->pluck('giatri_text');
+
+            if ($usedCtdtIds->isNotEmpty()) {
+                $availableCtdts = Ctdt::whereIn('mactdt', $usedCtdtIds)->orderBy('tenctdt')->get();
+            }
+        }
+
+        $query = $dotKhaoSat->phieuKhaoSat()
+            ->where('trangthai', 'completed');
+
+        $selectedCtdt = $request->input('ctdt');
+
+        if ($ctdtQuestion && $selectedCtdt) {
+            $filteredPhieuIds = DB::table('phieu_khaosat_chitiet')
+                ->where('cauhoi_id', $ctdtQuestion->id)
+                ->where('giatri_text', $selectedCtdt)
+                ->pluck('phieu_khaosat_id');
+
+            $query->whereIn('id', $filteredPhieuIds);
+        }
+
+        $danhSachPhieu = $query->orderBy('thoigian_hoanthanh', 'desc')->paginate(15);
+
         return view('admin.bao-cao.dot-khao-sat', compact(
             'dotKhaoSat',
             'tongQuan',
@@ -171,7 +207,9 @@ class BaoCaoController extends Controller
             'thongKeCauHoi',
             'danhSachPhieu',
             'personalInfoQuestions',
-            'personalInfoAnswers'
+            'personalInfoAnswers',
+            'availableCtdts',
+            'selectedCtdt'
         ));
     }
 
@@ -270,7 +308,6 @@ class BaoCaoController extends Controller
 
             case 'single_choice':
             case 'multiple_choice':
-            case 'likert':
                 $answeredCounts = (clone $baseQuery)
                     ->groupBy('phuongan_id')
                     ->select(
@@ -294,6 +331,38 @@ class BaoCaoController extends Controller
                     'type' => 'chart',
                     'data' => $data,
                     'total' => $totalResponses,
+                ];
+
+            case 'likert':
+                $answeredCounts = (clone $baseQuery)
+                    ->groupBy('phuongan_id')
+                    ->select('phuongan_id', DB::raw('COUNT(id) as so_luong'))
+                    ->pluck('so_luong', 'phuongan_id');
+
+                $totalResponses = $answeredCounts->sum();
+                $weightedSum = 0;
+
+                $data = $cauHoi->phuongAnTraLoi->sortBy('thutu')->values()->map(function ($phuongAn, $index) use ($answeredCounts, $totalResponses, &$weightedSum) {
+                    $soLuong = $answeredCounts->get($phuongAn->id, 0);
+
+                    $weight = $index + 1;
+                    $weightedSum += $soLuong * $weight;
+
+                    return (object) [
+                        'noidung' => $phuongAn->noidung,
+                        'so_luong' => $soLuong,
+                        'ty_le' => $totalResponses > 0 ? round(($soLuong / $totalResponses) * 100, 2) : 0,
+                    ];
+                });
+
+                $weightedAverage = $totalResponses > 0 ? round($weightedSum / $totalResponses, 2) : 0;
+
+                return [
+                    'type' => 'chart_with_avg',
+                    'data' => $data,
+                    'total' => $totalResponses,
+                    'average' => $weightedAverage,
+                    'max_score' => $cauHoi->phuongAnTraLoi->count()
                 ];
 
             case 'text':

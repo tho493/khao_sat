@@ -447,7 +447,7 @@
                                                 Hiện khi: <em>${escapeHtml(Str_limit(parentQuestionText, 25))}</em> là ${conditionText}
                                             </div>
                                         `;
-                } catch (e) { /* ignore */ }
+                } catch (e) { console.log(e) }
             }
             extraInfoHtml += `</div>`;
             let buttons = '';
@@ -636,7 +636,7 @@
                 data.cau_dieukien_id = null;
                 data.dieukien_hienthi = null;
             }
-            const url = cauHoiId ? `{{ url('admin/cau-hoi') }}/${cauHoiId}` : `/admin/mau-khao-sat/{{ $mauKhaoSat->id }}/cau-hoi`;
+            const url = cauHoiId ? `admin/cau-hoi/${cauHoiId}` : `/admin/mau-khao-sat/{{ $mauKhaoSat->id }}/cau-hoi`;
             // const url = cauHoiId ? `{{ url('admin/cau-hoi') }}/${cauHoiId}` : `{{ route('admin.mau-khao-sat.cau-hoi.store', $mauKhaoSat->id) }}`;
             const method = cauHoiId ? 'PUT' : 'POST';
 

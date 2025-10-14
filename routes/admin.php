@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\CauHoiController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\NamHocController;
 use App\Http\Controllers\Admin\CtdtController;
+use App\Http\Controllers\Admin\PhieuKhaoSatController;
 
 
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
@@ -69,6 +70,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/export/{dotKhaoSat}', [BaoCaoController::class, 'export'])->name('export');
         Route::post('{dotKhaoSat}/summarize', [BaoCaoController::class, 'summarizeWithAi'])->name('summarize');
     });
+
+    // Phiếu khảo sát
+    Route::get('phieu-khao-sat/{phieuKhaoSat}', [PhieuKhaoSatController::class, 'showJson'])->name('phieu-khao-sat.show');
 
     // Năm học
     Route::prefix('nam-hoc')->name('nam-hoc.')->group(function () {

@@ -12,6 +12,7 @@ services:
     volumes:
       - ./:/var/www
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+      - /var/www/vendor
     networks:
       - khao_sat_network
     depends_on:
