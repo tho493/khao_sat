@@ -586,11 +586,15 @@
             let answeredQuestions = 0;
 
             $('.question-card').each(function() {
-                const inputs = $(this).find('input[name^="cau_tra_loi"], textarea[name^="cau_tra_loi"]');
+                // Include select[name^="cau_tra_loi"] for type select_ctdt
+                const inputs = $(this).find('input[name^="cau_tra_loi"], textarea[name^="cau_tra_loi"], select[name^="cau_tra_loi"]');
                 let isAnswered = false;
                 inputs.each(function() {
-                    if (($(this).is(':radio') || $(this).is(':checkbox'))) {
+                    if ($(this).is(':radio') || $(this).is(':checkbox')) {
                         if ($(this).is(':checked')) isAnswered = true;
+                    } else if ($(this).is('select')) {
+                        // Check if select has a non-empty value (and is not disabled)
+                        if ($(this).val() && $(this).val().toString().trim() !== '') isAnswered = true;
                     } else {
                         if ($(this).val().trim() !== '') isAnswered = true;
                     }
