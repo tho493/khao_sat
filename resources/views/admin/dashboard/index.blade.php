@@ -215,12 +215,11 @@
                                     <a href="{{ route('admin.dot-khao-sat.show', $dot) }}"
                                         class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                                         <div>
-                                            <div>{{ Str::limit($dot->ten_dot, 45) }}</div>
-                                            <small class="text-muted">Hạn cuối:
-                                                {{ \Carbon\Carbon::parse($dot->denngay)->format('d/m/Y') }}</small>
+                                            <div class="fw-bold">{{ Str::limit($dot->ten_dot, 45) }}</div>
+                                            <small class="text-muted">Hạn cuối: {{ $dot->denngay }}</small>
                                         </div>
-                                        <span class="badge bg-warning text-dark rounded-pill">Còn
-                                            {{ now()->diffInHours($dot->denngay) }} giờ</span>
+                                        <span class="badge bg-warning text-dark rounded-pill">
+                                            {{ $dot->denngay->diffForHumans(now(), null, true, 2) }} sẽ kết thúc</span>
                                     </a>
                                 @endforeach
                             </div>

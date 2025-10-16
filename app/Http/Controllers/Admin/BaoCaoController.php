@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\KhaoSatExport;
 use Illuminate\Support\Str;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Ctdt;
 
 class BaoCaoController extends Controller
@@ -109,7 +109,7 @@ class BaoCaoController extends Controller
             'thoi_gian_lau_nhat' => $this->getExtremeCompletionTime($completedSurveys, 'MAX'),
         ];
 
-        // --- 2. Dữ liệu Biểu đồ Xu hướng Phản hồi ---
+        // --- Dữ liệu Biểu đồ Xu hướng Phản hồi ---
         $responseTrendChart = $this->getResponseTrendForSurvey($dotKhaoSat);
 
         // Chi tiết từng Câu hỏi
@@ -200,6 +200,8 @@ class BaoCaoController extends Controller
 
         $danhSachPhieu = $query->orderBy('thoigian_hoanthanh', 'desc')->paginate(15);
 
+        // dd($thongKeCauHoi);
+
         return view('admin.bao-cao.dot-khao-sat', compact(
             'dotKhaoSat',
             'tongQuan',
@@ -282,12 +284,23 @@ class BaoCaoController extends Controller
         return $this->formatSeconds($avgSeconds);
     }
 
-    private function thongKeCauHoi($dotKhaoSatId, $cauHoi)
+    /**
+     * Thống kê câu hỏi với tuỳ chọn lọc theo danh sách id phiếu đã trả lời.
+     *
+     * @param  int  $dotKhaoSatId
+     * @param  mixed $cauHoi
+     * @param  null|array|\Illuminate\Support\Collection $filteredSurveyIds   // danh sách id phiếu trả lời (nếu có lọc theo user), null nếu không lọc
+     * @return array
+     */
+    private function thongKeCauHoi($dotKhaoSatId, $cauHoi, $filteredSurveyIds = null)
     {
-        $completedSurveyIds = DB::table('phieu_khaosat')
-            ->where('dot_khaosat_id', $dotKhaoSatId)
-            ->where('trangthai', 'completed')
-            ->pluck('id');
+        // Lấy id các phiếu khảo sát hoàn thành, có thể có lọc hoặc không
+        $completedSurveyIds = is_null($filteredSurveyIds)
+            ? DB::table('phieu_khaosat')
+                ->where('dot_khaosat_id', $dotKhaoSatId)
+                ->where('trangthai', 'completed')
+                ->pluck('id')
+            : collect($filteredSurveyIds);
 
         if ($completedSurveyIds->isEmpty() && in_array($cauHoi->loai_cauhoi, ['single_choice', 'multiple_choice', 'likert', 'rating'])) {
             $data = $cauHoi->phuongAnTraLoi->map(function ($item) {
@@ -301,11 +314,10 @@ class BaoCaoController extends Controller
         }
 
         $baseQuery = DB::table('phieu_khaosat_chitiet')
-            ->where('phieu_khaosat_chitiet.cauhoi_id', $cauHoi->id)
+            ->where('cauhoi_id', $cauHoi->id)
             ->whereIn('phieu_khaosat_id', $completedSurveyIds);
 
         switch ($cauHoi->loai_cauhoi) {
-
             case 'single_choice':
             case 'multiple_choice':
                 $answeredCounts = (clone $baseQuery)
@@ -366,7 +378,8 @@ class BaoCaoController extends Controller
                 ];
 
             case 'text':
-                $totalResponses = (clone $baseQuery)->whereNotNull('giatri_text')->where('giatri_text', '!=', '')->count();
+                $totalResponses = (clone $baseQuery)
+                    ->whereNotNull('giatri_text')->where('giatri_text', '!=', '')->count();
                 $data = (clone $baseQuery)
                     ->whereNotNull('giatri_text')
                     ->where('giatri_text', '!=', '')
@@ -416,7 +429,7 @@ class BaoCaoController extends Controller
                     ->where(function ($q) {
                         $q->whereNotNull('giatri_text')->where('giatri_text', '!=', '');
                     })
-                    ->orWhereNotNull('giatri_number')
+                    // ->orWhereNotNull('giatri_number')
                     ->groupBy('ma_ctdt')
                     ->pluck('so_luong', 'ma_ctdt');
 
@@ -424,7 +437,7 @@ class BaoCaoController extends Controller
 
                 // Lấy tên CTĐT theo mã
                 $codes = $rawCounts->keys()->filter()->values();
-                $codeToName = \App\Models\Ctdt::whereIn('mactdt', $codes)->pluck('tenctdt', 'mactdt');
+                $codeToName = Ctdt::whereIn('mactdt', $codes)->pluck('tenctdt', 'mactdt');
 
                 $data = $rawCounts->map(function ($count, $code) use ($codeToName, $totalResponses) {
                     $ten = $codeToName->get((string) $code);
@@ -467,7 +480,7 @@ class BaoCaoController extends Controller
                     if ($cauHoi->loai_cauhoi === 'select_ctdt') {
                         $ma = $row->giatri_text ?? $row->giatri_number ?? null;
                         if ($ma !== null) {
-                            $ten = \App\Models\Ctdt::where('mactdt', $ma)->value('tenctdt');
+                            $ten = Ctdt::where('mactdt', $ma)->value('tenctdt');
                             return $ten ?: (string) $ma;
                         }
                     }
@@ -570,29 +583,109 @@ class BaoCaoController extends Controller
         }
     }
 
+    // Tổng hợp các câu hỏi likert, dành cho hàm export của pdf
+    private function getLikertTableData($completedSurveyIds, $likertQuestions)
+    {
+        if ($completedSurveyIds->isEmpty() || $likertQuestions->isEmpty()) {
+            return collect();
+        }
+        $allAnswers = DB::table('phieu_khaosat_chitiet')
+            ->join('phuongan_traloi', 'phieu_khaosat_chitiet.phuongan_id', '=', 'phuongan_traloi.id')
+            ->whereIn('phieu_khaosat_chitiet.cauhoi_id', $likertQuestions->pluck('id'))
+            ->whereIn('phieu_khaosat_id', $completedSurveyIds)
+            ->select('phieu_khaosat_chitiet.cauhoi_id', 'phuongan_traloi.thutu as option_order')
+            ->get();
+        return $allAnswers->groupBy('cauhoi_id')->map(fn($answers) => $answers->groupBy('option_order')->map->count());
+    }
+
     public function export(Request $request, DotKhaoSat $dotKhaoSat)
     {
         $format = $request->input('format', 'excel');
-        $fileName = 'bao-cao-' . Str::slug($dotKhaoSat->ten_dot) . '-' . date('Ymd');
+        $selectedCtdt = $request->input('ctdt');
+        $fileName = 'bao-cao-' . Str::slug($dotKhaoSat->ten_dot);
+
+        if ($selectedCtdt) {
+            $ctdt = Ctdt::find($selectedCtdt);
+            if ($ctdt) {
+                $fileName .= '-' . Str::slug($ctdt->tenctdt);
+            }
+        }
+        $fileName .= '-' . date('Ymd');
+
+        $completedSurveysQuery = $dotKhaoSat->phieuKhaoSat()->where('trangthai', 'completed');
+
+        if ($selectedCtdt) {
+            $ctdtQuestion = $dotKhaoSat->mauKhaoSat
+                ? $dotKhaoSat->mauKhaoSat->cauHoi->where('loai_cauhoi', 'select_ctdt')->first()
+                : null;
+
+            if ($ctdtQuestion) {
+                $filteredPhieuIds = \DB::table('phieu_khaosat_chitiet')
+                    ->where('cauhoi_id', $ctdtQuestion->id)
+                    ->where('giatri_text', $selectedCtdt)
+                    ->pluck('phieu_khaosat_id');
+                $completedSurveysQuery->whereIn('id', $filteredPhieuIds);
+            }
+        }
+
+        $completedSurveyIds = $completedSurveysQuery->pluck('id');
 
         if ($format == 'excel') {
-            return Excel::download(new KhaoSatExport($dotKhaoSat), $fileName . '.xlsx');
+            return Excel::download(new KhaoSatExport($dotKhaoSat, $completedSurveyIds), $fileName . '.xlsx');
         }
 
         if ($format == 'pdf') {
             $tongQuan = [
-                'tong_phieu' => $dotKhaoSat->phieuKhaoSat()->where('trangthai', 'completed')->count(),
-                'thoi_gian_tb' => $this->getThoiGianTraLoiTrungBinh($dotKhaoSat)
+                'tong_phieu' => $completedSurveyIds->count(),
+                'thoi_gian_tb' => $this->getThoiGianTraLoiTrungBinh($dotKhaoSat),
             ];
-            $thongKeCauHoi = [];
-            foreach ($dotKhaoSat->mauKhaoSat->cauHoi as $cauHoi) {
-                $thongKeCauHoi[$cauHoi->id] = $this->thongKeCauHoi($dotKhaoSat->id, $cauHoi);
+
+            // Lấy ra danh sách câu hỏi likert từ mẫu khảo sát, chỉ lấy các câu có xuất hiện trong completedSurveyIds
+            $answeredQuestionIdsQuery = PhieuKhaoSat::where('dot_khaosat_id', $dotKhaoSat->id)
+                ->where('trangthai', 'completed')
+                ->with(['chiTiet.phuongAn']);
+            if ($completedSurveyIds) {
+                $answeredQuestionIdsQuery->whereIn('id', $completedSurveyIds);
+            }
+            $answeredQuestionIds = $answeredQuestionIdsQuery->get();
+
+            $likertQuestions = $dotKhaoSat->mauKhaoSat->cauHoi
+                ->where('loai_cauhoi', 'likert')
+                ->values();
+
+            // Lấy ra các câu hỏi khác không phải likert từ mẫu khảo sát, chỉ lấy các câu có xuất hiện trong completedSurveyIds
+            $otherQuestions = $dotKhaoSat->mauKhaoSat->cauHoi
+                ->where('loai_cauhoi', '!=', 'likert')
+                ->values();
+
+            // dd($otherQuestions);
+
+            // Lấy danh sách các mức độ (phương án) từ 1 câu hỏi likert đầu tiên (nếu có)
+            $likertOptions = $likertQuestions->isNotEmpty() && $likertQuestions->first()
+                ? $likertQuestions->first()->phuongAnTraLoi
+                : collect();
+
+            // Tổng hợp bảng likert từ các phiếu khảo sát đã lọc và các câu hỏi likert
+            $likertTableData = $this->getLikertTableData($completedSurveyIds, $likertQuestions);
+
+            $thongKeCauHoiKhac = [];
+            foreach ($otherQuestions as $cauHoi) {
+                $thongKeCauHoiKhac[$cauHoi->id] = $this->thongKeCauHoi($dotKhaoSat->id, $cauHoi, $answeredQuestionIds->pluck('id'));
             }
 
-            $pdf = PDF::loadView('admin.bao-cao.pdf', compact('dotKhaoSat', 'tongQuan', 'thongKeCauHoi'));
-
+            $pdf = Pdf::loadView(
+                'admin.bao-cao.pdf',
+                compact(
+                    'dotKhaoSat',
+                    'tongQuan',
+                    'likertQuestions',
+                    'likertOptions',
+                    'likertTableData',
+                    'otherQuestions',
+                    'thongKeCauHoiKhac'
+                )
+            );
             $pdf->setPaper('a4', 'portrait');
-
             return $pdf->download($fileName . '.pdf');
         }
 

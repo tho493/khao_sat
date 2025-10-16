@@ -52,9 +52,9 @@
             </ol>
         </nav>
 
-        {{-- Header Báo cáo --}}
+        <!-- Header Báo cáo -->
         <div class="row align-items-center mb-4">
-            <div class="col-md-8 col-12">
+            <div class="col-lg-8 col-md-7">
                 <h1 class="h3 mb-1">{{ $dotKhaoSat->ten_dot }}</h1>
                 <p class="text-muted mb-0">
                     <span class="fw-semibold">Tên đợt khảo sát:</span>
@@ -64,15 +64,16 @@
                     <span class="fw-bold">{{ $dotKhaoSat->tungay }} - {{ $dotKhaoSat->denngay }}</span>
                 </p>
             </div>
-            <div class="col-md-4 col-12 text-md-end mt-3 mt-md-0">
-                <div class="btn-group" role="group" aria-label="Export group">
-                    <a href="{{ route('admin.bao-cao.export', ['dotKhaoSat' => $dotKhaoSat, 'format' => 'excel']) }}"
-                        class="btn btn-success">
-                        <i class="bi bi-file-earmark-excel"></i> Xuất Excel
+            <div class="col-lg-4 col-md-5 text-md-end mt-3 mt-md-0">
+                <div class="btn-group" role="group">
+                    {{-- Nút xuất mặc định --}}
+                    <a href="{{ route('admin.bao-cao.export', ['dotKhaoSat' => $dotKhaoSat, 'format' => 'excel']) }}" 
+                       class="btn btn-success" id="exportExcelBtn">
+                        <i class="bi bi-file-earmark-excel"></i> Xuất Excel (Tất cả)
                     </a>
-                    <a href="{{ route('admin.bao-cao.export', ['dotKhaoSat' => $dotKhaoSat, 'format' => 'pdf']) }}"
-                        class="btn btn-danger">
-                        <i class="bi bi-file-earmark-pdf"></i> Xuất PDF
+                    <a href="{{ route('admin.bao-cao.export', ['dotKhaoSat' => $dotKhaoSat, 'format' => 'pdf']) }}" 
+                       class="btn btn-danger" id="exportPdfBtn">
+                        <i class="bi bi-file-earmark-pdf"></i> Xuất PDF (Tất cả)
                     </a>
                 </div>
             </div>
@@ -124,14 +125,17 @@
             </div>
         </div>
 
-        {{-- Thống kê chi tiết từng câu hỏi --}}
-        <h3 class="h4 mb-3">Phân tích câu trả lời</h3>
+        {{-- Thống kê chi tiết tất cả câu trả lời --}}
+        <h3 class="h4 mb-3">Chi tiết tất cả câu trả lời</h3>
+        @php
+        $count = 1
+        @endphp
         @forelse($dotKhaoSat->mauKhaoSat->cauHoi as $index => $cauHoi)
             <div class="card shadow mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-1 fw-bold text-primary">
-                            Câu {{ $index + 1 }}: {{ $cauHoi->noidung_cauhoi }}
+                            Câu {{ $cauHoi->is_personal_info ? "hỏi thông tin" : $count++ }}: {{ $cauHoi->noidung_cauhoi }}
                         </h6>
                         <small class="text-muted">({{ $thongKeCauHoi[$cauHoi->id]['total'] ?? 0 }} lượt trả lời)</small>
                     </div>
@@ -251,14 +255,13 @@
             </div>
         @empty
             <div class="card shadow mb-4">
-
                 <div class="card-body">
                     <p class="text-muted text-center mb-0">Mẫu khảo sát này chưa có câu hỏi nào.</p>
                 </div>
             </div>
         @endforelse
 
-        {{-- Danh sách chi tiết phiếu trả lời với form lọc --}}
+        <!-- Danh sách chi tiết phiếu trả lời -->
         <div class="card shadow mb-4">
             <div class="card-header">
                 <div class="row align-items-center">
@@ -266,28 +269,27 @@
                         <h6 class="m-0 font-weight-bold text-primary">Danh sách phiếu đã hoàn thành</h6>
                     </div>
                     @if(isset($availableCtdts) && $availableCtdts->isNotEmpty())
-                        <div class="col-md-6">
-                            <form method="GET" action="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}" id="filterForm">
-                                <div class="input-group">
-                                    <select class="form-select" name="ctdt"
-                                        onchange="document.getElementById('filterForm').submit()">
-                                        <option value="">-- Lọc theo Chương trình đào tạo --</option>
-                                        @foreach($availableCtdts as $ctdt)
-                                            <option value="{{ $ctdt->mactdt }}" {{ $selectedCtdt == $ctdt->mactdt ? 'selected' : '' }}>
-                                                {{ $ctdt->tenctdt }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    {{-- Nút xóa lọc --}}
-                                    @if($selectedCtdt)
-                                        <a href="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}"
-                                            class="btn btn-outline-secondary" title="Bỏ lọc">
-                                            <i class="bi bi-x-lg"></i>
-                                        </a>
-                                    @endif
-                                </div>
-                            </form>
-                        </div>
+                    <div class="col-md-6">
+                        <form method="GET" action="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}" id="filterForm">
+                            <div class="input-group">
+                                <select class="form-select" name="ctdt" id="ctdtFilterSelect">
+                                    <option value="">-- Lọc theo Chương trình đào tạo --</option>
+                                    @foreach($availableCtdts as $ctdt)
+                                        <option value="{{ $ctdt->mactdt }}" 
+                                                {{ $selectedCtdt == $ctdt->mactdt ? 'selected' : '' }}>
+                                            {{ $ctdt->tenctdt }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <button class="btn btn-primary" type="submit"><i class="bi bi-filter"></i></button>
+                                @if($selectedCtdt)
+                                    <a href="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}" class="btn btn-outline-secondary" title="Bỏ lọc">
+                                        <i class="bi bi-x-lg"></i>
+                                    </a>
+                                @endif
+                            </div>
+                        </form>
+                    </div>
                     @endif
                 </div>
             </div>
@@ -572,5 +574,47 @@
             if (typeof text !== 'string') return '';
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
+    </script>
+
+    {{-- THÊM SCRIPT MỚI NÀY VÀO CUỐI --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctdtFilterSelect = document.getElementById('ctdtFilterSelect');
+            const exportExcelBtn = document.getElementById('exportExcelBtn');
+            const exportPdfBtn = document.getElementById('exportPdfBtn');
+
+            function updateExportLinks() {
+                if (!ctdtFilterSelect || !exportExcelBtn || !exportPdfBtn) return;
+
+                const selectedCtdt = ctdtFilterSelect.value;
+                
+                // Lấy URL gốc của nút export
+                const excelBaseUrl = "{{ route('admin.bao-cao.export', ['dotKhaoSat' => $dotKhaoSat, 'format' => 'excel']) }}";
+                const pdfBaseUrl = "{{ route('admin.bao-cao.export', ['dotKhaoSat' => $dotKhaoSat, 'format' => 'pdf']) }}";
+                
+                if (selectedCtdt) {
+                    // Nếu có lọc, thêm tham số ctdt vào URL
+                    exportExcelBtn.href = excelBaseUrl + '&ctdt=' + selectedCtdt;
+                    exportPdfBtn.href = pdfBaseUrl + '&ctdt=' + selectedCtdt;
+                    // Thay đổi text của nút
+                    exportExcelBtn.innerHTML = '<i class="bi bi-file-earmark-excel"></i> Xuất Excel (Đã lọc)';
+                    exportPdfBtn.innerHTML = '<i class="bi bi-file-earmark-pdf"></i> Xuất PDF (Đã lọc)';
+                } else {
+                    // Nếu không có lọc, trả về URL gốc
+                    exportExcelBtn.href = excelBaseUrl;
+                    exportPdfBtn.href = pdfBaseUrl;
+                    exportExcelBtn.innerHTML = '<i class="bi bi-file-earmark-excel"></i> Xuất Excel (Tất cả)';
+                    exportPdfBtn.innerHTML = '<i class="bi bi-file-earmark-pdf"></i> Xuất PDF (Tất cả)';
+                }
+            }
+
+            // Gắn sự kiện 'change' cho dropdown
+            if (ctdtFilterSelect) {
+                ctdtFilterSelect.addEventListener('change', updateExportLinks);
+            }
+
+            // Chạy lần đầu khi tải trang để cập nhật link theo bộ lọc hiện tại
+            updateExportLinks();
+        });
     </script>
 @endpush

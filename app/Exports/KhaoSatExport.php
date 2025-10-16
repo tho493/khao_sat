@@ -18,8 +18,9 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
     protected $cauHoiCollection;
     protected $personalInfoQuestions;
     protected $nonPersonalQuestions;
+    protected $filteredSurveyIds;
 
-    public function __construct(DotKhaoSat $dotKhaoSat)
+    public function __construct(DotKhaoSat $dotKhaoSat, $filteredSurveyIds = null)
     {
         // Tải trước tất cả dữ liệu cần thiết để tối ưu
         $this->dotKhaoSat = $dotKhaoSat->load([
@@ -31,6 +32,8 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
                     ->with(['chiTiet.phuongAn']);
             }
         ]);
+
+        $this->filteredSurveyIds = $filteredSurveyIds;
 
         // Phân nhóm câu hỏi và tạo header
         $allQuestions = $this->dotKhaoSat->mauKhaoSat->cauHoi;
@@ -52,8 +55,15 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
      */
     public function collection()
     {
-        // Trả về collection các phiếu khảo sát đã hoàn thành
-        return $this->dotKhaoSat->phieuKhaoSat()->get();
+        $query = PhieuKhaoSat::where('dot_khaosat_id', $this->dotKhaoSat->id)
+            ->where('trangthai', 'completed')
+            ->with(['chiTiet.phuongAn']);
+
+        if ($this->filteredSurveyIds) {
+            $query->whereIn('id', $this->filteredSurveyIds);
+        }
+
+        return $query->get();
     }
 
     /**
