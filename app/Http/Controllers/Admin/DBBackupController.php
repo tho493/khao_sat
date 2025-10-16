@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 
-class DbBackupController extends Controller
+class DBBackupController extends Controller
 {
     private string $dir = 'backup/db';
 
