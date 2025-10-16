@@ -10,19 +10,25 @@ use Illuminate\Support\Facades\Storage;
 
 class DbBackupController extends Controller
 {
-    private string $dir = 'backups/db';
+    private string $dir = 'backup/db';
 
     public function index()
     {
-        $files = collect(Storage::files($this->dir))
-            ->filter(fn($p) => str_ends_with(strtolower($p), '.sql') || str_ends_with(strtolower($p), '.sql.gz'))
-            ->map(fn($p) => [
-                'name' => basename($p),
-                'size' => Storage::size($p),
-                'time' => Storage::lastModified($p),
-            ])
-            ->sortByDesc('time')
-            ->values();
+        $dirPath = storage_path("app/{$this->dir}");
+        $files = collect();
+
+        if (is_dir($dirPath)) {
+            $files = collect(scandir($dirPath))
+                ->filter(fn($file) => $file !== '.' && $file !== '..')
+                ->filter(fn($file) => str_ends_with(strtolower($file), '.sql') || str_ends_with(strtolower($file), '.sql.gz'))
+                ->map(fn($file) => [
+                    'name' => $file,
+                    'size' => filesize("{$dirPath}/{$file}"),
+                    'time' => filemtime("{$dirPath}/{$file}"),
+                ])
+                ->sortByDesc('time')
+                ->values();
+        }
 
         return view('admin.db-backups.index', ['files' => $files]);
     }
@@ -47,19 +53,19 @@ class DbBackupController extends Controller
     public function download(string $file)
     {
         $file = basename($file);
-        $path = "{$this->dir}/{$file}";
-        abort_unless(Storage::exists($path), 404);
+        $path = storage_path("app/{$this->dir}/{$file}");
+        abort_unless(file_exists($path), 404);
 
-        return Response::download(Storage::path($path), $file);
+        return Response::download($path, $file);
     }
 
     public function destroy(string $file)
     {
         $file = basename($file);
-        $path = "{$this->dir}/{$file}";
-        abort_unless(Storage::exists($path), 404);
+        $path = storage_path("app/{$this->dir}/{$file}");
+        abort_unless(file_exists($path), 404);
 
-        Storage::delete($path);
+        unlink($path);
         return back()->with('status', 'Đã xóa bản backup.');
     }
 

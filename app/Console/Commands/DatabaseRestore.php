@@ -13,8 +13,8 @@ class DatabaseRestore extends Command
     public function handle(): int
     {
         $file = basename($this->argument('file')); // chặn path traversal
-        $relPath = "backups/db/{$file}";
-        $absPath = Storage::path($relPath);
+        $relPath = "backup/db/{$file}";
+        $absPath = storage_path("app/{$relPath}");
 
         if (!is_file($absPath)) {
             $this->error("Không tìm thấy file: {$relPath}");

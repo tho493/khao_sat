@@ -12,8 +12,11 @@ class DatabaseBackup extends Command
 
     public function handle(): int
     {
-        $dir = 'backups/db';
-        Storage::makeDirectory($dir);
+        $dir = 'backup/db';
+        $dirPath = storage_path("app/{$dir}");
+        if (!is_dir($dirPath)) {
+            mkdir($dirPath, 0755, true);
+        }
 
         $ts = now()->format('Ymd_His');
         $base = $this->option('name') ?: "db_{$ts}.sql";
@@ -24,7 +27,7 @@ class DatabaseBackup extends Command
         }
 
         $relPath = "{$dir}/{$base}";
-        $absPath = Storage::path($relPath);
+        $absPath = storage_path("app/{$relPath}");
 
         $host = env('DB_HOST', '127.0.0.1');
         $port = (int) env('DB_PORT', 3306);
