@@ -92,6 +92,12 @@
                         <i class="bi bi-journal-text"></i> <span>Nhật ký</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('admin.dbbackups.index') }}"
+                        class="{{ request()->routeIs('admin.dbbackups.*') ? 'active' : '' }}">
+                        <i class="bi bi-database-fill"></i> <span>Sao lưu CSDL</span>
+                    </a>
+                </li>
             </ul>
         </nav>
 

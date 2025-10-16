@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\NamHocController;
 use App\Http\Controllers\Admin\CtdtController;
 use App\Http\Controllers\Admin\PhieuKhaoSatController;
+use App\Http\Controllers\Admin\DbBackupController;
 
 
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
@@ -102,5 +103,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/download', [LogController::class, 'download'])->name('download');
         Route::get('/{id}', [LogController::class, 'show'])->name('show');
         Route::delete('/clear', [LogController::class, 'clear'])->name('clear');
+    });
+
+    // Database Backup
+    Route::prefix('db-backups')->name('dbbackups.')->group(function () {
+        Route::get('/', [DbBackupController::class, 'index'])->name('index');
+        Route::post('/create', [DbBackupController::class, 'create'])->name('create');
+        Route::post('/restore', [DbBackupController::class, 'restore'])->name('restore');
+        Route::get('/download/{file}', [DbBackupController::class, 'download'])->name('download');
+        Route::delete('/delete/{file}', [DbBackupController::class, 'destroy'])->name('destroy');
     });
 });

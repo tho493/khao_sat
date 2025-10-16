@@ -34,6 +34,7 @@ services:
       - DB_DATABASE=khao_sat_db
       - DB_USERNAME=khao_sat_user
       - DB_PASSWORD=khao_sat_password
+      - DB_CLIENT_BIN=/usr/bin
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_CLIENT=phpredis
@@ -50,7 +51,7 @@ services:
       - "8080:80"
     volumes:
       - ./:/var/www
-      - ./docker/nginx/default-http.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     networks:
       - khao_sat_network
     depends_on:

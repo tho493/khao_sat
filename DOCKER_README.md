@@ -113,10 +113,19 @@ docker-compose exec app php artisan test
 ### Quản lý database
 
 ```bash
-# Backup database
+# Backup database sử dụng Laravel command (khuyến nghị)
+docker-compose exec app php artisan backup:db --gzip
+
+# Backup với tên file tùy chỉnh
+docker-compose exec app php artisan backup:db --name=backup_$(date +%Y%m%d) --gzip
+
+# Restore database từ file backup
+docker-compose exec app php artisan restore:db backup_20240101.sql.gz --force
+
+# Backup database trực tiếp từ MySQL container (phương pháp cũ)
 docker-compose exec db mysqldump -u khao_sat_user -p khao_sat_db > backup.sql
 
-# Restore database
+# Restore database trực tiếp từ MySQL container (phương pháp cũ)
 docker-compose exec -T db mysql -u khao_sat_user -p khao_sat_db < backup.sql
 ```
 
@@ -227,24 +236,40 @@ docker system df
 
 ## Backup và Restore
 
-### Backup toàn bộ
+### Backup toàn bộ (Sử dụng Laravel Commands - Khuyến nghị)
 
 ```bash
-# Backup database
-docker-compose exec db mysqldump -u khao_sat_user -p khao_sat_db > backup_$(date +%Y%m%d).sql
+# Backup database với Laravel command (tự động nén)
+docker-compose exec app php artisan backup:db --name=backup_$(date +%Y%m%d) --gzip
 
-# Backup volumes
+# Backup database không nén
+docker-compose exec app php artisan backup:db --name=backup_$(date +%Y%m%d)
+
+# Backup volumes (MySQL data)
 docker run --rm -v khao_sat_db_data:/data -v $(pwd):/backup alpine tar czf /backup/db_backup_$(date +%Y%m%d).tar.gz -C /data .
 ```
 
-### Restore
+### Restore (Sử dụng Laravel Commands - Khuyến nghị)
 
 ```bash
-# Restore database
-docker-compose exec -T db mysql -u khao_sat_user -p khao_sat_db < backup_20240101.sql
+# Restore database từ file backup Laravel
+docker-compose exec app php artisan restore:db backup_20240101.sql.gz --force
+
+# Restore database từ file SQL thường
+docker-compose exec app php artisan restore:db backup_20240101.sql --force
 
 # Restore volumes
 docker run --rm -v khao_sat_db_data:/data -v $(pwd):/backup alpine tar xzf /backup/db_backup_20240101.tar.gz -C /data
+```
+
+### Backup và Restore truyền thống (Phương pháp cũ)
+
+```bash
+# Backup database trực tiếp từ MySQL
+docker-compose exec db mysqldump -u khao_sat_user -p khao_sat_db > backup_$(date +%Y%m%d).sql
+
+# Restore database trực tiếp từ MySQL
+docker-compose exec -T db mysql -u khao_sat_user -p khao_sat_db < backup_20240101.sql
 ```
 
 ## Liên hệ hỗ trợ

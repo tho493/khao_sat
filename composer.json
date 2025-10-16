@@ -16,7 +16,8 @@
         "laravel/tinker": "^2.10.1",
         "laravel/ui": "^4.6",
         "maatwebsite/excel": "^3.1",
-        "rap2hpoutre/laravel-log-viewer": "^2.5"
+        "rap2hpoutre/laravel-log-viewer": "^2.5",
+        "spatie/db-dumper": "^3.8"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

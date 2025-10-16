@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     netcat-openbsd \
+    default-mysql-client \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" pdo_mysql mbstring exif pcntl bcmath gd zip \
     && pecl install redis \
@@ -27,6 +28,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Tạo user www-data
 RUN groupadd -g 1000 www
 RUN useradd -u 1000 -ms /bin/bash -g www www
+
+# Thiết lập biến môi trường cho MySQL client
+# ENV DB_CLIENT_BIN=/usr/bin
 
 # Thiết lập working directory
 WORKDIR /var/www
