@@ -48,6 +48,9 @@ docker compose up -d
 ### 4. Khởi tạo database
 
 ```bash
+# Tạo key
+docker-compose exec app php artisan key:generate
+
 # Chạy migrations
 docker-compose exec app php artisan migrate
 

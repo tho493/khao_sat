@@ -636,7 +636,7 @@
                 data.cau_dieukien_id = null;
                 data.dieukien_hienthi = null;
             }
-            const url = cauHoiId ? `admin/cau-hoi/${cauHoiId}` : `/admin/mau-khao-sat/{{ $mauKhaoSat->id }}/cau-hoi`;
+            const url = cauHoiId ? `/admin/cau-hoi/${cauHoiId}` : `/admin/mau-khao-sat/{{ $mauKhaoSat->id }}/cau-hoi`;
             const method = cauHoiId ? 'PUT' : 'POST';
 
             $.ajax({
