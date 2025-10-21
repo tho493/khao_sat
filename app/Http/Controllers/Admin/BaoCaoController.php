@@ -465,10 +465,16 @@ class BaoCaoController extends Controller
                         STDDEV(giatri_number) as stddev
                     ')->first();
 
+                $cauTraLoi = (clone $baseQuery)
+                    ->whereNotNull('giatri_number')
+                    ->select('giatri_number')
+                    ->limit(20)
+                    ->pluck('giatri_number');
                 return [
                     'type' => 'number_stats',
                     'data' => $stats,
                     'total' => $stats->total ?? 0,
+                    'cauTraLoi' => $cauTraLoi,
                 ];
 
             default:

@@ -204,10 +204,13 @@ class KhaoSatController extends Controller
 
             DB::commit();
 
+            // Lưu dữ liệu vào session để hiển thị trong review
+            $this->storeReviewDataInSession($phieuKhaoSat, $dotKhaoSat);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Gửi khảo sát thành công',
-                'redirect' => route('khao-sat.thanks')
+                'redirect' => route('khao-sat.review')
             ]);
 
         } catch (\Exception $e) {
@@ -222,5 +225,153 @@ class KhaoSatController extends Controller
     public function thanks()
     {
         return view('thanks');
+    }
+
+    public function review()
+    {
+        $reviewData = session('khao_sat_review_data');
+
+        if (!$reviewData) {
+            return redirect()->route('khao-sat.index')
+                ->with('error', 'Không tìm thấy dữ liệu khảo sát để xem lại.');
+        }
+
+        return view('khao-sat.review', compact('reviewData'));
+    }
+
+    private function storeReviewDataInSession($phieuKhaoSat, $dotKhaoSat)
+    {
+        // Lấy thông tin phiếu khảo sát
+        $phieuKhaoSatWithDetails = PhieuKhaoSat::with([
+            'dotKhaoSat.mauKhaoSat.cauHoi' => function ($query) {
+                $query->orderBy('is_personal_info', 'desc')
+                    ->orderBy('page', 'asc')
+                    ->orderBy('thutu', 'asc');
+            },
+            'chiTiet.phuongAn'
+        ])->find($phieuKhaoSat->id);
+
+        $ctdtQuestion = optional($phieuKhaoSatWithDetails->dotKhaoSat->mauKhaoSat->cauHoi)
+            ->where('loai_cauhoi', 'select_ctdt')
+            ->first();
+
+        if ($ctdtQuestion) {
+            foreach ($phieuKhaoSatWithDetails->chiTiet as $chiTiet) {
+                if ($chiTiet->cauhoi_id === $ctdtQuestion->id) {
+                    $ma = $chiTiet->giatri_text ?? $chiTiet->giatri_number ?? null;
+                    if ($ma) {
+                        $tenCtdt = Ctdt::where('mactdt', $ma)->value('tenctdt');
+                        if ($tenCtdt) {
+                            $chiTiet->giatri_text = $tenCtdt;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Chuẩn bị dữ liệu thông tin phiếu
+        $phieuInfo = [
+            'id' => $phieuKhaoSat->id,
+            'ten_dot' => $dotKhaoSat->ten_dot ?? 'N/A',
+            'thoi_gian_nop' => $phieuKhaoSat->thoigian_hoanthanh ?
+                $phieuKhaoSat->thoigian_hoanthanh : 'N/A',
+
+            // Tính thời gian làm bài dưới dạng phút:giây
+            'thoi_gian_lam_bai' => (function () use ($phieuKhaoSat) {
+                $batDau = $phieuKhaoSat->thoigian_batdau;
+                $hoanThanh = $phieuKhaoSat->thoigian_hoanthanh;
+                if (!$batDau || !$hoanThanh)
+                    return 'N/A';
+
+                $diffSeconds = $batDau->diffInSeconds($hoanThanh);
+                $minutes = floor($diffSeconds / 60);
+                $seconds = $diffSeconds % 60;
+                $time = $minutes . ':' . $seconds;
+                return $time;
+            })(),
+        ];
+
+        // Chuẩn hóa dữ liệu câu trả lời
+        $allQuestions = $phieuKhaoSatWithDetails->dotKhaoSat->mauKhaoSat->cauHoi ?? collect();
+        $personalInfoQuestions = $allQuestions->where('is_personal_info', true)->values();
+        $surveyQuestions = $allQuestions->where('is_personal_info', false)->values();
+
+        // Nhóm câu trả lời theo câu hỏi
+        $answersByQuestionId = $phieuKhaoSatWithDetails->chiTiet->groupBy('cauhoi_id');
+
+        $personalInfoAnswers = [];
+        $surveyAnswers = [];
+
+        // Xử lý thông tin cá nhân
+        foreach ($personalInfoQuestions as $question) {
+            $answers = $answersByQuestionId->get($question->id);
+            $display = $this->formatAnswerForDisplay($answers, $question);
+
+            $personalInfoAnswers[] = [
+                'cau_hoi' => $question->noidung_cauhoi,
+                'cau_tra_loi' => $display ?: '(Không trả lời)'
+            ];
+        }
+
+        // Xử lý câu hỏi khảo sát
+        foreach ($surveyQuestions as $index => $question) {
+            $answers = $answersByQuestionId->get($question->id);
+            $display = $this->formatAnswerForDisplay($answers, $question);
+
+            $surveyAnswers[] = [
+                'cau_hoi' => $question->noidung_cauhoi,
+                'cau_tra_loi' => $display ?: '(Không trả lời)'
+            ];
+        }
+
+        // Lưu vào session
+        session([
+            'khao_sat_review_data' => [
+                'phieu_info' => $phieuInfo,
+                'personal_info_answers' => $personalInfoAnswers,
+                'survey_answers' => $surveyAnswers,
+                'total_questions' => $allQuestions->count(),
+                'personal_info_count' => $personalInfoQuestions->count(),
+                'survey_questions_count' => $surveyQuestions->count()
+            ]
+        ]);
+    }
+
+    /**
+     * Chuẩn hóa câu trả lời để hiển thị
+     */
+    private function formatAnswerForDisplay($answers, $question)
+    {
+        if (!$answers || $answers->count() === 0) {
+            return '';
+        }
+
+        switch ($question->loai_cauhoi) {
+            case 'multiple_choice':
+                return $answers->map(function ($ans) {
+                    return $ans->phuongAn->noidung ?? '';
+                })->filter()->implode('; ');
+
+            case 'single_choice':
+            case 'likert':
+                $first = $answers->first();
+                return $first->phuongAn->noidung ?? '';
+
+            case 'rating':
+            case 'number':
+                $first = $answers->first();
+                return $first->giatri_number ?? '';
+
+            case 'date':
+                $first = $answers->first();
+                return $first->giatri_date ?
+                    $first->giatri_date : '';
+
+            case 'select_ctdt':
+            case 'text':
+            default:
+                $first = $answers->first();
+                return $first->giatri_text ?? '';
+        }
     }
 }

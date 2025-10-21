@@ -245,24 +245,32 @@
                             </tbody>
                         </table>
                     @elseif($stats['type'] == 'number_stats')
-                        <table class="info-table">
-                            <tr>
-                                <td>Giá trị Trung bình</td>
-                                <td>{{ number_format($stats['data']->avg, 2) }}</td>
-                            </tr>
-                            <tr>
-                                <td>Giá trị Nhỏ nhất (Min)</td>
-                                <td>{{ number_format($stats['data']->min) }}</td>
-                            </tr>
-                            <tr>
-                                <td>Giá trị Lớn nhất (Max)</td>
-                                <td>{{ number_format($stats['data']->max) }}</td>
-                            </tr>
-                            <tr>
-                                <td>Độ lệch chuẩn</td>
-                                <td>{{ number_format($stats['data']->stddev, 2) }}</td>
-                            </tr>
-                        </table>
+                        @if(!empty($cauHoi->is_personal_info))
+                            <ul style="padding-left: 20px; border: 1px solid #eee; padding: 10px;">
+                                @foreach($stats['cauTraLoi'] as $item)
+                                    <li>{{ number_format($item) }}</li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <table class="info-table">
+                                <tr>
+                                    <td>Giá trị Trung bình</td>
+                                    <td>{{ number_format($stats['data']->avg, 2) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Giá trị Nhỏ nhất (Min)</td>
+                                    <td>{{ number_format($stats['data']->min) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Giá trị Lớn nhất (Max)</td>
+                                    <td>{{ number_format($stats['data']->max) }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Độ lệch chuẩn</td>
+                                    <td>{{ number_format($stats['data']->stddev, 2) }}</td>
+                                </tr>
+                            </table>
+                        @endif
                     @elseif($stats['type'] == 'list' || $stats['type'] == 'text')
                         <ul style="padding-left: 20px; border: 1px solid #eee; padding: 10px;">
                             @foreach($stats['data'] as $item)

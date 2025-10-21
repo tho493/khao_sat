@@ -234,7 +234,7 @@
                                                      <div class="flex justify-center">
                                                             <select class="form-input mt-2 w-full max-w-2xl rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
                                                                     name="cau_tra_loi[{{ $cauHoi->id }}]" {{ $isRequired ? 'required' : '' }}>
-                                                                <option value="">-- Chọn chương trình đào tạo --</option>
+                                                                <option value="">-- Chọn khoa --</option>
                                                                 @foreach($ctdtList as $ct)
                                                                     <option value="{{ $ct->mactdt }}">{{ $ct->tenctdt }}</option>
                                                                 @endforeach
