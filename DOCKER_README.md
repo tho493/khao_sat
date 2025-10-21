@@ -59,6 +59,13 @@ docker-compose exec app php artisan storage:link
 
 # Seed database (nếu cần)
 docker-compose exec app php artisan db:seed
+
+# Cấp quyền tạo file cho thư mục backup db. Phục vụ mục đích backup database
+sudo docker compose exec -it app sh -lc '
+  mkdir -p storage/framework/{cache,sessions,views} storage/logs storage/app/backup/db bootstrap/cache &&
+  chown -R www-data:www-data storage bootstrap/cache &&
+  chmod -R 775 storage bootstrap/cache
+'
 ```
 
 ## Truy cập ứng dụng
