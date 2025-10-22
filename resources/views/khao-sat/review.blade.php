@@ -369,91 +369,104 @@
                                 <div class="kpi-pill">
                                     <div class="num">{{ $reviewData['total_questions'] ?? 0 }}</div>
                                     <div class="lbl">Tổng câu hỏi</div>
-                                    </div>
-                                    <div class="kpi-pill">
-                                        <div class="num">{{ $reviewData['personal_info_count'] ?? 0 }}</div>
-                                        <div class="lbl">Thông tin cá nhân</div>
-                                        </div>
-                                        <div class="kpi-pill">
-                                            <div class="num">{{ $reviewData['survey_questions_count'] ?? 0 }}</div>
-                                            <div class="lbl">Câu hỏi khảo sát</div>
-                                            </div>
-                                            {{-- <div class="kpi-pill">
-                                                <div class="num">{{ $reviewData['phieu_info']['id'] ?? 'N/A' }}</div>
-                                                <div class="lbl">Mã phiếu</div>
-                                            </div> --}}
-                                        </div>
-                                    </div>
+                                </div>
+                                <div class="kpi-pill">
+                                    <div class="num">{{ $reviewData['personal_info_count'] ?? 0 }}</div>
+                                    <div class="lbl">Thông tin cá nhân</div>
+                                </div>
+                                <div class="kpi-pill">
+                                    <div class="num">{{ $reviewData['survey_questions_count'] ?? 0 }}</div>
+                                    <div class="lbl">Câu hỏi khảo sát</div>
+                                </div>
+                                {{-- <div class="kpi-pill">
+                                    <div class="num">{{ $reviewData['phieu_info']['id'] ?? 'N/A' }}</div>
+                                    <div class="lbl">Mã phiếu</div>
+                                </div> --}}
+                            </div>
+                        </div>
 
-                                    <!-- Personal info compact -->
-                                    <div class="block" aria-labelledby="block-info">
-                                        <h3 class="block-title" id="block-info">
-                                            <i class="bi bi-person-badge"></i> Thông tin phiếu khảo sát
-                                        </h3>
-                                        <div class="info-grid">
-                                            <div class="info-item">
-                                                <h6><i class="bi bi-hash me-1"></i>Tên đợt khảo sát</h6>
-                                                <h5>{{ $reviewData['phieu_info']['ten_dot'] ?? 'N/A' }}</h5>
-                                            </div>
-                                            <div class="info-item">
-                                                <h6><i class="bi bi-hash me-1"></i>Mã định danh</h6>
-                                                <h5>{{ $reviewData['phieu_info']['id'] ?? 'N/A' }}</h5>
-                                            </div>
-                                            <div class="info-item">
-                                                <h6><i class="bi bi-clock me-1"></i>Thời gian nộp</h6>
-                                                <h5>{{ $reviewData['phieu_info']['thoi_gian_nop'] ?? 'N/A' }}</h5>
-                                            </div>
-                                            <div class="info-item">
-                                                <h6><i class="bi bi-clock me-1"></i>Thời gian làm bài</h6>
-                                                <h5>{{ $reviewData['phieu_info']['thoi_gian_lam_bai'] ?? 'N/A' }}s</h5>
-                                            </div>
-                                        </div>
-                                    </div>
+                        <!-- Personal info compact -->
+                        <div class="block" aria-labelledby="block-info">
+                            <h3 class="block-title" id="block-info">
+                                <i class="bi bi-person-badge"></i> Thông tin phiếu khảo sát
+                            </h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <h6><i class="bi bi-hash me-1"></i>Tên đợt khảo sát</h6>
+                                    <h5>{{ $reviewData['phieu_info']['ten_dot'] ?? 'N/A' }}</h5>
+                                </div>
+                                <div class="info-item">
+                                    <h6><i class="bi bi-hash me-1"></i>Mã định danh</h6>
+                                    <h5>{{ $reviewData['phieu_info']['id'] ?? 'N/A' }}</h5>
+                                </div>
+                                <div class="info-item">
+                                    <h6><i class="bi bi-clock me-1"></i>Thời gian nộp</h6>
+                                    <h5>{{ $reviewData['phieu_info']['thoi_gian_nop'] ?? 'N/A' }}</h5>
+                                </div>
+                                <div class="info-item">
+                                    <h6><i class="bi bi-clock me-1"></i>Thời gian làm bài</h6>
+                                    <h5>{{ $reviewData['phieu_info']['thoi_gian_lam_bai'] ?? 'N/A' }}s</h5>
+                                </div>
+                            </div>
+                        </div>
 
-                                    <!-- Personal info answers -->
-                                    @if(!empty($reviewData['personal_info_answers']))
-                                                <div class="block" aria-labelledby="block-pi">
-                                            <h3 class="block-title" id="block-pi">
-                                                <i class="bi bi-person-circle"></i> Câu trả lời thông tin cá nhân
-                                            </h3>
-                                            <div class="table-responsive">
-                                                <table class="table-clean">
-                                                    <tbody>
-                                                        @foreach($reviewData['personal_info_answers'] as $answer)
-                                                            <tr>
-                                                                <td>{{ $answer['cau_hoi'] }}</td>
-                                                                <td>{{ $answer['cau_tra_loi'] }}</td>
-                                                            </tr>
-                                                        @endforeach
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    @endif
+                        <!-- Personal info answers -->
+                        @if(!empty($reviewData['personal_info_answers']))
+                            <div class="block" aria-labelledby="block-pi">
+                                <h3 class="block-title" id="block-pi">
+                                    <i class="bi bi-person-circle"></i> Câu trả lời thông tin cá nhân
+                                </h3>
+                                <div class="table-responsive">
+                                    <table class="table-clean">
+                                        <tbody>
+                                            @foreach($reviewData['personal_info_answers'] as $answer)
+                                                <tr>
+                                                    <td>{{ $answer['cau_hoi'] }}</td>
+                                                    <td>{{ $answer['cau_tra_loi'] }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        @endif
 
-                                <!-- Survey answers -->
-                                @if(!empty($reviewData['survey_answers']))
-                                        <div class="block" aria-labelledby="block-survey">
-                                    <h3 class="block-title" id="block-survey">
-                                        <i class="bi bi-card-checklist"></i> Câu trả lời khảo sát
-                                    </h3>
-                                    @foreach($reviewData['survey_answers'] as $index => $answer)
-                                                <div class="answer">
-                                            <div class="answer-head d-flex align-items-baseline gap-2">
-                                                <span class="qno flex-shrink-0">Câu {{ $index + 1 }}: {{ $answer['cau_hoi'] }}</span>
-                                            </div>
-                                            <div class="answer-body">
+                        <!-- Survey answers -->
+                        @if(!empty($reviewData['survey_answers']))
+                            <div class="block" aria-labelledby="block-survey">
+                                <h3 class="block-title" id="block-survey">
+                                    <i class="bi bi-card-checklist"></i> Câu trả lời khảo sát
+                                </h3>
+                                @foreach($reviewData['survey_answers'] as $index => $answer)
+                                    <div class="answer">
+                                        <div class="answer-head d-flex align-items-baseline gap-2">
+                                            <span class="qno flex-shrink-0">Câu {{ $index + 1 }}: {{ $answer['cau_hoi'] }}</span>
+                                        </div>
+                                        <div class="answer-body">
+                                            @if(is_array($answer['cau_tra_loi']))
+                                                <ul class="mb-0 ps-3">
+                                                    @forelse($answer['cau_tra_loi'] as $item)
+                                                        <li><i class="bi bi-check2-square me-1"></i>{{ $item }}</li>
+                                                    @empty
+                                                        <li class="text-muted">(Không trả lời)</li>
+                                                    @endforelse
+                                                </ul>
+                                            @else
                                                 <p class="mb-0">
                                                     <i class="bi bi-chat-quote me-1"></i>{{ $answer['cau_tra_loi'] }}
                                                 </p>
-                                            </div>
+                                            @endif
                                         </div>
-                                    @endforeach
-                                </div> @endif @if(empty($reviewData['personal_info_answers']) && empty($reviewData['survey_answers']))     <div class="block text-center">
-                                    <i class="bi bi-inbox display-6 text-muted"></i>
-                                    <p class="text-muted mt-2 mb-0">Không có dữ liệu câu trả lời.</p>
-                                </div>
-                            @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                        @if(empty($reviewData['personal_info_answers']) && empty($reviewData['survey_answers']))
+                            <div class="block text-center">
+                                <i class="bi bi-inbox display-6 text-muted"></i>
+                                <p class="text-muted mt-2 mb-0">Không có dữ liệu câu trả lời.</p>
+                            </div>
+                        @endif
 
                         <!-- Actions -->
                         <div class="actions">

@@ -62,10 +62,10 @@
                                         <h3 class="font-bold text-xl md:text-xl leading-tight">
                                             {{ Str::limit($dot->ten_dot, 50) }}
                                         </h3>
-                                        <span
+                                        <!-- <span
                                             class="inline-block bg-red-600/60 text-white text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0 mt-1">
                                             {{-- $dot->mauKhaoSat->ten_mau ?? 'Khảo sát' --}} Làm khảo sát
-                                        </span>
+                                        </span> -->
                                     </div>
 
                                     <div class="flex items-center text-sm text-gray-200 opacity-90">

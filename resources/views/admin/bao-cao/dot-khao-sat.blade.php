@@ -233,7 +233,7 @@
                                             @if(!empty($stats['cauTraLoi']) && is_iterable($stats['cauTraLoi']))
                                                 <ul class="list-group list-group-flush mb-2">
                                                     @foreach($stats['cauTraLoi'] as $item)
-                                                        <li class="list-group-item">{{ number_format($item) }}</li>
+                                                        <li class="list-group-item">{{ number_format($item, 0, ',', '.') }}</li>
                                                     @endforeach
                                                 </ul>
                                                 @if(isset($stats['total']) && $stats['total'] > 20)

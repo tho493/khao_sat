@@ -17,6 +17,8 @@ class KhaoSatController extends Controller
     public function index()
     {
         $dotKhaoSats = DotKhaoSat::with(['mauKhaoSat'])
+            ->where('trangthai', 'active')
+            ->where('tungay', '<=', now())
             ->where('denngay', '>=', now())
             ->get();
 
@@ -316,7 +318,15 @@ class KhaoSatController extends Controller
         // Xử lý câu hỏi khảo sát
         foreach ($surveyQuestions as $index => $question) {
             $answers = $answersByQuestionId->get($question->id);
-            $display = $this->formatAnswerForDisplay($answers, $question);
+
+            // Xử lý loại câu hỏi chọn nhiều đáp án (multiple_choice)
+            if ($question->loai_cauhoi === 'multiple_choice' && $answers) {
+                $display = $answers->map(function ($ans) {
+                    return $ans->phuongAn->noidung ?? '';
+                })->filter()->implode('; ');
+            } else {
+                $display = $this->formatAnswerForDisplay($answers, $question);
+            }
 
             $surveyAnswers[] = [
                 'cau_hoi' => $question->noidung_cauhoi,

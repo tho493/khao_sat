@@ -266,7 +266,7 @@
                                                 @php
                                                     $questionCounterGlobal++;
                                                     $isConditionalChild = isset($conditionalMap[$cauHoi->id]);
-                                                    $isRequired = $cauHoi->batBuoc && !$isConditionalChild;
+                                                    $isRequired = ($cauHoi->batbuoc && !$isConditionalChild);
                                                 @endphp
                                                 <div class="question-card bg-white/30 p-4 rounded-lg border border-white/30"
                                                      id="question-{{ $cauHoi->id }}"
@@ -444,9 +444,19 @@
                                 <div class="bg-blue-600 h-6 rounded-full flex items-center justify-center text-white text-sm font-semibold transition-all duration-300"
                                     id="progressBar" style="width: 0%;"></div>
                             </div>
-                            <p class="text-slate-600 text-sm mb-0">
-                                Đã trả lời: <span id="answeredCount">0</span> câu
-                            </p>
+                            <div class="space-y-2 text-sm">
+                                <p class="text-slate-600 mb-1">
+                                    <strong>Đã trả lời:</strong> <span id="answeredCount">0</span>/<span id="totalCount">0</span> câu
+                                </p>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-red-600">
+                                        <i class="bi bi-asterisk"></i> Bắt buộc: <span id="requiredCount">0</span>
+                                    </span>
+                                    <span class="text-slate-500">
+                                        <i class="bi bi-circle"></i> Không bắt buộc: <span id="optionalCount">0</span>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Lưu ý -->
@@ -584,8 +594,20 @@
         
         function updateProgress() {
             let answeredQuestions = 0;
+            let totalRequiredQuestions = 0;
+            let totalOptionalQuestions = 0;
 
             $('.question-card').each(function() {
+                const questionCard = $(this);
+                const isRequired = questionCard.data('originally-required') === true;
+                
+                // Count required vs optional questions
+                if (isRequired) {
+                    totalRequiredQuestions++;
+                } else {
+                    totalOptionalQuestions++;
+                }
+
                 // Include select[name^="cau_tra_loi"] for type select_ctdt
                 const inputs = $(this).find('input[name^="cau_tra_loi"], textarea[name^="cau_tra_loi"], select[name^="cau_tra_loi"]');
                 let isAnswered = false;
@@ -604,7 +626,10 @@
 
             const progress = totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
             $('#progressBar').css('width', progress + '%').text(progress + '%');
-            $('#answeredCount').text(`${answeredQuestions}/${totalQuestions}`);
+            $('#answeredCount').text(answeredQuestions);
+            $('#totalCount').text(totalQuestions);
+            $('#requiredCount').text(totalRequiredQuestions);
+            $('#optionalCount').text(totalOptionalQuestions);
         }
 
         function checkAllConditions() {
