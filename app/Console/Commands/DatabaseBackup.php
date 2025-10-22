@@ -19,7 +19,7 @@ class DatabaseBackup extends Command
         }
 
         $ts = now()->format('Ymd_His');
-        $base = $this->option('name') ?: "db_{$ts}.sql";
+        $base = $this->option('name') ? $this->option('name') . ".sql" : "db_{$ts}.sql";
         $gzip = (bool) $this->option('gzip');
 
         if ($gzip && !str_ends_with($base, '.gz')) {

@@ -12,7 +12,7 @@ class DatabaseRestore extends Command
 
     public function handle(): int
     {
-        $file = basename($this->argument('file')); // chặn path traversal
+        $file = basename($this->argument('file'));
         $relPath = "backup/db/{$file}";
         $absPath = storage_path("app/{$relPath}");
 
@@ -50,7 +50,6 @@ class DatabaseRestore extends Command
         $isGz = str_ends_with(strtolower($file), '.gz');
 
         if ($isGz) {
-            // Sử dụng PHP gzip thay vì shell gzip để tương thích Windows/Linux
             $tempFile = tempnam(sys_get_temp_dir(), 'db_restore_');
 
             // Giải nén file gzip bằng PHP

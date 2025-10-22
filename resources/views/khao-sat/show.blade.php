@@ -810,7 +810,10 @@
         $(`#survey-page-${pageNumber}`).fadeIn();
         currentPage = pageNumber;
         updateNavigationButtons();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const container = document.getElementById('survey-pages-container');
+        if (container) {
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
     }
 
     // Gắn sự kiện
