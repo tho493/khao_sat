@@ -62,6 +62,16 @@
                         <span class="mx-2">|</span>
                         <span class="fw-semibold">Thời gian:</span>
                         <span class="fw-bold">{{ $dotKhaoSat->tungay }} - {{ $dotKhaoSat->denngay }}</span>
+                        <!-- @if($selectedCtdt)
+                            <span class="mx-2">|</span>
+                            <span class="fw-semibold">Đang lọc:</span>
+                            <span class="fw-bold text-primary">
+                                @php
+                                    $selectedCtdtName = \App\Models\Ctdt::where('mactdt', $selectedCtdt)->value('tenctdt');
+                                @endphp
+                                {{ $selectedCtdtName ?? $selectedCtdt }}
+                            </span>
+                        @endif -->
                     </p>
                 </div>
                 <div class="col-lg-4 col-md-5 text-md-end mt-3 mt-md-0">
@@ -82,14 +92,24 @@
             {{-- Thống kê tổng quan --}}
             <div class="card shadow mb-4">
                 <div class="card-header">
-                    <h6 class="m-0 font-weight-bold text-primary">Tổng quan Kết quả</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        Tổng quan Kết quả
+                        @if($selectedCtdt)
+                            <span class="badge bg-primary ms-2">
+                                @php
+                                    $selectedCtdtName = \App\Models\Ctdt::where('mactdt', $selectedCtdt)->value('tenctdt');
+                                @endphp
+                                Đã lọc: {{ $selectedCtdtName ?? $selectedCtdt }}
+                            </span>
+                        @endif
+                    </h6>
                 </div>
                 <div class="card-body">
                     <div class="row text-center">
                         <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
                             <i class="bi bi-check2-all fs-1 text-success"></i>
                             <div class="h4 mt-2 font-weight-bold text-gray-800">
-                                {{ number_format($tongQuan['phieu_hoan_thanh']) }}
+                                {{ $tongQuan['phieu_hoan_thanh'] }}
                             </div>
                             <div class="text-xs font-weight-bold text-success text-uppercase">Phiếu hoàn thành</div>
                         </div>
@@ -118,7 +138,9 @@
             <!-- Biểu đồ Xu hướng Phản hồi -->
             <div class="card shadow mb-4">
                 <div class="card-header">
-                    <h6 class="m-0 font-weight-bold text-primary">Xu hướng phản hồi theo ngày</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        Xu hướng phản hồi theo ngày
+                    </h6>
                 </div>
                 <div class="card-body">
                     <div style="height: 300px;"><canvas id="responseTrendChart"></canvas></div>
@@ -126,7 +148,9 @@
             </div>
 
             {{-- Thống kê chi tiết tất cả câu trả lời --}}
-            <h3 class="h4 mb-3">Chi tiết tất cả câu trả lời</h3>
+            <h3 class="h4 mb-3">
+                Chi tiết tất cả câu trả lời
+            </h3>
             @php
     $count = 1
             @endphp
@@ -233,7 +257,7 @@
                                             @if(!empty($stats['cauTraLoi']) && is_iterable($stats['cauTraLoi']))
                                                 <ul class="list-group list-group-flush mb-2">
                                                     @foreach($stats['cauTraLoi'] as $item)
-                                                        <li class="list-group-item">{{ number_format($item, 0, ',', '.') }}</li>
+                                                        <li class="list-group-item">{{ intval($item) }}</li>
                                                     @endforeach
                                                 </ul>
                                                 @if(isset($stats['total']) && $stats['total'] > 20)
@@ -249,11 +273,11 @@
                                                     <div class="text-muted small">Trung bình</div>
                                                 </div>
                                                 <div class="col">
-                                                    <div class="h5">{{ number_format($stats['data']->min) }}</div>
+                                                    <div class="h5">{{ number_format($stats['data']->min, 2) }}</div>
                                                     <div class="text-muted small">Nhỏ nhất</div>
                                                 </div>
                                                 <div class="col">
-                                                    <div class="h5">{{ number_format($stats['data']->max) }}</div>
+                                                    <div class="h5">{{ number_format($stats['data']->max, 2) }}</div>
                                                     <div class="text-muted small">Lớn nhất</div>
                                                 </div>
                                                 <div class="col">
@@ -335,10 +359,16 @@
                                             {{ $phieu->thoigian_hoanthanh ? $phieu->thoigian_hoanthanh->format('d/m/Y H:i') : 'N/A' }}
                                         </td>
                                         <td class="text-end">
-                                            <button class="btn btn-sm btn-outline-info" title="Xem chi tiết phiếu"
-                                                onclick="showResponseDetail({{ $phieu->id }})">
-                                                <i class="bi bi-eye"></i>
-                                            </button>
+                                            <div class="btn-group" role="group">
+                                                <button class="btn btn-sm btn-outline-info" title="Xem chi tiết phiếu"
+                                                    onclick="showResponseDetail({{ $phieu->id }})">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" title="Xóa toàn bộ phiếu khảo sát"
+                                                    onclick="deleteEntireSurvey({{ $phieu->id }})">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
@@ -399,6 +429,78 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal xác nhận xóa câu trả lời -->
+        <div class="modal fade" id="deleteResponseModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận xóa câu trả lời
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Cảnh báo:</strong> Thao tác này sẽ xóa câu trả lời và không thể hoàn tác!
+                        </div>
+                        <p>Bạn có chắc chắn muốn xóa câu trả lời này không?</p>
+                        <div class="bg-light p-3 rounded">
+                            <strong>Câu hỏi:</strong><br>
+                            <span id="deleteQuestionText">Đang tải...</span><br><br>
+                            <strong>Câu trả lời:</strong><br>
+                            <span id="deleteAnswerText">Đang tải...</span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i>Hủy
+                        </button>
+                        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                            <i class="bi bi-trash me-1"></i>Xóa câu trả lời
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal xác nhận xóa toàn bộ phiếu khảo sát -->
+        <div class="modal fade" id="deleteSurveyModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận xóa toàn bộ phiếu khảo sát
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Cảnh báo:</strong> Thao tác này sẽ xóa phiếu khảo sát này!
+                        </div>
+                        <p class="mb-3">Bạn có chắc chắn muốn xóaphiếu khảo sát này không?</p>
+                        <div class="bg-light p-3 rounded">
+                            <strong>Thông tin phiếu:</strong><br>
+                            <span id="deleteSurveyInfo">Đang tải...</span>
+                        </div>
+                        <div class="mt-3 p-3 bg-warning bg-opacity-10 border border-warning rounded">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Lưu ý:</strong> Hành động này không thể hoàn tác và sẽ ảnh hưởng đến thống kê báo cáo.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i>Hủy
+                        </button>
+                        <button type="button" class="btn btn-danger" id="confirmDeleteSurveyBtn">
+                            <i class="bi bi-trash me-1"></i>Xóa toàn bộ phiếu
+                        </button>
                     </div>
                 </div>
             </div>
@@ -571,10 +673,27 @@
                         surveyQuestions.forEach((question, index) => {
                             const answerArray = answersByQuestionId[question.id] || [];
                             const answerText = answerArray.length > 0 ? answerArray.join('; ') : '<em class="text-muted">(Không trả lời)</em>';
-                            html += `<div class="mb-3">
+                            
+                            // Tìm chi tiết câu trả lời để lấy ID
+                            const responseDetails = phieuData.chi_tiet.filter(detail => detail.cauhoi_id === question.id);
+                            
+                            html += `<div class="mb-3 border rounded p-3">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
                                             <p class="mb-1"><strong>Câu ${index + 1}:</strong> ${escapeHtml(question.noidung_cauhoi)}</p>
-                                            <p class="ps-3 text-primary fst-italic mb-0">${answerText}</p>
-                                         </div>`;
+                                            ${responseDetails.length > 0 ? `
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    ${responseDetails.map(detail => `
+                                                        <button class="btn btn-outline-danger btn-sm" 
+                                                                title="Xóa câu trả lời này"
+                                                                onclick="deleteSpecificResponse(${detail.id}, '${escapeHtml(question.noidung_cauhoi)}', '${escapeHtml(answerText)}')">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    `).join('')}
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                        <p class="ps-3 text-primary fst-italic mb-0">${answerText}</p>
+                                     </div>`;
                         });
                     }
                     modalContent.html(html);
@@ -587,6 +706,184 @@
         function escapeHtml(text) {
             if (typeof text !== 'string') return '';
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // Xử lý xóa câu trả lời cụ thể
+        let currentResponseId = null;
+        const deleteResponseModal = new bootstrap.Modal(document.getElementById('deleteResponseModal'));
+
+        function deleteSpecificResponse(responseId, questionText, answerText) {
+            currentResponseId = responseId;
+            
+            // Hiển thị thông tin câu hỏi và câu trả lời trong modal
+            $('#deleteQuestionText').text(questionText);
+            $('#deleteAnswerText').text(answerText);
+            
+            deleteResponseModal.show();
+        }
+
+        // Xử lý xác nhận xóa câu trả lời
+        $('#confirmDeleteBtn').on('click', function() {
+            if (!currentResponseId) return;
+
+            const btn = $(this);
+            const originalText = btn.html();
+            
+            // Disable button và hiển thị loading
+            btn.prop('disabled', true).html('<i class="bi bi-hourglass-split me-1"></i>Đang xóa...');
+
+            // Gọi API xóa câu trả lời
+            $.ajax({
+                url: `/admin/bao-cao/response/${currentResponseId}`,
+                method: 'DELETE',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Hiển thị thông báo thành công
+                        showAlert('success', 'Xóa thành công', response.message);
+                        
+                        // Đóng modal
+                        deleteResponseModal.hide();
+                        
+                        // Reload trang để cập nhật dữ liệu
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showAlert('error', 'Lỗi', response.message);
+                        btn.prop('disabled', false).html(originalText);
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = 'Có lỗi xảy ra khi xóa câu trả lời.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                    showAlert('error', 'Lỗi', errorMessage);
+                    btn.prop('disabled', false).html(originalText);
+                }
+            });
+        });
+
+        // Xử lý xóa toàn bộ phiếu khảo sát
+        let currentSurveyId = null;
+        const deleteSurveyModal = new bootstrap.Modal(document.getElementById('deleteSurveyModal'));
+
+        function deleteEntireSurvey(surveyId) {
+            currentSurveyId = surveyId;
+            
+            // Hiển thị thông tin phiếu trong modal
+            $('#deleteSurveyInfo').html(`
+                <div class="text-center py-3">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                    <p class="mt-2 mb-0">Đang tải thông tin phiếu...</p>
+                </div>
+            `);
+            
+            deleteSurveyModal.show();
+
+            // Tải thông tin phiếu để hiển thị trong modal xác nhận
+            $.get(`/admin/phieu-khao-sat/${surveyId}`)
+                .done(function (phieuData) {
+                    const personalInfoQuestions = phieuData.dot_khao_sat.mau_khao_sat.cau_hoi.filter(q => q.is_personal_info);
+                    let infoText = `Phiếu #${surveyId}<br>`;
+                    
+                    if (personalInfoQuestions.length > 0) {
+                        const answersByQuestionId = {};
+                        phieuData.chi_tiet.forEach(answer => {
+                            const qId = answer.cauhoi_id;
+                            if (!answersByQuestionId[qId]) {
+                                answersByQuestionId[qId] = [];
+                            }
+                            const value = answer.phuong_an ? answer.phuong_an.noidung
+                                : (answer.giatri_text || answer.giatri_number || (answer.giatri_date ? new Date(answer.giatri_date).toLocaleDateString('vi-VN') : ''));
+                            answersByQuestionId[qId].push(value);
+                        });
+
+                        personalInfoQuestions.forEach(question => {
+                            const answerArray = answersByQuestionId[question.id] || [];
+                            const answerText = answerArray.length > 0 ? answerArray.join('; ') : '(Không trả lời)';
+                            infoText += `<strong>${escapeHtml(question.noidung_cauhoi)}:</strong> ${escapeHtml(answerText)}<br>`;
+                        });
+                    }
+                    
+                    infoText += `<strong>Thời gian hoàn thành:</strong> ${phieuData.thoigian_hoanthanh ? new Date(phieuData.thoigian_hoanthanh).toLocaleString('vi-VN') : 'N/A'}<br>`;
+                    infoText += `<strong>Số câu trả lời:</strong> ${phieuData.chi_tiet.length} câu`;
+                    
+                    $('#deleteSurveyInfo').html(infoText);
+                })
+                .fail(function () {
+                    $('#deleteSurveyInfo').html(`<span class="text-danger">Không thể tải thông tin phiếu #${surveyId}</span>`);
+                });
+        }
+
+        // Xử lý xác nhận xóa toàn bộ phiếu
+        $('#confirmDeleteSurveyBtn').on('click', function() {
+            if (!currentSurveyId) return;
+
+            const btn = $(this);
+            const originalText = btn.html();
+            
+            // Disable button và hiển thị loading
+            btn.prop('disabled', true).html('<i class="bi bi-hourglass-split me-1"></i>Đang xóa...');
+
+            // Gọi API xóa toàn bộ phiếu khảo sát
+            $.ajax({
+                url: `/admin/bao-cao/survey/${currentSurveyId}`,
+                method: 'DELETE',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Hiển thị thông báo thành công
+                        showAlert('success', 'Xóa thành công', response.message);
+                        
+                        // Đóng modal
+                        deleteSurveyModal.hide();
+                        
+                        // Reload trang để cập nhật dữ liệu
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showAlert('error', 'Lỗi', response.message);
+                        btn.prop('disabled', false).html(originalText);
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = 'Có lỗi xảy ra khi xóa phiếu khảo sát.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                    showAlert('error', 'Lỗi', errorMessage);
+                    btn.prop('disabled', false).html(originalText);
+                }
+            });
+        });
+
+        // Hàm hiển thị thông báo
+        function showAlert(type, title, message) {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const iconClass = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
+            
+            const alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    <i class="bi ${iconClass} me-2"></i>
+                    <strong>${title}:</strong> ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Thêm thông báo vào đầu trang
+            $('.container-fluid').prepend(alertHtml);
+            
+            // Tự động ẩn sau 5 giây
+            setTimeout(() => {
+                $('.alert').fadeOut();
+            }, 5000);
         }
     </script>
 

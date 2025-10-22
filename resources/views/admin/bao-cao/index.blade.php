@@ -150,7 +150,7 @@
                                     <strong>{{ $dot->ten_dot }}</strong>
                                 </td>
                                 <td>
-                                    <span class="badge bg-info">
+                                    <span class="badge bg-info" style="max-width: 180px; white-space: normal; word-break: break-word; display: inline-block;">
                                         {{ $dot->mauKhaoSat->ten_mau ?? 'N/A' }}
                                     </span>
                                 </td>

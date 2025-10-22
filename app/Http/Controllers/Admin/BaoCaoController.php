@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\DotKhaoSat;
 use App\Models\PhieuKhaoSat;
+use App\Models\PhieuKhaoSatChiTiet;
 use App\Models\CauHoiKhaoSat;
 use App\Services\ChatbotAIService;
 use Illuminate\Http\Request;
@@ -97,8 +98,27 @@ class BaoCaoController extends Controller
             }
         ]);
 
-        // Thống kê Tổng quan
-        $completedSurveys = $dotKhaoSat->phieuKhaoSat;
+        // Lấy câu hỏi CTĐT để áp dụng bộ lọc
+        $ctdtQuestion = $dotKhaoSat->mauKhaoSat->cauHoi
+            ->where('loai_cauhoi', 'select_ctdt')
+            ->first();
+
+        // Lấy danh sách phiếu đã hoàn thành với bộ lọc CTĐT
+        $query = $dotKhaoSat->phieuKhaoSat()
+            ->where('trangthai', 'completed');
+
+        $selectedCtdt = $request->input('ctdt');
+
+        if ($ctdtQuestion && $selectedCtdt) {
+            $filteredPhieuIds = DB::table('phieu_khaosat_chitiet')
+                ->where('cauhoi_id', $ctdtQuestion->id)
+                ->where('giatri_text', $selectedCtdt)
+                ->pluck('phieu_khaosat_id');
+
+            $query->whereIn('id', $filteredPhieuIds);
+        }
+
+        $completedSurveys = $query->get();
         $completedCount = $completedSurveys->count();
 
         $tongQuan = [
@@ -110,18 +130,16 @@ class BaoCaoController extends Controller
         ];
 
         // --- Dữ liệu Biểu đồ Xu hướng Phản hồi ---
-        $responseTrendChart = $this->getResponseTrendForSurvey($dotKhaoSat);
+        $responseTrendChart = $this->getResponseTrendForSurvey($dotKhaoSat, $selectedCtdt);
 
         // Chi tiết từng Câu hỏi
         $thongKeCauHoi = [];
         foreach ($dotKhaoSat->mauKhaoSat->cauHoi as $cauHoi) {
-            $thongKeCauHoi[$cauHoi->id] = $this->thongKeCauHoi($dotKhaoSat->id, $cauHoi);
+            $thongKeCauHoi[$cauHoi->id] = $this->thongKeCauHoi($dotKhaoSat->id, $cauHoi, $completedSurveys->pluck('id'));
         }
 
-        // Danh sách Phiếu đã nộp
-        $danhSachPhieu = $dotKhaoSat->phieuKhaoSat()
-            ->where('trangthai', 'completed')
-            ->with(['chiTiet.phuongAn'])
+        // Danh sách Phiếu đã nộp (sử dụng cùng query đã lọc)
+        $danhSachPhieu = $query->with(['chiTiet.phuongAn'])
             ->orderBy('thoigian_hoanthanh', 'desc')
             ->paginate(15);
 
@@ -165,12 +183,6 @@ class BaoCaoController extends Controller
             }
         }
 
-
-
-        $ctdtQuestion = $dotKhaoSat->mauKhaoSat->cauHoi
-            ->where('loai_cauhoi', 'select_ctdt')
-            ->first();
-
         $availableCtdts = collect();
         if ($ctdtQuestion) {
             $usedCtdtIds = DB::table('phieu_khaosat_chitiet')
@@ -183,22 +195,6 @@ class BaoCaoController extends Controller
                 $availableCtdts = Ctdt::whereIn('mactdt', $usedCtdtIds)->orderBy('tenctdt')->get();
             }
         }
-
-        $query = $dotKhaoSat->phieuKhaoSat()
-            ->where('trangthai', 'completed');
-
-        $selectedCtdt = $request->input('ctdt');
-
-        if ($ctdtQuestion && $selectedCtdt) {
-            $filteredPhieuIds = DB::table('phieu_khaosat_chitiet')
-                ->where('cauhoi_id', $ctdtQuestion->id)
-                ->where('giatri_text', $selectedCtdt)
-                ->pluck('phieu_khaosat_id');
-
-            $query->whereIn('id', $filteredPhieuIds);
-        }
-
-        $danhSachPhieu = $query->orderBy('thoigian_hoanthanh', 'desc')->paginate(15);
 
         // dd($thongKeCauHoi);
 
@@ -253,11 +249,28 @@ class BaoCaoController extends Controller
         return $type === 'MIN' ? $this->formatSeconds($seconds->min()) : $this->formatSeconds($seconds->max());
     }
 
-    private function getResponseTrendForSurvey(DotKhaoSat $dotKhaoSat)
+    private function getResponseTrendForSurvey(DotKhaoSat $dotKhaoSat, $selectedCtdt = null)
     {
-        $data = $dotKhaoSat->phieuKhaoSat()
-            ->where('trangthai', 'completed')
-            ->select(DB::raw('DATE(thoigian_hoanthanh) as date'), DB::raw('COUNT(*) as count'))
+        $query = $dotKhaoSat->phieuKhaoSat()
+            ->where('trangthai', 'completed');
+
+        // Áp dụng bộ lọc CTĐT nếu có
+        if ($selectedCtdt) {
+            $ctdtQuestion = $dotKhaoSat->mauKhaoSat->cauHoi
+                ->where('loai_cauhoi', 'select_ctdt')
+                ->first();
+
+            if ($ctdtQuestion) {
+                $filteredPhieuIds = DB::table('phieu_khaosat_chitiet')
+                    ->where('cauhoi_id', $ctdtQuestion->id)
+                    ->where('giatri_text', $selectedCtdt)
+                    ->pluck('phieu_khaosat_id');
+
+                $query->whereIn('id', $filteredPhieuIds);
+            }
+        }
+
+        $data = $query->select(DB::raw('DATE(thoigian_hoanthanh) as date'), DB::raw('COUNT(*) as count'))
             ->groupBy('date')
             ->orderBy('date', 'ASC')
             ->pluck('count', 'date');
@@ -696,5 +709,137 @@ class BaoCaoController extends Controller
         }
 
         return back()->with('error', 'Định dạng xuất không hợp lệ.');
+    }
+
+    /**
+     * Xóa một câu trả lời cụ thể
+     * @param Request $request
+     * @param PhieuKhaoSatChiTiet $phieuKhaoSatChiTiet
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteResponse(Request $request, PhieuKhaoSatChiTiet $phieuKhaoSatChiTiet)
+    {
+        try {
+            // Kiểm tra quyền truy cập
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'Bạn cần đăng nhập để thực hiện thao tác này.'], 401);
+            }
+
+            // Lấy thông tin phiếu khảo sát và đợt khảo sát
+            $phieuKhaoSat = $phieuKhaoSatChiTiet->phieuKhaoSat;
+            $dotKhaoSat = $phieuKhaoSat->dotKhaoSat;
+
+            // Kiểm tra xem đợt khảo sát có tồn tại không
+            if (!$dotKhaoSat) {
+                return response()->json(['success' => false, 'message' => 'Không tìm thấy đợt khảo sát.'], 404);
+            }
+
+            // Kiểm tra xem phiếu khảo sát đã hoàn thành chưa
+            if ($phieuKhaoSat->trangthai !== 'completed') {
+                return response()->json(['success' => false, 'message' => 'Chỉ có thể xóa câu trả lời từ phiếu đã hoàn thành.'], 400);
+            }
+
+            // Lưu thông tin để ghi log
+            $responseInfo = [
+                'phieu_id' => $phieuKhaoSat->id,
+                'cauhoi_id' => $phieuKhaoSatChiTiet->cauhoi_id,
+                'dot_khaosat_id' => $dotKhaoSat->id,
+                'dot_khaosat_ten' => $dotKhaoSat->ten_dot,
+                'response_value' => $phieuKhaoSatChiTiet->gia_tri,
+                'deleted_by' => auth()->user()->tendangnhap ?? 'unknown',
+                'deleted_at' => now()->toDateTimeString()
+            ];
+
+            // Xóa câu trả lời
+            $phieuKhaoSatChiTiet->delete();
+
+            // Ghi log hoạt động
+            \Log::info('Admin deleted survey response', $responseInfo);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã xóa câu trả lời thành công.',
+                'data' => $responseInfo
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error deleting survey response', [
+                'error' => $e->getMessage(),
+                'response_id' => $phieuKhaoSatChiTiet->id ?? 'unknown',
+                'user' => auth()->user()->tendangnhap ?? 'unknown'
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi xóa câu trả lời: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Xóa toàn bộ phiếu khảo sát
+     * @param Request $request
+     * @param PhieuKhaoSat $phieuKhaoSat
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteSurvey(Request $request, PhieuKhaoSat $phieuKhaoSat)
+    {
+        try {
+            // Kiểm tra quyền truy cập
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'Bạn cần đăng nhập để thực hiện thao tác này.'], 401);
+            }
+
+            // Lấy thông tin đợt khảo sát
+            $dotKhaoSat = $phieuKhaoSat->dotKhaoSat;
+
+            // Kiểm tra xem đợt khảo sát có tồn tại không
+            if (!$dotKhaoSat) {
+                return response()->json(['success' => false, 'message' => 'Không tìm thấy đợt khảo sát.'], 404);
+            }
+
+            // Kiểm tra xem phiếu khảo sát đã hoàn thành chưa
+            if ($phieuKhaoSat->trangthai !== 'completed') {
+                return response()->json(['success' => false, 'message' => 'Chỉ có thể xóa phiếu khảo sát đã hoàn thành.'], 400);
+            }
+
+            // Đếm số câu trả lời sẽ bị xóa
+            $responseCount = $phieuKhaoSat->chiTiet()->count();
+
+            // Lưu thông tin để ghi log
+            $surveyInfo = [
+                'phieu_id' => $phieuKhaoSat->id,
+                'dot_khaosat_id' => $dotKhaoSat->id,
+                'dot_khaosat_ten' => $dotKhaoSat->ten_dot,
+                'response_count' => $responseCount,
+                'thoigian_hoanthanh' => $phieuKhaoSat->thoigian_hoanthanh ? $phieuKhaoSat->thoigian_hoanthanh->toDateTimeString() : null,
+                'deleted_by' => auth()->user()->tendangnhap ?? 'unknown',
+                'deleted_at' => now()->toDateTimeString()
+            ];
+
+            // Xóa phiếu khảo sát (cascade sẽ tự động xóa các chi tiết)
+            $phieuKhaoSat->delete();
+
+            // Ghi log hoạt động
+            \Log::info('Admin deleted entire survey', $surveyInfo);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Đã xóa phiếu khảo sát thành công. Đã xóa {$responseCount} câu trả lời.",
+                'data' => $surveyInfo
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error deleting survey', [
+                'error' => $e->getMessage(),
+                'survey_id' => $phieuKhaoSat->id ?? 'unknown',
+                'user' => auth()->user()->tendangnhap ?? 'unknown'
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi xóa phiếu khảo sát: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

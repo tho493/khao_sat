@@ -248,7 +248,7 @@
                         @if(!empty($cauHoi->is_personal_info))
                             <ul style="padding-left: 20px; border: 1px solid #eee; padding: 10px;">
                                 @foreach($stats['cauTraLoi'] as $item)
-                                    <li>{{ number_format($item) }}</li>
+                                    <li>{{ $item }}</li>
                                 @endforeach
                             </ul>
                         @else

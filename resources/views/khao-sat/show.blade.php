@@ -259,7 +259,7 @@
                                 <div class="survey-page" id="survey-page-{{ $pageNumber }}" style="{{ !$loop->first ? 'display: none;' : '' }}">
                                     <div class="glass-effect">
                                         <div class="bg-white/40 rounded-t-xl px-6 py-4 border-b border-white/30">
-                                            <h5 class="text-slate-800 font-bold text-lg m-0">Phần {{ $pageNumber }} / {{ $questionsByPage->count() }}</h5>
+                                            <h5 class="text-slate-800 font-bold text-lg m-0">Phần {{ $pageNumber }}/{{ $questionsByPage->count() }}</h5>
                                         </div>
                                         <div class="p-6 space-y-6">
                                             @foreach($questionsOnPage as $cauHoi)
@@ -433,7 +433,7 @@
                     <div class="progress-section space-y-6">
                         <!-- Thời gian -->
                         <div class="glass-effect p-6 flex flex-col items-center">
-                            <h6 class="font-bold text-slate-800 mb-3">Thời gian làm bài</h6>
+                            <h6 class="font-bold text-slate-800 mb-3">Thời gian</h6>
                             <div class="text-4xl font-extrabold text-blue-600" id="survey-timer">00:00</div>
                         </div>
                     
