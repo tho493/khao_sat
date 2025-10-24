@@ -4,8 +4,6 @@ use App\Http\Controllers\Api\ChatbotController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\KhaoSatController;
-use App\Http\Controllers\ErrorController;
-use App\Http\Controllers\SafariIosController;
 
 // Nạp các route dành cho admin:
 require __DIR__ . '/admin.php';
@@ -18,9 +16,6 @@ Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 Route::prefix('api')->name('api.')->group(function () {
     Route::post('/chatbot/ask', [ChatbotController::class, 'ask'])->name('ask');
 });
-
-Route::get('/csrf-token', [SafariIosController::class, 'getCsrfToken'])->name('csrf-token');
-Route::get('/safari-ios/session-check', [SafariIosController::class, 'checkSession'])->name('safari-ios.session-check');
 
 // Public routes
 Route::prefix('')->name('khao-sat.')->group(function () {
