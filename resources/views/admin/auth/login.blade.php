@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập Quản trị - Hệ thống khảo sát</title>
     
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -139,7 +140,6 @@
 
                     <form method="POST" action="/login" id="loginForm">
                         @csrf
-                        {!! \App\Http\Middleware\PreventDoubleSubmissions::tokenField('admin_login') !!}
 
                         <div class="mb-3">
                             <label for="tendangnhap" class="form-label">Tên đăng nhập</label>
@@ -211,6 +211,19 @@
         const btn = document.getElementById('loginBtn');
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang đăng nhập...';
+        
+        // Đảm bảo CSRF token được gửi đúng cách cho iOS WebKit
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const form = document.getElementById('loginForm');
+        
+        // Thêm CSRF token vào form nếu chưa có
+        if (!form.querySelector('input[name="_token"]')) {
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = '_token';
+            tokenInput.value = csrfToken;
+            form.appendChild(tokenInput);
+        }
     });
 
     // Auto-hide alerts

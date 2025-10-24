@@ -114,7 +114,6 @@
 
                     <form id="formKhaoSat" method="POST" action="{{ route('khao-sat.store', $dotKhaoSat) }}" class="space-y-6">
                         @csrf
-                        {!! \App\Http\Middleware\PreventDoubleSubmissions::tokenField() !!}
                         <input type="hidden" name="metadata[thoigian_batdau]" id="thoigian_batdau">
 
                         <!-- Thông tin người trả lời -->
@@ -672,6 +671,20 @@
         }
 
 
+        function warningSafariIos() {
+            Swal.fire({
+                title: 'Thông báo!',
+                text: "Nếu bạn đang dùng Safari iOS vui lòng chuyển sang trình duyệt khác để tiếp tục làm bài!!",
+                icon: 'warning',
+                showDenyButton: true,
+                confirmButtonText: '<i class="bi bi-browser-chrome"></i> Chuyển trình duyệt',
+                denyButtonText: '<i class="bi bi-x-lg"></i> Đóng',
+            });
+            if (result.isConfirmed) {
+                window.location.href = 'googlechrome://' + window.location.href;
+            }
+        }
+
         /**
          * Helper: Xóa câu trả lời của một card câu hỏi.
          * @param {jQuery} questionCard - Đối tượng jQuery của .question-card
@@ -685,6 +698,7 @@
         loadProgress();
         checkAllConditions();
         updateProgress();
+        warningSafariIos();
         $('.question-card[data-conditional-parent-id]').hide();
         
         surveyForm.on('input change', function() {

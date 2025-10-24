@@ -9,7 +9,6 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Schema;
 use App\Models\User;
 use App\Rules\Recaptcha;
-use App\Http\Middleware\PreventDoubleSubmissions;
 
 class LoginController extends Controller
 {
@@ -28,8 +27,6 @@ class LoginController extends Controller
             ], [
                 'g-recaptcha-response.required' => 'Vui lòng xác thực bạn không phải là robot.'
             ]);
-
-            PreventDoubleSubmissions::clearToken('admin_login');
 
             $user = User::where('tendangnhap', $validated['tendangnhap'])
                 ->where('matkhau', md5($validated['matkhau']))

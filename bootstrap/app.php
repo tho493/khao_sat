@@ -17,12 +17,33 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\CheckSurveyStatus::class,
         ]);
-        $middleware->alias([
-            'prevent.double.submit' => \App\Http\Middleware\PreventDoubleSubmissions::class,
-        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Throwable $e, $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'error' => true,
+                    'message' => $e->getMessage(),
+                    'status_code' => $e->getCode() ?: 500
+                ], $e->getCode() ?: 500);
+            }
+
+            if ($request->is('admin') || $request->is('admin/*')) {
+                return null;
+            }
+
+            $statusCode = 500;
+            if (method_exists($e, 'getStatusCode')) {
+                $statusCode = $e->getStatusCode();
+            } elseif (method_exists($e, 'getCode')) {
+                $statusCode = $e->getCode() ?: 500;
+            }
+
+            return response()->view('error', [
+                'exception' => $e,
+                'statusCode' => $statusCode
+            ], $statusCode);
+        });
     })
     ->withSchedule(function (Schedule $schedule) {
         $schedule->command('surveys:update-status')->everyFiveMinutes();

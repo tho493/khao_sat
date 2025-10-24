@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Middleware\PreventDoubleSubmissions;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -86,7 +85,6 @@ class UserManagementController extends Controller
      */
     public function update(Request $request, $tendangnhap)
     {
-        PreventDoubleSubmissions::clearToken('update_users');
         $user = User::findOrFail($tendangnhap);
 
         $validated = $request->validate([

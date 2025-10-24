@@ -25,7 +25,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/create', [UserManagementController::class, 'create'])->name('create');
         Route::post('/', [UserManagementController::class, 'store'])->name('store');
         Route::get('/{tendangnhap}/edit', [UserManagementController::class, 'edit'])->name('edit');
-        Route::put('/{tendangnhap}', [UserManagementController::class, 'update'])->name('update')->middleware('prevent.double.submit:update_users');
+        Route::put('/{tendangnhap}', [UserManagementController::class, 'update'])->name('update');
         Route::delete('/{tendangnhap}', [UserManagementController::class, 'destroy'])->name('destroy');
     });
 
@@ -36,9 +36,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/{mauKhaoSat}/questions', [MauKhaoSatController::class, 'getQuestionsJson'])->name('questions');
         Route::post('/store', [MauKhaoSatController::class, 'store'])->name('store');
         Route::get('/{mauKhaoSat}/edit', [MauKhaoSatController::class, 'edit'])->name('edit');
-        Route::post('/{mauKhaoSat}/copy', [MauKhaoSatController::class, 'copy'])->name('copy')->middleware('prevent.double.submit:copy_template');
-        Route::put('/{mauKhaoSat}', [MauKhaoSatController::class, 'update'])->name('update')->middleware('prevent.double.submit:update_thongtin_maukahosat');
-        Route::delete('/{mauKhaoSat}', [MauKhaoSatController::class, 'destroy'])->name('destroy')->middleware('prevent.double.submit:delete_form');
+        Route::post('/{mauKhaoSat}/copy', [MauKhaoSatController::class, 'copy'])->name('copy');
+        Route::put('/{mauKhaoSat}', [MauKhaoSatController::class, 'update'])->name('update');
+        Route::delete('/{mauKhaoSat}', [MauKhaoSatController::class, 'destroy'])->name('destroy');
         Route::post('/{mauKhaoSat}/cau-hoi', [CauHoiController::class, 'store'])->name('cau-hoi.store');
     });
 
@@ -70,7 +70,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/dot-khao-sat/{dotKhaoSat}', [BaoCaoController::class, 'dotKhaoSat'])->name('dot-khao-sat');
         Route::get('/export/{dotKhaoSat}', [BaoCaoController::class, 'export'])->name('export');
         Route::post('{dotKhaoSat}/summarize', [BaoCaoController::class, 'summarizeWithAi'])->name('summarize');
-        Route::delete('/response/{phieuKhaoSatChiTiet}', [BaoCaoController::class, 'deleteResponse'])->name('delete-response')->middleware('prevent.double.submit:delete_response');
+        Route::delete('/response/{phieuKhaoSatChiTiet}', [BaoCaoController::class, 'deleteResponse'])->name('delete-response');
         Route::delete('/survey/{phieuKhaoSat}', [BaoCaoController::class, 'deleteSurvey'])->name('delete-survey');
     });
 

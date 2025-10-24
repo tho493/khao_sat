@@ -20,7 +20,6 @@
                     <div class="card-body">
                         <form method="POST" action="{{ route('admin.users.update', $user->id) }}">
                             @csrf
-                            {!! \App\Http\Middleware\PreventDoubleSubmissions::tokenField('update_users') !!}
                             @method('PUT')
 
                             <div class="mb-3">

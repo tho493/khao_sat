@@ -50,7 +50,6 @@
                         <form method="POST" action="{{ route('admin.mau-khao-sat.update', $mauKhaoSat) }}"
                             id="formUpdateMau">
                             @csrf
-                            {!! \App\Http\Middleware\PreventDoubleSubmissions::tokenField('update_thongtin_maukahosat') !!}
                             @method('PUT')
                             <div class="row mb-3">
                                 <div class="col-md-8">
@@ -343,12 +342,10 @@
     <form id="formCopyMau" action="{{ route('admin.mau-khao-sat.copy', $mauKhaoSat) }}" method="POST"
         style="display: none;">
         @csrf
-        {!! \App\Http\Middleware\PreventDoubleSubmissions::tokenField('copy_template') !!}
     </form>
     <form id="formDeleteMau" action="{{ route('admin.mau-khao-sat.destroy', $mauKhaoSat) }}" method="POST"
         style="display: none;">
         @csrf
-        {!! \App\Http\Middleware\PreventDoubleSubmissions::tokenField('delete_form') !!}
         @method('DELETE')
     </form>
 @endsection

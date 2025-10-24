@@ -1,11 +1,11 @@
 // Admin Panel JavaScript
 
 // Toggle sidebar
-document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+document.getElementById('sidebarToggle')?.addEventListener('click', function () {
     document.querySelector('.sidebar').classList.toggle('toggled');
 });
 
-document.getElementById('sidebarToggleTop')?.addEventListener('click', function() {
+document.getElementById('sidebarToggleTop')?.addEventListener('click', function () {
     document.querySelector('.sidebar').classList.toggle('toggled');
 });
 
@@ -41,21 +41,51 @@ function hideLoading() {
     Swal.close();
 }
 
-// Ajax setup
+// Ajax setup với xử lý đặc biệt cho iOS WebKit
 $.ajaxSetup({
     headers: {
-        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+        'X-Requested-With': 'XMLHttpRequest'
+    },
+    beforeSend: function (xhr, settings) {
+        // Đảm bảo CSRF token được gửi đúng cách cho iOS WebKit
+        const csrfToken = $('meta[name="csrf-token"]').attr('content');
+        if (csrfToken) {
+            xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+        }
+
+        // Thêm X-XSRF-TOKEN header cho iOS WebKit
+        const xsrfToken = $('meta[name="csrf-token"]').attr('content');
+        if (xsrfToken) {
+            xhr.setRequestHeader('X-XSRF-TOKEN', xsrfToken);
+        }
     }
 });
 
+// Refresh CSRF token
+function refreshCsrfToken() {
+    $.get('/refresh-csrf-token').done(function (data) {
+        $('meta[name="csrf-token"]').attr('content', data.csrf_token);
+        // Cập nhật tất cả form có _token input
+        $('input[name="_token"]').val(data.csrf_token);
+    });
+}
+
 // Handle ajax errors
-$(document).ajaxError(function(event, jqxhr, settings, thrownError) {
+$(document).ajaxError(function (event, jqxhr, settings, thrownError) {
     hideLoading();
     if (jqxhr.status === 401) {
         alert('Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.');
         window.location.href = '/login';
     } else if (jqxhr.status === 403) {
         alert('Bạn không có quyền thực hiện thao tác này.');
+    } else if (jqxhr.status === 419) {
+        // Xử lý lỗi CSRF token mismatch (đặc biệt cho iOS WebKit)
+        alert('Phiên làm việc đã hết hạn. Vui lòng tải lại trang và thử lại.');
+        // Tự động reload trang để lấy CSRF token mới
+        setTimeout(function () {
+            window.location.reload();
+        }, 2000);
     } else if (jqxhr.status === 422) {
         let errors = jqxhr.responseJSON.errors;
         let errorMessage = '';

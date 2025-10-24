@@ -303,6 +303,9 @@ if (isset($dotKhaoSat) && $dotKhaoSat) {
                     url: API_URL,
                     method: 'POST',
                     data: requestData,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     success: function (response) {
                         if (response.success) {
                             if (response.type === 'action') {

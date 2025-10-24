@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\CauHoiKhaoSat;
 use Illuminate\Support\Facades\DB;
-use App\Http\Middleware\PreventDoubleSubmissions;
 
 class KhaoSatController extends Controller
 {
@@ -123,8 +122,6 @@ class KhaoSatController extends Controller
         ], [
             'g-recaptcha-response.required' => 'Vui lòng xác thực reCAPTCHA.'
         ]);
-
-        PreventDoubleSubmissions::clearToken();
 
         DB::beginTransaction();
         try {
