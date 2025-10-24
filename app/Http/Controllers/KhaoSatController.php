@@ -231,7 +231,7 @@ class KhaoSatController extends Controller
         $reviewData = session('khao_sat_review_data');
 
         if (!$reviewData) {
-            return redirect()->route('khao-sat.index')
+            return redirect()->route('khao-sat.thanks')
                 ->with('error', 'Không tìm thấy dữ liệu khảo sát để xem lại.');
         }
 

@@ -669,15 +669,6 @@
                 updateProgress();
             }
         }
-
-        Swal.fire({
-            title: 'Thông báo!',
-            text: "Nếu bạn đang dùng Safari iOS vui lòng chuyển sang trình duyệt khác để tiếp tục làm bài!!",
-            icon: 'warning',
-            showDenyButton: true,
-            confirmButtonText: '<i class="bi bi-browser-chrome"></i> Chuyển trình duyệt',
-            denyButtonText: '<i class="bi bi-x-lg"></i> Đóng',
-        });
         
         /**
          * Helper: Xóa câu trả lời của một card câu hỏi.
