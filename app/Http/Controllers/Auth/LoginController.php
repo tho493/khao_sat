@@ -40,7 +40,7 @@ class LoginController extends Controller
 
                 Auth::login($user);
                 $request->session()->regenerate();
-                return redirect()->intended('admin');
+                return redirect('admin');
             }
 
             throw ValidationException::withMessages([
