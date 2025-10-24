@@ -17,6 +17,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\CheckSurveyStatus::class,
         ]);
+        $middleware->validateCsrfTokens(except: [
+            'https://khaosat.tho493.id.vn/*',
+        ]);
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {
