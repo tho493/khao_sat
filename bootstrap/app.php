@@ -17,9 +17,10 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\CheckSurveyStatus::class,
         ]);
-        $middleware->validateCsrfTokens(except: [
-            'https://khaosat.tho493.id.vn/*',
-        ]);
+
+        if (isset($_SERVER['HTTP_USER_AGENT']) && str_contains(strtolower($_SERVER['HTTP_USER_AGENT']), 'iphone')) { // Chỉ loại bỏ trên user agent của iPhone, iOS lỗi session nên tạm tắt để có thể submit form
+            $middleware->validateCsrfTokens(except: ['*']);
+        }
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -32,7 +33,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
                 ], $e->getCode() ?: 500);
             }
 
-            if ($request->is('admin') || $request->is('admin/*')) {
+            if ($request->is('login') || $request->is('logout') || $request->is('admin')) {
                 return null;
             }
 
