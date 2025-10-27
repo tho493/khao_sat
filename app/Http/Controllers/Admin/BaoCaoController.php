@@ -103,13 +103,55 @@ class BaoCaoController extends Controller
             ->where('loai_cauhoi', 'select_ctdt')
             ->first();
 
-        // Lấy danh sách phiếu đã hoàn thành với bộ lọc CTĐT
+        // Lấy các câu hỏi thông tin cá nhân (is_personal_info)
+        $personalInfoQuestions = $dotKhaoSat->mauKhaoSat->cauHoi
+            ->where('is_personal_info', true)
+            ->values();
+
+        // Lấy danh sách phiếu đã hoàn thành với bộ lọc
         $query = $dotKhaoSat->phieuKhaoSat()
             ->where('trangthai', 'completed');
 
         $selectedCtdt = $request->input('ctdt');
+        $personalInfoFilters = $request->input('personal_info_filters', []);
 
-        if ($ctdtQuestion && $selectedCtdt) {
+        // Áp dụng bộ lọc cho từng câu hỏi thông tin cá nhân
+        if (!empty($personalInfoFilters)) {
+            foreach ($personalInfoFilters as $questionId => $filterValue) {
+                if (empty($filterValue))
+                    continue;
+
+                $question = $personalInfoQuestions->firstWhere('id', $questionId);
+                if (!$question)
+                    continue;
+
+                // Lấy các phiếu khảo sát có câu trả lời khớp với bộ lọc
+                $filterQuery = DB::table('phieu_khaosat_chitiet')
+                    ->where('cauhoi_id', $questionId);
+
+                // Xử lý theo loại câu hỏi
+                if (in_array($question->loai_cauhoi, ['single_choice', 'multiple_choice'])) {
+                    // Nếu là câu hỏi lựa chọn, tìm theo phuongan_id
+                    if ($question->loai_cauhoi === 'multiple_choice') {
+                        $filterQuery->where('phuongan_id', $filterValue);
+                    } else {
+                        $filterQuery->where('phuongan_id', $filterValue);
+                    }
+                } elseif ($question->loai_cauhoi === 'select_ctdt') {
+                    $filterQuery->where('giatri_text', $filterValue);
+                } else {
+                    // Text, number, date, v.v.
+                    $filterQuery->where(function ($q) use ($filterValue) {
+                        $q->where('giatri_text', 'LIKE', "%{$filterValue}%")
+                            ->orWhere('giatri_number', '=', $filterValue);
+                    });
+                }
+
+                $filteredPhieuIds = $filterQuery->pluck('phieu_khaosat_id');
+                $query->whereIn('id', $filteredPhieuIds);
+            }
+        } elseif ($ctdtQuestion && $selectedCtdt) {
+            // Hỗ trợ bộ lọc CTĐT cũ (backward compatibility)
             $filteredPhieuIds = DB::table('phieu_khaosat_chitiet')
                 ->where('cauhoi_id', $ctdtQuestion->id)
                 ->where('giatri_text', $selectedCtdt)
@@ -130,7 +172,7 @@ class BaoCaoController extends Controller
         ];
 
         // --- Dữ liệu Biểu đồ Xu hướng Phản hồi ---
-        $responseTrendChart = $this->getResponseTrendForSurvey($dotKhaoSat, $selectedCtdt);
+        $responseTrendChart = $this->getResponseTrendForSurvey($dotKhaoSat, $personalInfoFilters, $personalInfoQuestions);
 
         // Chi tiết từng Câu hỏi
         $thongKeCauHoi = [];
@@ -196,6 +238,51 @@ class BaoCaoController extends Controller
             }
         }
 
+        // Tạo danh sách các options cho từng câu hỏi thông tin cá nhân
+        $personalInfoOptions = [];
+        foreach ($personalInfoQuestions as $question) {
+            $options = [];
+
+            if (in_array($question->loai_cauhoi, ['single_choice', 'multiple_choice'])) {
+                // Lấy các phương án từ câu hỏi
+                $options = $question->phuongAnTraLoi->map(function ($pa) {
+                    return (object) ['value' => $pa->id, 'label' => $pa->noidung];
+                })->toArray();
+            } elseif ($question->loai_cauhoi === 'select_ctdt') {
+                // Lấy các CTĐT đã được sử dụng
+                $usedCtdtIds = DB::table('phieu_khaosat_chitiet')
+                    ->where('cauhoi_id', $question->id)
+                    ->whereIn('phieu_khaosat_id', $completedSurveys->pluck('id'))
+                    ->distinct()
+                    ->pluck('giatri_text');
+
+                if ($usedCtdtIds->isNotEmpty()) {
+                    $ctdts = Ctdt::whereIn('mactdt', $usedCtdtIds)->orderBy('tenctdt')->get();
+                    $options = $ctdts->map(function ($ctdt) {
+                        return (object) ['value' => $ctdt->mactdt, 'label' => $ctdt->tenctdt];
+                    })->toArray();
+                }
+            } else {
+                // Đối với text, number, v.v., lấy tất cả các giá trị riêng biệt
+                $distinctValues = DB::table('phieu_khaosat_chitiet')
+                    ->where('cauhoi_id', $question->id)
+                    ->whereIn('phieu_khaosat_id', $completedSurveys->pluck('id'))
+                    ->distinct()
+                    ->selectRaw('COALESCE(giatri_text, CAST(giatri_number AS CHAR)) as value')
+                    ->pluck('value')
+                    ->filter()
+                    ->take(100) // Giới hạn 100 giá trị để không quá tải
+                    ->map(function ($val) {
+                        return (object) ['value' => $val, 'label' => $val];
+                    })
+                    ->toArray();
+
+                $options = $distinctValues;
+            }
+
+            $personalInfoOptions[$question->id] = $options;
+        }
+
         // dd($thongKeCauHoi);
 
         return view('admin.bao-cao.dot-khao-sat', compact(
@@ -207,7 +294,9 @@ class BaoCaoController extends Controller
             'personalInfoQuestions',
             'personalInfoAnswers',
             'availableCtdts',
-            'selectedCtdt'
+            'selectedCtdt',
+            'personalInfoOptions',
+            'personalInfoFilters'
         ));
     }
 
@@ -249,13 +338,40 @@ class BaoCaoController extends Controller
         return $type === 'MIN' ? $this->formatSeconds($seconds->min()) : $this->formatSeconds($seconds->max());
     }
 
-    private function getResponseTrendForSurvey(DotKhaoSat $dotKhaoSat, $selectedCtdt = null)
+    private function getResponseTrendForSurvey(DotKhaoSat $dotKhaoSat, $personalInfoFilters = [], $personalInfoQuestions = null, $selectedCtdt = null)
     {
         $query = $dotKhaoSat->phieuKhaoSat()
             ->where('trangthai', 'completed');
 
-        // Áp dụng bộ lọc CTĐT nếu có
-        if ($selectedCtdt) {
+        // Áp dụng bộ lọc cho từng câu hỏi thông tin cá nhân
+        if (!empty($personalInfoFilters) && $personalInfoQuestions) {
+            foreach ($personalInfoFilters as $questionId => $filterValue) {
+                if (empty($filterValue))
+                    continue;
+
+                $question = $personalInfoQuestions->firstWhere('id', $questionId);
+                if (!$question)
+                    continue;
+
+                $filterQuery = DB::table('phieu_khaosat_chitiet')
+                    ->where('cauhoi_id', $questionId);
+
+                if (in_array($question->loai_cauhoi, ['single_choice', 'multiple_choice'])) {
+                    $filterQuery->where('phuongan_id', $filterValue);
+                } elseif ($question->loai_cauhoi === 'select_ctdt') {
+                    $filterQuery->where('giatri_text', $filterValue);
+                } else {
+                    $filterQuery->where(function ($q) use ($filterValue) {
+                        $q->where('giatri_text', 'LIKE', "%{$filterValue}%")
+                            ->orWhere('giatri_number', '=', $filterValue);
+                    });
+                }
+
+                $filteredPhieuIds = $filterQuery->pluck('phieu_khaosat_id');
+                $query->whereIn('id', $filteredPhieuIds);
+            }
+        } elseif ($selectedCtdt) {
+            // Áp dụng bộ lọc CTĐT cũ nếu có
             $ctdtQuestion = $dotKhaoSat->mauKhaoSat->cauHoi
                 ->where('loai_cauhoi', 'select_ctdt')
                 ->first();
@@ -621,24 +737,58 @@ class BaoCaoController extends Controller
     {
         $format = $request->input('format', 'excel');
         $selectedCtdt = $request->input('ctdt');
+        $personalInfoFilters = $request->input('personal_info_filters', []);
         $fileName = 'bao-cao-' . Str::slug($dotKhaoSat->ten_dot);
 
-        if ($selectedCtdt) {
-            $ctdt = Ctdt::find($selectedCtdt);
-            if ($ctdt) {
-                $fileName .= '-' . Str::slug($ctdt->tenctdt);
-            }
-        }
-        $fileName .= '-' . date('Ymd');
+        // Load relationships
+        $dotKhaoSat->load([
+            'mauKhaoSat.cauHoi' => function ($query) {
+                $query->orderBy('thutu');
+            },
+            'mauKhaoSat.cauHoi.phuongAnTraLoi'
+        ]);
+
+        // Get personal info questions
+        $personalInfoQuestions = $dotKhaoSat->mauKhaoSat->cauHoi->where('is_personal_info', true)->values();
 
         $completedSurveysQuery = $dotKhaoSat->phieuKhaoSat()->where('trangthai', 'completed');
 
-        if ($selectedCtdt) {
-            $ctdtQuestion = $dotKhaoSat->mauKhaoSat
-                ? $dotKhaoSat->mauKhaoSat->cauHoi->where('loai_cauhoi', 'select_ctdt')->first()
-                : null;
+        // Apply personal info filters
+        if (!empty($personalInfoFilters)) {
+            foreach ($personalInfoFilters as $questionId => $filterValue) {
+                if (empty($filterValue))
+                    continue;
 
+                $question = $personalInfoQuestions->firstWhere('id', $questionId);
+                if (!$question)
+                    continue;
+
+                $filterQuery = DB::table('phieu_khaosat_chitiet')
+                    ->where('cauhoi_id', $questionId);
+
+                if (in_array($question->loai_cauhoi, ['single_choice', 'multiple_choice'])) {
+                    $filterQuery->where('phuongan_id', $filterValue);
+                } elseif ($question->loai_cauhoi === 'select_ctdt') {
+                    $filterQuery->where('giatri_text', $filterValue);
+                } else {
+                    $filterQuery->where(function ($q) use ($filterValue) {
+                        $q->where('giatri_text', 'LIKE', "%{$filterValue}%")
+                            ->orWhere('giatri_number', '=', $filterValue);
+                    });
+                }
+
+                $filteredPhieuIds = $filterQuery->pluck('phieu_khaosat_id');
+                $completedSurveysQuery->whereIn('id', $filteredPhieuIds);
+            }
+        } elseif ($selectedCtdt) {
+            // Backward compatibility with old CTDT filter
+            $ctdtQuestion = $dotKhaoSat->mauKhaoSat->cauHoi->where('loai_cauhoi', 'select_ctdt')->first();
             if ($ctdtQuestion) {
+                $ctdt = Ctdt::find($selectedCtdt);
+                if ($ctdt) {
+                    $fileName .= '-' . Str::slug($ctdt->tenctdt);
+                }
+
                 $filteredPhieuIds = \DB::table('phieu_khaosat_chitiet')
                     ->where('cauhoi_id', $ctdtQuestion->id)
                     ->where('giatri_text', $selectedCtdt)
@@ -647,6 +797,7 @@ class BaoCaoController extends Controller
             }
         }
 
+        $fileName .= '-' . date('Ymd');
         $completedSurveyIds = $completedSurveysQuery->pluck('id');
 
         if ($format == 'excel') {

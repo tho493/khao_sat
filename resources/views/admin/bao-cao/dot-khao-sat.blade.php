@@ -57,32 +57,52 @@
                 <div class="col-lg-8 col-md-7">
                     <h1 class="h3 mb-1">{{ $dotKhaoSat->ten_dot }}</h1>
                     <p class="text-muted mb-0">
-                        <span class="fw-semibold">Tên đợt khảo sát:</span>
-                        <span class="fw-bold">{{ $dotKhaoSat->ten_dot ?? 'N/A' }}</span>
+                        <span class="fw-semibold">Tên mẫu khảo sát:</span>
+                        <span class="fw-bold">
+                            {{ $dotKhaoSat->mauKhaoSat->ten_mau ?? 'N/A' }}
+                        </span>
                         <span class="mx-2">|</span>
                         <span class="fw-semibold">Thời gian:</span>
                         <span class="fw-bold">{{ $dotKhaoSat->tungay }} - {{ $dotKhaoSat->denngay }}</span>
-                        <!-- @if($selectedCtdt)
+                        @if(!empty($personalInfoFilters) || $selectedCtdt)
                             <span class="mx-2">|</span>
                             <span class="fw-semibold">Đang lọc:</span>
                             <span class="fw-bold text-primary">
                                 @php
-                                    $selectedCtdtName = \App\Models\Ctdt::where('mactdt', $selectedCtdt)->value('tenctdt');
+        $activeFilters = [];
+        if ($selectedCtdt) {
+            $selectedCtdtName = \App\Models\Ctdt::where('mactdt', $selectedCtdt)->value('tenctdt');
+            $activeFilters[] = $selectedCtdtName ?? $selectedCtdt;
+        }
+        if (!empty($personalInfoFilters)) {
+            foreach ($personalInfoFilters as $qId => $filterValue) {
+                $question = $personalInfoQuestions->firstWhere('id', $qId);
+                if ($question && $filterValue) {
+                    $filterLabel = $filterValue;
+                    if ($question->phuongAnTraLoi->count() > 0) {
+                        $option = $question->phuongAnTraLoi->firstWhere('id', $filterValue);
+                        if ($option)
+                            $filterLabel = $option->noidung;
+                    }
+                    $activeFilters[] = $filterLabel;
+                }
+            }
+        }
                                 @endphp
-                                {{ $selectedCtdtName ?? $selectedCtdt }}
+                                {{ implode(', ', $activeFilters) }}
                             </span>
-                        @endif -->
+                        @endif
                     </p>
                 </div>
                 <div class="col-lg-4 col-md-5 text-md-end mt-3 mt-md-0">
                     <div class="btn-group" role="group">
                         {{-- Nút xuất mặc định --}}
-                        <a href="{{ route('admin.bao-cao.export', ['dotKhaoSat' => $dotKhaoSat, 'format' => 'excel']) }}" 
-                           class="btn btn-success" id="exportExcelBtn">
+                        <a href="{{ route('admin.bao-cao.export', ['dotKhaoSat' => $dotKhaoSat, 'format' => 'excel']) }}"
+                            class="btn btn-success" id="exportExcelBtn">
                             <i class="bi bi-file-earmark-excel"></i> Xuất Excel (Tất cả)
                         </a>
-                        <a href="{{ route('admin.bao-cao.export', ['dotKhaoSat' => $dotKhaoSat, 'format' => 'pdf']) }}" 
-                           class="btn btn-danger" id="exportPdfBtn">
+                        <a href="{{ route('admin.bao-cao.export', ['dotKhaoSat' => $dotKhaoSat, 'format' => 'pdf']) }}"
+                            class="btn btn-danger" id="exportPdfBtn">
                             <i class="bi bi-file-earmark-pdf"></i> Xuất PDF (Tất cả)
                         </a>
                     </div>
@@ -94,14 +114,14 @@
                 <div class="card-header">
                     <h6 class="m-0 font-weight-bold text-primary">
                         Tổng quan Kết quả
-                        @if($selectedCtdt)
-                            <span class="badge bg-primary ms-2">
-                                @php
-                                    $selectedCtdtName = \App\Models\Ctdt::where('mactdt', $selectedCtdt)->value('tenctdt');
-                                @endphp
-                                Đã lọc: {{ $selectedCtdtName ?? $selectedCtdt }}
-                            </span>
-                        @endif
+                        <!-- @if($selectedCtdt)
+                                                                                <span class="badge bg-primary ms-2">
+                                                                                    @php
+                                                                                        $selectedCtdtName = \App\Models\Ctdt::where('mactdt', $selectedCtdt)->value('tenctdt');
+                                                                                    @endphp
+                                                                                    Đã lọc: {{ $selectedCtdtName ?? $selectedCtdt }}
+                                                                                </span>
+                                                                            @endif -->
                     </h6>
                 </div>
                 <div class="card-body">
@@ -147,6 +167,62 @@
                 </div>
             </div>
 
+            <!-- Bộ lọc -->
+            @if(isset($personalInfoQuestions) && $personalInfoQuestions->count() > 0)
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-light">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="bi bi-funnel"></i> Bộ lọc theo câu hỏi thông tin cá nhân
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form method="GET" action="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}" id="filterForm">
+                                <div class="row g-3">
+                                    @foreach($personalInfoQuestions as $q)
+                                        @php
+                $currentValue = $personalInfoFilters[$q->id] ?? null;
+                $isSelectType = in_array($q->loai_cauhoi, ['single_choice', 'multiple_choice', 'select_ctdt']);
+                $options = $personalInfoOptions[$q->id] ?? [];
+                                        @endphp
+                                        <div class="col-md-6 col-lg-4">
+                                            <label class="form-label small text-muted mb-1">{{ $q->noidung_cauhoi }}</label>
+                                            @if($isSelectType && !empty($options))
+                                                {{-- Hiển thị dropdown cho câu hỏi select --}}
+                                                <select class="form-select form-select-sm" name="personal_info_filters[{{ $q->id }}]">
+                                                    <option value="">-- Tất cả --</option>
+                                                    @foreach($options as $option)
+                                                        <option value="{{ $option->value }}" {{ $currentValue == $option->value ? 'selected' : '' }}>
+                                                            {{ $option->label }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            @else
+                                                {{-- Hiển thị input text cho câu hỏi text/number --}}
+                                                <input type="text" class="form-control form-control-sm"
+                                                    name="personal_info_filters[{{ $q->id }}]" value="{{ $currentValue }}"
+                                                    placeholder="Nhập giá trị để lọc...">
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                    <div class="col-12">
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-primary btn-sm" type="submit">
+                                                <i class="bi bi-filter"></i> Áp dụng bộ lọc
+                                            </button>
+                                            @if(!empty($personalInfoFilters) || $selectedCtdt)
+                                                <a href="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}"
+                                                    class="btn btn-outline-secondary btn-sm">
+                                                    <i class="bi bi-x-lg"></i> Bỏ tất cả bộ lọc
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+            @endif
+
             {{-- Thống kê chi tiết tất cả câu trả lời --}}
             <h3 class="h4 mb-3">
                 Chi tiết tất cả câu trả lời
@@ -155,72 +231,42 @@
     $count = 1
             @endphp
             @forelse($dotKhaoSat->mauKhaoSat->cauHoi as $index => $cauHoi)
-                        <div class="card shadow mb-4">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1 fw-bold text-primary">
-                                        Câu {{ $cauHoi->is_personal_info ? "hỏi thông tin" : $count++ }}: {{ $cauHoi->noidung_cauhoi }}
-                                    </h6>
-                                    <small class="text-muted">({{ $thongKeCauHoi[$cauHoi->id]['total'] ?? 0 }} lượt trả lời)</small>
-                                </div>
-                                @if($cauHoi->loai_cauhoi === 'text' && ($thongKeCauHoi[$cauHoi->id]['total'] ?? 0) > 0)
-                                    @if(!$cauHoi->is_personal_info)
-                                    <button class="btn btn-sm btn-outline-info"
-                                        onclick="requestSummary({{ $cauHoi->id }}, '{{ e($cauHoi->noidung_cauhoi) }}')">
-                                        <i class="bi bi-robot"></i> Tóm tắt bằng AI
-                                    </button>
-                                    @endif
-                                @endif
-                            </div>
-                            <div class="card-body">
-                                @php
-                $stats = $thongKeCauHoi[$cauHoi->id] ?? null;
-                                @endphp
+                <div class="card shadow mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1 fw-bold text-primary">
+                                Câu {{ $cauHoi->is_personal_info ? "hỏi thông tin" : $count++ }}: {{ $cauHoi->noidung_cauhoi }}
+                            </h6>
+                            <small class="text-muted">({{ $thongKeCauHoi[$cauHoi->id]['total'] ?? 0 }} lượt trả lời)</small>
+                        </div>
+                        @if($cauHoi->loai_cauhoi === 'text' && ($thongKeCauHoi[$cauHoi->id]['total'] ?? 0) > 0)
+                            @if(!$cauHoi->is_personal_info)
+                                <button class="btn btn-sm btn-outline-info"
+                                    onclick="requestSummary({{ $cauHoi->id }}, '{{ e($cauHoi->noidung_cauhoi) }}')">
+                                    <i class="bi bi-robot"></i> Tóm tắt bằng AI
+                                </button>
+                            @endif
+                        @endif
+                    </div>
+                    <div class="card-body">
+                        @php
+        $stats = $thongKeCauHoi[$cauHoi->id] ?? null;
+                        @endphp
 
-                                @if($stats && $stats['total'] > 0)
-                                    @if($stats['type'] == 'chart_with_avg')
-                                        <div class="row align-items-center">
-                                            <div class="col-md-3 text-center mb-4 mb-md-0">
-                                                <div class="display-4 font-weight-bold text-primary">{{ number_format($stats['average'], 2) }}</div>
-                                                <div class="font-weight-bold text-gray-600">/ {{ $stats['max_score'] }}</div>
-                                                <div class="text-xs text-uppercase text-primary mt-1">Điểm trung bình</div>
+                        @if($stats && $stats['total'] > 0)
+                            @if($stats['type'] == 'chart_with_avg')
+                                <div class="row align-items-center">
+                                    <div class="col-md-3 text-center mb-4 mb-md-0">
+                                        <div class="display-4 font-weight-bold text-primary">{{ number_format($stats['average'], 2) }}</div>
+                                        <div class="font-weight-bold text-gray-600">/ {{ $stats['max_score'] }}</div>
+                                        <div class="text-xs text-uppercase text-primary mt-1">Điểm trung bình</div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div style="height: 180px;"><canvas id="chart-cauhoi-{{ $cauHoi->id }}"></canvas></div>
                                             </div>
-                                            <div class="col-md-9">
-                                                <div class="row">
-                                                    <div class="col-lg-6">
-                                                        <div style="height: 180px;"><canvas id="chart-cauhoi-{{ $cauHoi->id }}"></canvas></div>
-                                                    </div>
-                                                    <div class="col-lg-6">
-                                                        <div class="table-responsive">
-                                                            <table class="table table-sm table-bordered align-middle mb-0">
-                                                                <thead class="table-light">
-                                                                    <tr>
-                                                                        <th>Phương án</th>
-                                                                        <th class="text-center">Số lượng</th>
-                                                                        <th class="text-center">Tỷ lệ</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    @foreach($stats['data'] as $item)
-                                                                        <tr>
-                                                                            <td>{{ $item->noidung ?? 'Không xác định' }}</td>
-                                                                            <td class="text-center">{{ $item->so_luong }}</td>
-                                                                            <td class="text-center">{{ $item->ty_le }}%</td>
-                                                                        </tr>
-                                                                    @endforeach
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @elseif($stats['type'] == 'chart' && !empty($stats['data']) && $stats['data']->isNotEmpty())
-                                        <div class="row align-items-center">
-                                            <div class="col-md-5">
-                                                <div style="height: 250px;"><canvas id="chart-cauhoi-{{ $cauHoi->id }}"></canvas></div>
-                                            </div>
-                                            <div class="col-md-7">
+                                            <div class="col-lg-6">
                                                 <div class="table-responsive">
                                                     <table class="table table-sm table-bordered align-middle mb-0">
                                                         <thead class="table-light">
@@ -243,55 +289,85 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    @elseif($stats['type'] == 'text' && !empty($stats['data']) && $stats['data']->isNotEmpty())
-                                        <ul class="list-group list-group-flush">
-                                            @foreach($stats['data'] as $item)
-                                                <li class="list-group-item">{{ $item }}</li>
+                                    </div>
+                                </div>
+                            @elseif($stats['type'] == 'chart' && !empty($stats['data']) && $stats['data']->isNotEmpty())
+                                <div class="row align-items-center">
+                                    <div class="col-md-5">
+                                        <div style="height: 250px;"><canvas id="chart-cauhoi-{{ $cauHoi->id }}"></canvas></div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered align-middle mb-0">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Phương án</th>
+                                                        <th class="text-center">Số lượng</th>
+                                                        <th class="text-center">Tỷ lệ</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach($stats['data'] as $item)
+                                                        <tr>
+                                                            <td>{{ $item->noidung ?? 'Không xác định' }}</td>
+                                                            <td class="text-center">{{ $item->so_luong }}</td>
+                                                            <td class="text-center">{{ $item->ty_le }}%</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            @elseif($stats['type'] == 'text' && !empty($stats['data']) && $stats['data']->isNotEmpty())
+                                <ul class="list-group list-group-flush">
+                                    @foreach($stats['data'] as $item)
+                                        <li class="list-group-item">{{ $item }}</li>
+                                    @endforeach
+                                </ul>
+                                @if($stats['total'] > 20)
+                                    <p class="small text-muted mt-2 text-center">... và {{ $stats['total'] - 20 }} câu trả lời khác.</p>
+                                @endif
+                            @elseif($stats['type'] == 'number_stats')
+                                @if(!empty($cauHoi->is_personal_info))
+                                    @if(!empty($stats['cauTraLoi']) && is_iterable($stats['cauTraLoi']))
+                                        <ul class="list-group list-group-flush mb-2">
+                                            @foreach($stats['cauTraLoi'] as $item)
+                                                <li class="list-group-item">{{ intval($item) }}</li>
                                             @endforeach
                                         </ul>
-                                        @if($stats['total'] > 20)
+                                        @if(isset($stats['total']) && $stats['total'] > 20)
                                             <p class="small text-muted mt-2 text-center">... và {{ $stats['total'] - 20 }} câu trả lời khác.</p>
                                         @endif
-                                    @elseif($stats['type'] == 'number_stats')
-                                        @if(!empty($cauHoi->is_personal_info))
-                                            @if(!empty($stats['cauTraLoi']) && is_iterable($stats['cauTraLoi']))
-                                                <ul class="list-group list-group-flush mb-2">
-                                                    @foreach($stats['cauTraLoi'] as $item)
-                                                        <li class="list-group-item">{{ intval($item) }}</li>
-                                                    @endforeach
-                                                </ul>
-                                                @if(isset($stats['total']) && $stats['total'] > 20)
-                                                    <p class="small text-muted mt-2 text-center">... và {{ $stats['total'] - 20 }} câu trả lời khác.</p>
-                                                @endif
-                                            @else
-                                                <p class="text-muted text-center mb-0">Không có dữ liệu.</p>
-                                            @endif
-                                        @else
-                                            <div class="row text-center">
-                                                <div class="col">
-                                                    <div class="h5">{{ number_format($stats['data']->avg, 2) }}</div>
-                                                    <div class="text-muted small">Trung bình</div>
-                                                </div>
-                                                <div class="col">
-                                                    <div class="h5">{{ number_format($stats['data']->min, 2) }}</div>
-                                                    <div class="text-muted small">Nhỏ nhất</div>
-                                                </div>
-                                                <div class="col">
-                                                    <div class="h5">{{ number_format($stats['data']->max, 2) }}</div>
-                                                    <div class="text-muted small">Lớn nhất</div>
-                                                </div>
-                                                <div class="col">
-                                                    <div class="h5">{{ number_format($stats['data']->stddev, 2) }}</div>
-                                                    <div class="text-muted small">Độ lệch chuẩn</div>
-                                                </div>
-                                            </div>
-                                        @endif
+                                    @else
+                                        <p class="text-muted text-center mb-0">Không có dữ liệu.</p>
                                     @endif
                                 @else
-                                    <p class="text-muted text-center mb-0">Chưa có dữ liệu cho câu hỏi này.</p>
+                                    <div class="row text-center">
+                                        <div class="col">
+                                            <div class="h5">{{ number_format($stats['data']->avg, 2) }}</div>
+                                            <div class="text-muted small">Trung bình</div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="h5">{{ number_format($stats['data']->min, 2) }}</div>
+                                            <div class="text-muted small">Nhỏ nhất</div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="h5">{{ number_format($stats['data']->max, 2) }}</div>
+                                            <div class="text-muted small">Lớn nhất</div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="h5">{{ number_format($stats['data']->stddev, 2) }}</div>
+                                            <div class="text-muted small">Độ lệch chuẩn</div>
+                                        </div>
+                                    </div>
                                 @endif
-                            </div>
-                        </div>
+                            @endif
+                        @else
+                            <p class="text-muted text-center mb-0">Chưa có dữ liệu cho câu hỏi này.</p>
+                        @endif
+                    </div>
+                </div>
             @empty
                 <div class="card shadow mb-4">
                     <div class="card-body">
@@ -307,29 +383,6 @@
                         <div class="col-md-6">
                             <h6 class="m-0 font-weight-bold text-primary">Danh sách phiếu đã hoàn thành</h6>
                         </div>
-                        @if(isset($availableCtdts) && $availableCtdts->isNotEmpty())
-                        <div class="col-md-6">
-                            <form method="GET" action="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}" id="filterForm">
-                                <div class="input-group">
-                                    <select class="form-select" name="ctdt" id="ctdtFilterSelect">
-                                        <option value="">-- Lọc theo Chương trình đào tạo --</option>
-                                        @foreach($availableCtdts as $ctdt)
-                                            <option value="{{ $ctdt->mactdt }}" 
-                                                    {{ $selectedCtdt == $ctdt->mactdt ? 'selected' : '' }}>
-                                                {{ $ctdt->tenctdt }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <button class="btn btn-primary" type="submit"><i class="bi bi-filter"></i></button>
-                                    @if($selectedCtdt)
-                                        <a href="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}" class="btn btn-outline-secondary" title="Bỏ lọc">
-                                            <i class="bi bi-x-lg"></i>
-                                        </a>
-                                    @endif
-                                </div>
-                            </form>
-                        </div>
-                        @endif
                     </div>
                 </div>
                 <div class="card-body">
@@ -582,18 +635,18 @@
                     }
                 @endif
             @endforeach
-            });
+                                                            });
 
         const summaryModal = new bootstrap.Modal(document.getElementById('summaryModal'));
 
         function requestSummary(questionId, questionContext) {
             $('#summaryQuestionContext').text('Câu hỏi: ' + questionContext + '.');
             $('#summaryContent').html(`
-                    <div class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status"></div>
-                        <p class="mt-3">AI đang phân tích và tóm tắt... Vui lòng chờ trong giây lát.</p>
-                    </div>
-                `);
+                                                                    <div class="text-center py-5">
+                                                                        <div class="spinner-border text-primary" role="status"></div>
+                                                                        <p class="mt-3">AI đang phân tích và tóm tắt... Vui lòng chờ trong giây lát.</p>
+                                                                    </div>
+                                                                `);
             summaryModal.show();
 
             $.ajax({
@@ -629,11 +682,11 @@
 
             modalLabel.text('Chi tiết Phiếu khảo sát #' + phieuId);
             modalContent.html(`
-                    <div class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status"></div>
-                        <p class="mt-2 text-muted">Đang tải dữ liệu...</p>
-                    </div>
-                `);
+                                                                    <div class="text-center py-5">
+                                                                        <div class="spinner-border text-primary" role="status"></div>
+                                                                        <p class="mt-2 text-muted">Đang tải dữ liệu...</p>
+                                                                    </div>
+                                                                `);
             modalInstance.show();
 
             $.get(`/admin/phieu-khao-sat/${phieuId}`)
@@ -656,14 +709,14 @@
                     let html = '';
                     if (personalInfoQuestions.length > 0) {
                         html += `<h5><i class="bi bi-person-circle text-primary me-2"></i>Thông tin người trả lời</h5>
-                                    <table class="table table-sm table-bordered mb-4"><tbody>`;
+                                                                                    <table class="table table-sm table-bordered mb-4"><tbody>`;
                         personalInfoQuestions.forEach(question => {
                             const answerArray = answersByQuestionId[question.id] || [];
                             const answerText = answerArray.length > 0 ? answerArray.join('; ') : '<em class="text-muted">(Không trả lời)</em>';
                             html += `<tr>
-                                            <td width="40%"><strong>${escapeHtml(question.noidung_cauhoi)}</strong></td>
-                                            <td>${answerText}</td>
-                                         </tr>`;
+                                                                                            <td width="40%"><strong>${escapeHtml(question.noidung_cauhoi)}</strong></td>
+                                                                                            <td>${answerText}</td>
+                                                                                         </tr>`;
                         });
                         html += `</tbody></table>`;
                     }
@@ -673,27 +726,27 @@
                         surveyQuestions.forEach((question, index) => {
                             const answerArray = answersByQuestionId[question.id] || [];
                             const answerText = answerArray.length > 0 ? answerArray.join('; ') : '<em class="text-muted">(Không trả lời)</em>';
-                            
+
                             // Tìm chi tiết câu trả lời để lấy ID
                             const responseDetails = phieuData.chi_tiet.filter(detail => detail.cauhoi_id === question.id);
-                            
+
                             html += `<div class="mb-3 border rounded p-3">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <p class="mb-1"><strong>Câu ${index + 1}:</strong> ${escapeHtml(question.noidung_cauhoi)}</p>
-                                            ${responseDetails.length > 0 ? `
-                                                <div class="btn-group btn-group-sm" role="group">
-                                                    ${responseDetails.map(detail => `
-                                                        <button class="btn btn-outline-danger btn-sm" 
-                                                                title="Xóa câu trả lời này"
-                                                                onclick="deleteSpecificResponse(${detail.id}, '${escapeHtml(question.noidung_cauhoi)}', '${escapeHtml(answerText)}')">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
-                                                    `).join('')}
-                                                </div>
-                                            ` : ''}
-                                        </div>
-                                        <p class="ps-3 text-primary fst-italic mb-0">${answerText}</p>
-                                     </div>`;
+                                                                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                                                                            <p class="mb-1"><strong>Câu ${index + 1}:</strong> ${escapeHtml(question.noidung_cauhoi)}</p>
+                                                                                            ${responseDetails.length > 0 ? `
+                                                                                                <div class="btn-group btn-group-sm" role="group">
+                                                                                                    ${responseDetails.map(detail => `
+                                                                                                        <button class="btn btn-outline-danger btn-sm" 
+                                                                                                                title="Xóa câu trả lời này"
+                                                                                                                onclick="deleteSpecificResponse(${detail.id}, '${escapeHtml(question.noidung_cauhoi)}', '${escapeHtml(answerText)}')">
+                                                                                                            <i class="bi bi-trash"></i>
+                                                                                                        </button>
+                                                                                                    `).join('')}
+                                                                                                </div>
+                                                                                            ` : ''}
+                                                                                        </div>
+                                                                                        <p class="ps-3 text-primary fst-italic mb-0">${answerText}</p>
+                                                                                     </div>`;
                         });
                     }
                     modalContent.html(html);
@@ -714,21 +767,21 @@
 
         function deleteSpecificResponse(responseId, questionText, answerText) {
             currentResponseId = responseId;
-            
+
             // Hiển thị thông tin câu hỏi và câu trả lời trong modal
             $('#deleteQuestionText').text(questionText);
             $('#deleteAnswerText').text(answerText);
-            
+
             deleteResponseModal.show();
         }
 
         // Xử lý xác nhận xóa câu trả lời
-        $('#confirmDeleteBtn').on('click', function() {
+        $('#confirmDeleteBtn').on('click', function () {
             if (!currentResponseId) return;
 
             const btn = $(this);
             const originalText = btn.html();
-            
+
             // Disable button và hiển thị loading
             btn.prop('disabled', true).html('<i class="bi bi-hourglass-split me-1"></i>Đang xóa...');
 
@@ -739,14 +792,14 @@
                 data: {
                     _token: '{{ csrf_token() }}'
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.success) {
                         // Hiển thị thông báo thành công
                         showAlert('success', 'Xóa thành công', response.message);
-                        
+
                         // Đóng modal
                         deleteResponseModal.hide();
-                        
+
                         // Reload trang để cập nhật dữ liệu
                         setTimeout(() => {
                             window.location.reload();
@@ -756,7 +809,7 @@
                         btn.prop('disabled', false).html(originalText);
                     }
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     let errorMessage = 'Có lỗi xảy ra khi xóa câu trả lời.';
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         errorMessage = xhr.responseJSON.message;
@@ -773,15 +826,15 @@
 
         function deleteEntireSurvey(surveyId) {
             currentSurveyId = surveyId;
-            
+
             // Hiển thị thông tin phiếu trong modal
             $('#deleteSurveyInfo').html(`
-                <div class="text-center py-3">
-                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                    <p class="mt-2 mb-0">Đang tải thông tin phiếu...</p>
-                </div>
-            `);
-            
+                                                                <div class="text-center py-3">
+                                                                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                                                    <p class="mt-2 mb-0">Đang tải thông tin phiếu...</p>
+                                                                </div>
+                                                            `);
+
             deleteSurveyModal.show();
 
             // Tải thông tin phiếu để hiển thị trong modal xác nhận
@@ -789,7 +842,7 @@
                 .done(function (phieuData) {
                     const personalInfoQuestions = phieuData.dot_khao_sat.mau_khao_sat.cau_hoi.filter(q => q.is_personal_info);
                     let infoText = `Phiếu #${surveyId}<br>`;
-                    
+
                     if (personalInfoQuestions.length > 0) {
                         const answersByQuestionId = {};
                         phieuData.chi_tiet.forEach(answer => {
@@ -808,10 +861,10 @@
                             infoText += `<strong>${escapeHtml(question.noidung_cauhoi)}:</strong> ${escapeHtml(answerText)}<br>`;
                         });
                     }
-                    
+
                     infoText += `<strong>Thời gian hoàn thành:</strong> ${phieuData.thoigian_hoanthanh ? new Date(phieuData.thoigian_hoanthanh).toLocaleString('vi-VN') : 'N/A'}<br>`;
                     infoText += `<strong>Số câu trả lời:</strong> ${phieuData.chi_tiet.length} câu`;
-                    
+
                     $('#deleteSurveyInfo').html(infoText);
                 })
                 .fail(function () {
@@ -820,12 +873,12 @@
         }
 
         // Xử lý xác nhận xóa toàn bộ phiếu
-        $('#confirmDeleteSurveyBtn').on('click', function() {
+        $('#confirmDeleteSurveyBtn').on('click', function () {
             if (!currentSurveyId) return;
 
             const btn = $(this);
             const originalText = btn.html();
-            
+
             // Disable button và hiển thị loading
             btn.prop('disabled', true).html('<i class="bi bi-hourglass-split me-1"></i>Đang xóa...');
 
@@ -836,14 +889,14 @@
                 data: {
                     _token: '{{ csrf_token() }}'
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.success) {
                         // Hiển thị thông báo thành công
                         showAlert('success', 'Xóa thành công', response.message);
-                        
+
                         // Đóng modal
                         deleteSurveyModal.hide();
-                        
+
                         // Reload trang để cập nhật dữ liệu
                         setTimeout(() => {
                             window.location.reload();
@@ -853,7 +906,7 @@
                         btn.prop('disabled', false).html(originalText);
                     }
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     let errorMessage = 'Có lỗi xảy ra khi xóa phiếu khảo sát.';
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         errorMessage = xhr.responseJSON.message;
@@ -868,18 +921,18 @@
         function showAlert(type, title, message) {
             const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
             const iconClass = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
-            
+
             const alertHtml = `
-                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-                    <i class="bi ${iconClass} me-2"></i>
-                    <strong>${title}:</strong> ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `;
-            
+                                                                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                                                                    <i class="bi ${iconClass} me-2"></i>
+                                                                    <strong>${title}:</strong> ${message}
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                                                </div>
+                                                            `;
+
             // Thêm thông báo vào đầu trang
             $('.container-fluid').prepend(alertHtml);
-            
+
             // Tự động ẩn sau 5 giây
             setTimeout(() => {
                 $('.alert').fadeOut();
@@ -887,31 +940,46 @@
         }
     </script>
 
-    {{-- THÊM SCRIPT MỚI NÀY VÀO CUỐI --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const ctdtFilterSelect = document.getElementById('ctdtFilterSelect');
+            const filterForm = document.getElementById('filterForm');
             const exportExcelBtn = document.getElementById('exportExcelBtn');
             const exportPdfBtn = document.getElementById('exportPdfBtn');
 
             function updateExportLinks() {
-                if (!ctdtFilterSelect || !exportExcelBtn || !exportPdfBtn) return;
+                if (!exportExcelBtn || !exportPdfBtn) return;
 
-                const selectedCtdt = ctdtFilterSelect.value;
-                
                 // Lấy URL gốc của nút export
                 const excelBaseUrl = "{{ route('admin.bao-cao.export', ['dotKhaoSat' => $dotKhaoSat, 'format' => 'excel']) }}";
                 const pdfBaseUrl = "{{ route('admin.bao-cao.export', ['dotKhaoSat' => $dotKhaoSat, 'format' => 'pdf']) }}";
-                
-                if (selectedCtdt) {
-                    // Nếu có lọc, thêm tham số ctdt vào URL
-                    exportExcelBtn.href = excelBaseUrl + '&ctdt=' + selectedCtdt;
-                    exportPdfBtn.href = pdfBaseUrl + '&ctdt=' + selectedCtdt;
-                    // Thay đổi text của nút
+
+                // Lấy tất cả các bộ lọc từ form
+                const formData = new FormData(filterForm);
+                const filters = [];
+
+                // Lấy CTDT filter
+                @if(isset($availableCtdts) && $availableCtdts->isNotEmpty())
+                    const ctdtFilter = formData.get('ctdt');
+                    if (ctdtFilter) {
+                        filters.push('ctdt=' + encodeURIComponent(ctdtFilter));
+                    }
+                @endif
+
+                                                            // Lấy personal info filters
+                                                            for (const [key, value] of formData.entries()) {
+                    if (key.startsWith('personal_info_filters[') && value) {
+                        filters.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
+                    }
+                }
+
+                // Thêm filters vào URL
+                if (filters.length > 0) {
+                    const queryString = '&' + filters.join('&');
+                    exportExcelBtn.href = excelBaseUrl + queryString;
+                    exportPdfBtn.href = pdfBaseUrl + queryString;
                     exportExcelBtn.innerHTML = '<i class="bi bi-file-earmark-excel"></i> Xuất Excel (Đã lọc)';
                     exportPdfBtn.innerHTML = '<i class="bi bi-file-earmark-pdf"></i> Xuất PDF (Đã lọc)';
                 } else {
-                    // Nếu không có lọc, trả về URL gốc
                     exportExcelBtn.href = excelBaseUrl;
                     exportPdfBtn.href = pdfBaseUrl;
                     exportExcelBtn.innerHTML = '<i class="bi bi-file-earmark-excel"></i> Xuất Excel (Tất cả)';
@@ -919,13 +987,27 @@
                 }
             }
 
-            // Gắn sự kiện 'change' cho dropdown
-            if (ctdtFilterSelect) {
-                ctdtFilterSelect.addEventListener('change', updateExportLinks);
+            // Update export links khi form thay đổi
+            if (filterForm) {
+                filterForm.addEventListener('change', function (e) {
+                    // Cập nhật khi thay đổi select hoặc input
+                    if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') {
+                        updateExportLinks();
+                    }
+                });
+
+                // Cập nhật khi người dùng nhập vào input text
+                filterForm.addEventListener('input', function (e) {
+                    if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
+                        updateExportLinks();
+                    }
+                });
             }
 
             // Chạy lần đầu khi tải trang để cập nhật link theo bộ lọc hiện tại
-            updateExportLinks();
-        });
+            @if(!empty($personalInfoFilters) || $selectedCtdt)
+                updateExportLinks();
+            @endif
+                                                    });
     </script>
 @endpush
