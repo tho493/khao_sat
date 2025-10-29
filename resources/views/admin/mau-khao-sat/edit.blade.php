@@ -514,9 +514,9 @@
         }
 
         window.showModalSuaCauHoi = function (cauHoiId) {
-            if (isLocked) return alert('Mẫu khảo sát đang bị khóa, không thể chỉnh sửa câu hỏi này.');
+            if (isLocked) return alert('error', 'Lỗi', 'Mẫu khảo sát đang bị khóa, không thể chỉnh sửa câu hỏi này.');
             const cauHoi = allQuestionsData.find(q => q.id === cauHoiId);
-            if (!cauHoi) return alert('Không tìm thấy dữ liệu câu hỏi');
+            if (!cauHoi) return alert('error', 'Lỗi', 'Không tìm thấy dữ liệu câu hỏi');
             $('#modalTitle').text('Sửa câu hỏi');
             $('#formCauHoi')[0].reset();
             $('#validation-errors').addClass('d-none').html('');
@@ -602,7 +602,7 @@
                     $(this).find('.input-group-text').text(index + 1);
                 });
             } else {
-                alert('Phải có ít nhất 2 phương án trả lời.');
+                alert('error', 'Lỗi', 'Phải có ít nhất 2 phương án trả lời.');
             }
         }
 
@@ -652,7 +652,7 @@
                         errorHtml += '</ul>';
                         $('#validation-errors').html(errorHtml).removeClass('d-none');
                     } else {
-                        alert('Đã xảy ra lỗi không mong muốn.');
+                        alert('error', 'Lỗi', 'Đã xảy ra lỗi không mong muốn.');
                     }
                 },
                 complete: function () {
@@ -664,7 +664,7 @@
         window.deleteCauHoi = function (id) {
             if (!confirm('Bạn có chắc chắn muốn xóa câu hỏi này?')) return;
             if (isLocked) {
-                alert('Mẫu khảo sát đang bị khóa, không thể chỉnh sửa câu hỏi này.');
+                alert('error', 'Lỗi', 'Mẫu khảo sát đang bị khóa, không thể chỉnh sửa câu hỏi này.');
                 return;
             }
             $.ajax({
@@ -674,7 +674,7 @@
                     allQuestionsData = allQuestionsData.filter(q => q.id !== id);
                     renderAllLists();
                 },
-                error: function (xhr) { alert('Lỗi: ' + (xhr.responseJSON?.message || 'Vui lòng thử lại')); }
+                error: function (xhr) { alert('error', 'Lỗi', 'Lỗi: ' + (xhr.responseJSON?.message || 'Vui lòng thử lại')); }
             });
         }
 
@@ -733,7 +733,7 @@
                             url: "/admin/cau-hoi/update-order",
                             method: 'POST', data: { order: order },
                             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                            error: () => alert('Lỗi khi lưu thứ tự, vui lòng tải lại trang.'),
+                            error: () => alert('error', 'Lỗi', 'Lỗi khi lưu thứ tự, vui lòng tải lại trang.'),
                         });
                     },
                 });

@@ -109,6 +109,33 @@
                 </div>
             </div>
 
+            @if(!empty($hiddenIds))
+                <div class="card shadow mb-4 border-warning">
+                    <div class="card-header bg-warning bg-opacity-25">
+                        <h6 class="m-0 font-weight-bold text-warning">
+                            <i class="bi bi-eye-slash me-1"></i> Câu hỏi đang bị ẩn khi tổng hợp
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            @foreach($dotKhaoSat->mauKhaoSat->cauHoi->whereIn('id', $hiddenIds) as $hiddenQ)
+                                <div class="col-md-6">
+                                    <div class="d-flex justify-content-between align-items-center border rounded p-2">
+                                        <div class="me-3 text-truncate" title="{{ $hiddenQ->noidung_cauhoi }}">
+                                            {{ $hiddenQ->noidung_cauhoi }}
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-primary"
+                                                onclick="toggleQuestionVisibility(this, {{ $hiddenQ->id }}, false)">
+                                            <i class="bi bi-eye"></i> Hiện trong tổng hợp
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             {{-- Thống kê tổng quan --}}
             <div class="card shadow mb-4">
                 <div class="card-header">
@@ -230,6 +257,7 @@
             @php
     $count = 1
             @endphp
+            @php $hiddenIds = $dotKhaoSat->hiddenQuestions->pluck('id')->toArray(); @endphp
             @forelse($dotKhaoSat->mauKhaoSat->cauHoi as $index => $cauHoi)
                 <div class="card shadow mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
@@ -238,22 +266,43 @@
                                 Câu {{ $cauHoi->is_personal_info ? "hỏi thông tin" : $count++ }}: {{ $cauHoi->noidung_cauhoi }}
                             </h6>
                             <small class="text-muted">({{ $thongKeCauHoi[$cauHoi->id]['total'] ?? 0 }} lượt trả lời)</small>
+                            @if(in_array($cauHoi->id, $hiddenIds))
+                                <span class="badge bg-warning text-dark ms-2"><i class="bi bi-eye-slash me-1"></i>Đang ẩn khi tổng hợp</span>
+                            @endif
                         </div>
-                        @if($cauHoi->loai_cauhoi === 'text' && ($thongKeCauHoi[$cauHoi->id]['total'] ?? 0) > 0)
-                            @if(!$cauHoi->is_personal_info)
+                        <div class="d-flex gap-2">
+                            @if($cauHoi->loai_cauhoi === 'text' && ($thongKeCauHoi[$cauHoi->id]['total'] ?? 0) > 0 && !$cauHoi->is_personal_info)
                                 <button class="btn btn-sm btn-outline-info"
                                     onclick="requestSummary({{ $cauHoi->id }}, '{{ e($cauHoi->noidung_cauhoi) }}')">
                                     <i class="bi bi-robot"></i> Tóm tắt bằng AI
                                 </button>
                             @endif
-                        @endif
+                            @php $isHidden = in_array($cauHoi->id, $hiddenIds); @endphp
+                            @if($isHidden)
+                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                        onclick="toggleQuestionVisibility(this, {{ $cauHoi->id }}, false)"
+                                        title="Hiển thị lại câu hỏi này trong báo cáo tổng hợp">
+                                    <i class="bi bi-eye"></i> Hiện khi tổng hợp
+                                </button>
+                            @else
+                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                        onclick="toggleQuestionVisibility(this, {{ $cauHoi->id }}, true)"
+                                        title="Ẩn câu hỏi này khỏi báo cáo tổng hợp">
+                                    <i class="bi bi-eye-slash"></i> Ẩn khi tổng hợp
+                                </button>
+                            @endif
+                        </div>
                     </div>
                     <div class="card-body">
                         @php
         $stats = $thongKeCauHoi[$cauHoi->id] ?? null;
                         @endphp
-
-                        @if($stats && $stats['total'] > 0)
+                        @if($stats && ($stats['type'] ?? '') === 'hidden')
+                            <div class="alert alert-warning mb-0">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Câu hỏi này đang <strong>được ẩn khi tổng hợp</strong>, nên không hiển thị biểu đồ/thống kê.
+                            </div>
+                        @elseif($stats && $stats['total'] > 0)
                             @if($stats['type'] == 'chart_with_avg')
                                 <div class="row align-items-center">
                                     <div class="col-md-3 text-center mb-4 mb-md-0">
@@ -586,6 +635,9 @@
             // Biểu đồ cho từng câu hỏi
             @foreach($dotKhaoSat->mauKhaoSat->cauHoi as $cauHoi)
                 @php $stats = $thongKeCauHoi[$cauHoi->id] ?? null; @endphp
+                @if($stats && ($stats['type'] ?? '') === 'hidden')
+                    @continue
+                @endif
                 @if($stats && $stats['type'] == 'chart_with_avg' && !empty($stats['data']) && $stats['data']->isNotEmpty())
                     {
                         const ctxAvg{{ $cauHoi->id }} = document.getElementById('chart-cauhoi-{{ $cauHoi->id }}')?.getContext('2d');
@@ -761,65 +813,29 @@
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // Xử lý xóa câu trả lời cụ thể
-        let currentResponseId = null;
-        const deleteResponseModal = new bootstrap.Modal(document.getElementById('deleteResponseModal'));
+        function toggleQuestionVisibility(btn, questionId, shouldHide) {
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Đang lưu...';
 
-        function deleteSpecificResponse(responseId, questionText, answerText) {
-            currentResponseId = responseId;
-
-            // Hiển thị thông tin câu hỏi và câu trả lời trong modal
-            $('#deleteQuestionText').text(questionText);
-            $('#deleteAnswerText').text(answerText);
-
-            deleteResponseModal.show();
-        }
-
-        // Xử lý xác nhận xóa câu trả lời
-        $('#confirmDeleteBtn').on('click', function () {
-            if (!currentResponseId) return;
-
-            const btn = $(this);
-            const originalText = btn.html();
-
-            // Disable button và hiển thị loading
-            btn.prop('disabled', true).html('<i class="bi bi-hourglass-split me-1"></i>Đang xóa...');
-
-            // Gọi API xóa câu trả lời
-            $.ajax({
-                url: `/admin/bao-cao/response/${currentResponseId}`,
-                method: 'DELETE',
-                data: {
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function (response) {
-                    if (response.success) {
-                        // Hiển thị thông báo thành công
-                        showAlert('success', 'Xóa thành công', response.message);
-
-                        // Đóng modal
-                        deleteResponseModal.hide();
-
-                        // Reload trang để cập nhật dữ liệu
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } else {
-                        showAlert('error', 'Lỗi', response.message);
-                        btn.prop('disabled', false).html(originalText);
-                    }
-                },
-                error: function (xhr) {
-                    let errorMessage = 'Có lỗi xảy ra khi xóa câu trả lời.';
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        errorMessage = xhr.responseJSON.message;
-                    }
-                    showAlert('error', 'Lỗi', errorMessage);
-                    btn.prop('disabled', false).html(originalText);
+            $.post(
+                `/admin/bao-cao/dot-khao-sat/{{ $dotKhaoSat->id }}/toggle-question`, {
+                    _token: '{{ csrf_token() }}',
+                    cauhoi_id: questionId,
+                    hidden: shouldHide
                 }
+            ).done(function() {
+                const message = shouldHide ? 'Câu hỏi sẽ được ẩn khi tổng hợp báo cáo.' : 'Câu hỏi sẽ được hiển thị lại trong tổng hợp.';
+                alert('success', 'Đã cập nhật', message);
+                setTimeout(() => { window.location.reload(); }, 1000);
+            }).fail(function(xhr) {
+                let msg = 'Không thể cập nhật trạng thái ẩn.';
+                if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                alert('error', 'Lỗi', msg);
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
             });
-        });
-
+        }
         // Xử lý xóa toàn bộ phiếu khảo sát
         let currentSurveyId = null;
         const deleteSurveyModal = new bootstrap.Modal(document.getElementById('deleteSurveyModal'));
@@ -892,7 +908,7 @@
                 success: function (response) {
                     if (response.success) {
                         // Hiển thị thông báo thành công
-                        showAlert('success', 'Xóa thành công', response.message);
+                        alert('success', 'Xóa thành công', response.message);
 
                         // Đóng modal
                         deleteSurveyModal.hide();
@@ -902,7 +918,7 @@
                             window.location.reload();
                         }, 1500);
                     } else {
-                        showAlert('error', 'Lỗi', response.message);
+                        alert('error', 'Lỗi', response.message);
                         btn.prop('disabled', false).html(originalText);
                     }
                 },
@@ -911,33 +927,11 @@
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         errorMessage = xhr.responseJSON.message;
                     }
-                    showAlert('error', 'Lỗi', errorMessage);
+                    alert('error', 'Lỗi', errorMessage);
                     btn.prop('disabled', false).html(originalText);
                 }
             });
         });
-
-        // Hàm hiển thị thông báo
-        function showAlert(type, title, message) {
-            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-            const iconClass = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
-
-            const alertHtml = `
-                                                                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-                                                                    <i class="bi ${iconClass} me-2"></i>
-                                                                    <strong>${title}:</strong> ${message}
-                                                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                                                </div>
-                                                            `;
-
-            // Thêm thông báo vào đầu trang
-            $('.container-fluid').prepend(alertHtml);
-
-            // Tự động ẩn sau 5 giây
-            setTimeout(() => {
-                $('.alert').fadeOut();
-            }, 5000);
-        }
     </script>
 
     <script>

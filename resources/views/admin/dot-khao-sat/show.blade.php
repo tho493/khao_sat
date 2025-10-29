@@ -219,7 +219,7 @@ function copyLink() {
     const input = document.getElementById('surveyLink');
     input.select();
     document.execCommand('copy');
-    alert('Đã copy link khảo sát!');
+    alert('success', 'Thành công', 'Đã copy link khảo sát!');
 }
 </script>
 @endsection

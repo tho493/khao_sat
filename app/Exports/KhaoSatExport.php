@@ -30,13 +30,15 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
             'phieuKhaoSat' => function ($query) {
                 $query->where('trangthai', 'completed')
                     ->with(['chiTiet.phuongAn']);
-            }
+            },
+            'hiddenQuestions'
         ]);
 
         $this->filteredSurveyIds = $filteredSurveyIds;
 
         // Phân nhóm câu hỏi và tạo header
-        $allQuestions = $this->dotKhaoSat->mauKhaoSat->cauHoi;
+        $hiddenQuestionIds = $this->dotKhaoSat->hiddenQuestions->pluck('id')->all();
+        $allQuestions = $this->dotKhaoSat->mauKhaoSat->cauHoi->whereNotIn('id', $hiddenQuestionIds);
         $this->personalInfoQuestions = $allQuestions->where('is_personal_info', true)->values();
         $this->nonPersonalQuestions = $allQuestions->where('is_personal_info', false)->values();
 

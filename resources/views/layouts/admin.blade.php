@@ -257,7 +257,8 @@
                 <i class="bi bi-cookie fs-3 text-primary me-3"></i>
                 <div>
                     <p class="card-text mb-2">
-                        Trang web này sử dụng cookie để đảm bảo bạn có trải nghiệm tốt nhất. Vui lòng chấp nhận để tiếp tục.
+                        Trang web này sử dụng cookie để đảm bảo bạn có trải nghiệm tốt nhất. Vui lòng chấp nhận để tiếp
+                        tục.
                     </p>
                     <div class="d-flex justify-content-end">
                         <button id="cookie-accept" class="btn btn-primary btn-sm px-3">Chấp nhận</button>
@@ -266,7 +267,7 @@
             </div>
         </div>
     </div>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const cookieConsent = document.getElementById('cookie-consent');
@@ -284,6 +285,57 @@
                 setTimeout(() => cookieConsent.style.display = 'none', 500); // Ẩn hoàn toàn sau khi hiệu ứng kết thúc
             });
         });
+
+        // Hàm hiển thị thông báo
+        function alert(type, title, message) {
+            const alertClass = type === 'success' ? 'bg-success text-white' : 'bg-danger text-white';
+            const iconClass = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
+
+            // Tạo vùng chứa toast nếu chưa có
+            let toastContainer = document.getElementById('custom-toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'custom-toast-container';
+                toastContainer.style.position = 'fixed';
+                toastContainer.style.top = '24px';
+                toastContainer.style.right = '24px';
+                toastContainer.style.zIndex = 1080;
+                toastContainer.style.maxWidth = '350px';
+                document.body.appendChild(toastContainer);
+            }
+
+            // Tạo HTML toast
+            const toastId = 'toast-' + Date.now() + Math.floor(Math.random() * 10000);
+            const toastHtml = `
+                <div id="${toastId}" class="toast align-items-center ${alertClass} border-0 show mb-2 shadow" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 250px;">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi ${iconClass} me-2 fs-5"></i>
+                            <strong>${title}:</strong> ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+
+            // Thêm toast vào vùng chứa
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+
+            // Bắt sự kiện tắt bằng nút close
+            const toastElem = document.getElementById(toastId);
+            toastElem.querySelector('.btn-close').onclick = function () {
+                toastElem.classList.remove('show');
+                setTimeout(() => toastElem.remove(), 400);
+            };
+
+            // Tự động ẩn sau 5 giây
+            setTimeout(() => {
+                if (toastElem) {
+                    toastElem.classList.remove('show');
+                    setTimeout(() => { if (toastElem) toastElem.remove(); }, 400);
+                }
+            }, 5000);
+        }
     </script>
 </body>
 

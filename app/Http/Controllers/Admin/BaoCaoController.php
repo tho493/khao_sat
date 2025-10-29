@@ -95,7 +95,8 @@ class BaoCaoController extends Controller
             },
             'phieuKhaoSat' => function ($query) {
                 $query->where('trangthai', 'completed');
-            }
+            },
+            'hiddenQuestions'
         ]);
 
         // Lấy câu hỏi CTĐT để áp dụng bộ lọc
@@ -163,6 +164,8 @@ class BaoCaoController extends Controller
         $completedSurveys = $query->get();
         $completedCount = $completedSurveys->count();
 
+        $hiddenQuestionIds = $dotKhaoSat->hiddenQuestions->pluck('id')->all();
+
         $tongQuan = [
             'phieu_hoan_thanh' => $completedCount,
             'tong_cau_hoi' => $dotKhaoSat->mauKhaoSat->cauHoi->count(),
@@ -177,7 +180,15 @@ class BaoCaoController extends Controller
         // Chi tiết từng Câu hỏi
         $thongKeCauHoi = [];
         foreach ($dotKhaoSat->mauKhaoSat->cauHoi as $cauHoi) {
-            $thongKeCauHoi[$cauHoi->id] = $this->thongKeCauHoi($dotKhaoSat->id, $cauHoi, $completedSurveys->pluck('id'));
+            if (in_array($cauHoi->id, $hiddenQuestionIds)) {
+                $thongKeCauHoi[$cauHoi->id] = [
+                    'type' => 'hidden',
+                    'data' => collect(),
+                    'total' => 0,
+                ];
+            } else {
+                $thongKeCauHoi[$cauHoi->id] = $this->thongKeCauHoi($dotKhaoSat->id, $cauHoi, $completedSurveys->pluck('id'));
+            }
         }
 
         // Danh sách Phiếu đã nộp (sử dụng cùng query đã lọc)
@@ -745,7 +756,8 @@ class BaoCaoController extends Controller
             'mauKhaoSat.cauHoi' => function ($query) {
                 $query->orderBy('thutu');
             },
-            'mauKhaoSat.cauHoi.phuongAnTraLoi'
+            'mauKhaoSat.cauHoi.phuongAnTraLoi',
+            'hiddenQuestions'
         ]);
 
         // Get personal info questions
@@ -819,13 +831,17 @@ class BaoCaoController extends Controller
             }
             $answeredQuestionIds = $answeredQuestionIdsQuery->get();
 
+            $hiddenQuestionIds = $dotKhaoSat->hiddenQuestions->pluck('id')->all();
+
             $likertQuestions = $dotKhaoSat->mauKhaoSat->cauHoi
                 ->where('loai_cauhoi', 'likert')
+                ->whereNotIn('id', $hiddenQuestionIds)
                 ->values();
 
             // Lấy ra các câu hỏi khác không phải likert từ mẫu khảo sát, chỉ lấy các câu có xuất hiện trong completedSurveyIds
             $otherQuestions = $dotKhaoSat->mauKhaoSat->cauHoi
                 ->where('loai_cauhoi', '!=', 'likert')
+                ->whereNotIn('id', $hiddenQuestionIds)
                 ->values();
 
             // dd($otherQuestions);
@@ -862,6 +878,48 @@ class BaoCaoController extends Controller
         return back()->with('error', 'Định dạng xuất không hợp lệ.');
     }
 
+    public function toggleQuestionVisibility(Request $request, DotKhaoSat $dotKhaoSat)
+    {
+        try {
+            $validated = $request->validate([
+                'cauhoi_id' => 'required|integer|exists:cauhoi_khaosat,id',
+                'hidden' => 'required'
+            ]);
+
+            $cauHoiId = (int) $validated['cauhoi_id'];
+            $hiddenRaw = $validated['hidden'];
+            $hidden = filter_var($hiddenRaw, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if ($hidden === null) {
+                $hidden = in_array((string) $hiddenRaw, ['1', 1], true);
+            }
+
+            if ($hidden) {
+                if (!$dotKhaoSat->hiddenQuestions()->where('cauhoi_id', $cauHoiId)->exists()) {
+                    $dotKhaoSat->hiddenQuestions()->attach($cauHoiId);
+                }
+            } else {
+                $dotKhaoSat->hiddenQuestions()->detach($cauHoiId);
+            }
+
+            return response()->json(['success' => true, 'hidden' => (bool) $hidden]);
+        } catch (\Illuminate\Validation\ValidationException $ve) {
+            return response()->json([
+                'success' => false,
+                'message' => $ve->errors()
+            ], 422);
+        } catch (\Throwable $e) {
+            \Log::error('toggleQuestionVisibility failed', [
+                'error' => $e->getMessage(),
+                'dot_khaosat_id' => $dotKhaoSat->id ?? null,
+                'request' => $request->all()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi cập nhật: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Xóa một câu trả lời cụ thể
      * @param Request $request
@@ -871,10 +929,6 @@ class BaoCaoController extends Controller
     public function deleteResponse(Request $request, PhieuKhaoSatChiTiet $phieuKhaoSatChiTiet)
     {
         try {
-            // Kiểm tra quyền truy cập
-            if (!auth()->check()) {
-                return response()->json(['success' => false, 'message' => 'Bạn cần đăng nhập để thực hiện thao tác này.'], 401);
-            }
 
             // Lấy thông tin phiếu khảo sát và đợt khảo sát
             $phieuKhaoSat = $phieuKhaoSatChiTiet->phieuKhaoSat;

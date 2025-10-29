@@ -70,6 +70,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/dot-khao-sat/{dotKhaoSat}', [BaoCaoController::class, 'dotKhaoSat'])->name('dot-khao-sat');
         Route::get('/export/{dotKhaoSat}', [BaoCaoController::class, 'export'])->name('export');
         Route::post('{dotKhaoSat}/summarize', [BaoCaoController::class, 'summarizeWithAi'])->name('summarize');
+        Route::post('/dot-khao-sat/{dotKhaoSat}/toggle-question', [BaoCaoController::class, 'toggleQuestionVisibility'])->name('toggle-question');
         Route::delete('/response/{phieuKhaoSatChiTiet}', [BaoCaoController::class, 'deleteResponse'])->name('delete-response');
         Route::delete('/survey/{phieuKhaoSat}', [BaoCaoController::class, 'deleteSurvey'])->name('delete-survey');
     });

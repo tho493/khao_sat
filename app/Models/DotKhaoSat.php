@@ -56,6 +56,11 @@ class DotKhaoSat extends Model
         return $this->hasMany(PhieuKhaoSat::class, 'dot_khaosat_id');
     }
 
+    public function hiddenQuestions()
+    {
+        return $this->belongsToMany(CauHoiKhaoSat::class, 'dot_khaosat_hidden_questions', 'dot_khaosat_id', 'cauhoi_id');
+    }
+
     public function nguoiTao()
     {
         return $this->belongsTo(User::class, 'nguoi_tao_id', 'tendangnhap');

@@ -180,6 +180,18 @@ CREATE TABLE IF NOT EXISTS `dot_khaosat` (
     REFERENCES `taikhoan` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Bảng câu hỏi đang bị ẩn khi tổng hợp
+CREATE TABLE IF NOT EXISTS `dot_khaosat_hidden_questions` (
+  `dot_khaosat_id` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `cauhoi_id` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`dot_khaosat_id`,`cauhoi_id`),
+  KEY `dot_khaosat_hidden_questions_cauhoi_id_foreign` (`cauhoi_id`),
+  CONSTRAINT `dot_khaosat_hidden_questions_cauhoi_id_foreign` FOREIGN KEY (`cauhoi_id`) REFERENCES `cauhoi_khaosat` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `dot_khaosat_hidden_questions_dot_khaosat_id_foreign` FOREIGN KEY (`dot_khaosat_id`) REFERENCES `dot_khaosat` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Bảng phiếu khảo sát
 CREATE TABLE IF NOT EXISTS `phieu_khaosat` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
