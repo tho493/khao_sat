@@ -116,6 +116,49 @@
             width: 80px;
             height: 80px;
         }
+
+        /* Cookie Consent */
+        .cookie-consent {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1001;
+            transform: translateY(200%);
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .cookie-consent.show {
+            transform: translateY(0);
+        }
+
+        .cookie-consent p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .cookie-consent-buttons button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background 0.3s;
+        }
+
+        .cookie-consent-buttons button:hover {
+            background: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -188,6 +231,13 @@
         </div>
     </div>
 
+    <div id="cookie-consent" class="cookie-consent">
+        <p>Trang web này sử dụng cookie để đảm bảo bạn có trải nghiệm tốt nhất. Vui lòng chấp nhận để tiếp tục.</p>
+        <div class="cookie-consent-buttons">
+            <button id="cookie-accept">Chấp nhận</button>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // Toggle password visibility
@@ -234,6 +284,23 @@
             bsAlert.close();
         });
     }, 5000);
+
+    // Cookie Consent
+    document.addEventListener('DOMContentLoaded', function () {
+        const cookieConsent = document.getElementById('cookie-consent');
+        const acceptButton = document.getElementById('cookie-accept');
+
+        if (!localStorage.getItem('cookie_accepted')) {
+            setTimeout(() => {
+                cookieConsent.classList.add('show');
+            }, 1000);
+        }
+
+        acceptButton.addEventListener('click', function () {
+            localStorage.setItem('cookie_accepted', 'true');
+            cookieConsent.classList.remove('show');
+        });
+    });
 </script>
 </body>
 </html>

@@ -233,6 +233,58 @@
         });
     </script>
     @stack('scripts')
+
+    <style>
+        #cookie-consent {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 1050;
+            max-width: 380px;
+            transition: opacity 0.5s, transform 0.5s;
+            opacity: 0;
+            transform: translateY(100%);
+        }
+
+        #cookie-consent.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+    <div id="cookie-consent">
+        <div class="card glass-effect shadow-lg border-0">
+            <div class="card-body d-flex align-items-start">
+                <i class="bi bi-cookie fs-3 text-primary me-3"></i>
+                <div>
+                    <p class="card-text mb-2">
+                        Trang web này sử dụng cookie để đảm bảo bạn có trải nghiệm tốt nhất. Vui lòng chấp nhận để tiếp tục.
+                    </p>
+                    <div class="d-flex justify-content-end">
+                        <button id="cookie-accept" class="btn btn-primary btn-sm px-3">Chấp nhận</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cookieConsent = document.getElementById('cookie-consent');
+            const acceptButton = document.getElementById('cookie-accept');
+
+            if (!localStorage.getItem('cookie_accepted')) {
+                setTimeout(() => {
+                    cookieConsent.classList.add('show');
+                }, 1000);
+            }
+
+            acceptButton.addEventListener('click', function () {
+                localStorage.setItem('cookie_accepted', 'true');
+                cookieConsent.classList.remove('show'); // Bắt đầu hiệu ứng ẩn
+                setTimeout(() => cookieConsent.style.display = 'none', 500); // Ẩn hoàn toàn sau khi hiệu ứng kết thúc
+            });
+        });
+    </script>
 </body>
 
 </html>

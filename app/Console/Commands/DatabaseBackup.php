@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 class DatabaseBackup extends Command
 {
     protected $signature = 'backup:db {--name=} {--gzip}';
-    protected $description = 'Backup MySQL thành file .sql (hoặc .sql.gz) ở storage/app/backups/db';
+    protected $description = 'Backup MySQL thành file .sql (hoặc .sql.gz) ở storage/app/backup/db';
 
     public function handle(): int
     {
@@ -38,12 +38,20 @@ class DatabaseBackup extends Command
         $binDir = rtrim((string) env('DB_CLIENT_BIN', ''), DIRECTORY_SEPARATOR);
         $dumpBinary = $binDir ? $binDir . DIRECTORY_SEPARATOR . 'mysqldump' : 'mysqldump';
 
-        // Build command
+        // Build command với các options
         $cmd = [
             escapeshellcmd($dumpBinary),
             '--single-transaction',
             '--skip-lock-tables',
             '--default-character-set=utf8mb4',
+            // '--routines', // Backup stored procedures và functions
+            // '--triggers', // Backup triggers
+            // '--events', // Backup events
+            '--add-drop-table', // Thêm DROP TABLE IF EXISTS
+            '--add-locks', // Thêm LOCK/UNLOCK statements
+            '--disable-keys', // Disable keys để tăng tốc restore
+            '--extended-insert', // Sử dụng extended INSERT statements
+            '--complete-insert', // Include column names trong INSERT
             '-h' . escapeshellarg($host),
             '-P' . escapeshellarg((string) $port),
             '-u' . escapeshellarg($user),
@@ -54,10 +62,7 @@ class DatabaseBackup extends Command
         }
 
         $cmd[] = escapeshellarg($db);
-
-        // Xuất ra file (có thể gzip)
         if ($gzip) {
-            // Sử dụng PHP gzip thay vì shell gzip để tương thích Windows/Linux
             $tempFile = tempnam(sys_get_temp_dir(), 'db_backup_');
             $cmdStr = implode(' ', $cmd) . ' > ' . escapeshellarg($tempFile);
 

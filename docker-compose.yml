@@ -26,10 +26,10 @@ services:
       - APP_URL=${APP_URL:-}
       - APP_ENV=production
       - APP_DEBUG=false
+      - TZ=Asia/Bangkok
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY:-}
       - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY:-}
-
       - DB_CONNECTION=mysql
       - DB_HOST=db
       - DB_PORT=3306
@@ -44,9 +44,9 @@ services:
       - CACHE_DRIVER=redis
       - SESSION_DRIVER=redis
       - QUEUE_CONNECTION=redis
-      - SESSION_SAME_SITE=${SESSION_SAME_SITE:-}  
+      - SESSION_SAME_SITE=${SESSION_SAME_SITE:-none}  
       - SESSION_DOMAIN=${SESSION_DOMAIN:-}
-      - SESSION_SECURE_COOKIE=${SESSION_SECURE_COOKIE:-}
+      - SESSION_SECURE_COOKIE=${SESSION_SECURE_COOKIE:-true}
 
   nginx:
     image: nginx:alpine

@@ -563,40 +563,40 @@ DELIMITER ;
 DELIMITER //
 
 -- Function kiểm tra quyền truy cập
-CREATE FUNCTION fn_KiemTraQuyen(
-  p_taikhoan_id INT,
-  p_chucnang VARCHAR(50),
-  p_quyen VARCHAR(10)
-)
-RETURNS BOOLEAN
-DETERMINISTIC
-READS SQL DATA
-BEGIN
-  DECLARE v_quyen_taikhoan VARCHAR(10);
-  DECLARE v_quyen_phanquyen VARCHAR(10);
+-- CREATE FUNCTION fn_KiemTraQuyen(
+--   p_taikhoan_id INT,
+--   p_chucnang VARCHAR(50),
+--   p_quyen VARCHAR(10)
+-- )
+-- RETURNS BOOLEAN
+-- DETERMINISTIC
+-- READS SQL DATA
+-- BEGIN
+--   DECLARE v_quyen_taikhoan VARCHAR(10);
+--   DECLARE v_quyen_phanquyen VARCHAR(10);
   
-  -- Kiểm tra quyền admin
-  SELECT quyen INTO v_quyen_taikhoan
-  FROM taikhoan
-  WHERE id = p_taikhoan_id;
+--   -- Kiểm tra quyền admin
+--   SELECT quyen INTO v_quyen_taikhoan
+--   FROM taikhoan
+--   WHERE id = p_taikhoan_id;
   
-  IF v_quyen_taikhoan = 'admin' THEN
-    RETURN TRUE;
-  END IF;
+--   IF v_quyen_taikhoan = 'admin' THEN
+--     RETURN TRUE;
+--   END IF;
   
-  -- Kiểm tra phân quyền chi tiết
-  SELECT quyen INTO v_quyen_phanquyen
-  FROM phanquyen
-  WHERE taikhoan_id = p_taikhoan_id AND chucnang = p_chucnang;
+--   -- Kiểm tra phân quyền chi tiết
+--   SELECT quyen INTO v_quyen_phanquyen
+--   FROM phanquyen
+--   WHERE taikhoan_id = p_taikhoan_id AND chucnang = p_chucnang;
   
-  IF v_quyen_phanquyen = 'full' OR v_quyen_phanquyen = p_quyen THEN
-    RETURN TRUE;
-  END IF;
+--   IF v_quyen_phanquyen = 'full' OR v_quyen_phanquyen = p_quyen THEN
+--     RETURN TRUE;
+--   END IF;
   
-  RETURN FALSE;
-END//
+--   RETURN FALSE;
+-- END//
 
-DELIMITER ;
+-- DELIMITER ;
 
 -- --------------------------------------------------------
 -- DỮ LIỆU MẪU
@@ -605,6 +605,7 @@ DELIMITER ;
 -- Thêm tài khoản admin mặc định
 INSERT INTO `taikhoan` (`tendangnhap`, `matkhau`, `hoten`, `email`) VALUES
 ('tho493', '2584fcf4f93b79886a1bba3c47dc5cac', 'Administrator', 'tho493@admin.com');
+('admin', '0192023a7bbd73250516f069df18b500', 'Admin', 'admin@admin.com')
 
 -- Thêm năm học
 INSERT INTO `namhoc` (`namhoc`) VALUES

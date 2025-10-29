@@ -473,10 +473,46 @@ if (isset($dotKhaoSat) && $dotKhaoSat) {
                 }
             }
         });
-    </script>
+        </script>
+        <div id="cookie-consent" class="fixed bottom-20 right-0 left-0 sm:left-auto sm:bottom-24 sm:right-4 z-[100] p-4 max-w-md transition-all duration-500 transform translate-y-full opacity-0">
+            <div class="glass-effect p-5 rounded-xl shadow-lg flex items-start gap-4">
+                <div class="text-2xl text-blue-500 mt-1">
+                    <i class="bi bi-cookie"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-slate-700 mb-3">
+                        Trang web này sử dụng cookie để đảm bảo bạn có trải nghiệm tốt nhất. Vui lòng chấp nhận để tiếp tục.
+                    </p>
+                    <div class="flex justify-end">
+                        <button id="cookie-accept"
+                            class="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                            Chấp nhận
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     @stack('scripts')
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cookieConsent = document.getElementById('cookie-consent');
+            const acceptButton = document.getElementById('cookie-accept');
+
+            if (!localStorage.getItem('cookie_accepted')) {
+                setTimeout(() => {
+                    cookieConsent.classList.remove('translate-y-full', 'opacity-0');
+                }, 1000);
+            }
+
+            acceptButton.addEventListener('click', function () {
+                localStorage.setItem('cookie_accepted', 'true');
+                cookieConsent.classList.add('opacity-0', 'translate-y-full');
+                setTimeout(() => cookieConsent.style.display = 'none', 500);
+            });
+        });
+    </script>
 </body>
 
 </html>

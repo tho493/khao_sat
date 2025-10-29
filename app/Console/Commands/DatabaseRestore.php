@@ -38,8 +38,9 @@ class DatabaseRestore extends Command
         if ($pass)
             putenv('MYSQL_PWD=' . $pass);
 
+        // Tạo command với các options để xử lý foreign keys và duplicate data
         $mysqlCmd = sprintf(
-            '%s --default-character-set=utf8mb4 -h%s -P%s -u%s %s',
+            '%s --default-character-set=utf8mb4 --force -h%s -P%s -u%s %s',
             escapeshellcmd($mysqlBin),
             escapeshellarg($host),
             escapeshellarg((string) $port),
@@ -64,35 +65,100 @@ class DatabaseRestore extends Command
                 }
                 gzclose($gz);
 
-                // Restore từ file tạm
-                $cmdStr = sprintf('%s < %s', $mysqlCmd, escapeshellarg($tempFile));
-
-                $exit = 0;
-                $output = [];
-                exec($cmdStr, $output, $exit);
-
+                // Restore từ file tạm với xử lý lỗi chi tiết
+                $result = $this->executeRestore($mysqlCmd, $tempFile, $file);
                 unlink($tempFile); // Xóa file tạm
+
+                return $result;
             } else {
                 $this->error("Không thể mở file gzip: {$file}");
                 return self::FAILURE;
             }
         } else {
-            $cmdStr = sprintf('%s < %s', $mysqlCmd, escapeshellarg($absPath));
-
-            $exit = 0;
-            $output = [];
-            exec($cmdStr, $output, $exit);
+            return $this->executeRestore($mysqlCmd, $absPath, $file);
         }
+    }
 
-        if ($pass)
+    private function executeRestore(string $mysqlCmd, string $filePath, string $originalFile): int
+    {
+        // Tạo file SQL với các commands để xử lý foreign keys
+        $tempSqlFile = tempnam(sys_get_temp_dir(), 'db_restore_processed_');
+
+        // Đọc file SQL gốc
+        $sqlContent = file_get_contents($filePath);
+
+        // Thêm các commands để xử lý foreign keys và duplicate data
+        $processedSql = $this->processSqlForRestore($sqlContent);
+
+        // Ghi file SQL đã xử lý
+        file_put_contents($tempSqlFile, $processedSql);
+
+        // Thực thi restore
+        $cmdStr = sprintf('%s < %s', $mysqlCmd, escapeshellarg($tempSqlFile));
+
+        $exit = 0;
+        $output = [];
+        $errorOutput = [];
+
+        // Capture cả output và error
+        exec($cmdStr . ' 2>&1', $output, $exit);
+
+        // Xóa file tạm
+        unlink($tempSqlFile);
+
+        if ($pass = env('DB_PASSWORD'))
             putenv('MYSQL_PWD');
 
         if ($exit === 0) {
-            $this->info("Đã restore DB từ {$file}");
+            $this->info("Đã restore DB từ {$originalFile}");
+
+            // Hiển thị thông tin về các bảng đã được restore
+            if (!empty($output)) {
+                $this->line("Chi tiết restore:");
+                foreach ($output as $line) {
+                    if (strpos($line, 'Query OK') !== false || strpos($line, 'Records:') !== false) {
+                        $this->line("  " . $line);
+                    }
+                }
+            }
+
             return self::SUCCESS;
         }
 
-        $this->error("Restore thất bại. Kiểm tra quyền và đường dẫn DB_CLIENT_BIN.");
+        $this->error("Restore thất bại với exit code: {$exit}");
+
+        // Hiển thị lỗi chi tiết
+        if (!empty($output)) {
+            $this->error("Chi tiết lỗi:");
+            foreach ($output as $line) {
+                if (strpos($line, 'ERROR') !== false || strpos($line, 'Duplicate') !== false) {
+                    $this->error("  " . $line);
+                }
+            }
+        }
+
+        $this->error("Kiểm tra quyền, đường dẫn DB_CLIENT_BIN và cấu trúc database.");
         return self::FAILURE;
+    }
+
+    private function processSqlForRestore(string $sqlContent): string
+    {
+        // Thêm các commands để xử lý foreign keys và duplicate data
+        $processedSql = "-- Restore processed SQL\n";
+        $processedSql .= "SET FOREIGN_KEY_CHECKS = 0;\n";
+        $processedSql .= "SET UNIQUE_CHECKS = 0;\n";
+        $processedSql .= "SET AUTOCOMMIT = 0;\n";
+        $processedSql .= "START TRANSACTION;\n\n";
+
+        // Thêm SQL gốc
+        $processedSql .= $sqlContent;
+
+        // Thêm các commands để kết thúc
+        $processedSql .= "\n\nCOMMIT;\n";
+        $processedSql .= "SET FOREIGN_KEY_CHECKS = 1;\n";
+        $processedSql .= "SET UNIQUE_CHECKS = 1;\n";
+        $processedSql .= "SET AUTOCOMMIT = 1;\n";
+
+        return $processedSql;
     }
 }

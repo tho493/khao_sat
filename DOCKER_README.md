@@ -282,6 +282,51 @@ docker-compose exec db mysqldump -u khao_sat_user -p khao_sat_db > backup_$(date
 docker-compose exec -T db mysql -u khao_sat_user -p khao_sat_db < backup_20240101.sql
 ```
 
+### Chạy service thủ công
+
+```bash
+docker network create khao_sat_network
+docker volume create db_data
+docker volume create redis_data
+
+docker run -d --name khao_sat_db --network khao_sat_network \
+    -e MYSQL_DATABASE=khao_sat_db \
+    -e MYSQL_USER=khao_sat_user \
+    -e MYSQL_PASSWORD=khao_sat_password \
+    -e MYSQL_ROOT_PASSWORD=root_password \
+    -v db_data:/var/lib/mysql \
+    -v $(pwd)/database/khao_sat_db.sql:/docker-entrypoint-initdb.d/init.sql \
+    mysql:8.0
+
+docker run -d --name khao_sat_redis --network khao_sat_network \
+    -v redis_data:/data \
+    -p 6379:6379 \
+    redis:alpine
+
+docker run -d --name khao_sat_app --network khao_sat_network \
+    --env-file .env \
+    -v $(pwd):/var/www \
+    -v $(pwd)/docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini \
+    tho493/khao-sat:latest
+
+docker run -d --name khao_sat_nginx --network khao_sat_network \
+    -v $(pwd):/var/www \
+    -v $(pwd)/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf \
+    -v $(pwd)/docker/nginx/ssl:/etc/nginx/ssl \
+    -p 8080:80 \
+    --depends-on khao_sat_app \
+    nginx:alpine
+
+docker run -d --name khao_sat_phpmyadmin --network khao_sat_network \
+    -e PMA_HOST=db \
+    -e PMA_PORT=3306 \
+    -e PMA_USER=khao_sat_user \
+    -e PMA_PASSWORD=khao_sat_password \
+    -p 8081:80 \
+    --depends-on khao_sat_db \
+    phpmyadmin/phpmyadmin
+```
+
 ## Liên hệ hỗ trợ
 
 Nếu gặp vấn đề, vui lòng:
