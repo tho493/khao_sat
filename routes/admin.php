@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\NamHocController;
 use App\Http\Controllers\Admin\CtdtController;
 use App\Http\Controllers\Admin\PhieuKhaoSatController;
 use App\Http\Controllers\Admin\DBBackupController;
+use App\Http\Controllers\Admin\DataSourceController;
 
 
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
@@ -72,7 +73,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::post('{dotKhaoSat}/summarize', [BaoCaoController::class, 'summarizeWithAi'])->name('summarize');
         Route::post('/dot-khao-sat/{dotKhaoSat}/toggle-question', [BaoCaoController::class, 'toggleQuestionVisibility'])->name('toggle-question');
         Route::delete('/response/{phieuKhaoSatChiTiet}', [BaoCaoController::class, 'deleteResponse'])->name('delete-response');
-        Route::delete('/survey/{phieuKhaoSat}', [BaoCaoController::class, 'deleteSurvey'])->name('delete-survey');
+        Route::delete('/survey/{phieuKhaoSat}', [BaoCaoController::class, 'delete-survey']);
         Route::patch('/phieu-khao-sat/{phieuKhaoSat}/toggle-duplicate', [BaoCaoController::class, 'toggleDuplicateStatus'])->name('toggle-duplicate');
         Route::patch('/phieu-khao-sat/{phieuKhaoSat}/mark-as-duplicate', [BaoCaoController::class, 'markAsDuplicate'])->name('mark-as-duplicate');
     });
@@ -94,6 +95,20 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::post('/', [CtdtController::class, 'store'])->name('store');
         Route::put('/{mactdt}', [CtdtController::class, 'update'])->name('update');
         Route::delete('/{mactdt}', [CtdtController::class, 'destroy'])->name('destroy');
+    });
+
+    // Data Sources
+    Route::prefix('data-source')->name('data-source.')->group(function () {
+        Route::get('/', [DataSourceController::class, 'index'])->name('index');
+        Route::get('/create', [DataSourceController::class, 'create'])->name('create');
+        Route::post('/', [DataSourceController::class, 'store'])->name('store');
+        Route::get('/{dataSource}/edit', [DataSourceController::class, 'edit'])->name('edit');
+        Route::put('/{dataSource}', [DataSourceController::class, 'update'])->name('update');
+        Route::delete('/{dataSource}', [DataSourceController::class, 'destroy'])->name('destroy');
+
+        Route::post('/{dataSource}/value', [DataSourceController::class, 'storeValue'])->name('value.store');
+        Route::put('/value/{value}', [DataSourceController::class, 'updateValue'])->name('value.update');
+        Route::delete('/value/{value}', [DataSourceController::class, 'destroyValue'])->name('value.destroy');
     });
 
     // FAQ

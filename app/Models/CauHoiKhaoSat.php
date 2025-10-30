@@ -19,6 +19,7 @@ class CauHoiKhaoSat extends Model
         'page',
         'cau_dieukien_id',
         'dieukien_hienthi',
+        'data_source_id',
         'trangthai'
     ];
 
@@ -37,6 +38,11 @@ class CauHoiKhaoSat extends Model
     public function phuongAnTraLoi()
     {
         return $this->hasMany(PhuongAnTraLoi::class, 'cauhoi_id')->orderBy('thutu');
+    }
+
+    public function dataSource()
+    {
+        return $this->belongsTo(DataSource::class, 'data_source_id');
     }
 
 

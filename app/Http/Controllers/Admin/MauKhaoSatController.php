@@ -100,11 +100,14 @@ class MauKhaoSatController extends Controller
         $conditionalQuestions = $allQuestions->whereIn('loai_cauhoi', ['single_choice', 'likert', 'rating']);
         $questionContentMap = $allQuestions->pluck('noidung_cauhoi', 'id');
 
+        $dataSources = \App\Models\DataSource::orderBy('name')->get();
+
         return view('admin.mau-khao-sat.edit', compact(
             'mauKhaoSat',
             'isLocked',
             'conditionalQuestions',
-            'questionContentMap'
+            'questionContentMap',
+            'dataSources'
         ));
     }
 

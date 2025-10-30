@@ -261,7 +261,7 @@
                                     <option value="rating">Đánh giá (1-5 sao)</option>
                                     <option value="date">Ngày tháng</option>
                                     <option value="number">Số</option>
-                                    <option value="select_ctdt">Chọn chương trình đào tạo</option>
+                                    <option value="custom_select">Lựa chọn từ danh sách</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
@@ -278,6 +278,16 @@
                                     <label class="form-check-label" for="checkDuplicate">Kiểm tra trùng lặp</label>
                                 </div>
                             </div>
+                        </div>
+
+                        <div id="dataSourceContainer" class="mb-3" style="display: none;">
+                            <label for="dataSourceId" class="form-label">Nguồn dữ liệu <span class="text-danger">*</span></label>
+                            <select class="form-select" id="dataSourceId">
+                                <option value="">-- Chọn nguồn dữ liệu --</option>
+                                @foreach($dataSources as $dataSource)
+                                    <option value="{{ $dataSource->id }}">{{ $dataSource->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
 
                         <div id="phuongAnContainer">
@@ -384,7 +394,7 @@
                 'rating': 'Đánh giá',
                 'date': 'Ngày tháng',
                 'number': 'Số',
-                'select_ctdt': 'Chọn chương trình đào tạo'
+                'custom_select': 'Lựa chọn từ danh sách'
             };
             return names[type] || type;
         }
@@ -438,6 +448,9 @@
                                         </div>
                                         ${duplicateCheckHtml}
                                 `;
+            if (cauHoi.loai_cauhoi === 'custom_select' && cauHoi.data_source) {
+                 extraInfoHtml += `<div class="border-start ps-3"><i class="bi bi-database me-1"></i>Nguồn: <strong>${cauHoi.data_source.name}</strong></div>`;
+            }
             if (cauHoi.cau_dieukien_id && cauHoi.dieukien_hienthi) {
                 try {
                     const condition = typeof cauHoi.dieukien_hienthi === 'string' ? JSON.parse(cauHoi.dieukien_hienthi) : cauHoi.dieukien_hienthi;
@@ -497,7 +510,6 @@
 
         function loadInitialQuestions() {
             $('#questions-loading').show();
-            // $.get("{{-- route('admin.mau-khao-sat.questions', $mauKhaoSat->id) --}}")
             $.get("/admin/mau-khao-sat/{{ $mauKhaoSat->id }}/questions")
                 .done(data => {
                     allQuestionsData = data;
@@ -516,8 +528,7 @@
             $('#cauHoiId').val('');
             $('#validation-errors').addClass('d-none').html('');
             $('#formCauHoi').data('is-personal-info', !!isPersonalInfo);
-            $('#checkDuplicate').prop('checked', false); // Mặc định không kiểm tra trùng lặp khi thêm mới
-            // $('#isPersonalInfo').prop('checked', isPersonalInfo);
+            $('#checkDuplicate').prop('checked', false);
 
             $('#enableConditionalLogic').prop('checked', false).trigger('change');
             $('#parentAnswer').html('');
@@ -535,15 +546,16 @@
             $('#validation-errors').addClass('d-none').html('');
             $('#cauHoiId').val(cauHoi.id);
             $('#formCauHoi').data('is-personal-info', !!cauHoi.is_personal_info);
-            // $('#isPersonalInfo').prop('checked', !!cauHoi.is_personal_info);
 
             $('#noiDungCauHoi').val(cauHoi.noidung_cauhoi);
             $('#loaiCauHoi').val(cauHoi.loai_cauhoi);
             $('#pageNumber').val(cauHoi.page || 1);
             $('#batBuoc').prop('checked', !!cauHoi.batbuoc);
-            $('#checkDuplicate').prop('checked', !!cauHoi.check_duplicate); // Đặt trạng thái checkbox
+            $('#checkDuplicate').prop('checked', !!cauHoi.check_duplicate);
 
-            // phương án trả lời
+            togglePhuongAnContainer();
+            $('#dataSourceId').val(cauHoi.data_source_id || '');
+
             const phuongAnContainer = $('#danhSachPhuongAn');
             phuongAnContainer.html('');
             const loaiHienTai = $('#loaiCauHoi').val();
@@ -582,24 +594,30 @@
             modalCauHoi.show();
         }
 
-        // === PHƯƠNG ÁN TRẢ LỜI functions (giữ nguyên) ===
         window.togglePhuongAnContainer = function () {
             const loai = $('#loaiCauHoi').val();
-            const container = $('#phuongAnContainer');
+            const phuongAnContainer = $('#phuongAnContainer');
+            const dataSourceContainer = $('#dataSourceContainer');
             const isChoiceType = ['single_choice', 'multiple_choice', 'likert'].includes(loai);
 
             if (isChoiceType) {
-                $('#danhSachPhuongAn').empty();
-                container.show();
-                if (loai === 'likert') {
-                    const likertOptions = ['Rất không hài lòng', 'Không hài lòng', 'Bình thường', 'Hài lòng', 'Rất hài lòng'];
-                    likertOptions.forEach(option => addPhuongAn(option, true));
-                } else {
-                    addPhuongAn();
-                    addPhuongAn();
+                phuongAnContainer.show();
+                dataSourceContainer.hide();
+                if ($('#danhSachPhuongAn .input-group').length === 0) {
+                    if (loai === 'likert') {
+                        const likertOptions = ['Rất không hài lòng', 'Không hài lòng', 'Bình thường', 'Hài lòng', 'Rất hài lòng'];
+                        likertOptions.forEach(option => addPhuongAn(option, true));
+                    } else {
+                        addPhuongAn();
+                        addPhuongAn();
+                    }
                 }
+            } else if (loai === 'custom_select') {
+                phuongAnContainer.hide();
+                dataSourceContainer.show();
             } else {
-                container.hide();
+                phuongAnContainer.hide();
+                dataSourceContainer.hide();
             }
         }
 
@@ -620,7 +638,6 @@
             }
         }
 
-        // === SAVE/DELETE ACTION ===
         window.saveCauHoi = function (event) {
             event.preventDefault();
             const btn = $('#btnSaveCauHoi');
@@ -635,10 +652,17 @@
                 check_duplicate: $('#checkDuplicate').is(':checked') ? 1 : 0,
                 phuong_an: [],
                 is_personal_info: $('#formCauHoi').data('is-personal-info') ? 1 : 0,
+                data_source_id: null
             };
-            $('.phuong-an').each(function () {
-                if ($(this).val().trim() !== '') data.phuong_an.push($(this).val().trim());
-            });
+
+            if (data.loai_cauhoi === 'custom_select') {
+                data.data_source_id = $('#dataSourceId').val();
+            } else {
+                $('.phuong-an').each(function () {
+                    if ($(this).val().trim() !== '') data.phuong_an.push($(this).val().trim());
+                });
+            }
+
             if ($('#enableConditionalLogic').is(':checked') && $('#parentQuestion').val() && $('#parentAnswer').val()) {
                 data.cau_dieukien_id = $('#parentQuestion').val();
                 data.dieukien_hienthi = JSON.stringify({

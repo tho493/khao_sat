@@ -229,14 +229,16 @@
                                                         oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                                                     @break
 
-                                                @case('select_ctdt')
+                                                @case('custom_select')
                                                      <div class="flex justify-center">
                                                             <select class="form-input mt-2 w-full max-w-2xl rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
                                                                     name="cau_tra_loi[{{ $cauHoi->id }}]" {{ $isRequired ? 'required' : '' }}>
-                                                                <option value="">-- Chọn khoa --</option>
-                                                                @foreach($ctdtList as $ct)
-                                                                    <option value="{{ $ct->mactdt }}">{{ $ct->tenctdt }}</option>
-                                                                @endforeach
+                                                                <option value="">-- {{ $cauHoi->noidung_cauhoi }} --</option>
+                                                                @if($cauHoi->dataSource)
+                                                                    @foreach($cauHoi->dataSource->values as $value)
+                                                                        <option value="{{ $value->value }}">{{ $value->label }}</option>
+                                                                    @endforeach
+                                                                @endif
                                                             </select>
                                                         </div>
                                                     @break
@@ -374,17 +376,19 @@
                                                                 oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                                                             @break
                 
-                                                    @case('select_ctdt')
-                                                        <div class="flex justify-center">
-                                                            <select class="form-input mt-2 w-full max-w-2xl rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
-                                                                    name="cau_tra_loi[{{ $cauHoi->id }}]" {{ $isRequired ? 'required' : '' }}>
-                                                                <option value="">-- Chọn chương trình đào tạo --</option>
-                                                                @foreach($ctdtList as $ct)
-                                                                    <option value="{{ $ct->mactdt }}">{{ $ct->tenctdt }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                        @break
+                                                        @case('custom_select')
+                                                            <div class="flex justify-center">
+                                                                <select class="form-input mt-2 w-full max-w-2xl rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
+                                                                        name="cau_tra_loi[{{ $cauHoi->id }}]" {{ $isRequired ? 'required' : '' }}>
+                                                                    <option value="">-- {{ $cauHoi->noidung_cauhoi }} --</option>
+                                                                    @if($cauHoi->dataSource)
+                                                                        @foreach($cauHoi->dataSource->values as $value)
+                                                                            <option value="{{ $value->value }}">{{ $value->label }}</option>
+                                                                        @endforeach
+                                                                    @endif
+                                                                </select>
+                                                            </div>
+                                                            @break
 
                                                     @endswitch
                                                 </div>

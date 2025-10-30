@@ -77,7 +77,8 @@ class KhaoSatController extends Controller
             },
             'cauHoi.phuongAnTraLoi' => function ($query) {
                 $query->orderBy('thutu', 'asc');
-            }
+            },
+            'cauHoi.dataSource.values'
         ])->first();
 
         if (!$mauKhaoSat) {
@@ -91,12 +92,9 @@ class KhaoSatController extends Controller
             ->where('is_personal_info', false)
             ->groupBy('page');
 
-        // Danh sách CTDT cho kiểu select_ctdt
-        $ctdtList = Ctdt::orderBy('tenctdt', 'asc')->get(['mactdt', 'tenctdt']);
-
         // Nếu là admin (đăng nhập), hiển thị cảnh báo chế độ admin
         $adminModeWarning = ($isAdminMode) ? 'Bạn đang ở chế độ quản trị viên (Admin) nên có thể xem trước. Khảo sát đang ở chế độ ' . $dotKhaoSat->trangthai : null;
-        return view('khao-sat.show', compact('dotKhaoSat', 'mauKhaoSat', 'questionsByPage', 'personalInfoQuestions', 'ctdtList', 'adminModeWarning'));
+        return view('khao-sat.show', compact('dotKhaoSat', 'mauKhaoSat', 'questionsByPage', 'personalInfoQuestions', 'adminModeWarning'));
     }
 
     public function store(Request $request, DotKhaoSat $dotKhaoSat)
@@ -164,7 +162,7 @@ class KhaoSatController extends Controller
                     case 'date':
                         $isDuplicate = $existingAnswerQuery->where('giatri_date', $traLoi)->exists();
                         break;
-                    case 'select_ctdt':
+                    case 'custom_select':
                     case 'text':
                         $isDuplicate = $existingAnswerQuery->where('giatri_text', $traLoi)->exists();
                         break;
@@ -241,7 +239,7 @@ class KhaoSatController extends Controller
                         PhieuKhaoSatChiTiet::create($data);
                         break;
 
-                    case 'select_ctdt':
+                    case 'custom_select':
                         $data['giatri_text'] = $traLoi;
                         PhieuKhaoSatChiTiet::create($data);
                         break;
@@ -306,31 +304,9 @@ class KhaoSatController extends Controller
     {
         // Lấy thông tin phiếu khảo sát
         $phieuKhaoSatWithDetails = PhieuKhaoSat::with([
-            'dotKhaoSat.mauKhaoSat.cauHoi' => function ($query) {
-                $query->orderBy('is_personal_info', 'desc')
-                    ->orderBy('page', 'asc')
-                    ->orderBy('thutu', 'asc');
-            },
+            'dotKhaoSat.mauKhaoSat.cauHoi.dataSource.values',
             'chiTiet.phuongAn'
         ])->find($phieuKhaoSat->id);
-
-        $ctdtQuestion = optional($phieuKhaoSatWithDetails->dotKhaoSat->mauKhaoSat->cauHoi)
-            ->where('loai_cauhoi', 'select_ctdt')
-            ->first();
-
-        if ($ctdtQuestion) {
-            foreach ($phieuKhaoSatWithDetails->chiTiet as $chiTiet) {
-                if ($chiTiet->cauhoi_id === $ctdtQuestion->id) {
-                    $ma = $chiTiet->giatri_text ?? $chiTiet->giatri_number ?? null;
-                    if ($ma) {
-                        $tenCtdt = Ctdt::where('mactdt', $ma)->value('tenctdt');
-                        if ($tenCtdt) {
-                            $chiTiet->giatri_text = $tenCtdt;
-                        }
-                    }
-                }
-            }
-        }
 
         // Chuẩn bị dữ liệu thông tin phiếu
         $phieuInfo = [
@@ -379,15 +355,7 @@ class KhaoSatController extends Controller
         // Xử lý câu hỏi khảo sát
         foreach ($surveyQuestions as $index => $question) {
             $answers = $answersByQuestionId->get($question->id);
-
-            // Xử lý loại câu hỏi chọn nhiều đáp án (multiple_choice)
-            if ($question->loai_cauhoi === 'multiple_choice' && $answers) {
-                $display = $answers->map(function ($ans) {
-                    return $ans->phuongAn->noidung ?? '';
-                })->filter()->implode('; ');
-            } else {
-                $display = $this->formatAnswerForDisplay($answers, $question);
-            }
+            $display = $this->formatAnswerForDisplay($answers, $question);
 
             $surveyAnswers[] = [
                 'cau_hoi' => $question->noidung_cauhoi,
@@ -439,7 +407,15 @@ class KhaoSatController extends Controller
                 return $first->giatri_date ?
                     $first->giatri_date : '';
 
-            case 'select_ctdt':
+            case 'custom_select':
+                $first = $answers->first();
+                $value = $first->giatri_text ?? '';
+                if ($question->dataSource && $question->dataSource->values) {
+                    $option = $question->dataSource->values->firstWhere('value', $value);
+                    return $option->label ?? $value;
+                }
+                return $value;
+
             case 'text':
             default:
                 $first = $answers->first();

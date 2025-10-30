@@ -62,9 +62,10 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('admin.ctdt.index') }}"
-                        class="{{ request()->routeIs('admin.ctdt.*') ? 'active' : '' }}" title="Chương trình đào tạo">
-                        <i class="bi bi-journal-bookmark-fill"></i> <span>Chương trình ĐT</span>
+                    <a href="{{ route('admin.data-source.index') }}"
+                        class="{{ request()->routeIs('admin.data-source.*') ? 'active' : '' }}"
+                        title="Câu hỏi tùy chỉnh">
+                        <i class="bi bi-database-fill"></i> <span>Câu hỏi tùy chỉnh</span>
                     </a>
                 </li>
                 <li>

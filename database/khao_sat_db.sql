@@ -64,36 +64,28 @@ CREATE TABLE IF NOT EXISTS `namhoc` (
   KEY `idx_namhoc` (`namhoc`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Bảng chương trình đào tạo
-CREATE TABLE IF NOT EXISTS `ctdt` (
-  `mactdt` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
-  `tenctdt` varchar(255) COLLATE utf8_unicode_ci NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+-- Bảng data_source cho câu hỏi lựa chọn tùy chỉnh
+CREATE TABLE IF NOT EXISTS `data_sources` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `data_sources_slug_unique` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `ctdt`
---
-
-INSERT INTO `ctdt` (`mactdt`, `tenctdt`) VALUES
-('7140234', 'Sư phạm Tiếng Trung Quốc'),
-('7140246', 'Sư phạm công nghệ'),
-('7220201', 'Ngôn ngữ Anh'),
-('7220204', 'Ngôn ngữ Trung Quốc'),
-('7310630', 'Việt Nam học (Hướng dẫn Du lịch)'),
-('7340101', 'Quản trị kinh doanh'),
-('7340301', 'Kế toán'),
-('7380101', 'Luật'),
-('7480201', 'Công nghệ thông tin'),
-('7510201', 'Kỹ thuật điều khiển và tự động hóa'),
-('7510205', 'Công nghệ kỹ thuật ô tô'),
-('7510301', 'Công nghệ kỹ thuật điện, điện tử'),
-('7510302', 'Công nghệ kỹ thuật điện tử, viễn thông'),
-('7520114', 'Kỹ thuật cơ điện tử'),
-('7520216', 'Công nghệ kỹ thuật cơ khí'),
-('7540101', 'Công nghệ thực phẩm'),
-('7540106', 'Đảm bảo chất lượng và an toàn thực phẩm'),
-('7540204', 'Công nghệ dệt, may'),
-('7810103', 'Quản trị dịch vụ du lịch và lữ hành');
+CREATE TABLE IF NOT EXISTS `data_source_values` (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `data_source_id` bigint(20) UNSIGNED NOT NULL,
+  `value` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `label` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `data_source_values_data_source_id_foreign` (`data_source_id`),
+  CONSTRAINT `data_source_values_data_source_id_foreign` FOREIGN KEY (`data_source_id`) REFERENCES `data_sources` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 -- CÁC BẢNG QUẢN LÝ KHẢO SÁT
@@ -117,27 +109,29 @@ CREATE TABLE IF NOT EXISTS `mau_khaosat` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Bảng câu hỏi khảo sát
-CREATE TABLE IF NOT EXISTS `cauhoi_khaosat` (
+DROP TABLE IF EXISTS `cauhoi_khaosat`;
+CREATE TABLE `cauhoi_khaosat` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `mau_khaosat_id` INT(11) NOT NULL,
   `noidung_cauhoi` TEXT NOT NULL,
-  `loai_cauhoi` ENUM('single_choice', 'multiple_choice', 'text', 'likert', 'rating', 'date', 'number', 'select_ctdt') DEFAULT 'single_choice',
+  `loai_cauhoi` ENUM('single_choice', 'multiple_choice', 'text', 'likert', 'rating', 'date', 'number', 'custom_select') DEFAULT 'single_choice',
   `batbuoc` TINYINT(1) DEFAULT 1,
-  `is_personal_info` TINYINT(1) DEFAULT 0, -- để xác định câu hỏi dành cho thông tin người khảo sát
+  `is_personal_info` TINYINT(1) DEFAULT 0,
   `thutu` INT DEFAULT 0,
-  `check_duplicate` TINYINT(1) DEFAULT 0, -- Để xác định câu hỏi có cần kiểm tra trùng lặp hay không
+  `check_duplicate` TINYINT(1) DEFAULT 0,
   `page` INT UNSIGNED DEFAULT(1),
-  `cau_dieukien_id` INT(11), -- Câu hỏi phụ thuộc
-  `dieukien_hienthi` JSON, -- Điều kiện hiển thị câu hỏi
-  ``
+  `cau_dieukien_id` INT(11),
+  `dieukien_hienthi` JSON,
+  `data_source_id` bigint(20) UNSIGNED DEFAULT NULL,
   `trangthai` TINYINT(1) DEFAULT 1,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_mau_khaosat` (`mau_khaosat_id`),
   KEY `idx_cau_dieukien` (`cau_dieukien_id`),
-  CONSTRAINT `fk_cauhoi_mau` FOREIGN KEY (`mau_khaosat_id`) 
-    REFERENCES `mau_khaosat` (`id`) ON DELETE CASCADE
+  KEY `cauhoi_khaosat_data_source_id_foreign` (`data_source_id`),
+  CONSTRAINT `fk_cauhoi_mau` FOREIGN KEY (`mau_khaosat_id`) REFERENCES `mau_khaosat` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `cauhoi_khaosat_data_source_id_foreign` FOREIGN KEY (`data_source_id`) REFERENCES `data_sources` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Bảng phương án trả lời
@@ -619,8 +613,8 @@ DELIMITER //
 
 -- Thêm tài khoản admin mặc định
 INSERT INTO `taikhoan` (`tendangnhap`, `matkhau`, `hoten`, `email`) VALUES
-('tho493', '2584fcf4f93b79886a1bba3c47dc5cac', 'Administrator', 'tho493@admin.com');
-('admin', '0192023a7bbd73250516f069df18b500', 'Admin', 'admin@admin.com')
+('tho493', '2584fcf4f93b79886a1bba3c47dc5cac', 'Administrator', 'tho493@admin.com'),
+('admin', '0192023a7bbd73250516f069df18b500', 'Admin', 'admin@admin.com');
 
 -- Thêm năm học
 INSERT INTO `namhoc` (`namhoc`) VALUES
@@ -638,7 +632,30 @@ INSERT INTO `chatbot_qa` (`id`, `keywords`, `question`, `answer`, `is_enabled`, 
 (5, 'lỗi,gửi,submit,không được', 'Tôi bị lỗi không gửi được khảo sát?', 'Chào bạn, nếu bạn không gửi được khảo sát, vui lòng thử các bước sau: <br>1. Kiểm tra lại kết nối mạng. <br>2. Đảm bảo đã trả lời tất cả các câu hỏi bắt buộc (*). <br>3. Xác thực reCAPTCHA \"Tôi không phải người máy\". <br>4. Thử tải lại trang và làm lại. Dữ liệu của bạn đã được tự động lưu.', 1, '2025-08-24 22:43:59', NULL),
 (6, 'cảm ơn,ok,chào', 'Chào bot', 'Chào bạn, tôi là trợ lý ảo của hệ thống khảo sát. Tôi có thể giúp gì cho bạn?', 1, '2025-08-24 22:43:59', NULL);
 
+-- Nhập dữ liệu bảng data_sources
+INSERT INTO `data_sources` (`id`, `name`, `slug`, `created_at`, `updated_at`) VALUES
+(1, 'Chương trình đào tạo', 'ctdt', NOW(), NOW());
 
+INSERT INTO `data_source_values` (`data_source_id`, `value`, `label`, `created_at`, `updated_at`) VALUES
+(1, '7140234', 'Sư phạm Tiếng Trung Quốc', NOW(), NOW()),
+(1, '7140246', 'Sư phạm công nghệ', NOW(), NOW()),
+(1, '7220201', 'Ngôn ngữ Anh', NOW(), NOW()),
+(1, '7220204', 'Ngôn ngữ Trung Quốc', NOW(), NOW()),
+(1, '7310630', 'Việt Nam học (Hướng dẫn Du lịch)', NOW(), NOW()),
+(1, '7340101', 'Quản trị kinh doanh', NOW(), NOW()),
+(1, '7340301', 'Kế toán', NOW(), NOW()),
+(1, '7380101', 'Luật', NOW(), NOW()),
+(1, '7480201', 'Công nghệ thông tin', NOW(), NOW()),
+(1, '7510201', 'Kỹ thuật điều khiển và tự động hóa', NOW(), NOW()),
+(1, '7510205', 'Công nghệ kỹ thuật ô tô', NOW(), NOW()),
+(1, '7510301', 'Công nghệ kỹ thuật điện, điện tử', NOW(), NOW()),
+(1, '7510302', 'Công nghệ kỹ thuật điện tử, viễn thông', NOW(), NOW()),
+(1, '7520114', 'Kỹ thuật cơ điện tử', NOW(), NOW()),
+(1, '7520216', 'Công nghệ kỹ thuật cơ khí', NOW(), NOW()),
+(1, '7540101', 'Công nghệ thực phẩm', NOW(), NOW()),
+(1, '7540106', 'Đảm bảo chất lượng và an toàn thực phẩm', NOW(), NOW()),
+(1, '7540204', 'Công nghệ dệt, may', NOW(), NOW()),
+(1, '7810103', 'Quản trị dịch vụ du lịch và lữ hành', NOW(), NOW());
 -- --------------------------------------------------------
 -- CÁC INDEX BỔ SUNG CHO HIỆU NĂNG
 -- --------------------------------------------------------

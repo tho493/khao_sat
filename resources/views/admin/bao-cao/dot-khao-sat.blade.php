@@ -64,16 +64,12 @@
                         <span class="mx-2">|</span>
                         <span class="fw-semibold">Thời gian:</span>
                         <span class="fw-bold">{{ $dotKhaoSat->tungay }} - {{ $dotKhaoSat->denngay }}</span>
-                        @if(!empty($personalInfoFilters) || $selectedCtdt)
+                        @if(!empty($personalInfoFilters))
                             <span class="mx-2">|</span>
                             <span class="fw-semibold">Đang lọc:</span>
                             <span class="fw-bold text-primary">
                                 @php
         $activeFilters = [];
-        if ($selectedCtdt) {
-            $selectedCtdtName = \App\Models\Ctdt::where('mactdt', $selectedCtdt)->value('tenctdt');
-            $activeFilters[] = $selectedCtdtName ?? $selectedCtdt;
-        }
         if (!empty($personalInfoFilters)) {
             foreach ($personalInfoFilters as $qId => $filterValue) {
                 $question = $personalInfoQuestions->firstWhere('id', $qId);
@@ -141,14 +137,6 @@
                 <div class="card-header">
                     <h6 class="m-0 font-weight-bold text-primary">
                         Tổng quan Kết quả
-                        <!-- @if($selectedCtdt)
-                                                                                <span class="badge bg-primary ms-2">
-                                                                                    @php
-                                                                                        $selectedCtdtName = \App\Models\Ctdt::where('mactdt', $selectedCtdt)->value('tenctdt');
-                                                                                    @endphp
-                                                                                    Đã lọc: {{ $selectedCtdtName ?? $selectedCtdt }}
-                                                                                </span>
-                                                                            @endif -->
                     </h6>
                 </div>
                 <div class="card-body">
@@ -209,7 +197,7 @@
                                     @foreach($personalInfoQuestions as $q)
                                         @php
                 $currentValue = $personalInfoFilters[$q->id] ?? null;
-                $isSelectType = in_array($q->loai_cauhoi, ['single_choice', 'multiple_choice', 'select_ctdt']);
+                $isSelectType = in_array($q->loai_cauhoi, ['single_choice', 'multiple_choice', 'custom_select']);
                 $options = $personalInfoOptions[$q->id] ?? [];
                                         @endphp
                                         <div class="col-md-6 col-lg-4">
@@ -237,7 +225,7 @@
                                             <button class="btn btn-primary btn-sm" type="submit">
                                                 <i class="bi bi-filter"></i> Áp dụng bộ lọc
                                             </button>
-                                            @if(!empty($personalInfoFilters) || $selectedCtdt)
+                                            @if(!empty($personalInfoFilters))
                                                 <a href="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}"
                                                     class="btn btn-outline-secondary btn-sm">
                                                     <i class="bi bi-x-lg"></i> Bỏ tất cả bộ lọc
@@ -1060,14 +1048,6 @@
                 const formData = new FormData(filterForm);
                 const filters = [];
 
-                // Lấy CTDT filter
-                @if(isset($availableCtdts) && $availableCtdts->isNotEmpty())
-                    const ctdtFilter = formData.get('ctdt');
-                    if (ctdtFilter) {
-                        filters.push('ctdt=' + encodeURIComponent(ctdtFilter));
-                    }
-                @endif
-
                 // Lấy personal info filters
                 for (const [key, value] of formData.entries()) {
                     if (key.startsWith('personal_info_filters[') && value) {
@@ -1108,7 +1088,7 @@
             }
 
             // Chạy lần đầu khi tải trang để cập nhật link theo bộ lọc hiện tại
-            @if(!empty($personalInfoFilters) || $selectedCtdt)
+            @if(!empty($personalInfoFilters))
                 updateExportLinks();
             @endif
                                                     });

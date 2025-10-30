@@ -25,6 +25,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {
+        if (env('APP_DEBUG', false)) {
+            return;
+        }
         $exceptions->render(function (\Throwable $e, $request) {
             if ($request->is('api/*')) {
                 return response()->json([

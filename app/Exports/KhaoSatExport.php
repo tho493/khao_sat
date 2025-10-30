@@ -4,6 +4,8 @@ namespace App\Exports;
 
 use App\Models\DotKhaoSat;
 use App\Models\PhieuKhaoSat;
+use App\Models\DataSource;
+use App\Models\DataSourceValue;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -27,6 +29,7 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
             'mauKhaoSat.cauHoi' => function ($query) {
                 $query->orderBy('thutu');
             },
+            'mauKhaoSat.cauHoi.dataSource.values',
             'phieuKhaoSat' => function ($query) {
                 $query->where('trangthai', 'completed')
                     ->with(['chiTiet.phuongAn']);
@@ -59,6 +62,7 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
     {
         $query = PhieuKhaoSat::where('dot_khaosat_id', $this->dotKhaoSat->id)
             ->where('trangthai', 'completed')
+            ->where('is_duplicate', 0)
             ->with(['chiTiet.phuongAn']);
 
         if ($this->filteredSurveyIds) {
@@ -93,11 +97,11 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
 
         // Điền câu trả lời cho nhóm TT cá nhân trước
         foreach ($this->personalInfoQuestions as $cauHoi) {
-            $rowAnswers[] = $this->mapAnswerForQuestionWithCdtLookup($answersByQuestionId, $cauHoi);
+            $rowAnswers[] = $this->formatAnswerForQuestion($answersByQuestionId, $cauHoi);
         }
         // Sau đó là các câu hỏi còn lại
         foreach ($this->nonPersonalQuestions as $cauHoi) {
-            $rowAnswers[] = $this->mapAnswerForQuestionWithCdtLookup($answersByQuestionId, $cauHoi);
+            $rowAnswers[] = $this->formatAnswerForQuestion($answersByQuestionId, $cauHoi);
         }
 
         // Ghép thông tin phiếu với các câu trả lời
@@ -109,25 +113,23 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
     }
 
     /**
-     * Trả về giá trị hiển thị cho từng câu hỏi, riêng 'select_ctdt' thì lấy mã -> tên
+     * Trả về giá trị hiển thị cho từng câu hỏi, riêng 'custom_select' thì lấy value -> label từ DataSource
      */
-    private function mapAnswerForQuestionWithCdtLookup($answersByQuestionId, $cauHoi)
+    private function formatAnswerForQuestion($answersByQuestionId, $cauHoi)
     {
         $cellValue = '';
         $answersForThisQuestion = $answersByQuestionId->get($cauHoi->id);
 
-        // Nếu câu hỏi là 'select_ctdt' thì lấy giá trị mã và tra tên từ bảng ctdt
-        if ($cauHoi->loai_cauhoi === 'select_ctdt') {
+        // Nếu câu hỏi là 'custom_select' thì lấy giá trị và tra label từ DataSource
+        if ($cauHoi->loai_cauhoi === 'custom_select') {
             if ($answersForThisQuestion && $answersForThisQuestion->count() > 0) {
-                // giá trị mã nằm ở giatri_text hoặc giatri_number
                 $firstAnswer = $answersForThisQuestion->first();
-                $ma = $firstAnswer->giatri_text ?? $firstAnswer->giatri_number ?? null;
-                if ($ma) {
-                    // Tìm trong bảng ctdt
-                    $ten = \App\Models\Ctdt::where('mactdt', $ma)->value('tenctdt');
-                    $cellValue = $ten ?: $ma;
+                $value = $firstAnswer->giatri_text ?? $firstAnswer->giatri_number ?? null;
+                if ($value !== null && $cauHoi->dataSource && $cauHoi->dataSource->values) {
+                    $option = $cauHoi->dataSource->values->firstWhere('value', $value);
+                    $cellValue = $option->label ?? $value;
                 } else {
-                    $cellValue = '';
+                    $cellValue = $value ?? '';
                 }
             }
         } else if ($answersForThisQuestion && $answersForThisQuestion->count() > 0) {
@@ -152,31 +154,7 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
         return $cellValue;
     }
 
-    private function mapAnswerForQuestion($answersByQuestionId, $cauHoi)
-    {
-        $cellValue = '';
-        $answersForThisQuestion = $answersByQuestionId->get($cauHoi->id);
-        if ($answersForThisQuestion && $answersForThisQuestion->count() > 0) {
-            if ($cauHoi->loai_cauhoi === 'multiple_choice') {
-                $cellValue = $answersForThisQuestion
-                    ->map(fn($answer) => $answer->phuongAn->noidung ?? '')
-                    ->filter()
-                    ->implode('; ');
-            } else {
-                $firstAnswer = $answersForThisQuestion->first();
-                if ($firstAnswer->phuongan_id) {
-                    $cellValue = $firstAnswer->phuongAn->noidung ?? '';
-                } elseif (!empty($firstAnswer->giatri_text)) {
-                    $cellValue = $firstAnswer->giatri_text;
-                } elseif (!is_null($firstAnswer->giatri_number)) {
-                    $cellValue = (string) $firstAnswer->giatri_number;
-                } elseif (!empty($firstAnswer->giatri_date)) {
-                    $cellValue = (string) $firstAnswer->giatri_date;
-                }
-            }
-        }
-        return $cellValue;
-    }
+
 
     /**
      * Định dạng style cho file Excel.

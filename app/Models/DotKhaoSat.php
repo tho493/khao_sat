@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use App\Models\DataSource;
 
 class DotKhaoSat extends Model
 {
@@ -32,8 +33,14 @@ class DotKhaoSat extends Model
         'trangthai',
         'mota',
         'image_url',
-        'nguoi_tao_id'
+        'nguoi_tao_id',
+        'data_source_id'
     ];
+
+    public function dataSource()
+    {
+        return $this->belongsTo(DataSource::class, 'data_source_id');
+    }
 
     protected $dates = ['tungay', 'denngay'];
     protected $casts = [

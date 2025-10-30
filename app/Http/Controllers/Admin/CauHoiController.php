@@ -14,7 +14,7 @@ class CauHoiController extends Controller
     {
         $validated = $request->validate([
             'noidung_cauhoi' => 'required|string',
-            'loai_cauhoi' => 'required|in:single_choice,multiple_choice,text,likert,rating,date,number,select_ctdt',
+            'loai_cauhoi' => 'required|in:single_choice,multiple_choice,text,likert,rating,date,number,custom_select',
             'batbuoc' => 'boolean',
             'is_personal_info' => 'boolean',
             'page' => 'required|integer|min:1',
@@ -23,6 +23,7 @@ class CauHoiController extends Controller
             'phuong_an.*' => 'required|string|max:500',
             'cau_dieukien_id' => 'nullable|exists:cauhoi_khaosat,id',
             'dieukien_hienthi' => 'nullable|json',
+            'data_source_id' => 'required_if:loai_cauhoi,custom_select|nullable|exists:data_sources,id',
         ]);
 
         DB::beginTransaction();
@@ -40,6 +41,7 @@ class CauHoiController extends Controller
                 'trangthai' => 1,
                 'cau_dieukien_id' => $validated['cau_dieukien_id'] ?? null,
                 'dieukien_hienthi' => $validated['dieukien_hienthi'] ?? null,
+                'data_source_id' => $validated['data_source_id'] ?? null,
             ]);
 
             if (isset($validated['phuong_an'])) {
@@ -73,7 +75,7 @@ class CauHoiController extends Controller
     {
         $validated = $request->validate([
             'noidung_cauhoi' => 'required|string',
-            'loai_cauhoi' => 'required|in:single_choice,multiple_choice,text,likert,rating,date,number,select_ctdt',
+            'loai_cauhoi' => 'required|in:single_choice,multiple_choice,text,likert,rating,date,number,custom_select',
             'batbuoc' => 'boolean',
             'is_personal_info' => 'boolean',
             'page' => 'required|integer|min:1',
@@ -82,6 +84,7 @@ class CauHoiController extends Controller
             'phuong_an.*' => 'required|string|max:500',
             'cau_dieukien_id' => 'nullable|exists:cauhoi_khaosat,id',
             'dieukien_hienthi' => 'nullable|json',
+            'data_source_id' => 'required_if:loai_cauhoi,custom_select|nullable|exists:data_sources,id',
         ]);
 
         DB::beginTransaction();
@@ -95,6 +98,7 @@ class CauHoiController extends Controller
                 'check_duplicate' => $validated['check_duplicate'] ?? 0,
                 'cau_dieukien_id' => $validated['cau_dieukien_id'] ?? null,
                 'dieukien_hienthi' => $validated['dieukien_hienthi'] ?? null,
+                'data_source_id' => $validated['data_source_id'] ?? null,
             ]);
 
             if ($request->has('phuong_an')) {
