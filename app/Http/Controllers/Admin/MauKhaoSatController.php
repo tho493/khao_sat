@@ -97,7 +97,7 @@ class MauKhaoSatController extends Controller
 
         $allQuestions = $mauKhaoSat->cauHoi()->orderBy('thutu')->get();
 
-        $conditionalQuestions = $allQuestions->whereIn('loai_cauhoi', ['single_choice', 'likert', 'rating']);
+        $conditionalQuestions = $allQuestions->whereIn('loai_cauhoi', ['single_choice', 'likert', 'rating', 'multiple_choice']);
         $questionContentMap = $allQuestions->pluck('noidung_cauhoi', 'id');
 
         $dataSources = \App\Models\DataSource::orderBy('name')->get();

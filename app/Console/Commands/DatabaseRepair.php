@@ -61,10 +61,10 @@ class DatabaseRepair extends Command
             return self::SUCCESS;
         }
 
-        if (!$this->confirm('Bạn có muốn sửa chữa các vấn đề này không?')) {
-            $this->info('Hủy sửa chữa.');
-            return self::SUCCESS;
-        }
+        // if (!$this->confirm('Bạn có muốn sửa chữa các vấn đề này không?')) {
+        //     $this->info('Hủy sửa chữa.');
+        //     return self::SUCCESS;
+        // }
 
         $this->info('Bắt đầu sửa chữa...');
 

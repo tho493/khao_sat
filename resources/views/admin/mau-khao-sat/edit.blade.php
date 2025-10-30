@@ -309,7 +309,7 @@
                                     <small class="d-block text-muted">Chỉ hiển thị câu hỏi này khi một câu trả lời khác được
                                         chọn.</small>
                                     <small class="d-block text-muted">Chỉ những câu hỏi có lựa chọn mới có thể làm câu hỏi
-                                        điều kiện (single_choice, likert, rating).</small>
+                                        điều kiện (single_choice, multiple_choice, likert, rating).</small>
                                 </label>
                             </div>
                             <div id="conditional-rules" class="p-3 border rounded bg-light" style="display: none;">
@@ -672,6 +672,7 @@
                 data.cau_dieukien_id = null;
                 data.dieukien_hienthi = null;
             }
+            console.log(data.dieukien_hienthi)
             const url = cauHoiId ? `/admin/cau-hoi/${cauHoiId}` : `/admin/mau-khao-sat/{{ $mauKhaoSat->id }}/cau-hoi`;
             const method = cauHoiId ? 'PUT' : 'POST';
 

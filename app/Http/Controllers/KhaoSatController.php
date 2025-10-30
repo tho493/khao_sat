@@ -87,7 +87,7 @@ class KhaoSatController extends Controller
         }
 
         // Phân loại câu hỏi: thông tin cá nhân và câu hỏi thường, rồi gom nhóm theo trang
-        $personalInfoQuestions = $mauKhaoSat->cauHoi->where('is_personal_info', true)->values();
+        $personalInfoQuestions = $mauKhaoSat->cauHoi->where('is_personal_info', true);
         $questionsByPage = $mauKhaoSat->cauHoi
             ->where('is_personal_info', false)
             ->groupBy('page');

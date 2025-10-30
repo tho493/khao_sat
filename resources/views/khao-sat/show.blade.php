@@ -60,10 +60,12 @@
 @php
     $conditionalMap = $mauKhaoSat->cauHoi
         ->whereNotNull('cau_dieukien_id')
-        ->mapWithKeys(function ($item) {
+        ->mapWithKeys(function ($item) use ($mauKhaoSat) {
             $condition = json_decode($item->dieukien_hienthi, true);
+            $parentQuestion = $mauKhaoSat->cauHoi->firstWhere('id', $item->cau_dieukien_id);
             return [$item->id => [
                 'parentId' => $item->cau_dieukien_id,
+                'parentType' => $parentQuestion ? $parentQuestion->loai_cauhoi : null,
                 'requiredValue' => (string)($condition['value'] ?? null),
                 'isOriginallyRequired' => (bool)$item->batbuoc
             ]];
@@ -127,10 +129,11 @@
                                         @php
                                             $questionCounterGlobal++;
                                             $isConditionalChild = isset($conditionalMap[$cauHoi->id]);
-                                            $isRequired = $cauHoi->batbuoc && !$isConditionalChild;
+                                            $isRequired = $cauHoi->batbuoc;
                                         @endphp
                                         <div class="question-card bg-white/30 p-4 rounded-lg border border-white/30"
-                                             id="question-personal-{{ $cauHoi->id }}"
+                                             id="question-{{ $cauHoi->id }}"
+                                             data-question-id="{{ $cauHoi->id }}"
                                              data-originally-required="{{ $isRequired ? 'true' : 'false' }}"
                                              @if($isConditionalChild)
                                                         data-conditional-parent-id="{{ $conditionalMap[$cauHoi->id]['parentId'] }}"
@@ -267,7 +270,7 @@
                                                 @php
                                                     $questionCounterGlobal++;
                                                     $isConditionalChild = isset($conditionalMap[$cauHoi->id]);
-                                                    $isRequired = ($cauHoi->batbuoc && !$isConditionalChild);
+                                                    $isRequired = $cauHoi->batbuoc;
                                                 @endphp
                                                 <div class="question-card bg-white/30 p-4 rounded-lg border border-white/30"
                                                      id="question-{{ $cauHoi->id }}"
@@ -277,7 +280,6 @@
                                                         data-conditional-parent-id="{{ $conditionalMap[$cauHoi->id]['parentId'] }}"
                                                         data-conditional-required-value="{{ $conditionalMap[$cauHoi->id]['requiredValue'] }}"
                                                      @endif>
-                                                    
                                                     <label class="block font-bold text-slate-800 mb-3 text-lg">
                                                         <span class="text-blue-600">Câu {{ $questionCounterGlobal }}:</span>
                                                         {{ $cauHoi->noidung_cauhoi }}
@@ -498,7 +500,6 @@
         const surveyForm = $('#formKhaoSat');
         const submitBtn = $('#submitBtn');
         const storageKey = `survey_progress_{{ $dotKhaoSat->id }}`;
-        const totalQuestions = $('.question-card').length;
         let debounceTimer;
 
         function updateUI() {
@@ -597,78 +598,122 @@
         
         function updateProgress() {
             let answeredQuestions = 0;
+            let totalVisibleQuestions = 0;
             let totalRequiredQuestions = 0;
             let totalOptionalQuestions = 0;
 
-            $('.question-card').each(function() {
-                const questionCard = $(this);
-                const isRequired = questionCard.data('originally-required') === true;
-                
-                // Count required vs optional questions
-                if (isRequired) {
+            $('.question-card:visible').each(function() {
+                const $card = $(this);
+                totalVisibleQuestions++;
+
+                const isRequiredOriginally =
+                    $card.data('originally-required') === true ||
+                    $card.data('originally-required') === 'true';
+
+                if (isRequiredOriginally) {
                     totalRequiredQuestions++;
                 } else {
                     totalOptionalQuestions++;
                 }
 
-                // Include select[name^="cau_tra_loi"] for type select_ctdt
-                const inputs = $(this).find('input[name^="cau_tra_loi"], textarea[name^="cau_tra_loi"], select[name^="cau_tra_loi"]');
+                const $inputs = $card.find(
+                    'input[name^="cau_tra_loi"], textarea[name^="cau_tra_loi"], select[name^="cau_tra_loi"]'
+                );
+
                 let isAnswered = false;
-                inputs.each(function() {
-                    if ($(this).is(':radio') || $(this).is(':checkbox')) {
-                        if ($(this).is(':checked')) isAnswered = true;
-                    } else if ($(this).is('select')) {
-                        // Check if select has a non-empty value (and is not disabled)
-                        if ($(this).val() && $(this).val().toString().trim() !== '') isAnswered = true;
+
+                $inputs.each(function() {
+                    const $input = $(this);
+
+                    if ($input.is(':radio') || $input.is(':checkbox')) {
+                        if ($input.is(':checked')) {
+                            isAnswered = true;
+                            return false;
+                        }
+                    } else if ($input.is('select')) {
+                        if ($input.val() && $input.val().toString().trim() !== '') {
+                            isAnswered = true;
+                            return false;
+                        }
                     } else {
-                        if ($(this).val().trim() !== '') isAnswered = true;
+                        if ($input.val().trim() !== '') {
+                            isAnswered = true;
+                            return false;
+                        }
                     }
                 });
-                if (isAnswered) answeredQuestions++;
+
+                if (isAnswered) {
+                    answeredQuestions++;
+                }
             });
 
-            const progress = totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0;
-            $('#progressBar').css('width', progress + '%').text(progress + '%');
+            const progress =
+                totalVisibleQuestions > 0
+                    ? Math.round((answeredQuestions / totalVisibleQuestions) * 100)
+                    : 0;
+
+            $('#progressBar')
+                .css('width', progress + '%')
+                .text(progress + '%');
+
             $('#answeredCount').text(answeredQuestions);
-            $('#totalCount').text(totalQuestions);
+            $('#totalCount').text(totalVisibleQuestions);
             $('#requiredCount').text(totalRequiredQuestions);
             $('#optionalCount').text(totalOptionalQuestions);
         }
 
+
+
         function checkAllConditions() {
             $('.question-card[data-conditional-parent-id]').each(function() {
-                const childCard = $(this);
-                const parentId = childCard.data('conditional-parent-id');
-                const requiredValue = String(childCard.data('conditional-required-value'));
-                const isOriginallyRequired = childCard.data('originally-required');
+                const $childCard = $(this);
+                const childId = $childCard.data('question-id');
 
-                const parentCheckedInput = $(`#question-${parentId} input:checked`);
-                let parentSelectedValue = parentCheckedInput.length ? parentCheckedInput.val() : null;
+                const condCfg = surveyConditionalMap[childId];
+                if (!condCfg) return;
+
+                const parentId = condCfg.parentId;
+                const parentType = condCfg.parentType;
+                const requiredValue = String(condCfg.requiredValue ?? '');
+                const isOriginallyRequired = !!condCfg.isOriginallyRequired;
 
                 let shouldShow = false;
-                if (parentSelectedValue !== null && String(parentSelectedValue) === requiredValue) {
-                    shouldShow = true;
-                }
 
-                const childInputs = childCard.find('input[name^="cau_tra_loi"], textarea[name^="cau_tra_loi"]');
-
-                if (shouldShow) {
-                    if (!childCard.is(':visible')) {
-                        childCard.slideDown(300);
-                    }
-                    if (isOriginallyRequired) {
-                        childInputs.prop('required', true);
+                if (parentType === 'multiple_choice') {
+                    const $checked = $(`#question-${parentId} input[type="checkbox"]:checked`);
+                    const selectedVals = $checked.map(function(){ return $(this).val(); }).get();
+                    if (selectedVals.includes(requiredValue)) {
+                        shouldShow = true;
                     }
                 } else {
-                    if (childCard.is(':visible')) {
-                        childCard.slideUp(300, function() {
-                            clearQuestionValues($(this));
+                    const $checked = $(`#question-${parentId} input:checked`);
+                    const val = $checked.length ? $checked.val() : null;
+                    if (val !== null && String(val) === requiredValue) {
+                        shouldShow = true;
+                    }
+                }
+
+                const $childInputs = $childCard.find('input[name^="cau_tra_loi"], textarea[name^="cau_tra_loi"], select[name^="cau_tra_loi"]');
+
+                if (shouldShow) {
+                    if (!$childCard.is(':visible')) {
+                        $childCard.slideDown(200);
+                    }
+                    if (isOriginallyRequired) {
+                        $childInputs.prop('required', true);
+                    }
+                } else {
+                    if ($childCard.is(':visible')) {
+                        $childCard.slideUp(200, function() {
+                            clearQuestionValues($childCard);
                         });
                     }
-                    childInputs.prop('required', false);
+                    $childInputs.prop('required', false);
                 }
             });
-            
+
+            // Sau khi ẩn/hiện thì cập nhật tiến độ
             if (typeof updateProgress === 'function') {
                 updateProgress();
             }
@@ -678,9 +723,10 @@
          * Helper: Xóa câu trả lời của một card câu hỏi.
          * @param {jQuery} questionCard - Đối tượng jQuery của .question-card
          */
-        function clearQuestionValues(questionCard) {
-            questionCard.find('input:checked').prop('checked', false);
-            questionCard.find('textarea, input[type="text"], input[type="number"], input[type="date"]').val('');
+        function clearQuestionValues($questionCard) {
+            $questionCard.find('input[type="radio"], input[type="checkbox"]').prop('checked', false);
+            $questionCard.find('input[type="text"], input[type="number"], input[type="date"], textarea').val('');
+            $questionCard.find('select').val('');
         }
 
         // Chạy lần đầu khi load
@@ -782,7 +828,7 @@
         let isValid = true;
 
         const checkedNames = new Set();
-        $(`#survey-page-${currentPage} [required]`).each(function() {
+        $(`#survey-page-${currentPage} [required]:visible`).each(function() {
             const $input = $(this);
             const inputType = $input.attr('type');
             const inputName = $input.attr('name');
