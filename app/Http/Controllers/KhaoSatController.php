@@ -123,15 +123,73 @@ class KhaoSatController extends Controller
             'g-recaptcha-response.required' => 'Vui lòng xác thực reCAPTCHA.'
         ]);
 
+        $hasDuplicateAnswer = false;
+        $duplicateQuestionNames = [];
+
+        // Lấy tất cả các câu hỏi của mẫu khảo sát này được đánh dấu là cần kiểm tra trùng lặp
+        $duplicateCheckQuestions = $dotKhaoSat->mauKhaoSat->cauHoi()
+            ->where('check_duplicate', 1)
+            ->get()
+            ->keyBy('id');
+
+        // Thực hiện kiểm tra trùng lặp trước khi bắt đầu transaction
+        foreach ($request->input('cau_tra_loi', []) as $cauHoiId => $traLoi) {
+            // Chỉ kiểm tra nếu câu hỏi này được đánh dấu là check_duplicate
+            if (isset($duplicateCheckQuestions[$cauHoiId])) {
+                $question = $duplicateCheckQuestions[$cauHoiId];
+
+                // Bỏ qua nếu câu trả lời rỗng, vì câu trả lời rỗng không thể bị trùng lặp
+                if (is_null($traLoi) || (is_string($traLoi) && trim($traLoi) === '') || (is_array($traLoi) && empty($traLoi))) {
+                    continue;
+                }
+
+                // Xây dựng truy vấn để kiểm tra các câu trả lời hiện có trong đợt khảo sát này
+                $existingAnswerQuery = PhieuKhaoSatChiTiet::where('cauhoi_id', $cauHoiId)
+                    ->whereHas('phieuKhaoSat', function ($query) use ($dotKhaoSat) {
+                        $query->where('dot_khaosat_id', $dotKhaoSat->id)
+                            ->where('trangthai', 'completed'); // Chỉ kiểm tra với các phiếu đã hoàn thành
+                    });
+
+                $isDuplicate = false;
+
+                switch ($question->loai_cauhoi) {
+                    case 'single_choice':
+                    case 'likert':
+                        $isDuplicate = $existingAnswerQuery->where('phuongan_id', $traLoi)->exists();
+                        break;
+                    case 'rating':
+                    case 'number':
+                        $isDuplicate = $existingAnswerQuery->where('giatri_number', $traLoi)->exists();
+                        break;
+                    case 'date':
+                        $isDuplicate = $existingAnswerQuery->where('giatri_date', $traLoi)->exists();
+                        break;
+                    case 'select_ctdt':
+                    case 'text':
+                        $isDuplicate = $existingAnswerQuery->where('giatri_text', $traLoi)->exists();
+                        break;
+                    case 'multiple_choice':
+                        // Loại câu hỏi này không cần thiết
+                        break;
+                }
+
+                if ($isDuplicate) {
+                    $hasDuplicateAnswer = true;
+                    $duplicateQuestionNames[] = $question->noidung_cauhoi;
+                }
+            }
+        }
+
         DB::beginTransaction();
         try {
-            // Tạo phiếu khảo sát
+            // Tạo phiếu khảo sát, bao gồm trạng thái trùng lặp
             $phieuKhaoSat = PhieuKhaoSat::create([
                 'dot_khaosat_id' => $dotKhaoSat->id,
                 'thoigian_batdau' => $request->metadata['thoigian_batdau'] ?? null,
                 'trangthai' => 'draft',
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent()
+                'ip_address' => $request->ip(), // Lưu địa chỉ IP của người dùng
+                'user_agent' => $request->userAgent(), // Lưu thông tin trình duyệt/thiết bị
+                'is_duplicate' => $hasDuplicateAnswer ? 1 : 0, // Đặt cờ trùng lặp
             ]);
 
             // Lưu câu trả lời
@@ -203,12 +261,18 @@ class KhaoSatController extends Controller
 
             DB::commit();
 
+            // Chuẩn bị thông báo phản hồi
+            $message = 'Gửi khảo sát thành công';
+            if ($hasDuplicateAnswer) {
+                $message .= ' Tuy nhiên, một hoặc nhiều câu trả lời của bạn cho các câu hỏi sau đã được ghi nhận trước đó trong đợt khảo sát này: ' . implode(', ', array_unique($duplicateQuestionNames)) . '. Bạn không nên spam khảo sát này nữa';
+            }
+
             // Lưu dữ liệu vào session để hiển thị trong review
-            $this->storeReviewDataInSession($phieuKhaoSat, $dotKhaoSat);
+            $this->storeReviewDataInSession($phieuKhaoSat, $dotKhaoSat, $hasDuplicateAnswer);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Gửi khảo sát thành công',
+                'message' => $message,
                 'redirect' => route('khao-sat.review')
             ]);
 
@@ -238,7 +302,7 @@ class KhaoSatController extends Controller
         return view('khao-sat.review', compact('reviewData'));
     }
 
-    private function storeReviewDataInSession($phieuKhaoSat, $dotKhaoSat)
+    private function storeReviewDataInSession($phieuKhaoSat, $dotKhaoSat, $hasDuplicateAnswer)
     {
         // Lấy thông tin phiếu khảo sát
         $phieuKhaoSatWithDetails = PhieuKhaoSat::with([
@@ -339,7 +403,8 @@ class KhaoSatController extends Controller
                 'survey_answers' => $surveyAnswers,
                 'total_questions' => $allQuestions->count(),
                 'personal_info_count' => $personalInfoQuestions->count(),
-                'survey_questions_count' => $surveyQuestions->count()
+                'survey_questions_count' => $surveyQuestions->count(),
+                'has_duplicate_answer' => $hasDuplicateAnswer
             ]
         ]);
     }

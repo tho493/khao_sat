@@ -125,9 +125,11 @@ CREATE TABLE IF NOT EXISTS `cauhoi_khaosat` (
   `batbuoc` TINYINT(1) DEFAULT 1,
   `is_personal_info` TINYINT(1) DEFAULT 0, -- để xác định câu hỏi dành cho thông tin người khảo sát
   `thutu` INT DEFAULT 0,
+  `check_duplicate` TINYINT(1) DEFAULT 0, -- Để xác định câu hỏi có cần kiểm tra trùng lặp hay không
   `page` INT UNSIGNED DEFAULT(1),
   `cau_dieukien_id` INT(11), -- Câu hỏi phụ thuộc
   `dieukien_hienthi` JSON, -- Điều kiện hiển thị câu hỏi
+  ``
   `trangthai` TINYINT(1) DEFAULT 1,
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME ON UPDATE CURRENT_TIMESTAMP,
@@ -199,6 +201,7 @@ CREATE TABLE IF NOT EXISTS `phieu_khaosat` (
   -- `ma_nguoi_traloi` VARCHAR(50), -- Mã SV, mã NV, mã DN...
   -- `metadata` JSON, -- Thông tin người trả lời (họ tên, đơn vị, email...)
   `trangthai` ENUM('draft', 'completed') DEFAULT 'draft',
+  `is_duplicate` TINYINT(1) DEFAULT 0,
   `thoigian_batdau` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `thoigian_hoanthanh` DATETIME,
   `ip_address` VARCHAR(45),

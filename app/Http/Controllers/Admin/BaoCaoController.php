@@ -110,8 +110,12 @@ class BaoCaoController extends Controller
             ->values();
 
         // Lấy danh sách phiếu đã hoàn thành với bộ lọc
-        $query = $dotKhaoSat->phieuKhaoSat()
+        $baseCompletedQuery = $dotKhaoSat->phieuKhaoSat()
             ->where('trangthai', 'completed');
+
+        // Tách thành 2 query: 1 cho phiếu hợp lệ, 1 cho phiếu trùng lặp
+        $nonDuplicateQuery = (clone $baseCompletedQuery)->where('is_duplicate', '!=', 1);
+        $duplicateQuery = (clone $baseCompletedQuery)->where('is_duplicate', 1);
 
         $selectedCtdt = $request->input('ctdt');
         $personalInfoFilters = $request->input('personal_info_filters', []);
@@ -149,7 +153,8 @@ class BaoCaoController extends Controller
                 }
 
                 $filteredPhieuIds = $filterQuery->pluck('phieu_khaosat_id');
-                $query->whereIn('id', $filteredPhieuIds);
+                $nonDuplicateQuery->whereIn('id', $filteredPhieuIds); // Lọc trên các phiếu hợp lệ
+                $duplicateQuery->whereIn('id', $filteredPhieuIds); // Lọc trên các phiếu trùng lặp
             }
         } elseif ($ctdtQuestion && $selectedCtdt) {
             // Hỗ trợ bộ lọc CTĐT cũ (backward compatibility)
@@ -158,15 +163,18 @@ class BaoCaoController extends Controller
                 ->where('giatri_text', $selectedCtdt)
                 ->pluck('phieu_khaosat_id');
 
-            $query->whereIn('id', $filteredPhieuIds);
+            $nonDuplicateQuery->whereIn('id', $filteredPhieuIds);
+            $duplicateQuery->whereIn('id', $filteredPhieuIds);
         }
 
-        $completedSurveys = $query->get();
+        $completedSurveys = $nonDuplicateQuery->get(); // Chỉ lấy phiếu hợp lệ để tính toán
         $completedCount = $completedSurveys->count();
+        $duplicateCount = (clone $duplicateQuery)->count();
 
         $hiddenQuestionIds = $dotKhaoSat->hiddenQuestions->pluck('id')->all();
 
         $tongQuan = [
+            'tong_phieu_hoan_thanh' => $completedCount + $duplicateCount,
             'phieu_hoan_thanh' => $completedCount,
             'tong_cau_hoi' => $dotKhaoSat->mauKhaoSat->cauHoi->count(),
             'thoi_gian_tb' => $this->getAverageCompletionTimeForSurvey($completedSurveys),
@@ -192,17 +200,24 @@ class BaoCaoController extends Controller
         }
 
         // Danh sách Phiếu đã nộp (sử dụng cùng query đã lọc)
-        $danhSachPhieu = $query->with(['chiTiet.phuongAn'])
+        $danhSachPhieu = (clone $nonDuplicateQuery)->with(['chiTiet.phuongAn'])
             ->orderBy('thoigian_hoanthanh', 'desc')
-            ->paginate(15);
+            ->paginate(15, ['*'], 'page_completed');
+
+        // Danh sách Phiếu trùng lặp
+        $danhSachPhieuTrungLap = (clone $duplicateQuery)->with(['chiTiet.phuongAn'])
+            ->orderBy('thoigian_hoanthanh', 'desc')
+            ->paginate(10, ['*'], 'page_duplicates');
 
         // Câu hỏi thông tin cá nhân của mẫu khảo sát này
         $personalInfoQuestions = $dotKhaoSat->mauKhaoSat->cauHoi->where('is_personal_info', true)->values();
 
+        $allSubmittedSurveys = $danhSachPhieu->concat($danhSachPhieuTrungLap);
+
         // Trích xuất câu trả lời thông tin cá nhân theo từng phiếu, chuẩn hóa dạng chuỗi để hiển thị
         $personalInfoAnswers = [];
         $personalQuestionIds = $personalInfoQuestions->pluck('id')->all();
-        foreach ($danhSachPhieu as $phieu) {
+        foreach ($allSubmittedSurveys as $phieu) {
             $answersByQuestionId = $phieu->chiTiet->groupBy('cauhoi_id');
             foreach ($personalInfoQuestions as $q) {
                 $display = '';
@@ -302,6 +317,7 @@ class BaoCaoController extends Controller
             'responseTrendChart',
             'thongKeCauHoi',
             'danhSachPhieu',
+            'danhSachPhieuTrungLap',
             'personalInfoQuestions',
             'personalInfoAnswers',
             'availableCtdts',
@@ -1045,6 +1061,60 @@ class BaoCaoController extends Controller
                 'success' => false,
                 'message' => 'Có lỗi xảy ra khi xóa phiếu khảo sát: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Đổi trạng thái is_duplicate của phiếu khảo sát.
+     * @param Request $request
+     * @param PhieuKhaoSat $phieuKhaoSat
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function toggleDuplicateStatus(Request $request, PhieuKhaoSat $phieuKhaoSat)
+    {
+        try {
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'Bạn cần đăng nhập.'], 401);
+            }
+
+            // Chuyển is_duplicate thành 0 (hợp lệ)
+            $phieuKhaoSat->update(['is_duplicate' => 0]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã đánh dấu phiếu khảo sát là hợp lệ.'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error toggling duplicate status', ['error' => $e->getMessage(), 'phieu_id' => $phieuKhaoSat->id]);
+            return response()->json(['success' => false, 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Đánh dấu phiếu khảo sát là trùng lặp.
+     * @param Request $request
+     * @param PhieuKhaoSat $phieuKhaoSat
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function markAsDuplicate(Request $request, PhieuKhaoSat $phieuKhaoSat)
+    {
+        try {
+            if (!auth()->check()) {
+                return response()->json(['success' => false, 'message' => 'Bạn cần đăng nhập.'], 401);
+            }
+
+            // Chuyển is_duplicate thành 1 (trùng lặp)
+            $phieuKhaoSat->update(['is_duplicate' => 1]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã đánh dấu phiếu khảo sát là trùng lặp.'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error marking as duplicate', ['error' => $e->getMessage(), 'phieu_id' => $phieuKhaoSat->id]);
+            return response()->json(['success' => false, 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
 }

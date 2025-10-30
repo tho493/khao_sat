@@ -14,7 +14,8 @@ class PhieuKhaoSat extends Model
         'thoigian_batdau',
         'thoigian_hoanthanh',
         'ip_address',
-        'user_agent'
+        'user_agent',
+        'is_duplicate'
     ];
 
     protected $casts = [

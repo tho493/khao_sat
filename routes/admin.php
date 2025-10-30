@@ -73,6 +73,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::post('/dot-khao-sat/{dotKhaoSat}/toggle-question', [BaoCaoController::class, 'toggleQuestionVisibility'])->name('toggle-question');
         Route::delete('/response/{phieuKhaoSatChiTiet}', [BaoCaoController::class, 'deleteResponse'])->name('delete-response');
         Route::delete('/survey/{phieuKhaoSat}', [BaoCaoController::class, 'deleteSurvey'])->name('delete-survey');
+        Route::patch('/phieu-khao-sat/{phieuKhaoSat}/toggle-duplicate', [BaoCaoController::class, 'toggleDuplicateStatus'])->name('toggle-duplicate');
+        Route::patch('/phieu-khao-sat/{phieuKhaoSat}/mark-as-duplicate', [BaoCaoController::class, 'markAsDuplicate'])->name('mark-as-duplicate');
     });
 
     // Phiếu khảo sát

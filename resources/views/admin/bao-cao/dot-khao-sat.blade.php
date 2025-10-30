@@ -154,11 +154,12 @@
                 <div class="card-body">
                     <div class="row text-center">
                         <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
-                            <i class="bi bi-check2-all fs-1 text-success"></i>
+                            <i class="bi bi-check2-circle fs-1 text-success"></i>
                             <div class="h4 mt-2 font-weight-bold text-gray-800">
-                                {{ $tongQuan['phieu_hoan_thanh'] }}
+                                {{ $tongQuan['phieu_hoan_thanh'] }} 
+                                <span class="fs-6 text-muted">/ {{ $tongQuan['tong_phieu_hoan_thanh'] }}</span>
                             </div>
-                            <div class="text-xs font-weight-bold text-success text-uppercase">Phiếu hoàn thành</div>
+                            <div class="text-xs font-weight-bold text-success text-uppercase">Phiếu hoàn thành (Hợp lệ / Tổng)</div>
                         </div>
                         <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
                             <i class="bi bi-card-checklist fs-1 text-info"></i>
@@ -466,6 +467,10 @@
                                                     onclick="showResponseDetail({{ $phieu->id }})">
                                                     <i class="bi bi-eye"></i>
                                                 </button>
+                                                <button class="btn btn-sm btn-outline-warning" title="Đánh dấu là trùng lặp"
+                                                    onclick="markAsDuplicate({{ $phieu->id }})">
+                                                    <i class="bi bi-exclamation-triangle"></i>
+                                                </button>
                                                 <button class="btn btn-sm btn-outline-danger" title="Xóa toàn bộ phiếu khảo sát"
                                                     onclick="deleteEntireSurvey({{ $phieu->id }})">
                                                     <i class="bi bi-trash"></i>
@@ -488,6 +493,69 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Danh sách phiếu bị đánh dấu trùng lặp -->
+            @if($danhSachPhieuTrungLap->isNotEmpty())
+                <div class="card shadow mb-4 border-warning">
+                    <div class="card-header bg-amber-100 bg-opacity-25">
+                        <h6 class="m-0 font-weight-bold text-warning">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            Danh sách phiếu bị đánh dấu trùng lặp ({{ $danhSachPhieuTrungLap->total() }})
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        @if(isset($personalInfoQuestions) && $personalInfoQuestions->count())
+                                            @foreach($personalInfoQuestions as $q)
+                                                <th scope="col">{{ $q->noidung_cauhoi }}</th>
+                                            @endforeach
+                                        @endif
+                                        <th scope="col">Thời gian làm bài</th>
+                                        <th scope="col" class="text-end">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($danhSachPhieuTrungLap as $phieu)
+                                        <tr>
+                                            @if(isset($personalInfoQuestions) && $personalInfoQuestions->count())
+                                                @foreach($personalInfoQuestions as $q)
+                                                    <td>{{ $personalInfoAnswers[$phieu->id][$q->id] ?? 'N/A' }}</td>
+                                                @endforeach
+                                            @endif
+                                            <td>
+                                                {{ $phieu->thoigian_batdau ? $phieu->thoigian_batdau->format('d/m/Y H:i') : 'N/A' }} -
+                                                {{ $phieu->thoigian_hoanthanh ? $phieu->thoigian_hoanthanh->format('d/m/Y H:i') : 'N/A' }}
+                                            </td>
+                                            <td class="text-end">
+                                                <div class="btn-group" role="group">
+                                                    <button class="btn btn-sm btn-outline-info" title="Xem chi tiết phiếu"
+                                                        onclick="showResponseDetail({{ $phieu->id }})">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-success" title="Đánh dấu là không trùng lặp"
+                                                        onclick="toggleDuplicate({{ $phieu->id }})">
+                                                        <i class="bi bi-check-circle"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" title="Xóa vĩnh viễn phiếu này"
+                                                        onclick="deleteEntireSurvey({{ $phieu->id }}, true)">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-3 d-flex justify-content-end">
+                            {{ $danhSachPhieuTrungLap->withQueryString()->links('vendor.pagination.bootstrap-5') }}
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
 
         <div class="modal fade" id="summaryModal" tabindex="-1">
@@ -586,7 +654,7 @@
                             <i class="bi bi-exclamation-triangle-fill me-2"></i>
                             <strong>Cảnh báo:</strong> Thao tác này sẽ xóa phiếu khảo sát này!
                         </div>
-                        <p class="mb-3">Bạn có chắc chắn muốn xóaphiếu khảo sát này không?</p>
+                        <p class="mb-3">Bạn có chắc chắn muốn xóa phiếu khảo sát này không?</p>
                         <div class="bg-light p-3 rounded">
                             <strong>Thông tin phiếu:</strong><br>
                             <span id="deleteSurveyInfo">Đang tải...</span>
@@ -840,7 +908,7 @@
         let currentSurveyId = null;
         const deleteSurveyModal = new bootstrap.Modal(document.getElementById('deleteSurveyModal'));
 
-        function deleteEntireSurvey(surveyId) {
+        function deleteEntireSurvey(surveyId, isDuplicate = false) {
             currentSurveyId = surveyId;
 
             // Hiển thị thông tin phiếu trong modal
@@ -899,7 +967,7 @@
             btn.prop('disabled', true).html('<i class="bi bi-hourglass-split me-1"></i>Đang xóa...');
 
             // Gọi API xóa toàn bộ phiếu khảo sát
-            $.ajax({
+            $.ajax({ // admin/bao-cao/phieu-khao-sat/{phieuKhaoSat}
                 url: `/admin/bao-cao/survey/${currentSurveyId}`,
                 method: 'DELETE',
                 data: {
@@ -932,6 +1000,47 @@
                 }
             });
         });
+
+        function toggleDuplicate(phieuId) {
+            if (!confirm(`Bạn có chắc chắn muốn đánh dấu phiếu #${phieuId} là hợp lệ? Phiếu này sẽ được chuyển sang tab "Phiếu hợp lệ" và được tính vào báo cáo.`)) {
+                return;
+            }
+
+            $.ajax({
+                url: `/admin/bao-cao/phieu-khao-sat/${phieuId}/toggle-duplicate`,
+                method: 'PATCH',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                success: function(response) {
+                    if (response.success) {
+                        alert('success', 'Thành công', response.message);
+                        // Reload trang để cập nhật lại toàn bộ dữ liệu
+                        location.reload();
+                    }
+                },
+                error: function(xhr) { alert('error', 'Lỗi', xhr.responseJSON?.message || 'Đã có lỗi xảy ra.'); }
+            });
+        }
+
+        function markAsDuplicate(phieuId) {
+            if (!confirm(`Bạn có chắc chắn muốn đánh dấu phiếu #${phieuId} là trùng lặp? Phiếu này sẽ được chuyển sang tab "Phiếu trùng lặp" và không được tính vào báo cáo.`)) {
+                return;
+            }
+
+            $.ajax({
+                url: `/admin/bao-cao/phieu-khao-sat/${phieuId}/mark-as-duplicate`,
+                method: 'PATCH',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                success: function(response) {
+                    if (response.success) {
+                        alert('success', 'Thành công', response.message);
+                        // Reload trang để cập nhật lại toàn bộ dữ liệu
+                        location.reload();
+                    }
+                },
+                error: function(xhr) { alert('error', 'Lỗi', xhr.responseJSON?.message || 'Đã có lỗi xảy ra.'); }
+            });
+        }
+
     </script>
 
     <script>
@@ -959,8 +1068,8 @@
                     }
                 @endif
 
-                                                            // Lấy personal info filters
-                                                            for (const [key, value] of formData.entries()) {
+                // Lấy personal info filters
+                for (const [key, value] of formData.entries()) {
                     if (key.startsWith('personal_info_filters[') && value) {
                         filters.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
                     }

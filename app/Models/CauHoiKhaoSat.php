@@ -15,6 +15,7 @@ class CauHoiKhaoSat extends Model
         'batbuoc',
         'is_personal_info',
         'thutu',
+        'check_duplicate',
         'page',
         'cau_dieukien_id',
         'dieukien_hienthi',

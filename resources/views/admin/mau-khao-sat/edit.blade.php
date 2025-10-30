@@ -264,14 +264,18 @@
                                     <option value="select_ctdt">Chọn chương trình đào tạo</option>
                                 </select>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-3">
                                 <label for="pageNumber" class="form-label">Trang số</label>
                                 <input type="number" class="form-control" id="pageNumber" value="1" min="1">
                             </div>
-                            <div class="col-md-3 d-flex align-items-end">
+                            <div class="col-md-4 d-flex align-items-center">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="batBuoc" checked>
                                     <label class="form-check-label" for="batBuoc">Bắt buộc trả lời</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="checkDuplicate">
+                                    <label class="form-check-label" for="checkDuplicate">Kiểm tra trùng lặp</label>
                                 </div>
                             </div>
                         </div>
@@ -411,8 +415,15 @@
         }
 
         function createQuestionHtml(cauHoi, stt) {
+            let duplicateCheckHtml = (cauHoi.check_duplicate == true || cauHoi.check_duplicate == 1 || cauHoi.check_duplicate === '1') 
+                ? `<span class="badge bg-warning text-dark"><i class="bi bi-shield-check me-1"></i>Kiểm tra trùng lặp</span>`
+                : '';
+            
             let optionsHtml = '';
-            if (['single_choice', 'multiple_choice', 'likert'].includes(cauHoi.loai_cauhoi) && (cauHoi.phuong_an_tra_loi?.length > 0)) {
+            if (
+                ['single_choice', 'multiple_choice', 'likert'].includes(cauHoi.loai_cauhoi)
+                && (cauHoi.phuong_an_tra_loi?.length > 0)
+            ) {
                 optionsHtml = '<ol class="mb-0 ps-3 small text-muted">';
                 cauHoi.phuong_an_tra_loi.forEach(pa => {
                     optionsHtml += `<li>${escapeHtml(pa.noidung)}</li>`;
@@ -425,6 +436,7 @@
                                             <i class="bi bi-file-earmark-break me-1"></i>
                                             Trang: <strong>${cauHoi.page || 1}</strong>
                                         </div>
+                                        ${duplicateCheckHtml}
                                 `;
             if (cauHoi.cau_dieukien_id && cauHoi.dieukien_hienthi) {
                 try {
@@ -504,6 +516,7 @@
             $('#cauHoiId').val('');
             $('#validation-errors').addClass('d-none').html('');
             $('#formCauHoi').data('is-personal-info', !!isPersonalInfo);
+            $('#checkDuplicate').prop('checked', false); // Mặc định không kiểm tra trùng lặp khi thêm mới
             // $('#isPersonalInfo').prop('checked', isPersonalInfo);
 
             $('#enableConditionalLogic').prop('checked', false).trigger('change');
@@ -528,6 +541,7 @@
             $('#loaiCauHoi').val(cauHoi.loai_cauhoi);
             $('#pageNumber').val(cauHoi.page || 1);
             $('#batBuoc').prop('checked', !!cauHoi.batbuoc);
+            $('#checkDuplicate').prop('checked', !!cauHoi.check_duplicate); // Đặt trạng thái checkbox
 
             // phương án trả lời
             const phuongAnContainer = $('#danhSachPhuongAn');
@@ -618,6 +632,7 @@
                 loai_cauhoi: $('#loaiCauHoi').val(),
                 page: $('#pageNumber').val() || 1,
                 batbuoc: $('#batBuoc').is(':checked') ? 1 : 0,
+                check_duplicate: $('#checkDuplicate').is(':checked') ? 1 : 0,
                 phuong_an: [],
                 is_personal_info: $('#formCauHoi').data('is-personal-info') ? 1 : 0,
             };

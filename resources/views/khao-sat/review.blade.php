@@ -363,6 +363,13 @@
                                     {{ $reviewData['phieu_info']['ten_dot'] ?? 'Đợt khảo sát' }} ·
                                     Cảm ơn bạn đã tham gia khảo sát
                                 </p>
+                                @if(!empty($reviewData['has_duplicate_answer']))
+                                    <div class="alert alert-warning mt-3 fw-bold">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                        Tuy nhiên, một hoặc nhiều câu trả lời của bạn cho các câu hỏi sau đã được ghi nhận trước
+                                        đó trong đợt khảo sát này. Bạn không nên spam khảo sát này nữa
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="kpis">
