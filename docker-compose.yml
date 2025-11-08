@@ -23,7 +23,8 @@ services:
       - db
       - redis
     environment:
-      - APP_URL=${APP_URL:-}
+      - APP_NAME=${APP_NAME:-Hệ thống khảo sát}
+      - APP_URL=${APP_URL:-http://localhost}
       - APP_ENV=production
       - APP_DEBUG=false
       - TZ=Asia/Bangkok
@@ -47,6 +48,7 @@ services:
       - SESSION_SAME_SITE=${SESSION_SAME_SITE:-none}  
       - SESSION_DOMAIN=${SESSION_DOMAIN:-}
       - SESSION_SECURE_COOKIE=${SESSION_SECURE_COOKIE:-true}
+      - SESSION_PATH=${SESSION_PATH:-/}
 
   nginx:
     image: nginx:alpine

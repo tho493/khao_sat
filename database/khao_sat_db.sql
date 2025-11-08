@@ -674,7 +674,7 @@ DELIMITER //
 -- Event tự động cập nhật trạng thái đợt khảo sát
 CREATE EVENT IF NOT EXISTS evt_CapNhatTrangThaiDot
 ON SCHEDULE EVERY 1 DAY
-STARTS CURRENT_DATE
+STARTS CURRENT_TIMESTAMP + INTERVAL 5 MINUTE
 DO
 BEGIN
   -- Kích hoạt các đợt đến ngày

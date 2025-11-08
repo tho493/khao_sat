@@ -603,14 +603,25 @@
             if (isChoiceType) {
                 phuongAnContainer.show();
                 dataSourceContainer.hide();
-                if ($('#danhSachPhuongAn .input-group').length === 0) {
-                    if (loai === 'likert') {
-                        const likertOptions = ['Rất không hài lòng', 'Không hài lòng', 'Bình thường', 'Hài lòng', 'Rất hài lòng'];
-                        likertOptions.forEach(option => addPhuongAn(option, true));
-                    } else {
+                const existingOptionsCount = $('#danhSachPhuongAn .input-group').length;
+                
+                // Kiểm tra xem các phương án hiện tại có phải là Likert không (readonly và có 5 phương án)
+                const isCurrentLikert = existingOptionsCount === 5 && 
+                    $('#danhSachPhuongAn .phuong-an').first().prop('readonly') === true;
+                
+                // Nếu chuyển sang likert, luôn xóa và thêm lại các phương án Likert
+                if (loai === 'likert') {
+                    $('#danhSachPhuongAn').empty();
+                    const likertOptions = ['Rất không hài lòng', 'Không hài lòng', 'Bình thường', 'Hài lòng', 'Rất hài lòng'];
+                    likertOptions.forEach(option => addPhuongAn(option, true));
+                } else if (loai === 'single_choice' || loai === 'multiple_choice') {
+                    // Nếu chuyển từ Likert sang Chọn một/Chọn nhiều, xóa và thêm 2 phương án trống
+                    if (isCurrentLikert || existingOptionsCount === 0) {
+                        $('#danhSachPhuongAn').empty();
                         addPhuongAn();
                         addPhuongAn();
                     }
+                    // Nếu đã có phương án và không phải Likert, giữ nguyên (trường hợp đang sửa câu hỏi)
                 }
             } else if (loai === 'custom_select') {
                 phuongAnContainer.hide();
