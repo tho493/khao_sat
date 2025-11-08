@@ -77,23 +77,23 @@
             </div>
 
             <header class="sticky-header">
-                <div class="mx-auto px-4" style="max-width: 90%;">
+                <div class="mx-auto px-2 sm:px-4" style="max-width: 90%;">
                     <div class="flex items-center justify-between py-2">
-                        <a href="{{ route('khao-sat.index') }}" class="flex items-center gap-3">
-                            <div class="h-12 w-12 rounded-full bg-white/95 grid place-items-center shadow-md p-1">
+                        <a href="{{ route('khao-sat.index') }}" class="flex items-center gap-2 sm:gap-3">
+                            <div class="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white/95 grid place-items-center shadow-md p-1">
                                 <img src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ"
                                     class="h-full w-full object-contain">
                             </div>
-                            <span class="hidden sm:block text-white font-bold text-lg">Đại học Sao Đỏ</span>
+                            <span class="hidden sm:block text-white font-bold text-base sm:text-lg">Đại học Sao Đỏ</span>
                         </a>
-                        <nav class="flex items-center gap-4">
+                        <nav class="flex items-center gap-2 sm:gap-4">
                             <a href="https://saodo.edu.vn/vi/about/Gioi-thieu-ve-truong-Dai-hoc-Sao-Do.html"
                                 target="_blank"
-                                class="text-white/90 hover:text-white text-sm font-medium transition">GIỚI THIỆU</a>
+                                class="text-white/90 hover:text-white text-xs sm:text-sm font-medium transition xs:inline">GIỚI THIỆU</a>
                             <a href="{{ route('admin.dashboard') }}"
-                                class="px-4 py-2 rounded-lg bg-white/20 text-white text-xs font-semibold hover:bg-white/30 transition backdrop-blur-sm"
+                                class="px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-white/20 text-white text-xs font-semibold hover:bg-white/30 transition backdrop-blur-sm"
                                 title="Truy cập trang quản trị">
-                                <i class="bi bi-shield-lock-fill mr-1"></i> Quản trị
+                                <i class="bi bi-shield-lock-fill sm:mr-1"></i> <span class="hidden xs:inline">Quản trị</span>
                             </a>
                         </nav>
                     </div>
@@ -193,7 +193,6 @@
     <script src="https://unpkg.com/scrollreveal"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
-    <script src="https://unpkg.com/scrollreveal"></script>
     <script>
         NProgress.start();
 

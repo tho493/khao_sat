@@ -6,7 +6,13 @@
 <style>
     .progress-section {
         position: sticky;
-        top: 100px;
+        top: 80px;
+    }
+    
+    @media (max-width: 1023px) {
+        .progress-section {
+            position: static;
+        }
     }
 
     .form-input, .form-textarea, .form-radio, .form-checkbox {
@@ -75,15 +81,17 @@
 
 @section('content')
     @if(!empty($adminModeWarning))
-        <div id="admin-warning" class="mb-6" style="position: sticky; top:80px ; z-index: 50;">
-            <div class="glass-effect bg-yellow-100/70 border-l-4 border-yellow-300 text-yellow-800 p-4 rounded shadow flex items-center backdrop-blur-md">
-                <i class="bi bi-exclamation-triangle-fill mr-2"></i>
-                <span>{{ $adminModeWarning }}</span>
-                <div class="ml-auto flex gap-2">
-                    <a href="{{ route('admin.dot-khao-sat.show', $dotKhaoSat->id) }}" class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition">
-                        <i class="bi bi-speedometer2 mr-1"></i> Về trang quản trị
+        <div id="admin-warning" class="mb-4 sm:mb-6 px-3 sm:px-0" style="position: sticky; top:70px; z-index: 50;">
+            <div class="glass-effect bg-yellow-100/70 border-l-4 border-yellow-300 text-yellow-800 p-3 sm:p-4 rounded shadow flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0 backdrop-blur-md">
+                <div class="flex items-start gap-2 flex-1">
+                    <i class="bi bi-exclamation-triangle-fill mt-0.5 flex-shrink-0"></i>
+                    <span class="text-sm sm:text-base">{{ $adminModeWarning }}</span>
+                </div>
+                <div class="ml-auto flex gap-2 w-full sm:w-auto">
+                    <a href="{{ route('admin.dot-khao-sat.show', $dotKhaoSat->id) }}" class="inline-flex items-center justify-center px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded hover:bg-blue-700 transition flex-1 sm:flex-initial">
+                        <i class="bi bi-speedometer2 mr-1"></i> <span class="hidden xs:inline">Về trang quản trị</span><span class="xs:hidden">Quản trị</span>
                     </a>
-                    <button type="button" onclick="document.getElementById('admin-warning').style.display='none';" class="inline-flex items-center px-2 py-1 bg-gray-200 text-gray-700 text-xs font-semibold rounded hover:bg-gray-300 transition" title="Ẩn cảnh báo">
+                    <button type="button" onclick="document.getElementById('admin-warning').style.display='none';" class="inline-flex items-center justify-center px-2 py-1.5 bg-gray-200 text-gray-700 text-xs font-semibold rounded hover:bg-gray-300 transition flex-shrink-0" title="Ẩn cảnh báo">
                         <i class="bi bi-x-lg"></i>
                     </button>
                 </div>
@@ -91,25 +99,25 @@
         </div>
     @endif
 
-    <div class="container mx-auto py-12 px-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col lg:flex-row gap-8 xl:gap-12">
+    <div class="container mx-auto py-6 sm:py-8 md:py-12 px-3 sm:px-4 md:px-8">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+            <div class="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8 xl:gap-12">
 
                 <!-- Nội dung khảo sát -->
                 <div class="w-full lg:w-2/3 space-y-6">
                     
                     {{-- Header của khảo sát --}}
-                    <div class="glass-effect p-6 text-center">
-                        <nav class="text-sm text-slate-600 mb-4">
+                    <div class="glass-effect p-4 sm:p-6 text-center">
+                        <nav class="text-xs sm:text-sm text-slate-600 mb-3 sm:mb-4 flex flex-wrap justify-center items-center gap-1">
                             <a href="{{ url('/') }}" class="hover:text-blue-700">Trang chủ</a>
-                            <span class="mx-2">/</span>
+                            <span>/</span>
                             <a href="{{ route('khao-sat.index') }}" class="hover:text-blue-700">Khảo sát</a>
-                            <span class="mx-2">/</span>
+                            <span>/</span>
                             <span class="font-semibold text-slate-800">{{ Str::limit($dotKhaoSat->ten_dot, 30) }}</span>
                         </nav>
-                        <h1 class="text-3xl font-extrabold text-slate-800 mb-2">{{ $dotKhaoSat->ten_dot }}</h1>
-                        <h3 class="text-slate-600 mb-2">{{ $dotKhaoSat->mota ? $dotKhaoSat->mota : "Khảo sát này không có mô tả" }}</h3>
-                        <p class="text-slate-500">
+                        <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-800 mb-2 px-2">{{ $dotKhaoSat->ten_dot }}</h1>
+                        <h3 class="text-sm sm:text-base text-slate-600 mb-2 px-2">{{ $dotKhaoSat->mota ? $dotKhaoSat->mota : "Khảo sát này không có mô tả" }}</h3>
+                        <p class="text-xs sm:text-sm text-slate-500">
                             Hạn cuối: {{ $dotKhaoSat->denngay }}
                         </p>
                     </div>
@@ -120,10 +128,10 @@
 
                         <!-- Thông tin người trả lời -->
                         <div class="glass-effect">
-                            <div class="bg-white/40 rounded-t-xl px-6 py-4 border-b border-white/30">
-                                <h5 class="text-slate-800 font-bold text-lg m-0">Thông tin của bạn</h5>
+                            <div class="bg-white/40 rounded-t-xl px-4 sm:px-6 py-3 sm:py-4 border-b border-white/30">
+                                <h5 class="text-slate-800 font-bold text-base sm:text-lg m-0">Thông tin của bạn</h5>
                             </div>
-                            <div class="p-6 space-y-6">
+                            <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
                                 @if(isset($personalInfoQuestions) && $personalInfoQuestions->count())
                                     @foreach($personalInfoQuestions as $cauHoi)
                                         @php
@@ -131,7 +139,7 @@
                                             $isConditionalChild = isset($conditionalMap[$cauHoi->id]);
                                             $isRequired = $cauHoi->batbuoc;
                                         @endphp
-                                        <div class="question-card bg-white/30 p-4 rounded-lg border border-white/30"
+                                        <div class="question-card bg-white/30 p-3 sm:p-4 rounded-lg border border-white/30"
                                              id="question-{{ $cauHoi->id }}"
                                              data-question-id="{{ $cauHoi->id }}"
                                              data-originally-required="{{ $isRequired ? 'true' : 'false' }}"
@@ -139,7 +147,7 @@
                                                         data-conditional-parent-id="{{ $conditionalMap[$cauHoi->id]['parentId'] }}"
                                                         data-conditional-required-value="{{ $conditionalMap[$cauHoi->id]['requiredValue'] }}"
                                                 @endif>
-                                            <label class="block font-bold text-slate-800 mb-3 text-lg">
+                                            <label class="block font-bold text-slate-800 mb-2 sm:mb-3 text-base sm:text-lg">
                                                 <span class="text-blue-600">Câu {{ $questionCounterGlobal }}:</span>
                                                 {{ $cauHoi->noidung_cauhoi }}
                                                 @if($isRequired)<span class="text-red-600">*</span>@endif
@@ -178,17 +186,17 @@
                                                     @break
 
                                                 @case('likert')
-                                                    <div class="flex flex-wrap justify-between items-center mt-3 gap-2">
+                                                    <div class="flex flex-wrap justify-center sm:justify-between items-center mt-3 gap-1.5 sm:gap-2">
                                                         @foreach($cauHoi->phuongAnTraLoi as $index => $phuongAn)
                                                             @php
                                                                 $isLast = $loop->last;
                                                             @endphp
-                                                            <label class="flex flex-col items-center flex-1 p-2 rounded-lg hover:bg-white/50 cursor-pointer transition min-w-[80px]">
-                                                                <input type="radio" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500"
+                                                            <label class="flex flex-col items-center flex-1 p-1.5 sm:p-2 rounded-lg hover:bg-white/50 cursor-pointer transition min-w-[60px] sm:min-w-[80px]">
+                                                                <input type="radio" class="form-radio h-4 w-4 sm:h-5 sm:w-5 text-blue-600 focus:ring-blue-500"
                                                                     name="cau_tra_loi[{{ $cauHoi->id }}]"
                                                                     value="{{ $phuongAn->id }}"
                                                                     {{ $isRequired ? 'required' : '' }} {{ $isLast ? 'checked' : '' }}>
-                                                                <span class="mt-2 text-xs text-center text-slate-600">{{ $phuongAn->noidung }}</span>
+                                                                <span class="mt-1 sm:mt-2 text-[10px] sm:text-xs text-center text-slate-600 leading-tight">{{ $phuongAn->noidung }}</span>
                                                             </label>
                                                         @endforeach
                                                     </div>
@@ -262,17 +270,17 @@
                             @forelse($questionsByPage as $pageNumber => $questionsOnPage)
                                 <div class="survey-page" id="survey-page-{{ $pageNumber }}" style="{{ !$loop->first ? 'display: none;' : '' }}">
                                     <div class="glass-effect">
-                                        <div class="bg-white/40 rounded-t-xl px-6 py-4 border-b border-white/30">
-                                            <h5 class="text-slate-800 font-bold text-lg m-0">Phần {{ $pageNumber }}/{{ $questionsByPage->count() }}</h5>
+                                        <div class="bg-white/40 rounded-t-xl px-4 sm:px-6 py-3 sm:py-4 border-b border-white/30">
+                                            <h5 class="text-slate-800 font-bold text-base sm:text-lg m-0">Phần {{ $pageNumber }}/{{ $questionsByPage->count() }}</h5>
                                         </div>
-                                        <div class="p-6 space-y-6">
+                                        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
                                             @foreach($questionsOnPage as $cauHoi)
                                                 @php
                                                     $questionCounterGlobal++;
                                                     $isConditionalChild = isset($conditionalMap[$cauHoi->id]);
                                                     $isRequired = $cauHoi->batbuoc;
                                                 @endphp
-                                                <div class="question-card bg-white/30 p-4 rounded-lg border border-white/30"
+                                                <div class="question-card bg-white/30 p-3 sm:p-4 rounded-lg border border-white/30"
                                                      id="question-{{ $cauHoi->id }}"
                                                      data-question-id="{{ $cauHoi->id }}"
                                                      data-originally-required="{{ $isRequired ? 'true' : 'false' }}"
@@ -280,7 +288,7 @@
                                                         data-conditional-parent-id="{{ $conditionalMap[$cauHoi->id]['parentId'] }}"
                                                         data-conditional-required-value="{{ $conditionalMap[$cauHoi->id]['requiredValue'] }}"
                                                      @endif>
-                                                    <label class="block font-bold text-slate-800 mb-3 text-lg">
+                                                    <label class="block font-bold text-slate-800 mb-2 sm:mb-3 text-base sm:text-lg">
                                                         <span class="text-blue-600">Câu {{ $questionCounterGlobal }}:</span>
                                                         {{ $cauHoi->noidung_cauhoi }}
                                                         @if($isRequired)<span class="text-red-600">*</span>@endif
@@ -319,17 +327,17 @@
                                                             @break
                                                         
                                                         @case('likert')
-                                                            <div class="flex flex-wrap justify-between items-center mt-3 gap-2">
+                                                            <div class="flex flex-wrap justify-center sm:justify-between items-center mt-3 gap-1.5 sm:gap-2">
                                                                 @foreach($cauHoi->phuongAnTraLoi as $index => $phuongAn)
                                                                     @php
                                                                         $isLast = $loop->last;
                                                                     @endphp
-                                                                    <label class="flex flex-col items-center flex-1 p-2 rounded-lg hover:bg-white/50 cursor-pointer transition min-w-[80px]">
-                                                                        <input type="radio" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500"
+                                                                    <label class="flex flex-col items-center flex-1 p-1.5 sm:p-2 rounded-lg hover:bg-white/50 cursor-pointer transition min-w-[60px] sm:min-w-[80px]">
+                                                                        <input type="radio" class="form-radio h-4 w-4 sm:h-5 sm:w-5 text-blue-600 focus:ring-blue-500"
                                                                             name="cau_tra_loi[{{ $cauHoi->id }}]"
                                                                             value="{{ $phuongAn->id }}"
                                                                             {{ $isRequired ? 'required' : '' }} {{ $isLast ? 'checked' : '' }}>
-                                                                        <span class="mt-2 text-xs text-center text-slate-600">{{ $phuongAn->noidung }}</span>
+                                                                        <span class="mt-1 sm:mt-2 text-[10px] sm:text-xs text-center text-slate-600 leading-tight">{{ $phuongAn->noidung }}</span>
                                                                     </label>
                                                                 @endforeach
                                                             </div>
@@ -337,7 +345,7 @@
                 
                                                         @case('rating')
                                                             <div class="mt-3">
-                                                                <div class="flex items-center justify-center space-x-2" role="group">
+                                                                <div class="flex items-center justify-center space-x-1.5 sm:space-x-2" role="group">
                                                                     @for($i = 1; $i <= 5; $i++)
                                                                         <div class="rating-item">
                                                                             <input type="radio" class="sr-only peer" 
@@ -347,8 +355,8 @@
                                                                                 {{ $isRequired ? 'required' : '' }}>
                                                                             
                                                                             <label for="rating_{{ $cauHoi->id }}_{{ $i }}"
-                                                                                class="flex items-center justify-center w-12 h-12 rounded-full border border-slate-300 bg-white/40
-                                                                                        cursor-pointer transition text-slate-600 font-bold text-lg
+                                                                                class="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-slate-300 bg-white/40
+                                                                                        cursor-pointer transition text-slate-600 font-bold text-base sm:text-lg
                                                                                         hover:bg-blue-200 hover:border-blue-400
                                                                                         peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600">
                                                                                 {{ $i }}
@@ -356,9 +364,9 @@
                                                                         </div>
                                                                     @endfor
                                                                 </div>
-                                                                <div class="flex justify-between text-xs text-slate-500 mt-2 px-1">
-                                                                    <span>Rất không hài lòng</span>
-                                                                    <span>Rất hài lòng</span>
+                                                                <div class="flex justify-between text-[10px] sm:text-xs text-slate-500 mt-2 px-1">
+                                                                    <span class="hidden xs:inline">Rất không hài lòng</span>
+                                                                    <span class="hidden xs:inline">Rất hài lòng</span>
                                                                 </div>
                                                             </div>
                                                             @break
@@ -406,27 +414,27 @@
                         </div>
 
                         <!-- Captcha, nút Submit và điều hướng -->
-                        <div class="glass-effect p-6">
+                        <div class="glass-effect p-4 sm:p-6">
                             {{-- Captcha --}}
                             <div id="captcha-container" class="mb-4 flex justify-center" style="display: none;">
-                                <div class="g-recaptcha" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div> 
+                                <div class="g-recaptcha transform scale-90 sm:scale-100" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div> 
                             </div>
                             
                             {{-- Nút điều hướng --}}
-                            <div class="flex justify-between items-center">
-                                <button type="button" class="btn-nav btn-prev inline-flex items-center px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition" id="prevBtn" style="display: none;">
-                                    <i class="bi bi-arrow-left mr-2"></i> Quay lại
+                            <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+                                <button type="button" class="btn-nav btn-prev inline-flex items-center justify-center px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm sm:text-base" id="prevBtn" style="display: none;">
+                                    <i class="bi bi-arrow-left mr-2"></i> <span class="hidden xs:inline">Quay lại</span><span class="xs:hidden">Trước</span>
                                 </button>
                                 
                                 {{-- Placeholder để giữ layout cân bằng --}}
-                                <div id="prev-placeholder"></div>
+                                <div id="prev-placeholder" class="hidden sm:block"></div>
 
-                                <button type="button" class="btn-nav btn-next inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition" id="nextBtn">
-                                    Tiếp theo <i class="bi bi-arrow-right ml-2"></i>
+                                <button type="button" class="btn-nav btn-next inline-flex items-center justify-center px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm sm:text-base font-medium" id="nextBtn">
+                                    <span class="hidden xs:inline">Tiếp theo</span><span class="xs:hidden">Tiếp</span> <i class="bi bi-arrow-right ml-2"></i>
                                 </button>
                                 
-                                <button type="submit" class="inline-flex items-center px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-lg font-semibold" id="submitBtn" style="display: none;">
-                                    <i class="bi bi-send mr-2"></i> Gửi khảo sát
+                                <button type="submit" class="inline-flex items-center justify-center px-6 sm:px-8 py-2.5 sm:py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-lg font-semibold text-sm sm:text-base" id="submitBtn" style="display: none;">
+                                    <i class="bi bi-send mr-2"></i> <span class="hidden xs:inline">Gửi khảo sát</span><span class="xs:hidden">Gửi</span>
                                 </button>
                             </div>
                         </div>
@@ -434,26 +442,26 @@
                 </div>
 
                 <!-- Sidebar Progress -->
-                <div class="w-full lg:w-1/3">
-                    <div class="progress-section space-y-6">
+                <div class="w-full lg:w-1/3 order-first lg:order-last">
+                    <div class="progress-section space-y-4 sm:space-y-6">
                         <!-- Thời gian -->
-                        <div class="glass-effect p-6 flex flex-col items-center">
-                            <h6 class="font-bold text-slate-800 mb-3">Thời gian</h6>
-                            <div class="text-4xl font-extrabold text-blue-600" id="survey-timer">00:00</div>
+                        <div class="glass-effect p-4 sm:p-6 flex flex-col items-center">
+                            <h6 class="font-bold text-slate-800 mb-2 sm:mb-3 text-sm sm:text-base">Thời gian</h6>
+                            <div class="text-3xl sm:text-4xl font-extrabold text-blue-600" id="survey-timer">00:00</div>
                         </div>
                     
                         <!-- Tiến độ -->
-                        <div class="glass-effect p-6">
-                            <h6 class="font-bold text-slate-800 mb-4">Tiến độ hoàn thành</h6>
-                            <div class="w-full bg-white/40 rounded-full h-6 mb-3 overflow-hidden border border-white/50">
-                                <div class="bg-blue-600 h-6 rounded-full flex items-center justify-center text-white text-sm font-semibold transition-all duration-300"
+                        <div class="glass-effect p-4 sm:p-6">
+                            <h6 class="font-bold text-slate-800 mb-3 sm:mb-4 text-sm sm:text-base">Tiến độ hoàn thành</h6>
+                            <div class="w-full bg-white/40 rounded-full h-5 sm:h-6 mb-2 sm:mb-3 overflow-hidden border border-white/50">
+                                <div class="bg-blue-600 h-5 sm:h-6 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-semibold transition-all duration-300"
                                     id="progressBar" style="width: 0%;"></div>
                             </div>
-                            <div class="space-y-2 text-sm">
+                            <div class="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
                                 <p class="text-slate-600 mb-1">
                                     <strong>Đã trả lời:</strong> <span id="answeredCount">0</span>/<span id="totalCount">0</span> câu
                                 </p>
-                                <div class="flex justify-between text-xs">
+                                <div class="flex flex-col xs:flex-row justify-between gap-1 xs:gap-0 text-[10px] sm:text-xs">
                                     <span class="text-red-600">
                                         <i class="bi bi-asterisk"></i> Bắt buộc: <span id="requiredCount">0</span>
                                     </span>
@@ -465,9 +473,9 @@
                         </div>
 
                         <!-- Lưu ý -->
-                        <div class="glass-effect p-6">
-                            <h6 class="font-bold text-slate-800 mb-2">Lưu ý</h6>
-                            <ul class="text-sm text-slate-700 list-disc pl-5 space-y-1 mb-0">
+                        <div class="glass-effect p-4 sm:p-6">
+                            <h6 class="font-bold text-slate-800 mb-2 text-sm sm:text-base">Lưu ý</h6>
+                            <ul class="text-xs sm:text-sm text-slate-700 list-disc pl-4 sm:pl-5 space-y-1 mb-0">
                                 <li>Câu hỏi có dấu <span class="text-red-600">*</span> là bắt buộc.</li>
                                 <li>Tiến trình của bạn được tự động lưu.</li>
                                 <li>Vui lòng kiểm tra kỹ trước khi gửi.</li>
