@@ -84,7 +84,10 @@
                                 <img src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ"
                                     class="h-full w-full object-contain">
                             </div>
-                            <span class="hidden sm:block text-white font-bold text-base sm:text-lg">Đại học Sao Đỏ</span>
+                            <span class="hidden min-[320px]:block">
+                                <span class="text-white font-bold text-base sm:text-lg">Hệ thống khảo sát</span>
+                                <span class="hidden sm:block text-white/80 text-xs font-medium">Thu thập ý kiến, nâng cao chất lượng</span>
+                            </span>
                         </a>
                         <nav class="flex items-center gap-2 sm:gap-4">
                             <a href="https://saodo.edu.vn/vi/about/Gioi-thieu-ve-truong-Dai-hoc-Sao-Do.html"
