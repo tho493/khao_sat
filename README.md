@@ -13,6 +13,13 @@
 
 ---
 
+<div style="background: #fff3cd; color: #856404; border-left: 6px solid #ffe083; padding: 14px 18px; border-radius: 6px; margin: 18px 0; display: flex; align-items: center; font-weight: 500;">
+    <span style="font-size: 1.3em; margin-right: 0.6em;">&#9888;&#65039;</span>
+    <span>
+        <strong>Important:</strong> Dự án này hiện đã hoàn tất. Sẽ không có bất kỳ bản cập nhật nào trong tương lai.
+    </span>
+</div>
+
 ## 🚀 Tính năng nổi bật
 
 -   **Quản lý Khảo sát Động:** Dễ dàng tạo, sửa, xóa, và sao chép các mẫu khảo sát.
