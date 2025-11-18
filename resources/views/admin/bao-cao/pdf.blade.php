@@ -129,6 +129,20 @@
 </head>
 
 <body>
+    @if(!empty($previewMode))
+        <div
+            style="position: sticky; top: 0; background: #f8f9fa; padding: 12px 20px; border-bottom: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <strong>Chế độ xem trước báo cáo PDF</strong>
+            <div style="display: flex; gap: 10px;">
+                <a href="{{ $downloadUrl ?? '#' }}"
+                    style="padding: 8px 14px; background-color: #dc3545; color: #fff; text-decoration: none; border-radius: 4px;">Tải
+                    PDF</a>
+                <a href="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}"
+                    style="padding: 8px 14px; background-color: #6c757d; color: #fff; text-decoration: none; border-radius: 4px;">Quay
+                    lại</a>
+            </div>
+        </div>
+    @endif
     <div class="header">
         <h1>BÁO CÁO KẾT QUẢ KHẢO SÁT</h1>
         <h2>{{ $dotKhaoSat->ten_dot }}</h2>

@@ -710,13 +710,11 @@ class BaoCaoController extends Controller
         return $allAnswers->groupBy('cauhoi_id')->map(fn($answers) => $answers->groupBy('option_order')->map->count());
     }
 
-    public function export(Request $request, DotKhaoSat $dotKhaoSat)
+    protected function prepareSurveyExportData(Request $request, DotKhaoSat $dotKhaoSat): array
     {
-        $format = $request->input('format', 'excel');
         $personalInfoFilters = $request->input('personal_info_filters', []);
         $fileName = 'bao-cao-' . Str::slug($dotKhaoSat->ten_dot);
 
-        // Load relationships
         $dotKhaoSat->load([
             'mauKhaoSat.cauHoi' => function ($query) {
                 $query->orderBy('thutu');
@@ -725,21 +723,23 @@ class BaoCaoController extends Controller
             'hiddenQuestions'
         ]);
 
-        // Get personal info questions
         $personalInfoQuestions = $dotKhaoSat->mauKhaoSat->cauHoi->where('is_personal_info', true)->values();
 
-        $completedSurveysQuery = $dotKhaoSat->phieuKhaoSat()->where('trangthai', 'completed')->where('is_duplicate', 0);
+        $completedSurveysQuery = $dotKhaoSat->phieuKhaoSat()
+            ->where('trangthai', 'completed')
+            ->where('is_duplicate', 0);
 
-        // Apply personal info filters
         if (!empty($personalInfoFilters)) {
             $allFilteredPhieuIds = collect();
             foreach ($personalInfoFilters as $questionId => $filterValue) {
-                if (empty($filterValue))
+                if (empty($filterValue)) {
                     continue;
+                }
 
                 $question = $personalInfoQuestions->firstWhere('id', $questionId);
-                if (!$question)
+                if (!$question) {
                     continue;
+                }
 
                 $filterQuery = DB::table('phieu_khaosat_chitiet')
                     ->where('cauhoi_id', $questionId);
@@ -747,12 +747,15 @@ class BaoCaoController extends Controller
                 if (in_array($question->loai_cauhoi, ['single_choice', 'multiple_choice'])) {
                     $filterQuery->where('phuongan_id', $filterValue);
                 } elseif ($question->loai_cauhoi === 'custom_select') {
-                    $dataSourceValue = $question->dataSource->values->firstWhere('label', $filterValue);
-                    if ($dataSourceValue) {
-                        $filterQuery->where('giatri_text', $dataSourceValue->value);
-                    } else {
-                        $filterQuery->whereRaw('1 = 0'); // Force no results
-                    }
+                    $dataSourceValues = optional($question->dataSource)->values;
+                    $matchedValue = $dataSourceValues
+                        ? optional($dataSourceValues->firstWhere('value', $filterValue))->value
+                        : null;
+
+                    $filterQuery->where(function ($q) use ($filterValue, $matchedValue) {
+                        $q->where('giatri_text', $matchedValue ?? $filterValue)
+                            ->orWhere('giatri_number', '=', $matchedValue ?? $filterValue);
+                    });
                 } else {
                     $filterQuery->where(function ($q) use ($filterValue) {
                         $q->where('giatri_text', 'LIKE', "%{$filterValue}%")
@@ -768,77 +771,113 @@ class BaoCaoController extends Controller
                     $allFilteredPhieuIds = $allFilteredPhieuIds->intersect($currentFilteredPhieuIds);
                 }
             }
+
             if ($allFilteredPhieuIds->isNotEmpty()) {
                 $completedSurveysQuery->whereIn('id', $allFilteredPhieuIds);
+            } else {
+                // Nếu không có bản ghi nào thỏa mãn bộ lọc, đảm bảo trả về tập rỗng
+                $completedSurveysQuery->whereRaw('1 = 0');
             }
+
             $fileName .= '-' . date('Ymd');
         }
+
         $completedSurveyIds = $completedSurveysQuery->pluck('id');
+
+        return [
+            'fileName' => $fileName,
+            'completedSurveyIds' => $completedSurveyIds,
+            'personalInfoFilters' => $personalInfoFilters,
+        ];
+    }
+
+    protected function buildPdfViewData(DotKhaoSat $dotKhaoSat, $completedSurveyIds): array
+    {
+        $tongQuan = [
+            'tong_phieu' => $completedSurveyIds->count(),
+            'thoi_gian_tb' => $this->getThoiGianTraLoiTrungBinh($dotKhaoSat),
+        ];
+
+        $answeredQuestionIdsQuery = PhieuKhaoSat::where('dot_khaosat_id', $dotKhaoSat->id)
+            ->where('trangthai', 'completed')
+            ->with(['chiTiet.phuongAn']);
+
+        if ($completedSurveyIds->isNotEmpty()) {
+            $answeredQuestionIdsQuery->whereIn('id', $completedSurveyIds);
+        } else {
+            $answeredQuestionIdsQuery->whereRaw('1 = 0');
+        }
+
+        $answeredQuestionIds = $answeredQuestionIdsQuery->get();
+
+        $hiddenQuestionIds = $dotKhaoSat->hiddenQuestions->pluck('id')->all();
+
+        $likertQuestions = $dotKhaoSat->mauKhaoSat->cauHoi
+            ->where('loai_cauhoi', 'likert')
+            ->whereNotIn('id', $hiddenQuestionIds)
+            ->values();
+
+        $otherQuestions = $dotKhaoSat->mauKhaoSat->cauHoi
+            ->where('loai_cauhoi', '!=', 'likert')
+            ->whereNotIn('id', $hiddenQuestionIds)
+            ->values();
+
+        $likertOptions = $likertQuestions->isNotEmpty() && $likertQuestions->first()
+            ? $likertQuestions->first()->phuongAnTraLoi
+            : collect();
+
+        $likertTableData = $this->getLikertTableData($completedSurveyIds, $likertQuestions);
+
+        $thongKeCauHoiKhac = [];
+        foreach ($otherQuestions as $cauHoi) {
+            $thongKeCauHoiKhac[$cauHoi->id] = $this->thongKeCauHoi($dotKhaoSat->id, $cauHoi, $answeredQuestionIds->pluck('id'));
+        }
+
+        return compact(
+            'dotKhaoSat',
+            'tongQuan',
+            'likertQuestions',
+            'likertOptions',
+            'likertTableData',
+            'otherQuestions',
+            'thongKeCauHoiKhac'
+        );
+    }
+
+    public function export(Request $request, DotKhaoSat $dotKhaoSat)
+    {
+        $format = $request->input('format', 'excel');
+        $exportContext = $this->prepareSurveyExportData($request, $dotKhaoSat);
+        $fileName = $exportContext['fileName'];
+        $completedSurveyIds = $exportContext['completedSurveyIds'];
 
         if ($format == 'excel') {
             return Excel::download(new KhaoSatExport($dotKhaoSat, $completedSurveyIds), $fileName . '.xlsx');
         }
 
         if ($format == 'pdf') {
-            $tongQuan = [
-                'tong_phieu' => $completedSurveyIds->count(),
-                'thoi_gian_tb' => $this->getThoiGianTraLoiTrungBinh($dotKhaoSat),
-            ];
-
-            // Lấy ra danh sách câu hỏi likert từ mẫu khảo sát, chỉ lấy các câu có xuất hiện trong completedSurveyIds
-            $answeredQuestionIdsQuery = PhieuKhaoSat::where('dot_khaosat_id', $dotKhaoSat->id)
-                ->where('trangthai', 'completed')
-                ->with(['chiTiet.phuongAn']);
-            if ($completedSurveyIds) {
-                $answeredQuestionIdsQuery->whereIn('id', $completedSurveyIds);
-            }
-            $answeredQuestionIds = $answeredQuestionIdsQuery->get();
-
-            $hiddenQuestionIds = $dotKhaoSat->hiddenQuestions->pluck('id')->all();
-
-            $likertQuestions = $dotKhaoSat->mauKhaoSat->cauHoi
-                ->where('loai_cauhoi', 'likert')
-                ->whereNotIn('id', $hiddenQuestionIds)
-                ->values();
-
-            // Lấy ra các câu hỏi khác không phải likert từ mẫu khảo sát, chỉ lấy các câu có xuất hiện trong completedSurveyIds
-            $otherQuestions = $dotKhaoSat->mauKhaoSat->cauHoi
-                ->where('loai_cauhoi', '!=', 'likert')
-                ->whereNotIn('id', $hiddenQuestionIds)
-                ->values();
-
-            // dd($otherQuestions);
-
-            // Lấy danh sách các mức độ (phương án) từ 1 câu hỏi likert đầu tiên (nếu có)
-            $likertOptions = $likertQuestions->isNotEmpty() && $likertQuestions->first()
-                ? $likertQuestions->first()->phuongAnTraLoi
-                : collect();
-
-            // Tổng hợp bảng likert từ các phiếu khảo sát đã lọc và các câu hỏi likert
-            $likertTableData = $this->getLikertTableData($completedSurveyIds, $likertQuestions);
-
-            $thongKeCauHoiKhac = [];
-            foreach ($otherQuestions as $cauHoi) {
-                $thongKeCauHoiKhac[$cauHoi->id] = $this->thongKeCauHoi($dotKhaoSat->id, $cauHoi, $answeredQuestionIds->pluck('id'));
-            }
-
-            $pdf = Pdf::loadView(
-                'admin.bao-cao.pdf',
-                compact(
-                    'dotKhaoSat',
-                    'tongQuan',
-                    'likertQuestions',
-                    'likertOptions',
-                    'likertTableData',
-                    'otherQuestions',
-                    'thongKeCauHoiKhac'
-                )
-            );
+            $pdfData = $this->buildPdfViewData($dotKhaoSat, $completedSurveyIds);
+            $pdf = Pdf::loadView('admin.bao-cao.pdf', $pdfData);
             $pdf->setPaper('a4', 'portrait');
             return $pdf->download($fileName . '.pdf');
         }
 
         return back()->with('error', 'Định dạng xuất không hợp lệ.');
+    }
+
+    public function previewPdf(Request $request, DotKhaoSat $dotKhaoSat)
+    {
+        $exportContext = $this->prepareSurveyExportData($request, $dotKhaoSat);
+        $completedSurveyIds = $exportContext['completedSurveyIds'];
+
+        $queryParams = array_merge($request->query(), ['format' => 'pdf']);
+        $downloadUrl = route('admin.bao-cao.export', ['dotKhaoSat' => $dotKhaoSat]) . '?' . http_build_query($queryParams);
+
+        $viewData = $this->buildPdfViewData($dotKhaoSat, $completedSurveyIds);
+        $viewData['previewMode'] = true;
+        $viewData['downloadUrl'] = $downloadUrl;
+
+        return view('admin.bao-cao.pdf', $viewData);
     }
 
     public function toggleQuestionVisibility(Request $request, DotKhaoSat $dotKhaoSat)
@@ -892,7 +931,6 @@ class BaoCaoController extends Controller
     public function deleteResponse(Request $request, PhieuKhaoSatChiTiet $phieuKhaoSatChiTiet)
     {
         try {
-
             // Lấy thông tin phiếu khảo sát và đợt khảo sát
             $phieuKhaoSat = $phieuKhaoSatChiTiet->phieuKhaoSat;
             $dotKhaoSat = $phieuKhaoSat->dotKhaoSat;

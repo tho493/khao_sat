@@ -69,11 +69,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::prefix('bao-cao')->name('bao-cao.')->group(function () {
         Route::get('/', [BaoCaoController::class, 'index'])->name('index');
         Route::get('/dot-khao-sat/{dotKhaoSat}', [BaoCaoController::class, 'dotKhaoSat'])->name('dot-khao-sat');
+        Route::get('/pdf-preview/{dotKhaoSat}', [BaoCaoController::class, 'previewPdf'])->name('pdf-preview');
         Route::get('/export/{dotKhaoSat}', [BaoCaoController::class, 'export'])->name('export');
         Route::post('{dotKhaoSat}/summarize', [BaoCaoController::class, 'summarizeWithAi'])->name('summarize');
         Route::post('/dot-khao-sat/{dotKhaoSat}/toggle-question', [BaoCaoController::class, 'toggleQuestionVisibility'])->name('toggle-question');
         Route::delete('/response/{phieuKhaoSatChiTiet}', [BaoCaoController::class, 'deleteResponse'])->name('delete-response');
-        Route::delete('/survey/{phieuKhaoSat}', [BaoCaoController::class, 'delete-survey']);
+        Route::delete('/survey/{phieuKhaoSat}', [BaoCaoController::class, 'deleteSurvey'])->name('delete-survey');
         Route::patch('/phieu-khao-sat/{phieuKhaoSat}/toggle-duplicate', [BaoCaoController::class, 'toggleDuplicateStatus'])->name('toggle-duplicate');
         Route::patch('/phieu-khao-sat/{phieuKhaoSat}/mark-as-duplicate', [BaoCaoController::class, 'markAsDuplicate'])->name('mark-as-duplicate');
     });
@@ -87,14 +88,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::post('/', [NamHocController::class, 'store'])->name('store');
         Route::put('/{nam_hoc}', [NamHocController::class, 'update'])->name('update');
         Route::delete('/{nam_hoc}', [NamHocController::class, 'destroy'])->name('destroy');
-    });
-
-    // Chương trình đào tạo
-    Route::prefix('ctdt')->name('ctdt.')->group(function () {
-        Route::get('/', [CtdtController::class, 'index'])->name('index');
-        Route::post('/', [CtdtController::class, 'store'])->name('store');
-        Route::put('/{mactdt}', [CtdtController::class, 'update'])->name('update');
-        Route::delete('/{mactdt}', [CtdtController::class, 'destroy'])->name('destroy');
     });
 
     // Data Sources
