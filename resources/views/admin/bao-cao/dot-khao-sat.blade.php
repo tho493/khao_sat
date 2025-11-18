@@ -101,9 +101,9 @@
                         <i class="bi bi-file-earmark-excel"></i> Xuất Excel
                     </a>
                     <!-- <a href="{{ route('admin.bao-cao.export', ['dotKhaoSat' => $dotKhaoSat, 'format' => 'pdf']) }}"
-                                                    class="btn btn-danger" id="exportPdfBtn">
-                                                    <i class="bi bi-file-earmark-pdf"></i> Tải PDF
-                                                </a> -->
+                                                        class="btn btn-danger" id="exportPdfBtn">
+                                                        <i class="bi bi-file-earmark-pdf"></i> Tải PDF
+                                                    </a> -->
                     <a href="{{ route('admin.bao-cao.pdf-preview', array_merge(['dotKhaoSat' => $dotKhaoSat], $currentQuery, ['format' => 'pdf'])) }}"
                         class="btn btn-outline-danger" id="previewPdfBtn" target="_blank" rel="noopener">
                         <i class="bi bi-file-earmark-pdf"></i> Xuất PDF
@@ -590,6 +590,7 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
+                                <th scope="col" class="text-center" style="width: 70px;">STT</th>
                                 @if(isset($personalInfoQuestions) && $personalInfoQuestions->count())
                                     @foreach($personalInfoQuestions as $q)
                                         <th scope="col">{{ $q->noidung_cauhoi }}</th>
@@ -602,6 +603,9 @@
                         <tbody>
                             @forelse($danhSachPhieu as $phieu)
                                 <tr>
+                                    <td class="text-center">
+                                        {{ ($danhSachPhieu->firstItem() ?? 0) + $loop->index }}
+                                    </td>
                                     @if(isset($personalInfoQuestions) && $personalInfoQuestions->count())
                                         @foreach($personalInfoQuestions as $q)
                                             <td>{{ $personalInfoAnswers[$phieu->id][$q->id] ?? 'N/A' }}</td>
@@ -630,7 +634,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ (isset($personalInfoQuestions) ? $personalInfoQuestions->count() : 0) + 2 }}"
+                                    <td colspan="{{ (isset($personalInfoQuestions) ? $personalInfoQuestions->count() : 0) + 3 }}"
                                         class="text-center">Chưa có phiếu nào được hoàn thành.</td>
                                 </tr>
                             @endforelse
@@ -905,18 +909,18 @@
                     }
                 @endif
             @endforeach
-                                                                                    });
+                                                                                        });
 
         const summaryModal = new bootstrap.Modal(document.getElementById('summaryModal'));
 
         function requestSummary(questionId, questionContext) {
             $('#summaryQuestionContext').text('Câu hỏi: ' + questionContext + '.');
             $('#summaryContent').html(`
-                                                                                            <div class="text-center py-5">
-                                                                                                <div class="spinner-border text-primary" role="status"></div>
-                                                                                                <p class="mt-3">AI đang phân tích và tóm tắt... Vui lòng chờ trong giây lát.</p>
-                                                                                            </div>
-                                                                                        `);
+                                                                                                <div class="text-center py-5">
+                                                                                                    <div class="spinner-border text-primary" role="status"></div>
+                                                                                                    <p class="mt-3">AI đang phân tích và tóm tắt... Vui lòng chờ trong giây lát.</p>
+                                                                                                </div>
+                                                                                            `);
             summaryModal.show();
 
             $.ajax({
@@ -952,11 +956,11 @@
 
             modalLabel.text('Chi tiết Phiếu khảo sát #' + phieuId);
             modalContent.html(`
-                                                                                            <div class="text-center py-5">
-                                                                                                <div class="spinner-border text-primary" role="status"></div>
-                                                                                                <p class="mt-2 text-muted">Đang tải dữ liệu...</p>
-                                                                                            </div>
-                                                                                        `);
+                                                                                                <div class="text-center py-5">
+                                                                                                    <div class="spinner-border text-primary" role="status"></div>
+                                                                                                    <p class="mt-2 text-muted">Đang tải dữ liệu...</p>
+                                                                                                </div>
+                                                                                            `);
             modalInstance.show();
 
             $.get(`/admin/phieu-khao-sat/${phieuId}`)
@@ -979,14 +983,14 @@
                     let html = '';
                     if (personalInfoQuestions.length > 0) {
                         html += `<h5><i class="bi bi-person-circle text-primary me-2"></i>Thông tin người trả lời</h5>
-                                                                                                            <table class="table table-sm table-bordered mb-4"><tbody>`;
+                                                                                                                <table class="table table-sm table-bordered mb-4"><tbody>`;
                         personalInfoQuestions.forEach(question => {
                             const answerArray = answersByQuestionId[question.id] || [];
                             const answerText = answerArray.length > 0 ? answerArray.join('; ') : '<em class="text-muted">(Không trả lời)</em>';
                             html += `<tr>
-                                                                                                                    <td width="40%"><strong>${escapeHtml(question.noidung_cauhoi)}</strong></td>
-                                                                                                                    <td>${answerText}</td>
-                                                                                                                 </tr>`;
+                                                                                                                        <td width="40%"><strong>${escapeHtml(question.noidung_cauhoi)}</strong></td>
+                                                                                                                        <td>${answerText}</td>
+                                                                                                                     </tr>`;
                         });
                         html += `</tbody></table>`;
                     }
@@ -1001,22 +1005,22 @@
                             const responseDetails = phieuData.chi_tiet.filter(detail => detail.cauhoi_id === question.id);
 
                             html += `<div class="mb-3 border rounded p-3">
-                                                                                                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                                                                                                    <p class="mb-1"><strong>Câu ${index + 1}:</strong> ${escapeHtml(question.noidung_cauhoi)}</p>
-                                                                                                                    ${responseDetails.length > 0 ? `
-                                                                                                                        <div class="btn-group btn-group-sm" role="group">
-                                                                                                                            ${responseDetails.map(detail => `
-                                                                                                                                <button class="btn btn-outline-danger btn-sm" 
-                                                                                                                                        title="Xóa câu trả lời này"
-                                                                                                                                        onclick="deleteSpecificResponse(${detail.id}, '${escapeHtml(question.noidung_cauhoi)}', '${escapeHtml(answerText)}')">
-                                                                                                                                    <i class="bi bi-trash"></i>
-                                                                                                                                </button>
-                                                                                                                            `).join('')}
-                                                                                                                        </div>
-                                                                                                                    ` : ''}
-                                                                                                                </div>
-                                                                                                                <p class="ps-3 text-primary fst-italic mb-0">${answerText}</p>
-                                                                                                             </div>`;
+                                                                                                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                                                                                                        <p class="mb-1"><strong>Câu ${index + 1}:</strong> ${escapeHtml(question.noidung_cauhoi)}</p>
+                                                                                                                        ${responseDetails.length > 0 ? `
+                                                                                                                            <div class="btn-group btn-group-sm" role="group">
+                                                                                                                                ${responseDetails.map(detail => `
+                                                                                                                                    <button class="btn btn-outline-danger btn-sm" 
+                                                                                                                                            title="Xóa câu trả lời này"
+                                                                                                                                            onclick="deleteSpecificResponse(${detail.id}, '${escapeHtml(question.noidung_cauhoi)}', '${escapeHtml(answerText)}')">
+                                                                                                                                        <i class="bi bi-trash"></i>
+                                                                                                                                    </button>
+                                                                                                                                `).join('')}
+                                                                                                                            </div>
+                                                                                                                        ` : ''}
+                                                                                                                    </div>
+                                                                                                                    <p class="ps-3 text-primary fst-italic mb-0">${answerText}</p>
+                                                                                                                 </div>`;
                         });
                     }
                     modalContent.html(html);
@@ -1063,11 +1067,11 @@
 
             // Hiển thị thông tin phiếu trong modal
             $('#deleteSurveyInfo').html(`
-                                                                                        <div class="text-center py-3">
-                                                                                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                                                                            <p class="mt-2 mb-0">Đang tải thông tin phiếu...</p>
-                                                                                        </div>
-                                                                                    `);
+                                                                                            <div class="text-center py-3">
+                                                                                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                                                                                <p class="mt-2 mb-0">Đang tải thông tin phiếu...</p>
+                                                                                            </div>
+                                                                                        `);
 
             deleteSurveyModal.show();
 
@@ -1259,6 +1263,6 @@
             @if(!empty($personalInfoFilters))
                 updateExportLinks();
             @endif
-                                                                            });
+                                                                                });
     </script>
 @endpush
