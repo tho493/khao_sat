@@ -66,7 +66,12 @@
                     <tbody>
                         @forelse($dotKhaoSats as $dot)
                             <tr>
-                                <td>{{ $dot->id }}</td>
+                                <td>
+                                    <span class="badge bg-light text-dark fw-normal" title="{{ $dot->id }}" style="cursor: pointer"
+                                        onclick="navigator.clipboard.writeText('{{ $dot->id }}').then(function() { alert('success','Thông báo','Đã copy ID: {{ $dot->id }} thành công!'); });">
+                                        {{ Str::limit($dot->id, 8, '...') }} <i class="bi bi-clipboard ms-1" title="Click vào đây để copy"></i>
+                                    </span>
+                                </td>
                                 <td>
                                     <strong>{{ $dot->ten_dot }}</strong>
                                     @if($dot->mota)
@@ -108,34 +113,36 @@
                                     @endswitch
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.dot-khao-sat.show', $dot) }}" 
-                                       class="btn btn-sm btn-outline-info" title="Xem chi tiết">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    
-                                    @if($dot->trangthai == 'draft')
-                                        <form action="{{ route('admin.dot-khao-sat.activate', $dot) }}" 
-                                              method="POST" class="d-inline">
+                                    <div class="btn-group btn-group-sm d-flex" role="group">
+                                        <a href="{{ route('admin.dot-khao-sat.show', $dot) }}" class="btn btn-outline-primary" title="Xem chi tiết">
+                                            <i class="bi bi-eye-fill fs-6"></i>
+                                        </a>
+                                        <a href="{{ route('admin.dot-khao-sat.edit', $dot) }}" class="btn btn-outline-secondary" title="Chỉnh sửa">
+                                            <i class="bi bi-pencil-fill fs-6"></i>
+                                        </a>
+                                        @if($dot->trangthai == 'draft')
+                                            <form action="{{ route('admin.dot-khao-sat.activate', $dot) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="btn btn-outline-success" title="Kích hoạt">
+                                                    <i class="bi bi-play-circle-fill fs-6"></i>
+                                                </button>
+                                            </form>
+                                        @elseif($dot->trangthai == 'active')
+                                            <form action="{{ route('admin.dot-khao-sat.close', $dot) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn đóng đợt khảo sát này?')">
+                                                @csrf
+                                                <button type="submit" class="btn btn-outline-warning" title="Đóng đợt khảo sát">
+                                                    <i class="bi bi-stop-circle-fill fs-6"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                        <form action="{{ route('admin.dot-khao-sat.destroy', $dot) }}" method="POST" onsubmit="return confirm('Xóa đợt khảo sát sẽ xóa toàn bộ phiếu trả lời liên quan. Bạn chắc chắn chứ?')">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm btn-outline-success" 
-                                                    title="Kích hoạt">
-                                                <i class="bi bi-play"></i>
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-outline-danger" title="Xóa đợt khảo sát">
+                                                <i class="bi bi-trash-fill fs-6"></i>
                                             </button>
                                         </form>
-                                    @elseif($dot->trangthai == 'active')
-                                        <form action="{{ route('admin.dot-khao-sat.close', $dot) }}" 
-                                              method="POST" class="d-inline">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" 
-                                                    title="Đóng" onclick="return confirm('Bạn có chắc chắn muốn đóng đợt khảo sát này?')">
-                                                <i class="bi bi-stop"></i>
-                                            </button>
-                                        </form>
-                                    @endif
-                                    <a href="{{ route('admin.dot-khao-sat.edit', $dot) }}" 
-                                       class="btn btn-sm btn-outline-info" title="Xem chi tiết">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
+                                    </div>
                                 </td>
                             </tr>
                         @empty

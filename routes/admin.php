@@ -62,6 +62,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::put('/{dotKhaoSat}', [DotKhaoSatController::class, 'update'])->name('update');
         Route::post('/{dotKhaoSat}/activate', [DotKhaoSatController::class, 'activate'])->name('activate');
         Route::post('/{dotKhaoSat}/close', [DotKhaoSatController::class, 'close'])->name('close');
+        Route::delete('/{dotKhaoSat}', [DotKhaoSatController::class, 'destroy'])->name('destroy');
         // Route::resource('/', DotKhaoSatController::class)->parameters(['' => 'dotKhaoSat']);
     });
 

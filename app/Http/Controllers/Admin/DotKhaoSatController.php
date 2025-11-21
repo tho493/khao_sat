@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DotKhaoSat;
 use App\Models\MauKhaoSat;
 use App\Models\NamHoc;
+use App\Models\PhieuKhaoSat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -223,18 +224,30 @@ class DotKhaoSatController extends Controller
 
     public function destroy(DotKhaoSat $dotKhaoSat)
     {
-        // Chỉ cho phép xóa khi ở trạng thái draft và chưa có phiếu khảo sát
-        if ($dotKhaoSat->trangthai !== 'draft') {
-            return back()->with('error', 'Chỉ có thể xóa đợt khảo sát ở trạng thái nháp');
+        DB::beginTransaction();
+        try {
+            // Xóa tất cả phiếu khảo sát và chi tiết liên quan
+            $surveyIds = $dotKhaoSat->phieuKhaoSat()->pluck('id');
+            if ($surveyIds->isNotEmpty()) {
+                PhieuKhaoSat::whereIn('id', $surveyIds)->delete();
+            }
+
+            // Xóa các câu hỏi bị ẩn (pivot)
+            $dotKhaoSat->hiddenQuestions()->detach();
+
+            // Xóa ảnh đính kèm nếu có
+            if ($dotKhaoSat->image_url && Storage::disk('public')->exists($dotKhaoSat->image_url)) {
+                Storage::disk('public')->delete($dotKhaoSat->image_url);
+            }
+
+            $dotKhaoSat->delete();
+            DB::commit();
+
+            return redirect()->route('admin.dot-khao-sat.index')
+                ->with('success', 'Đã xóa đợt khảo sát và toàn bộ dữ liệu liên quan.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return back()->with('error', 'Không thể xóa đợt khảo sát: ' . $th->getMessage());
         }
-
-        if ($dotKhaoSat->phieuKhaoSat()->count() > 0) {
-            return back()->with('error', 'Không thể xóa đợt khảo sát đã có phiếu trả lời');
-        }
-
-        $dotKhaoSat->delete();
-
-        return redirect()->route('admin.dot-khao-sat.index')
-            ->with('success', 'Xóa đợt khảo sát thành công');
     }
 }
