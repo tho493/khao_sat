@@ -83,69 +83,6 @@
                     @endif
                 </div>
             </div>
-
-            <!-- Thống kê -->
-            <!-- <div class="card shadow mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Thống kê phản hồi</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-md-4">
-                            <h3 class="mb-0">{{ $thongKe['tong_phieu'] ?? 0 }}</h3>
-                            <p class="text-muted">Tổng số phiếu</p>
-                        </div>
-                        <div class="col-md-4">
-                            <h3 class="mb-0 text-success">{{ $thongKe['phieu_hoan_thanh'] ?? 0 }}</h3>
-                            <p class="text-muted">Hoàn thành</p>
-                        </div>
-                        <div class="col-md-4">
-                            <h3 class="mb-0 text-info">{{ $thongKe['ty_le'] ?? 0 }}%</h3>
-                            <p class="text-muted">Tỷ lệ hoàn thành</p>
-                        </div>
-                    </div>
-
-                    <div class="progress mt-3" style="height: 25px;">
-                        <div class="progress-bar bg-success" role="progressbar" 
-                             style="width: {{ $thongKe['ty_le'] ?? 0 }}%">
-                            {{ $thongKe['ty_le'] ?? 0 }}%
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-
-            <!-- Thống kê theo đơn vị -->
-            @if(!empty($thongKeTheoDonVi))
-                <div class="card shadow">
-                    <div class="card-header">
-                        <h5 class="mb-0">Thống kê theo đơn vị</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Đơn vị</th>
-                                        <th>Tổng phiếu</th>
-                                        <th>Hoàn thành</th>
-                                        <th>Tỷ lệ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($thongKeTheoDonVi as $item)
-                                        <tr>
-                                            <td>{{ $item->donvi ?? 'Không xác định' }}</td>
-                                            <td>{{ $item->tong_phieu ?? 0 }}</td>
-                                            <td>{{ $item->phieu_hoanthanh ?? 0 }}</td>
-                                            <td>{{ $item->ty_le ?? 0 }}%</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            @endif
         </div>
 
         <div class="col-lg-4">
@@ -212,6 +149,70 @@
             @endif
         </div>
     </div>
+
+    <!-- Thống kê theo câu hỏi custom_select (thông tin cá nhân) -->
+    @if(!empty($thongKeCustomSelect) && count($thongKeCustomSelect) > 0)
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Thống kê theo thông tin cá nhân (Custom Select)</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach($thongKeCustomSelect as $stats)
+                            <div class="mb-4 pb-4 {{ !$loop->last ? 'border-bottom' : '' }}">
+                                <h6 class="mb-3">
+                                    <i class="bi bi-question-circle"></i> {{ $stats['cau_hoi']->noidung_cauhoi }}
+                                    <span class="badge bg-secondary ms-2">Tổng: {{ $stats['total'] }} phiếu</span>
+                                </h6>
+                                
+                                @if($stats['total'] > 0 && count($stats['data']) > 0)
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th width="5%">STT</th>
+                                                    <th width="50%">Giá trị</th>
+                                                    <th width="20%" class="text-center">Số lượng</th>
+                                                    <th width="25%" class="text-center">Tỷ lệ</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($stats['data'] as $index => $item)
+                                                    <tr>
+                                                        <td>{{ $index + 1 }}</td>
+                                                        <td>{{ $item->label }}</td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-info">{{ $item->so_luong }}</span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <div class="progress" style="height: 20px;">
+                                                                <div class="progress-bar" role="progressbar" 
+                                                                     style="width: {{ $item->ty_le }}%"
+                                                                     aria-valuenow="{{ $item->ty_le }}" 
+                                                                     aria-valuemin="0" 
+                                                                     aria-valuemax="100">
+                                                                    {{ $item->ty_le }}%
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @else
+                                    <div class="alert alert-info mb-0">
+                                        <i class="bi bi-info-circle"></i> Chưa có dữ liệu trả lời cho câu hỏi này.
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>
 
 <script>

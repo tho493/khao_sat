@@ -229,6 +229,11 @@ canvas.chartjs-render-monitor {
     font-weight: 600;
 }
 
+.mau-khao-sat-link:hover {
+    color: #0d6efd !important;
+    text-decoration: underline !important;
+}
+
 @media (max-width: 992px) {
     #sidebar {
         width: 280px;
@@ -298,7 +303,7 @@ canvas.chartjs-render-monitor {
 }
 
 .cookie-consent-buttons button {
-    background: #4CAF50;
+    background: #4caf50;
     color: white;
     border: none;
     padding: 10px 20px;

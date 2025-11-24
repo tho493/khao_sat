@@ -78,7 +78,18 @@
                                         <br><small class="text-muted">{{ Str::limit($dot->mota, 50) }}</small>
                                     @endif
                                 </td>
-                                <td>{{ $dot->mauKhaoSat->ten_mau ?? 'N/A' }}</td>
+                                <td>
+                                    @if(isset($dot->mauKhaoSat))
+                                        <a href="{{ route('admin.mau-khao-sat.edit', $dot->mauKhaoSat) }}"
+                                           target="_blank"
+                                           class="p-0 text-dark text-decoration-none mau-khao-sat-link">
+                                            {{ $dot->mauKhaoSat->ten_mau }}
+                                            <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                        </a>
+                                    @else
+                                        N/A
+                                    @endif
+                                </td>
                                 <td>
                                     <small>
                                         {{ $dot->tungay }} - 

@@ -107,7 +107,7 @@ class DotKhaoSatController extends Controller
 
     public function show(DotKhaoSat $dotKhaoSat)
     {
-        $dotKhaoSat->load(['mauKhaoSat', 'namHoc']);
+        $dotKhaoSat->load(['mauKhaoSat.cauHoi.dataSource.values', 'namHoc']);
 
         // Thống kê
         $thongKe = [
@@ -132,7 +132,59 @@ class DotKhaoSatController extends Controller
             // Nếu lỗi JSON function thì bỏ qua
         }
 
-        return view('admin.dot-khao-sat.show', compact('dotKhaoSat', 'thongKe', 'thongKeTheoDonVi'));
+        // Thống kê theo các câu hỏi custom_select (thông tin cá nhân)
+        $thongKeCustomSelect = [];
+        if ($dotKhaoSat->mauKhaoSat) {
+            $customSelectQuestions = $dotKhaoSat->mauKhaoSat->cauHoi
+                ->where('loai_cauhoi', 'custom_select')
+                ->where('is_personal_info', true)
+                ->where('trangthai', true);
+
+            $completedPhieuIds = $dotKhaoSat->phieuKhaoSat()
+                ->where('trangthai', 'completed')
+                ->pluck('id');
+
+            foreach ($customSelectQuestions as $cauHoi) {
+                $rawCounts = DB::table('phieu_khaosat_chitiet')
+                    ->where('cauhoi_id', $cauHoi->id)
+                    ->whereIn('phieu_khaosat_id', $completedPhieuIds)
+                    ->whereNotNull('giatri_text')
+                    ->where('giatri_text', '!=', '')
+                    ->select(
+                        DB::raw('giatri_text as value'),
+                        DB::raw('COUNT(id) as so_luong')
+                    )
+                    ->groupBy('giatri_text')
+                    ->pluck('so_luong', 'value');
+
+                $totalResponses = $rawCounts->sum();
+
+                $valueToLabel = collect();
+                if ($cauHoi->dataSource && $cauHoi->dataSource->values) {
+                    $valueToLabel = $cauHoi->dataSource->values
+                        ->whereIn('value', $rawCounts->keys())
+                        ->pluck('label', 'value');
+                }
+
+                $data = $rawCounts->map(function ($count, $value) use ($valueToLabel, $totalResponses) {
+                    $label = $valueToLabel->get((string) $value);
+                    return (object) [
+                        'label' => $label ?: (string) $value,
+                        'value' => (string) $value,
+                        'so_luong' => $count,
+                        'ty_le' => $totalResponses > 0 ? round(($count / $totalResponses) * 100, 2) : 0,
+                    ];
+                })->values()->sortByDesc('so_luong');
+
+                $thongKeCustomSelect[$cauHoi->id] = [
+                    'cau_hoi' => $cauHoi,
+                    'data' => $data,
+                    'total' => $totalResponses,
+                ];
+            }
+        }
+
+        return view('admin.dot-khao-sat.show', compact('dotKhaoSat', 'thongKe', 'thongKeTheoDonVi', 'thongKeCustomSelect'));
     }
 
     public function activate(DotKhaoSat $dotKhaoSat)
