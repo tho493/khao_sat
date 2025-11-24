@@ -146,10 +146,10 @@
                                                 </button>
                                             </form>
                                         @endif
-                                        <form action="{{ route('admin.dot-khao-sat.destroy', $dot) }}" method="POST" onsubmit="return confirm('Xóa đợt khảo sát sẽ xóa toàn bộ phiếu trả lời liên quan. Bạn chắc chắn chứ?')">
+                                        <form action="{{ route('admin.dot-khao-sat.destroy', $dot) }}" method="POST" onsubmit="return confirm('CẢNH BÁO NGHIÊM TRỌNG: Hành động này sẽ xóa VĨNH VIỄN toàn bộ dữ liệu khảo sát và KHÔNG THỂ KHÔI PHỤC! Bạn thực sự muốn tiếp tục?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-outline-danger" title="Xóa đợt khảo sát">
+                                            <button type="submit" class="btn btn-outline-danger" title="Xóa đợt khảo sát" onclick="return confirm('Xóa đợt khảo sát sẽ xóa toàn bộ phiếu trả lời liên quan. Bạn chắc chắn chứ?')">
                                                 <i class="bi bi-trash-fill fs-6"></i>
                                             </button>
                                         </form>

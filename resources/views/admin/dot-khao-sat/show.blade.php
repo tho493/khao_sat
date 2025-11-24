@@ -111,6 +111,13 @@
                             <button class="btn btn-info" onclick="copyLink()">
                                 <i class="bi bi-clipboard"></i> Copy link khảo sát
                             </button>
+                            
+                            @if($thongKe['tong_phieu'] > 0)
+                            <a href="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}" 
+                               class="btn btn-info">
+                                <i class="bi bi-graph-up"></i> Xem báo cáo
+                            </a>
+                        @endif
 
                             <form action="{{ route('admin.dot-khao-sat.close', $dotKhaoSat) }}" method="POST">
                                 @csrf
@@ -120,13 +127,13 @@
                                 </button>
                             </form>
                         @endif
-
-                        @if($thongKe['tong_phieu'] > 0)
-                            <a href="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}" 
-                               class="btn btn-info">
-                                <i class="bi bi-graph-up"></i> Xem báo cáo
-                            </a>
-                        @endif
+                        <form action="{{ route('admin.dot-khao-sat.destroy', $dotKhaoSat) }}" method="POST" onsubmit="return confirm('CẢNH BÁO NGHIÊM TRỌNG: Hành động này sẽ xóa VĨNH VIỄN toàn bộ dữ liệu khảo sát và KHÔNG THỂ KHÔI PHỤC! Bạn thực sự muốn tiếp tục?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger w-100" title="Xóa đợt khảo sát" onclick="return confirm('Xóa đợt khảo sát sẽ xóa toàn bộ phiếu trả lời liên quan. Bạn chắc chắn chứ?')">
+                                <i class="bi bi-trash-fill"></i> Xóa đợt khảo sát
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
