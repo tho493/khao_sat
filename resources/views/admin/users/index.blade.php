@@ -74,16 +74,16 @@
                                                 title="Sửa">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-                                            @if($user->id !== auth()->id())
-                                                <form method="POST" action="{{ route('admin.users.destroy', $user) }}"
-                                                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-outline-danger" title="Xóa">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </form>
-                                            @endif
+                                            <!-- @if($user->id !== auth()->id())
+                                                        <form method="POST" action="{{ route('admin.users.destroy', $user) }}"
+                                                            onsubmit="return confirm('Bạn có chắc chắn muốn xóa?')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-outline-danger" title="Xóa">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif -->
                                         </div>
                                     </td>
                                 </tr>
