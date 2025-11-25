@@ -33,6 +33,12 @@ class LoginController extends Controller
                 ->first();
 
             if ($user) {
+                if ($user->trangthai != 1) {
+                    throw ValidationException::withMessages([
+                        'tendangnhap' => 'Tài khoản của bạn đang bị khóa hoặc chưa được kích hoạt.',
+                    ]);
+                }
+
                 if (Schema::hasColumn('taikhoan', 'last_login')) {
                     $user->last_login = now();
                     $user->save();

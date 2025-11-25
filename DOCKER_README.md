@@ -210,14 +210,14 @@ APP_URL=https://yourdomain.com
 ### 2. Build production image
 
 ```bash
-docker-compose -f docker-compose.prod.yml build
+docker-compose -f docker-compose.yml build
 ```
 
 ### 3. Deploy với SSL
 
 ```bash
-# Thêm SSL certificates vào docker/nginx/ssl/
-# Cập nhật nginx config cho HTTPS
+# Tạo SSL certificates vào docker/nginx/ssl/
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /docker/nginx/ssl/local.key -out /docker/nginx/ssl/local.crt -subj "/CN=localhost"
 ```
 
 ## Monitoring và Logs
