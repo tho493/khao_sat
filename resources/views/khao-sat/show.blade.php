@@ -610,7 +610,7 @@
             let totalRequiredQuestions = 0;
             let totalOptionalQuestions = 0;
 
-            $('.question-card:visible').each(function() {
+            $('.question-card').each(function() {
                 const $card = $(this);
                 totalVisibleQuestions++;
 
