@@ -646,39 +646,187 @@
                         </div>
                     
                         <!-- Tiến độ -->
-                        <div class="glass-effect p-4 sm:p-6">
-                            <h6 class="font-bold text-slate-800 mb-3 sm:mb-4 text-sm sm:text-base">Tiến độ hoàn thành</h6>
-                            <div class="w-full bg-white/40 rounded-full h-5 sm:h-6 mb-2 sm:mb-3 overflow-hidden border border-white/50">
-                                <div 
-                                    class="progress-bar-dynamic h-5 sm:h-6 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-semibold transition-all duration-300"
-                                    id="progressBar" style="width: 0%; background-color: #f59e42;">
+                        <div id="progress-container" class="glass-effect p-4 sm:p-6 transition-all duration-300 ease-in-out lg:sticky lg:top-24 origin-top z-50">
+    
+                            <div id="progress-content" class="transition-opacity duration-200">
+                                
+                                <div id="btn-collapse-view" class="flex justify-between items-center mb-3 sm:mb-4 group cursor-pointer lg:cursor-default">
+                                    <h6 class="font-bold text-slate-800 text-sm sm:text-base group-hover:text-blue-600 transition-colors">
+                                        Tiến độ hoàn thành
+                                    </h6>
+                                    <i class="bi bi-chevron-up text-slate-500 bg-slate-100 hover:bg-slate-200 p-1 rounded-full text-xs transition-colors hidden" id="icon-collapse"></i>
+                                </div>
+
+                                <div class="w-full bg-white/40 rounded-full h-5 sm:h-6 mb-2 sm:mb-3 overflow-hidden border border-white/50">
+                                    <div class="progress-bar-dynamic h-5 sm:h-6 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-semibold transition-all duration-300"
+                                        id="progressBar" style="width: 0%; background-color: #f59e42;">
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
+                                    <p class="text-slate-600 mb-1">
+                                        <strong>Đã trả lời:</strong> <span id="answeredCount">0</span>/<span id="totalCount">0</span> câu
+                                    </p>
+                                    <div class="flex flex-col xs:flex-row justify-between gap-1 xs:gap-0 text-[10px] sm:text-xs">
+                                        <span class="text-red-600"><i class="bi bi-asterisk"></i> Bắt buộc: <span id="requiredCount">0</span></span>
+                                        <span class="text-slate-500"><i class="bi bi-circle"></i> Không bắt buộc: <span id="optionalCount">0</span></span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
-                                <p class="text-slate-600 mb-1">
-                                    <strong>Đã trả lời:</strong> <span id="answeredCount">0</span>/<span id="totalCount">0</span> câu
-                                </p>
-                                <div class="flex flex-col xs:flex-row justify-between gap-1 xs:gap-0 text-[10px] sm:text-xs">
-                                    <span class="text-red-600">
-                                        <i class="bi bi-asterisk"></i> Bắt buộc: <span id="requiredCount">0</span>
-                                    </span>
-                                    <span class="text-slate-500">
-                                        <i class="bi bi-circle"></i> Không bắt buộc: <span id="optionalCount">0</span>
+
+                            <div id="progress-collapsed" 
+                                class="hidden flex items-center justify-between gap-2 cursor-pointer select-none animate-fade-in
+                                        backdrop-blur-md shadow-lg rounded-full px-4 py-2 ring-1 ring-slate-900/5">
+                                <div class="flex items-center gap-3 flex-1">
+                                    <div class="w-24 bg-white/40 rounded-full h-5 overflow-hidden border border-white/50 flex-shrink-0">
+                                        <div class="progress-bar-dynamic h-5 rounded-full flex items-center justify-center text-white text-xs font-semibold transition-all duration-300"
+                                            id="progressBarCollapsed" style="width: 0%; background-color: #f59e42;">
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-bold text-slate-700 whitespace-nowrap">
+                                        <span id="answeredCountCollapsed">0</span>/<span id="totalCountCollapsed">0</span> câu
                                     </span>
                                 </div>
+                                <i class="bi bi-chevron-down text-slate-500"></i>
                             </div>
                         </div>
+
+                        <div id="progress-placeholder" class="hidden"></div>
+
                         <style>
-                            #progressBar {
+                            @keyframes fadeInDown {
+                                from { opacity: 0; transform: translateY(-10px); }
+                                to { opacity: 1; transform: translateY(0); }
+                            }
+                            .animate-fade-in {
+                                animation: fadeInDown 0.3s ease-out forwards;
+                            }
+                             #progressBar {
                                 background-color: #f59e42; /* Orange */
                             }
+
                             #progressBar.progress-almost {
                                 background-color: #2563eb !important; /* blue-600 */
                             }
+
                             #progressBar.progress-done {
                                 background-color: #16a34a !important; /* Green */
                             }
                         </style>
+                        <script>
+                           document.addEventListener('DOMContentLoaded', function() {
+                                // Lấy các element
+                                const container = document.getElementById('progress-container');
+                                const placeholder = document.getElementById('progress-placeholder');
+                                const content = document.getElementById('progress-content');
+                                const collapsed = document.getElementById('progress-collapsed');
+                                const btnCollapseView = document.getElementById('btn-collapse-view');
+                                const iconCollapse = document.getElementById('icon-collapse');
+                                
+                                let initialHeight = container.offsetHeight;
+                                let isSticky = false;
+                                let isExpanded = false;
+
+                                window.addEventListener('resize', () => {
+                                    if (!isSticky) initialHeight = container.offsetHeight;
+                                });
+
+                                function syncData() {
+                                    const fullBar = document.getElementById('progressBar');
+                                    const collapsedBar = document.getElementById('progressBarCollapsed');
+                                    if (fullBar && collapsedBar) {
+                                        collapsedBar.style.width = fullBar.style.width;
+                                        collapsedBar.style.backgroundColor = fullBar.style.backgroundColor;
+                                        collapsedBar.innerHTML = ""; 
+                                    }
+                                    const ans = document.getElementById('answeredCount');
+                                    const total = document.getElementById('totalCount');
+                                    if(ans && total) {
+                                        document.getElementById('answeredCountCollapsed').textContent = ans.textContent;
+                                        document.getElementById('totalCountCollapsed').textContent = total.textContent;
+                                    }
+                                }
+                                const observer = new MutationObserver(syncData);
+                                const targets = [document.getElementById('progressBar'), document.getElementById('answeredCount')];
+                                targets.forEach(el => { if(el) observer.observe(el, { attributes: true, childList: true, subtree: true }); });
+
+
+                                function clearContainerStyles() {
+                                    container.classList.remove(
+                                        'glass-effect', 'p-4', 'sm:p-6', // Style gốc
+                                         'backdrop-blur-xl', 'shadow-2xl', 'border-blue-200', 'rounded-2xl', // Style Popup
+                                        'bg-transparent', 'py-2', 'px-4' // Style Wrapper rỗng
+                                    );
+                                }
+
+                                function expandPopup() {
+                                    isExpanded = true;
+                                    collapsed.classList.add('hidden');
+                                    content.classList.remove('hidden');
+                                    iconCollapse.classList.remove('hidden');
+
+                                    clearContainerStyles();
+                                    container.classList.add('backdrop-blur-xl', 'shadow-2xl', 'border-blue-200', 'p-4', 'sm:p-6', 'rounded-2xl');
+                                }
+
+                                function collapsePopup() {
+                                    isExpanded = false;
+                                    content.classList.add('hidden');
+                                    collapsed.classList.remove('hidden');
+                                    iconCollapse.classList.add('hidden');
+
+                                    clearContainerStyles();
+                                    container.classList.add('bg-transparent', 'py-2', 'px-4');
+                                }
+
+                                collapsed.addEventListener('click', expandPopup);
+                                btnCollapseView.addEventListener('click', function() {
+                                    if (isSticky && window.innerWidth < 1024) collapsePopup();
+                                });
+
+                                window.addEventListener('scroll', function() {
+                                    if (window.innerWidth >= 1024) {
+                                        if (isSticky) deactivateSticky();
+                                        return;
+                                    }
+
+                                    const threshold = 120;
+
+                                    if (window.scrollY > threshold) {
+                                        if (!isSticky) activateSticky();
+                                    } else {
+                                        if (isSticky) deactivateSticky();
+                                    }
+                                });
+
+                                function activateSticky() {
+                                    isSticky = true;
+                                    placeholder.style.height = initialHeight + 'px';
+                                    placeholder.classList.remove('hidden');
+
+                                    container.classList.remove('lg:sticky');
+                                    container.classList.add('fixed', 'top-[70px]', 'left-4', 'right-4', 'z-50');
+                                    
+                                    collapsePopup();
+                                }
+
+                                function deactivateSticky() {
+                                    isSticky = false;
+                                    isExpanded = false;
+                                    placeholder.classList.add('hidden');
+
+                                    container.classList.remove('fixed', 'top-[70px]', 'left-4', 'right-4', 'z-50');
+                                    container.classList.add('lg:sticky');
+
+                                    clearContainerStyles();
+                                    container.classList.add('glass-effect', 'p-4', 'sm:p-6');
+
+                                    content.classList.remove('hidden');
+                                    collapsed.classList.add('hidden');
+                                    iconCollapse.classList.add('hidden');
+                                }
+                            });
+                        </script>
 
                         <!-- Lưu ý -->
                         <div class="glass-effect p-4 sm:p-6">
