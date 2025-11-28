@@ -12,19 +12,34 @@
         <div class="mx-auto px-3 sm:px-4 relative z-10" style="max-width: 90%;">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-center py-10 sm:py-12 md:py-16">
                 <div class="order-2 md:order-1 text-center md:text-left reveal-banner-text">
-                    <h1
-                        class="text-white drop-shadow-lg text-2xl sm:text-3xl md:text-5xl font-extrabold leading-tight mb-2 sm:mb-3 tracking-wider"  style="line-height: 1.3;">
+                    <h1 class="text-white drop-shadow-lg text-2xl sm:text-3xl md:text-5xl font-extrabold leading-tight mb-2 sm:mb-3 tracking-wider"
+                        style="line-height: 1.3;">
                         HỆ THỐNG KHẢO SÁT TRỰC TUYẾN
                     </h1>
                     <p class="text-white/90 text-lg sm:text-xl md:text-2xl font-semibold">
                         TRƯỜNG ĐẠI HỌC SAO&nbsp;ĐỎ
                     </p>
+                    <div class="mt-6 flex justify-center md:justify-start">
+                        <a href="#survey-list"
+                            class="inline-block px-7 py-3 rounded-full bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold text-lg shadow-lg shadow-yellow-200/40 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 animate-bounce-slow"
+                            onclick="event.preventDefault(); document.querySelector('#survey-list').scrollIntoView({ behavior: 'smooth' });">
+                            <i class="bi bi-list-stars me-2 text-xl align-middle"></i>
+                            Xem danh sách khảo sát
+                        </a>
+                    </div>
                 </div>
                 <div class="order-1 md:order-2 reveal-banner-image">
-                    <div class="glass-effect p-2 sm:p-3">
-                        <div class="aspect-[4/3] w-full bg-slate-100 rounded-lg overflow-hidden">
-                            <img src="{{ asset('image/img_sdu.jpg') }}" alt="Hình ảnh trường Đại học Sao Đỏ"
-                                class="w-full h-full object-cover object-center">
+                    <div class="relative">
+                        <div class="absolute inset-0 rounded-2xl bg-white/30 backdrop-blur-xl ring-1 ring-white/30 shadow-2xl z-0"
+                            style="box-shadow:0 16px 40px 0 rgba(51,97,201,0.24),0 2.5px 22px 0 rgba(72,182,236,0.18);">
+                        </div>
+                        <div class="relative glass-effect p-2 sm:p-3 rounded-2xl z-10"
+                            style="box-shadow: 0 10px 35px 0 rgba(50,78,135,0.25), 0 3px 12px 0 rgba(124,181,244,0.15);">
+                            <div
+                                class="aspect-[4/3] w-full bg-slate-100 rounded-xl overflow-hidden transition-shadow shadow-2xl shadow-blue-900/40 hover:shadow-[0_25px_60px_0_rgba(44,140,255,0.30)]">
+                                <img src="{{ asset('image/img_sdu.jpg') }}" alt="Hình ảnh trường Đại học Sao Đỏ"
+                                    class="w-full h-full object-cover object-center" draggable="false">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -32,7 +47,7 @@
         </div>
     </section>
 
-    <section class="relative overflow-hidden py-12 sm:py-16 md:py-20">
+    <section class="relative overflow-hidden py-12 sm:py-16 md:py-20" id="survey-list">
         <div class="absolute inset-0 bg-gradient-to-br from-blue-300 to-slate-50 -z-10"></div>
 
         <div class="mx-auto px-3 sm:px-4" style="max-width: 90%;">
@@ -57,39 +72,38 @@
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-transparent"></div>
 
                             <div class="relative p-4 sm:p-6 flex flex-col h-full text-white justify-end">
-                                <div class="bg-white/10 backdrop-blur-xs rounded-xl p-3 sm:p-4 border border-white/20 shadow-soft">
+                                <div
+                                    class="relative z-10 bg-white/20 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/30 shadow-lg">
                                     <div class="flex justify-between items-start gap-2 sm:gap-3 mb-2">
-                                        <h3 class="font-bold text-lg sm:text-xl leading-tight">
+                                        <h3
+                                            class="font-extrabold text-2xl sm:text-2xl leading-tight drop-shadow-xl text-white tracking-wider">
                                             {{ Str::limit($dot->ten_dot, 50) }}
                                         </h3>
-                                        <!-- <span
-                                            class="inline-block bg-red-600/60 text-white text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0 mt-1">
-                                            {{-- $dot->mauKhaoSat->ten_mau ?? 'Khảo sát' --}} Làm khảo sát
-                                        </span> -->
                                     </div>
 
-                                    <div class="flex items-center text-xs sm:text-sm text-gray-200 opacity-90">
-                                        <i class="bi bi-hourglass-split me-2 flex-shrink-0"></i>
+                                    <div
+                                        class="flex items-center text-xs sm:text-sm text-gray-100 opacity-100 font-semibold drop-shadow">
+                                        <i class="bi bi-hourglass-split me-2 flex-shrink-0 text-lg"></i>
                                         <span class="break-words">
                                             @php
-        $now = now();
-        $startDate = $dot->tungay;
-        $endDate = $dot->denngay;
+                                                $now = now();
+                                                $startDate = $dot->tungay;
+                                                $endDate = $dot->denngay;
                                             @endphp
                                             @if($dot->isClosed())
-                                                <span class="font-semibold text-gray-400">
+                                                <span class="font-semibold text-gray-300 drop-shadow">
                                                     Đợt khảo sát này đã kết thúc
                                                 </span>
                                             @elseif($now->lt($startDate))
-                                                <span class="font-semibold text-cyan-300">
+                                                <span class="font-semibold text-cyan-300 drop-shadow">
                                                     {{ $startDate->diffForHumans(now(), null, true, 2) }} sẽ bắt đầu
                                                 </span>
                                             @elseif($now->between($startDate, $endDate))
-                                                <span class="font-semibold text-yellow-300">
+                                                <span class="font-semibold text-yellow-300 drop-shadow">
                                                     {{ $endDate->diffForHumans(now(), null, true, 2) }} sẽ kết thúc
                                                 </span>
                                             @else
-                                                <span class="font-semibold text-red-400">
+                                                <span class="font-semibold text-red-400 drop-shadow">
                                                     {{ $endDate->diffForHumans(now(), null, true, 2) }} đã kết thúc
                                                 </span>
                                             @endif
@@ -104,7 +118,8 @@
                 <div class="text-center text-slate-500 py-12 sm:py-16 glass-effect mx-2">
                     <i class="bi bi-cloud-drizzle text-4xl sm:text-6xl text-slate-400 mb-3 sm:mb-4"></i>
                     <h3 class="text-xl sm:text-2xl font-semibold text-slate-700">Không có khảo sát nào.</h3>
-                    <p class="mt-2 text-sm sm:text-base px-2">Hiện tại không có đợt khảo sát nào đang diễn ra. Vui lòng quay lại sau.</p>
+                    <p class="mt-2 text-sm sm:text-base px-2">Hiện tại không có đợt khảo sát nào đang diễn ra. Vui lòng quay lại
+                        sau.</p>
                 </div>
             @endif
     </section>

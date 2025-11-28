@@ -6,7 +6,7 @@
 <style>
     .progress-section {
         position: sticky;
-        top: 80px;
+        top: 100px;
     }
     
     @media (max-width: 1023px) {
@@ -116,7 +116,7 @@
                             <span class="font-semibold text-slate-800">{{ Str::limit($dotKhaoSat->ten_dot, 30) }}</span>
                         </nav>
                         <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-800 mb-2 px-2">{{ $dotKhaoSat->ten_dot }}</h1>
-                        <h3 class="text-sm sm:text-base text-slate-600 mb-2 px-2">{{ $dotKhaoSat->mota ? $dotKhaoSat->mota : "Khảo sát này không có mô tả" }}</h3>
+                        <h3 class="text-sm sm:text-base text-slate-600 mb-2 px-2 text-justify">{{ $dotKhaoSat->mota ? $dotKhaoSat->mota : "Khảo sát này không có mô tả" }}</h3>
                         <p class="text-xs sm:text-sm text-slate-500">
                             Hạn cuối: {{ $dotKhaoSat->denngay }}
                         </p>
@@ -154,81 +154,179 @@
                                             </label>
                                             @switch($cauHoi->loai_cauhoi)
                                                 @case('single_choice')
-                                                    <div class="mt-2 space-y-3">
+                                                    <div 
+                                                        class="flex flex-col justify-center items-stretch mt-3 gap-2"
+                                                        x-data="{
+                                                            selected: '',
+                                                            setSelected(val) { 
+                                                                this.selected = val;
+                                                            },
+                                                        }">
                                                         @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
-                                                            <label class="flex items-center p-3 rounded-lg bg-white/30 hover:bg-white/50 cursor-pointer transition">
-                                                                <input type="radio" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500 border-slate-400"
-                                                                    name="cau_tra_loi[{{ $cauHoi->id }}]" value="{{ $phuongAn->id }}"
+                                                            <label
+                                                                @click="setSelected('{{ $phuongAn->id }}')"
+                                                                class="selectable-likert-card flex flex-row items-center p-4 rounded-xl border cursor-pointer transition w-full min-h-[56px] text-center bg-white/50 border-blue-200 hover:ring-2 hover:ring-blue-300"
+                                                                :class="selected == '{{ $phuongAn->id }}' 
+                                                                    ? 'bg-blue-100/80 ring-4 ring-blue-400/40 text-blue-800' 
+                                                                    : 'text-slate-700'">
+                                                                <input 
+                                                                    type="radio" 
+                                                                    class="hidden" 
+                                                                    name="cau_tra_loi[{{ $cauHoi->id }}]" 
+                                                                    value="{{ $phuongAn->id }}" 
+                                                                    x-model="selected"
                                                                     {{ $isRequired ? 'required' : '' }}>
-                                                                <span class="ml-3 text-slate-700">{{ $phuongAn->noidung }}</span>
+                                                                
+                                                                <div 
+                                                                    class="flex items-center justify-center w-5 h-5 sm:w-7 sm:h-7 rounded-full border-2 transition-all mr-4"
+                                                                    :class="selected == '{{ $phuongAn->id }}'
+                                                                        ? 'bg-blue-500 border-blue-600' 
+                                                                        : 'bg-white/80 border-blue-300'">
+                                                                    <template x-if="selected == '{{ $phuongAn->id }}'">
+                                                                        <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                                            <circle cx="10" cy="10" r="5" />
+                                                                        </svg>
+                                                                    </template>
+                                                                </div>
+                                                                
+                                                                <span 
+                                                                    class="text-[14px] sm:text-base leading-tight line-clamp-2 text-left flex-1"
+                                                                    :class="selected == '{{ $phuongAn->id }}' ? 'font-bold' : 'font-normal'">
+                                                                    {{ $phuongAn->noidung }}
+                                                                </span>
                                                             </label>
                                                         @endforeach
                                                     </div>
                                                     @break
 
                                                 @case('multiple_choice')
-                                                    <div class="mt-2 space-y-3">
+                                                    <div 
+                                                        class="flex flex-col justify-center items-stretch mt-3 gap-2"
+                                                        x-data="{
+                                                            selected: [],
+                                                        }"
+                                                    >
                                                         @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
-                                                            <label class="flex items-center p-3 rounded-lg bg-white/30 hover:bg-white/50 cursor-pointer transition">
-                                                                <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 focus:ring-blue-500 rounded border-slate-400"
-                                                                    name="cau_tra_loi[{{ $cauHoi->id }}][]" value="{{ $phuongAn->id }}">
-                                                                <span class="ml-3 text-slate-700">{{ $phuongAn->noidung }}</span>
+                                                            <label
+                                                                class="selectable-likert-card flex flex-row items-center p-4 rounded-xl border cursor-pointer transition w-full min-h-[56px] text-center bg-white/50 border-blue-200 hover:ring-2 hover:ring-blue-300"
+                                                                :class="selected.includes('{{ $phuongAn->id }}')
+                                                                    ? 'bg-blue-100/80 ring-4 ring-blue-400/40 text-blue-800' 
+                                                                    : 'text-slate-700'">
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    class="hidden"
+                                                                    name="cau_tra_loi[{{ $cauHoi->id }}][]" 
+                                                                    value="{{ $phuongAn->id }}"
+                                                                    x-model="selected"
+                                                                    @click.stop
+                                                                >
+                                                                <div 
+                                                                    class="flex items-center justify-center w-5 h-5 sm:w-7 sm:h-7 rounded-md border-2 transition-all mr-4"
+                                                                    :class="selected.includes('{{ $phuongAn->id }}')
+                                                                        ? 'bg-blue-500 border-blue-600' 
+                                                                        : 'bg-white/80 border-blue-300'">
+                                                                    <template x-if="selected.includes('{{ $phuongAn->id }}')">
+                                                                        <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 20 20" stroke="currentColor">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 10l4 4 6-7" />
+                                                                        </svg>
+                                                                    </template>
+                                                                </div>
+                                                                
+                                                                <span 
+                                                                    class="text-[14px] sm:text-base leading-tight line-clamp-2 text-left flex-1"
+                                                                    :class="selected.includes('{{ $phuongAn->id }}') ? 'font-bold' : 'font-normal'">
+                                                                    {{ $phuongAn->noidung }}
+                                                                </span>
                                                             </label>
                                                         @endforeach
                                                     </div>
                                                     @break
 
                                                 @case('text')
-                                                    <textarea class="form-textarea mt-2 w-full rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
+                                                    <textarea class="form-textarea mt-2 w-full rounded-lg bg-[#FFFFFF] border-slate-300 focus:ring-blue-500 focus:border-blue-500"
                                                             name="cau_tra_loi[{{ $cauHoi->id }}]" rows="4"
                                                             placeholder="Nhập câu trả lời của bạn..."
                                                             {{ $isRequired ? 'required' : '' }}></textarea>
                                                     @break
 
                                                 @case('likert')
-                                                    <div class="flex flex-wrap justify-center sm:justify-between items-center mt-3 gap-1.5 sm:gap-2">
-                                                        @foreach($cauHoi->phuongAnTraLoi as $index => $phuongAn)
-                                                            @php
-                                                                $isLast = $loop->last;
-                                                            @endphp
-                                                            <label class="flex flex-col items-center flex-1 p-1.5 sm:p-2 rounded-lg hover:bg-white/50 cursor-pointer transition min-w-[60px] sm:min-w-[80px]">
-                                                                <input type="radio" class="form-radio h-4 w-4 sm:h-5 sm:w-5 text-blue-600 focus:ring-blue-500"
-                                                                    name="cau_tra_loi[{{ $cauHoi->id }}]"
-                                                                    value="{{ $phuongAn->id }}"
-                                                                    {{ $isRequired ? 'required' : '' }} {{ $isLast ? 'checked' : '' }}>
-                                                                <span class="mt-1 sm:mt-2 text-[10px] sm:text-xs text-center text-slate-600 leading-tight">{{ $phuongAn->noidung }}</span>
-                                                            </label>
-                                                        @endforeach
-                                                    </div>
+                                                    <div 
+                                                            class="flex flex-col justify-center items-stretch mt-3 gap-2"
+                                                            x-data="{
+                                                                selected: '{{ $isRequired && isset($cauHoi->phuongAnTraLoi) ? ($cauHoi->phuongAnTraLoi->last()->id ?? '') : '' }}',
+                                                                setSelected(val) { this.selected = val },
+                                                            }">
+                                                            @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
+                                                                <label
+                                                                    @click="setSelected('{{ $phuongAn->id }}')"
+                                                                    class="selectable-likert-card flex flex-row items-center p-4 rounded-xl border cursor-pointer transition w-full min-h-[56px] text-center bg-white/50 border-blue-200 hover:ring-2 hover:ring-blue-300"
+                                                                    :class="selected == '{{ $phuongAn->id }}' 
+                                                                        ? 'bg-blue-100/80 ring-4 ring-blue-400/40 text-blue-800' 
+                                                                        : 'text-slate-700'">
+                                                                    <input type="radio" class="hidden" name="cau_tra_loi[{{ $cauHoi->id }}]" value="{{ $phuongAn->id }}" x-model="selected"
+                                                                        {{ $isRequired ? 'required' : '' }}>
+                                                                    
+                                                                    <div 
+                                                                        class="flex items-center justify-center w-5 h-5 sm:w-7 sm:h-7 rounded-full border-2 transition-all mr-4"
+                                                                        :class="selected == '{{ $phuongAn->id }}'
+                                                                            ? 'bg-blue-500 border-blue-600' 
+                                                                            : 'bg-white/80 border-blue-300'">
+                                                                        <template x-if="selected == '{{ $phuongAn->id }}'">
+                                                                            <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                                                <circle cx="10" cy="10" r="5" />
+                                                                            </svg>
+                                                                        </template>
+                                                                    </div>
+                                                                    
+                                                                    <span 
+                                                                        class="text-[14px] sm:text-base leading-tight line-clamp-2 text-left flex-1"
+                                                                        :class="selected == '{{ $phuongAn->id }}' ? 'font-bold' : 'font-normal'">
+                                                                        {{ $phuongAn->noidung }}
+                                                                    </span>
+                                                                </label>
+                                                            @endforeach
+                                                        </div>
                                                     @break
 
                                                 @case('rating')
-                                                    <div class="mt-3">
-                                                        <div class="flex items-center justify-start space-x-2" role="group">
+                                                    <div 
+                                                        class="flex flex-col justify-center items-stretch mt-3 gap-2"
+                                                        x-data="{
+                                                            selected: '',
+                                                            setSelected(val) { this.selected = val },
+                                                        }">
+                                                        <div class="flex items-center justify-between gap-2 w-full">
                                                             @for($i = 1; $i <= 5; $i++)
-                                                                <div class="rating-item">
-                                                                    <input type="radio" class="sr-only peer" 
+                                                                <label
+                                                                    @click="setSelected('{{ $i }}')"
+                                                                    class="selectable-likert-card flex flex-row items-center justify-center w-12 h-12 rounded-xl border cursor-pointer transition bg-white/50 border-blue-200 hover:ring-2 hover:ring-blue-300"
+                                                                    :class="selected == '{{ $i }}' 
+                                                                        ? 'bg-blue-100/80 ring-4 ring-blue-400/40 text-blue-800 font-bold' 
+                                                                        : 'text-slate-700 font-normal'">
+                                                                    <input 
+                                                                        type="radio" 
+                                                                        class="hidden" 
                                                                         name="cau_tra_loi[{{ $cauHoi->id }}]" 
                                                                         value="{{ $i }}"
-                                                                        id="pi_rating_{{ $cauHoi->id }}_{{ $i }}"
+                                                                        x-model="selected"
                                                                         {{ $isRequired ? 'required' : '' }}>
-                                                                    <label for="pi_rating_{{ $cauHoi->id }}_{{ $i }}"
-                                                                        class="flex items-center justify-center w-12 h-12 rounded-full border border-slate-300 bg-white/40
-                                                                                cursor-pointer transition text-slate-600 font-bold text-lg
-                                                                                hover:bg-blue-200 hover:border-blue-400
-                                                                                peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600">
+                                                                    <div 
+                                                                        class="flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all"
+                                                                        :class="selected == '{{ $i }}'
+                                                                            ? 'bg-blue-500 border-blue-600 text-white' 
+                                                                            : 'bg-white/80 border-blue-300 text-slate-600'">
                                                                         {{ $i }}
-                                                                    </label>
-                                                                </div>
+                                                                    </div>
+                                                                </label>
                                                             @endfor
                                                         </div>
                                                     </div>
                                                     @break
 
                                                 @case('date')
-                                                    <input type="date" class="form-input mt-2 w-full md:w-1/2 rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
-                                                        name="cau_tra_loi[{{ $cauHoi->id }}]"
-                                                        {{ $isRequired ? 'required' : '' }}>
+                                                    <input type="date" class="form-input mt-2 w-full rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
+                                                                name="cau_tra_loi[{{ $cauHoi->id }}]"
+                                                                {{ $isRequired ? 'required' : '' }}>
                                                     @break
 
                                                 @case('number')
@@ -295,84 +393,176 @@
                                                     </label>
                                                     @switch($cauHoi->loai_cauhoi)
                                                         @case('single_choice')
-                                                            <div class="mt-2 space-y-3">
-                                                                @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
-                                                                    <label class="flex items-center p-3 rounded-lg bg-white/30 hover:bg-white/50 cursor-pointer transition">
-                                                                        <input type="radio" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500 border-slate-400"
-                                                                            name="cau_tra_loi[{{ $cauHoi->id }}]" value="{{ $phuongAn->id }}"
-                                                                            {{ $isRequired ? 'required' : '' }}>
-                                                                        <span class="ml-3 text-slate-700">{{ $phuongAn->noidung }}</span>
-                                                                    </label>
-                                                                @endforeach
-                                                            </div>
-                                                            @break
-                                                        
-                                                        @case('multiple_choice')
-                                                            <div class="mt-2 space-y-3">
-                                                                @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
-                                                                    <label class="flex items-center p-3 rounded-lg bg-white/30 hover:bg-white/50 cursor-pointer transition">
-                                                                        <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 focus:ring-blue-500 rounded border-slate-400"
-                                                                            name="cau_tra_loi[{{ $cauHoi->id }}][]" value="{{ $phuongAn->id }}">
-                                                                        <span class="ml-3 text-slate-700">{{ $phuongAn->noidung }}</span>
-                                                                    </label>
-                                                                @endforeach
-                                                            </div>
-                                                            @break
+                                                    <div 
+                                                        class="flex flex-col justify-center items-stretch mt-3 gap-2"
+                                                        x-data="{
+                                                            selected: '',
+                                                            setSelected(val) { 
+                                                                this.selected = val;
+                                                            },
+                                                        }">
+                                                        @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
+                                                            <label
+                                                                @click="setSelected('{{ $phuongAn->id }}')"
+                                                                class="selectable-likert-card flex flex-row items-center p-4 rounded-xl border cursor-pointer transition w-full min-h-[56px] text-center bg-white/50 border-blue-200 hover:ring-2 hover:ring-blue-300"
+                                                                :class="selected == '{{ $phuongAn->id }}' 
+                                                                    ? 'bg-blue-100/80 ring-4 ring-blue-400/40 text-blue-800' 
+                                                                    : 'text-slate-700'">
+                                                                <input 
+                                                                    type="radio" 
+                                                                    class="hidden" 
+                                                                    name="cau_tra_loi[{{ $cauHoi->id }}]" 
+                                                                    value="{{ $phuongAn->id }}" 
+                                                                    x-model="selected"
+                                                                    {{ $isRequired ? 'required' : '' }}>
+                                                                
+                                                                <div 
+                                                                    class="flex items-center justify-center w-5 h-5 sm:w-7 sm:h-7 rounded-full border-2 transition-all mr-4"
+                                                                    :class="selected == '{{ $phuongAn->id }}'
+                                                                        ? 'bg-blue-500 border-blue-600' 
+                                                                        : 'bg-white/80 border-blue-300'">
+                                                                    <template x-if="selected == '{{ $phuongAn->id }}'">
+                                                                        <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                                            <circle cx="10" cy="10" r="5" />
+                                                                        </svg>
+                                                                    </template>
+                                                                </div>
+                                                                
+                                                                <span 
+                                                                    class="text-[14px] sm:text-base leading-tight line-clamp-2 text-left flex-1"
+                                                                    :class="selected == '{{ $phuongAn->id }}' ? 'font-bold' : 'font-normal'">
+                                                                    {{ $phuongAn->noidung }}
+                                                                </span>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+                                                    @break
+
+                                                    @case('multiple_choice')
+                                                        <div 
+                                                            class="flex flex-col justify-center items-stretch mt-3 gap-2"
+                                                            x-data="{
+                                                                selected: [],
+                                                            }">
+                                                            @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
+                                                                <label
+                                                                    class="selectable-likert-card flex flex-row items-center p-4 rounded-xl border cursor-pointer transition w-full min-h-[56px] text-center bg-white/50 border-blue-200 hover:ring-2 hover:ring-blue-300"
+                                                                    :class="selected.includes('{{ $phuongAn->id }}')
+                                                                        ? 'bg-blue-100/80 ring-4 ring-blue-400/40 text-blue-800' 
+                                                                        : 'text-slate-700'">
+                                                                    <input 
+                                                                        type="checkbox" 
+                                                                        class="hidden"
+                                                                        name="cau_tra_loi[{{ $cauHoi->id }}][]" 
+                                                                        value="{{ $phuongAn->id }}"
+                                                                        x-model="selected"
+                                                                        @click.stop
+                                                                    >
+                                                                    <div 
+                                                                        class="flex items-center justify-center w-5 h-5 sm:w-7 sm:h-7 rounded-md border-2 transition-all mr-4"
+                                                                        :class="selected.includes('{{ $phuongAn->id }}')
+                                                                            ? 'bg-blue-500 border-blue-600' 
+                                                                            : 'bg-white/80 border-blue-300'">
+                                                                        <template x-if="selected.includes('{{ $phuongAn->id }}')">
+                                                                            <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 20 20" stroke="currentColor">
+                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 10l4 4 6-7" />
+                                                                            </svg>
+                                                                        </template>
+                                                                    </div>
+                                                                    
+                                                                    <span 
+                                                                        class="text-[14px] sm:text-base leading-tight line-clamp-2 text-left flex-1"
+                                                                        :class="selected.includes('{{ $phuongAn->id }}') ? 'font-bold' : 'font-normal'">
+                                                                        {{ $phuongAn->noidung }}
+                                                                    </span>
+                                                                </label>
+                                                            @endforeach
+                                                        </div>
+                                                        @break
                                                             
                                                         @case('text')
-                                                            <textarea class="form-textarea mt-2 w-full rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
+                                                            <textarea class="form-textarea mt-2 w-full rounded-lg bg-white border-slate-300 focus:ring-blue-500 focus:border-blue-500"
                                                                     name="cau_tra_loi[{{ $cauHoi->id }}]" rows="4"
                                                                     placeholder="Nhập câu trả lời của bạn..."
                                                                     {{ $isRequired ? 'required' : '' }}></textarea>
                                                             @break
                                                         
                                                         @case('likert')
-                                                            <div class="flex flex-wrap justify-center sm:justify-between items-center mt-3 gap-1.5 sm:gap-2">
-                                                                @foreach($cauHoi->phuongAnTraLoi as $index => $phuongAn)
-                                                                    @php
-                                                                        $isLast = $loop->last;
-                                                                    @endphp
-                                                                    <label class="flex flex-col items-center flex-1 p-1.5 sm:p-2 rounded-lg hover:bg-white/50 cursor-pointer transition min-w-[60px] sm:min-w-[80px]">
-                                                                        <input type="radio" class="form-radio h-4 w-4 sm:h-5 sm:w-5 text-blue-600 focus:ring-blue-500"
-                                                                            name="cau_tra_loi[{{ $cauHoi->id }}]"
-                                                                            value="{{ $phuongAn->id }}"
-                                                                            {{ $isRequired ? 'required' : '' }} {{ $isLast ? 'checked' : '' }}>
-                                                                        <span class="mt-1 sm:mt-2 text-[10px] sm:text-xs text-center text-slate-600 leading-tight">{{ $phuongAn->noidung }}</span>
-                                                                    </label>
-                                                                @endforeach
-                                                            </div>
-                                                            @break
+                                                        <div 
+                                                            class="flex flex-col justify-center items-stretch mt-3 gap-2"
+                                                            x-data="{
+                                                                selected: '{{ $isRequired && isset($cauHoi->phuongAnTraLoi) ? ($cauHoi->phuongAnTraLoi->last()->id ?? '') : '' }}',
+                                                                setSelected(val) { this.selected = val },
+                                                            }">
+                                                            @foreach($cauHoi->phuongAnTraLoi as $phuongAn)
+                                                                <label
+                                                                    @click="setSelected('{{ $phuongAn->id }}')"
+                                                                    class="selectable-likert-card flex flex-row items-center p-4 rounded-xl border cursor-pointer transition w-full min-h-[56px] text-center bg-white/50 border-blue-200 hover:ring-2 hover:ring-blue-300"
+                                                                    :class="selected == '{{ $phuongAn->id }}' 
+                                                                        ? 'bg-blue-100/80 ring-4 ring-blue-400/40 text-blue-800' 
+                                                                        : 'text-slate-700'">
+                                                                    <input type="radio" class="hidden" name="cau_tra_loi[{{ $cauHoi->id }}]" value="{{ $phuongAn->id }}" x-model="selected"
+                                                                        {{ $isRequired ? 'required' : '' }}>
+                                                                    
+                                                                    <div 
+                                                                        class="flex items-center justify-center w-5 h-5 sm:w-7 sm:h-7 rounded-full border-2 transition-all mr-4"
+                                                                        :class="selected == '{{ $phuongAn->id }}'
+                                                                            ? 'bg-blue-500 border-blue-600' 
+                                                                            : 'bg-white/80 border-blue-300'">
+                                                                        <template x-if="selected == '{{ $phuongAn->id }}'">
+                                                                            <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                                                <circle cx="10" cy="10" r="5" />
+                                                                            </svg>
+                                                                        </template>
+                                                                    </div>
+                                                                    
+                                                                    <span 
+                                                                        class="text-[14px] sm:text-base leading-tight line-clamp-2 text-left flex-1"
+                                                                        :class="selected == '{{ $phuongAn->id }}' ? 'font-bold' : 'font-normal'">
+                                                                        {{ $phuongAn->noidung }}
+                                                                    </span>
+                                                                </label>
+                                                            @endforeach
+                                                        </div>
+                                                        @break
                 
                                                         @case('rating')
-                                                            <div class="mt-3">
-                                                                <div class="flex items-center justify-center space-x-1.5 sm:space-x-2" role="group">
+                                                            <div 
+                                                                class="flex flex-col justify-center items-stretch mt-3 gap-2"
+                                                                x-data="{
+                                                                    selected: '',
+                                                                    setSelected(val) { this.selected = val },
+                                                                }">
+                                                                <div class="flex items-center justify-between gap-2 w-full">
                                                                     @for($i = 1; $i <= 5; $i++)
-                                                                        <div class="rating-item">
-                                                                            <input type="radio" class="sr-only peer" 
+                                                                        <label
+                                                                            @click="setSelected('{{ $i }}')"
+                                                                            class="selectable-likert-card flex flex-row items-center justify-center w-12 h-12 rounded-xl border cursor-pointer transition bg-white/50 border-blue-200 hover:ring-2 hover:ring-blue-300"
+                                                                            :class="selected == '{{ $i }}' 
+                                                                                ? 'bg-blue-100/80 ring-4 ring-blue-400/40 text-blue-800 font-bold' 
+                                                                                : 'text-slate-700 font-normal'">
+                                                                            <input 
+                                                                                type="radio" 
+                                                                                class="hidden" 
                                                                                 name="cau_tra_loi[{{ $cauHoi->id }}]" 
                                                                                 value="{{ $i }}"
-                                                                                id="rating_{{ $cauHoi->id }}_{{ $i }}"
+                                                                                x-model="selected"
                                                                                 {{ $isRequired ? 'required' : '' }}>
-                                                                            
-                                                                            <label for="rating_{{ $cauHoi->id }}_{{ $i }}"
-                                                                                class="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-slate-300 bg-white/40
-                                                                                        cursor-pointer transition text-slate-600 font-bold text-base sm:text-lg
-                                                                                        hover:bg-blue-200 hover:border-blue-400
-                                                                                        peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600">
+                                                                            <div 
+                                                                                class="flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all"
+                                                                                :class="selected == '{{ $i }}'
+                                                                                    ? 'bg-blue-500 border-blue-600 text-white' 
+                                                                                    : 'bg-white/80 border-blue-300 text-slate-600'">
                                                                                 {{ $i }}
-                                                                            </label>
-                                                                        </div>
+                                                                            </div>
+                                                                        </label>
                                                                     @endfor
-                                                                </div>
-                                                                <div class="flex justify-between text-[10px] sm:text-xs text-slate-500 mt-2 px-1">
-                                                                    <span class="hidden xs:inline">Rất không hài lòng</span>
-                                                                    <span class="hidden xs:inline">Rất hài lòng</span>
                                                                 </div>
                                                             </div>
                                                             @break
                 
                                                         @case('date')
-                                                            <input type="date" class="form-input mt-2 w-full md:w-1/2 rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
+                                                            <input type="date" class="form-input mt-2 w-full rounded-lg bg-white/50 border-slate-300 focus:ring-blue-500 focus:border-blue-500"
                                                                 name="cau_tra_loi[{{ $cauHoi->id }}]"
                                                                 {{ $isRequired ? 'required' : '' }}>
                                                             @break
@@ -416,9 +606,14 @@
                         <!-- Captcha, nút Submit và điều hướng -->
                         <div class="glass-effect p-4 sm:p-6">
                             {{-- Captcha --}}
-                            <div id="captcha-container" class="mb-4 flex justify-center" style="display: none;">
+                            <!-- <div id="captcha-container" class="mb-4 flex justify-center" style="display: none;">
                                 <div class="g-recaptcha transform scale-90 sm:scale-100" data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"></div> 
+                            </div> -->
+                            <div id="captcha-container" class="mb-4 flex justify-center" style="display: none;">
+                                <div id="html_element"></div> 
                             </div>
+
+                            <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
                             
                             {{-- Nút điều hướng --}}
                             <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
@@ -454,8 +649,10 @@
                         <div class="glass-effect p-4 sm:p-6">
                             <h6 class="font-bold text-slate-800 mb-3 sm:mb-4 text-sm sm:text-base">Tiến độ hoàn thành</h6>
                             <div class="w-full bg-white/40 rounded-full h-5 sm:h-6 mb-2 sm:mb-3 overflow-hidden border border-white/50">
-                                <div class="bg-blue-600 h-5 sm:h-6 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-semibold transition-all duration-300"
-                                    id="progressBar" style="width: 0%;"></div>
+                                <div 
+                                    class="progress-bar-dynamic h-5 sm:h-6 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-semibold transition-all duration-300"
+                                    id="progressBar" style="width: 0%; background-color: #f59e42;">
+                                </div>
                             </div>
                             <div class="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
                                 <p class="text-slate-600 mb-1">
@@ -471,6 +668,17 @@
                                 </div>
                             </div>
                         </div>
+                        <style>
+                            #progressBar {
+                                background-color: #f59e42; /* Orange */
+                            }
+                            #progressBar.progress-almost {
+                                background-color: #2563eb !important; /* blue-600 */
+                            }
+                            #progressBar.progress-done {
+                                background-color: #16a34a !important; /* Green */
+                            }
+                        </style>
 
                         <!-- Lưu ý -->
                         <div class="glass-effect p-4 sm:p-6">
@@ -487,7 +695,7 @@
         </div>
     </div>
 
-    
+<script src="https://unpkg.com/alpinejs" defer></script>
 @push('scripts')
 <script>
      function getCurrentLocalDateTime() {
@@ -604,7 +812,7 @@
             console.log('Survey progress cleared.');
         }
         
-        function updateProgress() {
+        window.updateProgress = function() {
             let answeredQuestions = 0;
             let totalVisibleQuestions = 0;
             let totalRequiredQuestions = 0;
@@ -633,7 +841,7 @@
                 $inputs.each(function() {
                     const $input = $(this);
 
-                    if ($input.is(':radio') || $input.is(':checkbox')) {
+                    if ($input.is(':radio') || $input.is(':checkbox'))  {
                         if ($input.is(':checked')) {
                             isAnswered = true;
                             return false;
@@ -661,6 +869,14 @@
                     ? Math.round((answeredQuestions / totalVisibleQuestions) * 100)
                     : 0;
 
+            const bar = document.getElementById('progressBar');
+            bar.classList.remove('progress-almost', 'progress-done');
+            if (progress >= 80) {
+                bar.classList.add('progress-done');
+            } else if (progress >= 45) {
+                bar.classList.add('progress-almost');
+            }
+
             $('#progressBar')
                 .css('width', progress + '%')
                 .text(progress + '%');
@@ -669,9 +885,7 @@
             $('#totalCount').text(totalVisibleQuestions);
             $('#requiredCount').text(totalRequiredQuestions);
             $('#optionalCount').text(totalOptionalQuestions);
-        }
-
-
+        };
 
         function checkAllConditions() {
             $('.question-card[data-conditional-parent-id]').each(function() {
@@ -814,21 +1028,38 @@
     let currentPage = 1;
     const totalPages = $('.survey-page').length;
 
-    function updateNavigationButtons() {
-        // Ẩn/hiện nút Quay lại
-        $('#prevBtn').toggle(currentPage > 1);
-        $('#prev-placeholder').toggle(currentPage <= 1);
+// Biến kiểm tra trạng thái
+var isCaptchaRendered = false;
 
-        if (currentPage === totalPages) {
-            $('#nextBtn').hide();
-            $('#captcha-container').show();
-            $('#submitBtn').show();
-        } else {
-            $('#nextBtn').show();
-            $('#captcha-container').hide();
-            $('#submitBtn').hide();
+var onloadCallback = function() {
+    console.log("grecaptcha is ready!");
+};
+
+function updateNavigationButtons() {
+    // Ẩn/hiện nút Quay lại
+    $('#prevBtn').toggle(currentPage > 1);
+    $('#prev-placeholder').toggle(currentPage <= 1);
+
+    if (currentPage === totalPages) {
+        $('#nextBtn').hide();
+        $('#submitBtn').show();
+        
+        // Hiện container trước
+        $('#captcha-container').show(); 
+
+        if (!isCaptchaRendered) {
+            grecaptcha.render('html_element', {
+                'sitekey' : "{{ env('RECAPTCHA_SITE_KEY') }}" 
+            });
+            isCaptchaRendered = true;
         }
+
+    } else {
+        $('#nextBtn').show();
+        $('#captcha-container').hide();
+        $('#submitBtn').hide();
     }
+}
 
     function goToPage(pageNumber) {
         if (pageNumber < 1 || pageNumber > totalPages) return;

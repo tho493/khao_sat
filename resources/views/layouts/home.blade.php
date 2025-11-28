@@ -149,24 +149,34 @@
 
                     <div class="lg:col-span-1">
                         <h5 class="font-bold text-lg mb-4 tracking-wider">THÔNG TIN LIÊN HỆ</h5>
-                        <div class="text-white/80 space-y-3 text-sm">
-                            <p class="flex items-start">
-                                <i class="bi bi-geo-alt-fill mr-3 mt-1 flex-shrink-0"></i>
-                                <span>Số 76, Nguyễn Thị Duệ, Thái Học 2, phường Chu Văn An, thành phố Hải Phòng.</span>
-                            </p>
-                            <p class="flex items-start">
-                                <i class="bi bi-telephone-fill mr-3 mt-1 flex-shrink-0"></i>
-                                <span>Điện thoại: (0220) 3882 402</span>
-                            </p>
-                            <p class="flex items-start">
-                                <i class="bi bi-printer-fill mr-3 mt-1 flex-shrink-0"></i>
-                                <span>Fax: (0220) 3882 921</span>
-                            </p>
-                            <p class="flex items-start">
-                                <i class="bi bi-globe2 mr-3 mt-1 flex-shrink-0"></i>
-                                <a href="https://saodo.edu.vn" class="hover:text-white hover:underline transition"
-                                    target="_blank">https://saodo.edu.vn</a>
-                            </p>
+                        <div class="text-white/80 space-y-4 text-sm">
+                            <div class="flex flex-row items-start gap-0" style="line-height:1.9;">
+                                <span class="flex-shrink-0 flex items-center justify-center" style="height:1.6em;">
+                                    <i class="bi bi-geo-alt-fill mr-3 text-base" style="vertical-align:middle;"></i>
+                                </span>
+                                <span class="flex-1">Số 76, Nguyễn Thị Duệ, Thái Học 2, phường Chu Văn An, thành phố Hải Phòng.</span>
+                            </div>
+                            <div class="flex flex-row items-start gap-0" style="line-height:1.9;">
+                                <span class="flex-shrink-0 flex items-center justify-center" style="height:1.6em;">
+                                    <i class="bi bi-telephone-fill mr-3 text-base" style="vertical-align:middle;"></i>
+                                </span>
+                                <span class="flex-1">Điện thoại: (0220) 3882 402</span>
+                            </div>
+                            <div class="flex flex-row items-start gap-0" style="line-height:1.9;">
+                                <span class="flex-shrink-0 flex items-center justify-center" style="height:1.6em;">
+                                    <i class="bi bi-printer-fill mr-3 text-base" style="vertical-align:middle;"></i>
+                                </span>
+                                <span class="flex-1">Fax: (0220) 3882 921</span>
+                            </div>
+                            <div class="flex flex-row items-start gap-0" style="line-height:1.9;">
+                                <span class="flex-shrink-0 flex items-center justify-center" style="height:1.6em;">
+                                    <i class="bi bi-globe2 mr-3 text-base" style="vertical-align:middle;"></i>
+                                </span>
+                                <span class="flex-1">
+                                    <a href="https://saodo.edu.vn" class="hover:text-white hover:underline transition"
+                                        target="_blank">https://saodo.edu.vn</a>
+                                </span>
+                            </div>
                         </div>
                     </div>
 
@@ -185,11 +195,6 @@
                 <div class="mt-12 border-t border-white/20 pt-6 text-center text-white/60 text-sm">
                     © {{ date('Y') }} Trường Đại học Sao Đỏ · Hệ thống khảo sát trực tuyến.
                 </div>
-
-                <button id="back-to-top" title="Cuộn lên đầu trang" class="hidden fixed bottom-5 right-5 w-12 h-12 rounded-full bg-blue-300/40 backdrop-blur-sm text-white text-2xl
-                   hover:bg-white/30 focus:outline-none transition-all duration-300">
-                    <i class="bi bi-arrow-up-short"></i>
-                </button>
             </footer>
         </div>
     </div>
@@ -209,22 +214,6 @@
             $(document).on('ajaxStop', () => NProgress.done());
         }
         
-        // nút lướt lên đầu
-        const backToTopButton = document.getElementById('back-to-top');
-        if (backToTopButton) {
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 300) { // Hiển thị nút khi cuộn xuống 300px
-                    backToTopButton.classList.remove('hidden');
-                } else {
-                    backToTopButton.classList.add('hidden');
-                }
-            });
-
-            backToTopButton.addEventListener('click', () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-        }
-
         const header = document.querySelector('header.sticky-header');
         if (header) {
             window.addEventListener('scroll', () => {
