@@ -99,7 +99,45 @@
         </div>
     @endif
 
-    <div class="container mx-auto py-6 sm:py-8 md:py-12 px-3 sm:px-4 md:px-8">
+    <!-- Màn hình đã hoàn thành (Ẩn mặc định) -->
+    <div id="survey-completed-screen" class="hidden container mx-auto py-12 px-4">
+        <div class="max-w-2xl mx-auto glass-effect p-8 sm:p-12 text-center rounded-2xl shadow-2xl relative overflow-hidden">
+             <div class="absolute inset-0 bg-gradient-to-br from-green-50 to-blue-50 -z-10 opacity-50"></div>
+            
+            <div class="mb-6 relative">
+                 <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto animate-bounce-slow">
+                    <i class="bi bi-check-lg text-5xl text-green-600"></i>
+                 </div>
+            </div>
+
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-800 mb-4">
+                Bạn đã hoàn thành khảo sát này!
+            </h1>
+            <p class="text-slate-600 text-lg mb-8">
+                Cảm ơn bạn đã đóng góp ý kiến quý báu. Câu trả lời của bạn đã được hệ thống ghi nhận.
+            </p>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                 <a id="btn-review-answers" href="#" class="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-200/50">
+                    <i class="bi bi-eye mr-2"></i> Xem lại đáp án
+                </a>
+                
+                 <button id="btn-redo-survey" type="button" class="inline-flex items-center justify-center px-6 py-3 bg-white text-slate-700 border border-slate-200 font-bold rounded-xl hover:bg-slate-50 hover:text-red-600 transition shadow-sm">
+                    <i class="bi bi-arrow-repeat mr-2"></i> Làm lại
+                </button>
+
+                <a href="{{ route('khao-sat.index') }}" class="inline-flex items-center justify-center px-6 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition">
+                    <i class="bi bi-house mr-2"></i> Trang chủ
+                </a>
+            </div>
+            
+             <p class="mt-8 text-xs text-slate-400">
+                Mã phiếu: <span id="completed-submission-id" class="font-mono bg-slate-100 px-2 py-1 rounded"></span>
+            </p>
+        </div>
+    </div>
+
+    <div id="survey-main-container" class="container mx-auto py-6 sm:py-8 md:py-12 px-3 sm:px-4 md:px-8">
         <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
             <div class="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8 xl:gap-12">
 
@@ -678,6 +716,10 @@
                                 class="hidden flex items-center justify-between gap-2 cursor-pointer select-none animate-fade-in
                                         backdrop-blur-md shadow-lg rounded-full px-4 py-2 ring-1 ring-slate-900/5">
                                 <div class="flex items-center gap-3 flex-1">
+                                    <div class="flex items-center gap-1 text-xs font-bold text-blue-600 border-r border-slate-300 pr-3">
+                                        <i class="bi bi-clock"></i>
+                                        <span id="survey-timer-collapsed" class="min-w-[35px]">00:00</span>
+                                    </div>
                                     <div class="w-24 bg-white/40 rounded-full h-5 overflow-hidden border border-white/50 flex-shrink-0">
                                         <div class="progress-bar-dynamic h-5 rounded-full flex items-center justify-center text-white text-xs font-semibold transition-all duration-300"
                                             id="progressBarCollapsed" style="width: 0%; background-color: #f59e42;">
@@ -701,15 +743,15 @@
                             .animate-fade-in {
                                 animation: fadeInDown 0.3s ease-out forwards;
                             }
-                             #progressBar {
+                             #progressBar, #progressBarCollapsed {
                                 background-color: #f59e42; /* Orange */
                             }
 
-                            #progressBar.progress-almost {
+                            #progressBar.progress-almost, #progressBarCollapsed.progress-almost {
                                 background-color: #2563eb !important; /* blue-600 */
                             }
 
-                            #progressBar.progress-done {
+                            #progressBar.progress-done, #progressBarCollapsed.progress-done {
                                 background-color: #16a34a !important; /* Green */
                             }
                         </style>
@@ -736,7 +778,11 @@
                                     const collapsedBar = document.getElementById('progressBarCollapsed');
                                     if (fullBar && collapsedBar) {
                                         collapsedBar.style.width = fullBar.style.width;
-                                        collapsedBar.style.backgroundColor = fullBar.style.backgroundColor;
+                                        
+                                        // Sync color classes
+                                        collapsedBar.classList.toggle('progress-almost', fullBar.classList.contains('progress-almost'));
+                                        collapsedBar.classList.toggle('progress-done', fullBar.classList.contains('progress-done'));
+                                        
                                         collapsedBar.innerHTML = ""; 
                                     }
                                     const ans = document.getElementById('answeredCount');
@@ -1099,11 +1145,66 @@
             $questionCard.find('select').val('');
         }
 
-        // Chạy lần đầu khi load
-        loadProgress();
-        checkAllConditions();
-        updateProgress();
-        $('.question-card[data-conditional-parent-id]').hide();
+        // Check trạng thái đã hoàn thành
+        function checkCompletionStatus() {
+            const completedKey = 'survey_completed_{{ $dotKhaoSat->id }}';
+            const completedData = localStorage.getItem(completedKey);
+
+            if (completedData) {
+                try {
+                    const data = JSON.parse(completedData);
+                    // Ẩn form chính
+                    $('#survey-main-container').hide();
+                    // Hiện màn hình hoàn thành
+                    $('#survey-completed-screen').removeClass('hidden');
+                    
+                    // Cập nhật link xem lại
+                    if (data.id) {
+                        let reviewUrl = '{{ route('khao-sat.index') }}/review-history/' + data.id;
+                        if (data.token) {
+                            reviewUrl += '?token=' + data.token;
+                        }
+                        $('#btn-review-answers').attr('href', reviewUrl);
+                        $('#completed-submission-id').text('#' + data.id);
+                    } else {
+                         $('#btn-review-answers').hide(); // Fallback nếu không có ID
+                    }
+
+                    // Xử lý nút làm lại
+                    $('#btn-redo-survey').on('click', function() {
+                        Swal.fire({
+                            title: 'Làm lại khảo sát?',
+                            text: "Bạn có chắc chắn muốn xóa trạng thái hoàn thành và làm lại khảo sát này không?",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Đồng ý, làm lại!',
+                            cancelButtonText: 'Hủy'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                localStorage.removeItem(completedKey);
+                                location.reload();
+                            }
+                        });
+                    });
+
+                    return true; // Đã hoàn thành
+                } catch(e) {
+                    console.error("Lỗi parse completion data", e);
+                    localStorage.removeItem(completedKey);
+                }
+            }
+            return false; // Chưa hoàn thành
+        }
+
+        if (!checkCompletionStatus()) {
+            // Chạy lần đầu khi load nếu chưa hoàn thành
+            loadProgress();
+            checkAllConditions();
+            updateProgress();
+            $('.question-card[data-conditional-parent-id]').hide();
+        }
         
         surveyForm.on('input change', function() {
             clearTimeout(debounceTimer);
@@ -1117,7 +1218,9 @@
             secondsElapsed++;
             const minutes = Math.floor(secondsElapsed / 60);
             const seconds = secondsElapsed % 60;
-            $('#survey-timer').text(pad(minutes) + ':' + pad(seconds));
+            const timeStr = pad(minutes) + ':' + pad(seconds);
+            $('#survey-timer').text(timeStr);
+            $('#survey-timer-collapsed').text(timeStr);
         }, 1000);
 
         // ===========================================================
@@ -1144,6 +1247,15 @@
                 success: function(response) {
                     if (response.success) {
                         clearProgress();
+                        
+                        // Lưu trạng thái hoàn thành vào localStorage
+                        const completionData = {
+                            id: response.submission_id,
+                            token: response.token,
+                            timestamp: new Date().getTime()
+                        };
+                        localStorage.setItem('survey_completed_{{ $dotKhaoSat->id }}', JSON.stringify(completionData));
+
                         window.location.href = response.redirect;
                     } else {
                         alert(response.message || 'Có lỗi xảy ra, vui lòng thử lại.');

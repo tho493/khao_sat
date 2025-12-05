@@ -63,8 +63,8 @@
             @if(isset($dotKhaoSats) && $dotKhaoSats->isNotEmpty())
                 <div class="grid gap-6 sm:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                     @foreach ($dotKhaoSats as $dot)
-                        <a href="{{ route('khao-sat.show', $dot->id) }}"
-                            class="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out aspect-[4/5] reveal-survey-card">
+                        <a href="{{ route('khao-sat.show', $dot->id) }}" data-survey-id="{{ $dot->id }}"
+                            class="group relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out aspect-[4/5] reveal-survey-card survey-card-link">
 
                             <img src="{{ $dot->image }}" alt="{{ $dot->ten_dot }}"
                                 class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
@@ -123,4 +123,33 @@
                 </div>
             @endif
     </section>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const surveyCards = document.querySelectorAll('.survey-card-link');
+
+            surveyCards.forEach(card => {
+                const surveyId = card.getAttribute('data-survey-id');
+                const completedKey = `survey_completed_${surveyId}`;
+                const completedData = localStorage.getItem(completedKey);
+
+                if (completedData) {
+                    // Create Badge
+                    const badge = document.createElement('div');
+                    badge.className = 'absolute top-3 right-3 z-20 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg border border-green-400 flex items-center gap-1 animate-fade-in-up';
+                    badge.innerHTML = '<i class="bi bi-check-circle-fill"></i> Đã khảo sát';
+
+                    // Add visual completed state to card
+                    card.appendChild(badge);
+
+                    // Optional: Add grayscale or dimming effect to image
+                    const img = card.querySelector('img');
+                    if (img) {
+                        // img.style.filter = 'grayscale(100%)';
+                    }
+                }
+            });
+        });
+    </script>
 @endsection

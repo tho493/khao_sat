@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\CauHoiKhaoSat;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class KhaoSatController extends Controller
 {
@@ -188,6 +189,7 @@ class KhaoSatController extends Controller
                 'ip_address' => $request->ip(), // Lưu địa chỉ IP của người dùng
                 'user_agent' => $request->userAgent(), // Lưu thông tin trình duyệt/thiết bị
                 'is_duplicate' => $hasDuplicateAnswer ? 1 : 0, // Đặt cờ trùng lặp
+                'token' => Str::uuid(), // Token bảo mật
             ]);
 
             // Lưu câu trả lời
@@ -265,13 +267,16 @@ class KhaoSatController extends Controller
                 $message .= ' Tuy nhiên, một hoặc nhiều câu trả lời của bạn cho các câu hỏi sau đã được ghi nhận trước đó trong đợt khảo sát này: ' . implode(', ', array_unique($duplicateQuestionNames)) . '. Bạn không nên spam khảo sát này nữa';
             }
 
-            // Lưu dữ liệu vào session để hiển thị trong review
-            $this->storeReviewDataInSession($phieuKhaoSat, $dotKhaoSat, $hasDuplicateAnswer);
+            // Lưu dữ liệu vào session để hiển thị trong review (nếu người dùng xem ngay)
+            $reviewData = $this->getReviewData($phieuKhaoSat);
+            session(['khao_sat_review_data' => $reviewData]);
 
             return response()->json([
                 'success' => true,
                 'message' => $message,
-                'redirect' => route('khao-sat.review')
+                'redirect' => route('khao-sat.review'),
+                'submission_id' => $phieuKhaoSat->id,
+                'token' => $phieuKhaoSat->token
             ]);
 
         } catch (\Exception $e) {
@@ -300,13 +305,28 @@ class KhaoSatController extends Controller
         return view('khao-sat.review', compact('reviewData'));
     }
 
-    private function storeReviewDataInSession($phieuKhaoSat, $dotKhaoSat, $hasDuplicateAnswer)
+    public function reviewHistory(PhieuKhaoSat $phieuKhaoSat, Request $request)
+    {
+        // Kiểm tra token bảo mật strict mode
+        if (!$phieuKhaoSat->token || $request->query('token') !== $phieuKhaoSat->token) {
+            abort(403, 'Bạn không có quyền xem kết quả khảo sát này.');
+        }
+
+        // Cho phép xem lịch sử nếu có thông tin
+        $reviewData = $this->getReviewData($phieuKhaoSat);
+        return view('khao-sat.review', compact('reviewData'));
+    }
+
+    private function getReviewData($phieuKhaoSat)
     {
         // Lấy thông tin phiếu khảo sát
         $phieuKhaoSatWithDetails = PhieuKhaoSat::with([
             'dotKhaoSat.mauKhaoSat.cauHoi.dataSource.values',
             'chiTiet.phuongAn'
         ])->find($phieuKhaoSat->id);
+
+        $dotKhaoSat = $phieuKhaoSatWithDetails->dotKhaoSat;
+        $hasDuplicateAnswer = $phieuKhaoSatWithDetails->is_duplicate;
 
         // Chuẩn bị dữ liệu thông tin phiếu
         $phieuInfo = [
@@ -363,18 +383,15 @@ class KhaoSatController extends Controller
             ];
         }
 
-        // Lưu vào session
-        session([
-            'khao_sat_review_data' => [
-                'phieu_info' => $phieuInfo,
-                'personal_info_answers' => $personalInfoAnswers,
-                'survey_answers' => $surveyAnswers,
-                'total_questions' => $allQuestions->count(),
-                'personal_info_count' => $personalInfoQuestions->count(),
-                'survey_questions_count' => $surveyQuestions->count(),
-                'has_duplicate_answer' => $hasDuplicateAnswer
-            ]
-        ]);
+        return [
+            'phieu_info' => $phieuInfo,
+            'personal_info_answers' => $personalInfoAnswers,
+            'survey_answers' => $surveyAnswers,
+            'total_questions' => $allQuestions->count(),
+            'personal_info_count' => $personalInfoQuestions->count(),
+            'survey_questions_count' => $surveyQuestions->count(),
+            'has_duplicate_answer' => $hasDuplicateAnswer
+        ];
     }
 
     /**

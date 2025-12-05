@@ -22,6 +22,7 @@ Route::prefix('')->name('khao-sat.')->group(function () {
     Route::get('/', [KhaoSatController::class, 'index'])->name('index');
     Route::post('/{dotKhaoSat}', [KhaoSatController::class, 'store'])->name('store');
     Route::get('/review', [KhaoSatController::class, 'review'])->name('review');
+    Route::get('/review-history/{phieuKhaoSat}', [KhaoSatController::class, 'reviewHistory'])->name('reviewHistory');
     Route::get('/thank-you', [KhaoSatController::class, 'thanks'])->name('thanks');
     Route::get('/{dotKhaoSat}', [KhaoSatController::class, 'show'])->name('show');
 });
