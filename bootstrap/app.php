@@ -18,10 +18,10 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\CheckSurveyStatus::class,
         ]);
-        if (isset($_SERVER['HTTP_USER_AGENT']) && str_contains(strtolower($_SERVER['HTTP_USER_AGENT']), 'iphone')) { // Chỉ loại bỏ trên user agent của iPhone, iOS lỗi session nên tạm tắt để có thể submit form
-            $middleware->validateCsrfTokens(except: ['*']);
-        }
-        $middleware->append(TrustProxies::class);
+        // if (isset($_SERVER['HTTP_USER_AGENT']) && str_contains(strtolower($_SERVER['HTTP_USER_AGENT']), 'iphone')) { // App name có utf8 thì session không lưu được ở ios. ĐÃ FIX
+        //     $middleware->validateCsrfTokens(except: ['*']);
+        // }
+        // $middleware->append(TrustProxies::class);
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {

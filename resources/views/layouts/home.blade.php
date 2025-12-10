@@ -2,6 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -16,7 +17,11 @@
         content="Hệ thống khảo sát trực tuyến - Nền tảng khảo sát hiện đại, bảo mật và dễ sử dụng." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="{{ url()->current() }}" />
-    <meta property="og:image" content="/image/logo.png" />
+    @if(isset($dotKhaoSat) && $dotKhaoSat->image_url)
+        <meta property="og:image" content="{{ asset($dotKhaoSat->image_url) }}" />
+    @else
+        <meta property="og:image" content="/image/logo.png" />
+    @endif
     <link rel="stylesheet" href="/css/splash-screen.css">
 
     <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
