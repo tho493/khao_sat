@@ -1239,6 +1239,7 @@
             submitBtn.prop('disabled', true);
             submitBtn.html('<span class="spinner-border spinner-border-sm me-2"></span>Đang gửi...');
             
+            // Ajax submit
             $.ajax({
                 url: $(this).attr('action'),
                 method: $(this).attr('method'),

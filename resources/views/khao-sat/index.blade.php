@@ -77,7 +77,7 @@
                                     <div class="flex justify-between items-start gap-2 sm:gap-3 mb-2">
                                         <h3
                                             class="font-extrabold text-2xl sm:text-2xl leading-tight drop-shadow-xl text-white tracking-wider">
-                                            {{ Str::limit($dot->ten_dot, 50) }}
+                                            {{ Str::limit($dot->ten_dot, 85) }}
                                         </h3>
                                     </div>
 
