@@ -198,6 +198,7 @@
                     <th rowspan="2" style="width: 30px;">TT</th>
                     <th rowspan="2" class="question-content">Nội dung</th>
                     <th colspan="{{ $likertOptions->count() }}">Mức độ hài lòng</th>
+                    <th rowspan="2" style="width: 40px; background-color: #f2f2f2;">Trung bình</th>
                 </tr>
                 <tr>
                     @foreach($likertOptions as $option)
@@ -214,6 +215,7 @@
                         @foreach($likertOptions as $option)
                             <td>{{ $counts[$option->thutu] ?? 0 }}</td>
                         @endforeach
+                        <td style="font-weight: bold; background-color: #fafafa;">{{ $likertAverages[$question->id] ?? 0 }}</td>
                     </tr>
                 @endforeach
             </tbody>

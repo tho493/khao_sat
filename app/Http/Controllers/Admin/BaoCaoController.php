@@ -828,6 +828,26 @@ class BaoCaoController extends Controller
 
         $likertTableData = $this->getLikertTableData($completedSurveyIds, $likertQuestions);
 
+        // Tính điểm trung bình cho từng câu hỏi Likert
+        $likertAverages = [];
+        foreach ($likertQuestions as $question) {
+            $counts = $likertTableData->get($question->id, collect());
+            $totalResponses = 0;
+            $weightedSum = 0;
+
+            foreach ($likertOptions as $option) {
+                $count = $counts->get($option->thutu, 0);
+                $weight = $option->thutu;
+
+                $totalResponses += $count;
+                $weightedSum += $count * $weight;
+            }
+
+            $likertAverages[$question->id] = $totalResponses > 0
+                ? round($weightedSum / $totalResponses, 2)
+                : 0;
+        }
+
         $thongKeCauHoiKhac = [];
         foreach ($otherQuestions as $cauHoi) {
             $thongKeCauHoiKhac[$cauHoi->id] = $this->thongKeCauHoi($dotKhaoSat->id, $cauHoi, $answeredQuestionIds->pluck('id'));
@@ -839,6 +859,7 @@ class BaoCaoController extends Controller
             'likertQuestions',
             'likertOptions',
             'likertTableData',
+            'likertAverages',
             'otherQuestions',
             'thongKeCauHoiKhac'
         );
