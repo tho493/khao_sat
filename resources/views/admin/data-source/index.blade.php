@@ -33,30 +33,49 @@
                             <tr>
                                 <th>Tên câu hỏi tùy chỉnh</th>
                                 <th>Slug</th>
-                                <th class="text-center">Số lượng giá trị</th>
+                                <th class="text-center">Số lượng đáp án</th>
+                                <th class="text-center">Số lượng khảo sát sử dụng</th>
                                 <th class="text-center" style="width: 120px;">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($dataSources as $dataSource)
+                                @php
+                                    $surveyCount = $dataSource->questions->pluck('mau_khaosat_id')->unique()->count();
+                                @endphp
                                 <tr>
                                     <td>{{ $dataSource->name }}</td>
                                     <td><code>{{ $dataSource->slug }}</code></td>
                                     <td class="text-center">{{ $dataSource->values_count }}</td>
+                                    <td class="text-center">
+                                        @if($surveyCount > 0)
+                                            <span class="badge bg-info">{{ $surveyCount }}</span>
+                                        @else
+                                            <span class="text-muted">0</span>
+                                        @endif
+                                    </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm">
                                             <a href="{{ route('admin.data-source.edit', $dataSource) }}"
                                                 class="btn btn-outline-primary" title="Sửa">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-                                            <form action="{{ route('admin.data-source.destroy', $dataSource) }}" method="POST"
-                                                onsubmit="return confirm('Bạn có chắc chắn muốn xóa câu hỏi tùy chỉnh này? Tất cả các giá trị liên quan cũng sẽ bị xóa.');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-outline-danger" title="Xóa">
+                                            @if($surveyCount > 0)
+                                                <button type="button" class="btn btn-outline-secondary" disabled
+                                                    title="Không thể xóa vì đang được sử dụng trong {{ $surveyCount }} mẫu khảo sát.">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
-                                            </form>
+                                            @else
+                                                <form action="{{ route('admin.data-source.destroy', $dataSource) }}" method="POST"
+                                                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa câu hỏi tùy chỉnh này? Tất cả các giá trị liên quan cũng sẽ bị xóa.');"
+                                                    style="display: inline-block;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-outline-danger" title="Xóa">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

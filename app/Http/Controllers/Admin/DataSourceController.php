@@ -20,7 +20,10 @@ class DataSourceController extends Controller
                 ->orWhere('slug', 'like', "%{$search}%");
         }
 
-        $dataSources = $query->withCount('values')->orderBy('name')->paginate(15);
+        $dataSources = $query->withCount('values')
+            ->with(['questions:id,data_source_id,mau_khaosat_id'])
+            ->orderBy('name')
+            ->paginate(15);
         return view('admin.data-source.index', compact('dataSources'));
     }
 

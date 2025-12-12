@@ -119,7 +119,6 @@
                                           action="{{ route('admin.mau-khao-sat.destroy', $mau) }}" 
                                           method="POST" style="display: none;">
                                         @csrf
-                                         {!! \App\Http\Middleware\PreventDoubleSubmissions::tokenField('delete_form') !!} 
                                         @method('DELETE')
                                     </form> --}}
                                 </td>
