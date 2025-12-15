@@ -17,7 +17,7 @@ class SecurityHeaders
     {
         $response = $next($request);
 
-        if (env('APP_ENV') === 'production') {
+        if (env('APP_ENV') === 'production' && $request->isSecure()) {
             $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
             $response->headers->set('X-Content-Type-Options', 'nosniff');
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
