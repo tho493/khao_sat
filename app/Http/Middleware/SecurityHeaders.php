@@ -17,12 +17,13 @@ class SecurityHeaders
     {
         $response = $next($request);
 
-        $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
-        $response->headers->set('X-Content-Type-Options', 'nosniff');
-        $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-
-        $csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:;";
-        $response->headers->set('Content-Security-Policy', $csp);
+        if (env('APP_ENV') === 'production') {
+            $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
+            $response->headers->set('X-Content-Type-Options', 'nosniff');
+            $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+            $csp = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:;";
+            $response->headers->set('Content-Security-Policy', $csp);
+        }
 
         return $response;
     }

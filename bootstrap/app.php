@@ -21,7 +21,6 @@ $app = Application::configure(basePath: dirname(__DIR__))
         // if (isset($_SERVER['HTTP_USER_AGENT']) && str_contains(strtolower($_SERVER['HTTP_USER_AGENT']), 'iphone')) { // App name có utf8 thì session không lưu được ở ios. ĐÃ FIX
         //     $middleware->validateCsrfTokens(except: ['*']);
         // }
-        // $middleware->append(TrustProxies::class);
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {
