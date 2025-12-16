@@ -284,7 +284,7 @@ class BaoCaoController extends Controller
     // FUNCTION
     protected function formatSeconds(?int $avgSeconds): string
     {
-        if ($avgSeconds === null || $avgSeconds <= 0) {
+        if ($avgSeconds === null || $avgSeconds < 0) {
             return 'N/A';
         }
 
@@ -305,7 +305,7 @@ class BaoCaoController extends Controller
         $avgSeconds = $completedSurveys->avg(function ($phieu) {
             return $phieu->thoigian_batdau ? $phieu->thoigian_batdau->diffInSeconds($phieu->thoigian_hoanthanh) : 0;
         });
-        return $this->formatSeconds($avgSeconds);
+        return $this->formatSeconds((int) round($avgSeconds));
     }
 
     public function getExtremeCompletionTime($completedSurveys, $type = 'MIN')
@@ -314,7 +314,11 @@ class BaoCaoController extends Controller
             return 'N/A';
         $seconds = $completedSurveys->map(function ($phieu) {
             return $phieu->thoigian_batdau ? $phieu->thoigian_batdau->diffInSeconds($phieu->thoigian_hoanthanh) : null;
-        })->filter();
+        })->filter(fn($value) => !is_null($value));
+
+        if ($seconds->isEmpty()) {
+            return 'N/A';
+        }
 
         return $type === 'MIN' ? $this->formatSeconds($seconds->min()) : $this->formatSeconds($seconds->max());
     }
