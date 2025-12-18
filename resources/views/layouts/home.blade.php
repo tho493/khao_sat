@@ -22,12 +22,23 @@
     @else
         <meta property="og:image" content="/image/logo.png" />
     @endif
+
     <link rel="stylesheet" href="/css/splash-screen.css">
-
+    
     <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
-
+    
     {{-- CSS for Glassmorphism & Improvements --}}
     <link rel="stylesheet" href="/css/home.css">
+    
+    {{-- Christmas Theme CSS --}}
+    @if (date('m') == 12 && (date('d') >= 10 || date('d') <= 28))
+    <link rel="stylesheet" href="/css/christmas-theme.css">
+    @endif
+
+    {{-- Happy New Year 2025 Theme CSS (Dec 28 - Jan 5) --}}
+    @if ((date('m') == 12 && date('d') >= 28) || (date('m') == 1 && date('d') <= 5))
+    <link rel="stylesheet" href="/css/newyear-theme.css">
+    @endif
 
     <!-- CSS NProgress -->
     <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css" />
@@ -490,6 +501,16 @@ if (isset($dotKhaoSat) && $dotKhaoSat) {
         </div>
 
     @stack('scripts')
+
+    {{-- Christmas Theme JS --}}
+    @if (date('m') == 12 && (date('d') >= 10 || date('d') <= 28))
+    <script src="/js/christmas-theme.js"></script>
+    @endif
+
+    {{-- Happy New Year 2025 Theme JS (Dec 28 - Jan 5) --}}
+    @if ((date('m') == 12 && date('d') >= 28) || (date('m') == 1 && date('d') <= 5))
+    <script src="/js/newyear-theme.js"></script>
+    @endif
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
