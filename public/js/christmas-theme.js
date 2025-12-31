@@ -8,7 +8,7 @@
 
     // Configuration
     const CONFIG = {
-        snowflakeCount: 25,
+        snowflakeCount: 10,
         lightBulbCount: 15,
         enableSnow: true,
         enableLights: true,

@@ -32,7 +32,7 @@
     <link rel="stylesheet" href="/css/home.css">
     
     {{-- Christmas Theme CSS --}}
-    @if (date('m') == 12 && date('d') >= 10 && date('d') <= 28)
+    @if (date('m') == 12 && date('d') >= 10 && date('d') <= 26)
     <link rel="stylesheet" href="/css/christmas-theme.css">
     @endif
 

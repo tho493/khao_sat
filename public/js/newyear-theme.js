@@ -7,10 +7,10 @@
     'use strict';
 
     const CONFIG = {
-        confettiCount: 100,
-        enableConfetti: true,
+        confettiCount: 25,
+        enableConfetti: false,
         enableFireworks: true,
-        fireworkInterval: 200,
+        fireworkInterval: 100,
     };
 
     document.addEventListener('DOMContentLoaded', function () {
