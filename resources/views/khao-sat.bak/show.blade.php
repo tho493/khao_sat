@@ -1,11 +1,6 @@
 @extends('layouts.home')
 
-@section('title',$dotKhaoSat->ten_dot)
-@section('description',$dotKhaoSat->mota)
-@section('og:description',$dotKhaoSat->mota)
-@if ($dotKhaoSat->image_url)
-    @section('og:image',asset($dotKhaoSat->image_url))
-@endif
+@section('title','Khảo sát ' . $dotKhaoSat->ten_dot)
 
 @push('styles')
 <style>

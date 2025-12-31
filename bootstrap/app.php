@@ -6,8 +6,6 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Console\Scheduling\Schedule;
 use App\Http\Middleware\TrustProxies;
 
-
-
 $app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__ . '/../routes/web.php',
@@ -18,10 +16,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\CheckSurveyStatus::class,
         ]);
-        // if (isset($_SERVER['HTTP_USER_AGENT']) && str_contains(strtolower($_SERVER['HTTP_USER_AGENT']), 'iphone')) { // App name có utf8 thì session không lưu được ở ios. ĐÃ FIX
-        //     $middleware->validateCsrfTokens(except: ['*']);
-        // }
-        // $middleware->append(TrustProxies::class);
+        $middleware->append(TrustProxies::class);
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -2,32 +2,45 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title> @yield('title', "Trang chủ") - Hệ thống khảo sát trực tuyến </title>
     <meta name="description"
-        content="Hệ thống khảo sát trực tuyến - Nền tảng khảo sát hiện đại, bảo mật và dễ sử dụng." />
-    <meta name="keywords" content="khảo sát, survey, trực tuyến, online, hệ thống, khảo sát trực tuyến" />
+    content="@yield('description', 'Hệ thống khảo sát trực tuyến - Nền tảng khảo sát hiện đại, bảo mật và dễ sử dụng.')" />
+    <title> @yield('title', "Trang chủ") - Hệ thống khảo sát trực tuyến </title>
+    
+    <meta property="og:site_name" content="Hệ thống khảo sát trực tuyến">
+    <meta name="keywords" content="khảo sát, survey, trực tuyến, online, hệ thống, khảo sát trực tuyến, sdu, sao đỏ, trường đại học sao đỏ" />
     <meta name="author" content="Hệ thống khảo sát trực tuyến" />
     <meta name="robots" content="index, follow" />
     <meta property="og:title" content="@yield('title', 'Trang chủ') - Hệ thống khảo sát trực tuyến" />
     <meta property="og:description"
-        content="Hệ thống khảo sát trực tuyến - Nền tảng khảo sát hiện đại, bảo mật và dễ sử dụng." />
+        content="@yield('og:description', 'Hệ thống khảo sát trực tuyến - Nền tảng khảo sát hiện đại, bảo mật và dễ sử dụng.')" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="{{ url()->current() }}" />
-    @if(isset($dotKhaoSat) && $dotKhaoSat->image_url)
-        <meta property="og:image" content="{{ asset($dotKhaoSat->image_url) }}" />
-    @else
-        <meta property="og:image" content="/image/logo.png" />
-    @endif
+
+    <meta property="og:image" content="@yield('og:image', '/image/logo.png')">
+    <link rel="icon" type="image/png" href="{{ asset('favicon.ico') }}">
+    <meta property="og:locale" content="vi_VN">
+    <link rel="canonical" href="{{ url()->current() }}">
+
     <link rel="stylesheet" href="/css/splash-screen.css">
-
-    <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
-
+    <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script>
+    
     {{-- CSS for Glassmorphism & Improvements --}}
     <link rel="stylesheet" href="/css/home.css">
+    
+    {{-- Christmas Theme CSS --}}
+    @if (date('m') == 12 && date('d') >= 10 && date('d') <= 28)
+    <link rel="stylesheet" href="/css/christmas-theme.css">
+    @endif
+
+    {{-- Happy New Year 2025 Theme CSS (Dec 28 - Jan 5) --}}
+    @if ((date('m') == 12 && date('d') >= 29) || (date('m') == 1 && date('d') <= 5))
+    <link rel="stylesheet" href="/css/newyear-theme.css">
+    @endif
+
 
     <!-- CSS NProgress -->
     <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css" />
@@ -490,6 +503,16 @@ if (isset($dotKhaoSat) && $dotKhaoSat) {
         </div>
 
     @stack('scripts')
+
+    {{-- Christmas Theme JS --}}
+    @if (date('m') == 12 && date('d') >= 10 && date('d') <= 28)
+    <script src="/js/christmas-theme.js"></script>
+    @endif
+
+    {{-- Happy New Year 2025 Theme JS (Dec 28 - Jan 5) --}}
+    @if ((date('m') == 12 && date('d') >= 28) || (date('m') == 1 && date('d') <= 5))
+    <script src="/js/newyear-theme.js"></script>
+    @endif
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

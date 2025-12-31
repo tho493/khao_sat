@@ -12,9 +12,6 @@ class TrustProxies extends Middleware
      *
      * @var array<int, string>|string|null
      */
-    // Thay đổi dòng này:
-    // protected $proxies;
-    // Thành:
     protected $proxies = '*';
 
     /**
