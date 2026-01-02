@@ -65,6 +65,72 @@
             box-shadow: 0 0 0 0px rgba(79, 70, 229, 0);
         }
     }
+
+    .unanswered-question {
+        background-color: rgba(254, 202, 202, 0.3) !important; /* red-200 with opacity */
+        border-color: rgba(252, 165, 165, 0.5) !important; /* red-300 with opacity */
+        transition: all 0.3s ease-in-out;
+    }
+
+    .unanswered-question label:first-child {
+        color: #991b1b !important; /* red-800 for question text */
+    }
+
+    .question-card:focus-within {
+        background-color: rgba(239, 246, 255, 0.5) !important; /* blue-50 with opacity */
+        border-color: #3b82f6 !important; /* blue-500 */
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        transition: all 0.3s ease-in-out;
+    }
+
+    @keyframes rollUp {
+        0% {
+            transform: translateY(-100%);
+            opacity: 0;
+            filter: blur(2px);
+        }
+        50% {
+            filter: blur(1px);
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+            filter: blur(0);
+        }
+    }
+
+    @keyframes rollOut {
+        0% {
+            transform: translateY(0);
+            opacity: 1;
+            filter: blur(0);
+        }
+        100% {
+            transform: translateY(100%);
+            opacity: 0;
+            filter: blur(2px);
+        }
+    }
+
+    .timer-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .timer-digit {
+        display: inline-block;
+        position: relative;
+        vertical-align: baseline;
+        transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    .timer-roll-in {
+        animation: rollUp 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    .timer-roll-out {
+        animation: rollOut 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
 </style>
 @endpush
 
@@ -684,7 +750,7 @@
                     <div class="progress-section space-y-4 sm:space-y-6">
                         <!-- Thời gian -->
                         <div class="glass-effect p-4 sm:p-6 flex flex-col items-center">
-                            <h6 class="font-bold text-slate-800 mb-2 sm:mb-3 text-sm sm:text-base">Thời gian</h6>
+                            <h6 class="font-bold text-slate-800 mb-2 sm:mb-3 text-sm sm:text-base">Đã làm trong:</h6>
                             <div class="text-3xl sm:text-4xl font-extrabold text-blue-600" id="survey-timer">00:00</div>
                         </div>
                     
@@ -793,8 +859,15 @@
                                     const ans = document.getElementById('answeredCount');
                                     const total = document.getElementById('totalCount');
                                     if(ans && total) {
-                                        document.getElementById('answeredCountCollapsed').textContent = ans.textContent;
-                                        document.getElementById('totalCountCollapsed').textContent = total.textContent;
+                                        // Lấy text thuần từ các số (bỏ qua các span con)
+                                        const ansText = ans.textContent;
+                                        const totalText = total.textContent;
+                                        
+                                        // Sử dụng animation cho collapsed counters
+                                        if (window.updateNumberWithAnimation) {
+                                            updateNumberWithAnimation($('#answeredCountCollapsed'), ansText);
+                                            updateNumberWithAnimation($('#totalCountCollapsed'), totalText);
+                                        }
                                     }
                                 }
                                 const observer = new MutationObserver(syncData);
@@ -910,6 +983,46 @@
     
     document.getElementById('thoigian_batdau').value = getCurrentLocalDateTime();
     const surveyConditionalMap = @json($conditionalMap);
+
+    function updateNumberWithAnimation($el, newText) {
+        const oldText = $el.text();
+        if (oldText === newText) return;
+        
+        // Tạo wrapper nếu chưa có
+        if (!$el.hasClass('timer-container')) {
+            $el.addClass('timer-container');
+        }
+        
+        $el.find('.timer-digit').each(function(i) {
+            const oldChar = oldText[i] || '';
+            const newChar = newText[i] || '';
+            if (oldChar !== newChar) {
+                $(this).addClass('timer-roll-out');
+            }
+        });
+        
+        setTimeout(function() {
+            let html = '';
+            for (let i = 0; i < newText.length; i++) {
+                const char = newText[i];
+                const oldChar = oldText[i] || '';
+                
+                if (char !== oldChar) {
+                    html += `<span class="timer-digit timer-roll-in">${char}</span>`;
+                } else {
+                    html += `<span class="timer-digit">${char}</span>`;
+                }
+            }
+            $el.html(html);
+            
+            setTimeout(function() {
+                $el.find('.timer-roll-in').removeClass('timer-roll-in');
+            }, 500);
+        }, 250);
+    }
+    
+    // Đặt vào window để có thể truy cập từ DOMContentLoaded
+    window.updateNumberWithAnimation = updateNumberWithAnimation;
 
      $(document).ready(function() {
         const surveyForm = $('#formKhaoSat');
@@ -1060,6 +1173,15 @@
 
                 if (isAnswered) {
                     answeredQuestions++;
+                    $card.removeClass('unanswered-question');
+                } else {
+                    // Chỉ highlight màu đỏ cho câu bắt buộc đã touched nhưng chưa trả lời
+                    const isTouched = $card.data('touched') === true;
+                    if (isRequiredOriginally && isTouched) {
+                        $card.addClass('unanswered-question');
+                    } else {
+                        $card.removeClass('unanswered-question');
+                    }
                 }
             });
 
@@ -1078,12 +1200,12 @@
 
             $('#progressBar')
                 .css('width', progress + '%')
-                .text(progress + '%');
 
-            $('#answeredCount').text(answeredQuestions);
-            $('#totalCount').text(totalVisibleQuestions);
-            $('#requiredCount').text(totalRequiredQuestions);
-            $('#optionalCount').text(totalOptionalQuestions);
+            updateNumberWithAnimation($('#progressBar'), progress.toString() + "%");
+            updateNumberWithAnimation($('#answeredCount'), answeredQuestions.toString());
+            updateNumberWithAnimation($('#totalCount'), totalVisibleQuestions.toString());
+            updateNumberWithAnimation($('#requiredCount'), totalRequiredQuestions.toString());
+            updateNumberWithAnimation($('#optionalCount'), totalOptionalQuestions.toString());
         };
 
         function checkAllConditions() {
@@ -1216,6 +1338,13 @@
             debounceTimer = setTimeout(updateUI, 250);
         });
 
+        // Track khi người dùng đã interact với câu hỏi
+        $('.question-card').on('focusin click', function() {
+            $(this).data('touched', true);
+            updateProgress();
+        });
+
+
         // Thời gian làm bài
         let secondsElapsed = 0;
         function pad(n) { return n < 10 ? '0' + n : n; }
@@ -1224,8 +1353,9 @@
             const minutes = Math.floor(secondsElapsed / 60);
             const seconds = secondsElapsed % 60;
             const timeStr = pad(minutes) + ':' + pad(seconds);
-            $('#survey-timer').text(timeStr);
-            $('#survey-timer-collapsed').text(timeStr);
+            
+            updateNumberWithAnimation($('#survey-timer'), timeStr);
+            updateNumberWithAnimation($('#survey-timer-collapsed'), timeStr);
         }, 1000);
 
         // ===========================================================
