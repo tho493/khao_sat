@@ -6,6 +6,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://www.google.com https://www.gstatic.com https://unpkg.com https://cdn.jsdelivr.net https://code.jquery.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com https://unpkg.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: https:; frame-src 'self' https://www.google.com https://www.gstatic.com; connect-src 'self' https://www.google.com https://www.gstatic.com https://maps.googleapis.com">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="description"
     content="@yield('description', 'Hệ thống khảo sát trực tuyến - Nền tảng khảo sát hiện đại, bảo mật và dễ sử dụng.')" />
     <title> @yield('title', "Trang chủ") - Hệ thống khảo sát trực tuyến </title>
@@ -20,7 +22,12 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="{{ url()->current() }}" />
 
-    <meta property="og:image" content="@yield('og:image', '/image/logo.png')">
+    <meta property="og:image" content="@yield('og:image', asset('/image/logo.png'))">
+    <meta property="og:image:type" content="@yield('og:image:type', 'image/png')">
+    <meta property="og:image:alt" content="Ảnh khảo sát">
+    <meta property="og:image:secure_url" content="@yield('og:image', asset('/image/logo.png'))">
+    <meta property="og:image:width" content="@yield('og:image:width', 300)">
+    <meta property="og:image:height" content="@yield('og:image:height', 300)">
     <link rel="icon" type="image/png" href="{{ asset('favicon.ico') }}">
     <meta property="og:locale" content="vi_VN">
     <link rel="canonical" href="{{ url()->current() }}">
@@ -32,7 +39,7 @@
     <link rel="stylesheet" href="/css/home.css">
     
     {{-- Christmas Theme CSS --}}
-    @if (date('m') == 12 && date('d') >= 10 && date('d') <= 26)
+    @if (date('m') == 12 && date('d') >= 20 && date('d') <= 26)
     <link rel="stylesheet" href="/css/christmas-theme.css">
     @endif
 

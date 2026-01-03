@@ -5,6 +5,22 @@
 @section('og:description',$dotKhaoSat->mota)
 @if ($dotKhaoSat->image_url)
     @section('og:image',asset($dotKhaoSat->image_url))
+    @php
+        $imagePath = public_path($dotKhaoSat->image_url);
+        if (file_exists($imagePath)) {
+            $imageSize = getimagesize($imagePath);
+            if ($imageSize !== false) {
+                $imageWidth = $imageSize[0];
+                $imageHeight = $imageSize[1];
+                $imageMimeType = $imageSize['mime'] ?? 'image/png';
+            }
+        }
+    @endphp
+    @if (isset($imageWidth) && isset($imageHeight))
+        @section('og:image:width', $imageWidth)
+        @section('og:image:height', $imageHeight)
+        @section('og:image:type', $imageMimeType)
+    @endif
 @endif
 
 @push('styles')
