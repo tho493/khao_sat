@@ -101,7 +101,7 @@
 
     @keyframes rollUp {
         0% {
-            transform: translateY(-100%);
+            transform: translateY(-80%);
             opacity: 0;
             filter: blur(2px);
         }
@@ -122,7 +122,7 @@
             filter: blur(0);
         }
         100% {
-            transform: translateY(100%);
+            transform: translateY(80%);
             opacity: 0;
             filter: blur(2px);
         }

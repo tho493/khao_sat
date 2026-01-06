@@ -39,12 +39,12 @@
     <link rel="stylesheet" href="/css/home.css">
     
     {{-- Christmas Theme CSS --}}
-    @if (date('m') == 12 && date('d') >= 20 && date('d') <= 26)
+    @if (date('m') == 12 && date('d') >= 22 && date('d') <= 25)
     <link rel="stylesheet" href="/css/christmas-theme.css">
     @endif
 
     {{-- Happy New Year 2025 Theme CSS (Dec 28 - Jan 5) --}}
-    @if ((date('m') == 12 && date('d') >= 29) || (date('m') == 1 && date('d') <= 5))
+    @if ((date('m') == 12 && date('d') >= 29) || (date('m') == 1 && date('d') <= 3))
     <link rel="stylesheet" href="/css/newyear-theme.css">
     @endif
 
@@ -223,6 +223,10 @@
             </footer>
         </div>
     </div>
+    
+    {{-- Interactive Effects Script --}}
+    <script src="/js/interactive-effects.js"></script>
+    
     <script src="https://unpkg.com/scrollreveal"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
@@ -512,12 +516,12 @@ if (isset($dotKhaoSat) && $dotKhaoSat) {
     @stack('scripts')
 
     {{-- Christmas Theme JS --}}
-    @if (date('m') == 12 && date('d') >= 10 && date('d') <= 28)
+    @if (date('m') == 12 && date('d') >= 22 && date('d') <= 25)
     <script src="/js/christmas-theme.js"></script>
     @endif
 
     {{-- Happy New Year 2025 Theme JS (Dec 28 - Jan 5) --}}
-    @if ((date('m') == 12 && date('d') >= 28) || (date('m') == 1 && date('d') <= 5))
+    @if ((date('m') == 12 && date('d') >= 29) || (date('m') == 1 && date('d') <= 3))
     <script src="/js/newyear-theme.js"></script>
     @endif
 
