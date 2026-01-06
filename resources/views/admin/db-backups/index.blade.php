@@ -31,17 +31,15 @@
             <div>
                 <h2 class="mb-1">Quản lý Sao lưu CSDL</h2>
                 <p class="text-muted mb-0">Tạo, tải lên và khôi phục bản sao lưu database</p>
+                <p class="text-muted mb-0">Các bản backup chỉ được lưu trữ tối đa 60 ngày</p>
             </div>
             <div class="text-end">
                 <small class="text-muted">Tổng số backup: <strong>{{ count($files) }}</strong></small>
-                @if($oldBackupsCount > 0)
-                    <br>
-                    <small class="text-warning">
-                        <i class="fas fa-exclamation-triangle me-1"></i>
-                        {{ $oldBackupsCount }} backup cũ hơn 30 ngày
-                        ({{ number_format($oldBackupsSize / (1024 * 1024), 1) }} MB)
-                    </small>
-                @endif
+                <br>
+                <small id="header-old-backups-info" class="text-warning" style="display: none;">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    <span id="header-old-backups-text"></span>
+                </small>
             </div>
         </div>
 
@@ -120,18 +118,10 @@
                         <h5 class="mb-0"><i class="fas fa-broom me-2"></i>Dọn dẹp Backup Cũ</h5>
                     </div>
                     <div class="card-body">
-                        @if($oldBackupsCount > 0)
-                            <div class="alert alert-warning alert-sm mb-3">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Có <strong>{{ $oldBackupsCount }}</strong> backup cũ hơn 30 ngày
-                                ({{ number_format($oldBackupsSize / (1024 * 1024), 1) }} MB)
-                            </div>
-                        @else
-                            <div class="alert alert-success alert-sm mb-3">
-                                <i class="fas fa-check-circle me-1"></i>
-                                Không có backup cũ nào để dọn dẹp
-                            </div>
-                        @endif
+                        <div id="cleanup-alert" class="alert alert-warning alert-sm mb-3">
+                            <i class="fas fa-info-circle me-1"></i>
+                            <span id="cleanup-message">Đang tính toán...</span>
+                        </div>
 
                         <form method="POST" action="{{ route('admin.dbbackups.cleanup') }}">
                             @csrf
@@ -142,7 +132,6 @@
                                     <option value="15">15 ngày</option>
                                     <option value="30" selected>30 ngày</option>
                                     <option value="60">60 ngày</option>
-                                    <option value="90">90 ngày</option>
                                 </select>
                                 <div class="form-text">Backup cũ hơn sẽ bị xóa</div>
                             </div>
@@ -155,7 +144,7 @@
                                     </label>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-warning w-100" @if($oldBackupsCount == 0) disabled @endif>
+                            <button type="submit" id="cleanup-submit-btn" class="btn btn-warning w-100">
                                 <i class="fas fa-trash-alt me-2"></i>Dọn dẹp Backup Cũ
                             </button>
                         </form>
@@ -166,24 +155,39 @@
 
         <!-- Danh sách backup -->
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-light">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-list me-2"></i>Danh sách Backup</h5>
+                @if(count($files) > 0)
+                    <div id="bulk-actions-toolbar" style="display: none;">
+                        <button type="button" class="btn btn-danger btn-sm" id="bulk-delete-btn">
+                            <i class="fas fa-trash-alt me-1"></i>Xóa đã chọn (<span id="selected-count">0</span>)
+                        </button>
+                    </div>
+                @endif
             </div>
             <div class="card-body p-0">
                 @if(count($files) > 0)
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="border-0"><i class="fas fa-file me-1"></i>File</th>
-                                    <th class="border-0"><i class="fas fa-weight me-1"></i>Kích thước</th>
-                                    <th class="border-0"><i class="fas fa-clock me-1"></i>Thời gian</th>
-                                    <th class="border-0 text-end"><i class="fas fa-cogs me-1"></i>Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($files as $f)
+                        <form id="bulk-delete-form" method="POST" action="{{ route('admin.dbbackups.bulk-delete') }}">
+                            @csrf
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
                                     <tr>
+                                        <th class="border-0" style="width: 40px;">
+                                            <input type="checkbox" id="select-all" class="form-check-input">
+                                        </th>
+                                        <th class="border-0"><i class="fas fa-file me-1"></i>File</th>
+                                        <th class="border-0"><i class="fas fa-weight me-1"></i>Kích thước</th>
+                                        <th class="border-0"><i class="fas fa-clock me-1"></i>Thời gian</th>
+                                        <th class="border-0 text-end"><i class="fas fa-cogs me-1"></i>Hành động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($files as $f)
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" name="files[]" value="{{ $f['name'] }}" class="form-check-input backup-checkbox">
+                                            </td>
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 @if(str_ends_with(strtolower($f['name']), '.gz'))
@@ -234,9 +238,10 @@
                                             </div>
                                         </td>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </form>
                     </div>
                 @else
                     <div class="text-center py-5">
@@ -276,4 +281,124 @@
             background-color: rgba(0, 123, 255, 0.05);
         }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const backupFiles = @json($files);
+            const currentTime = Math.floor(Date.now() / 1000); // Timestamp hiện tại (giây)
+
+            const daysSelect = document.getElementById('days');
+            const cleanupAlert = document.getElementById('cleanup-alert');
+            const cleanupMessage = document.getElementById('cleanup-message');
+            const submitBtn = document.getElementById('cleanup-submit-btn');
+            const confirmCheckbox = document.getElementById('confirm_cleanup');
+            const headerOldBackupsInfo = document.getElementById('header-old-backups-info');
+            const headerOldBackupsText = document.getElementById('header-old-backups-text');
+
+            function calculateOldBackups(days) {
+                const cutoffTime = currentTime - (days * 24 * 60 * 60);
+
+                const oldFiles = backupFiles.filter(file => file.time < cutoffTime);
+                const count = oldFiles.length;
+                const totalSize = oldFiles.reduce((sum, file) => sum + file.size, 0);
+
+                return { count, totalSize };
+            }
+
+            function updateCleanupInfo() {
+                const selectedDays = parseInt(daysSelect.value);
+                const { count, totalSize } = calculateOldBackups(selectedDays);
+
+                if (count > 0) {
+                    const sizeMB = (totalSize / (1024 * 1024)).toFixed(1);
+                    
+                    // Cập nhật card cleanup
+                    cleanupAlert.className = 'alert alert-warning alert-sm mb-3';
+                    cleanupAlert.querySelector('i').className = 'fas fa-info-circle me-1';
+                    cleanupMessage.innerHTML = `Có <strong>${count}</strong> backup cũ hơn <strong>${selectedDays}</strong> ngày (${sizeMB} MB)`;
+                    submitBtn.disabled = false;
+                    
+                    // Cập nhật header
+                    headerOldBackupsInfo.style.display = 'inline';
+                    headerOldBackupsText.textContent = `${count} backup cũ hơn ${selectedDays} ngày (${sizeMB} MB)`;
+                } else {
+                    // Cập nhật card cleanup
+                    cleanupAlert.className = 'alert alert-success alert-sm mb-3';
+                    cleanupAlert.querySelector('i').className = 'fas fa-check-circle me-1';
+                    cleanupMessage.innerHTML = `Không có backup cũ hơn <strong>${selectedDays}</strong> ngày`;
+                    submitBtn.disabled = true;
+                    confirmCheckbox.checked = false;
+                    
+                    // Ẩn thông báo ở header
+                    headerOldBackupsInfo.style.display = 'none';
+                }
+            }
+
+            // Lắng nghe sự kiện thay đổi
+            daysSelect.addEventListener('change', updateCleanupInfo);
+
+            // Cập nhật lần đầu
+            updateCleanupInfo();
+        });
+
+        // Bulk Delete Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectAllCheckbox = document.getElementById('select-all');
+            const backupCheckboxes = document.querySelectorAll('.backup-checkbox');
+            const bulkActionsToolbar = document.getElementById('bulk-actions-toolbar');
+            const selectedCountSpan = document.getElementById('selected-count');
+            const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
+            const bulkDeleteForm = document.getElementById('bulk-delete-form');
+
+            if (!selectAllCheckbox) return;
+
+            function updateBulkActionsUI() {
+                const checkedCount = document.querySelectorAll('.backup-checkbox:checked').length;
+                selectedCountSpan.textContent = checkedCount;
+                
+                if (checkedCount > 0) {
+                    bulkActionsToolbar.style.display = 'block';
+                } else {
+                    bulkActionsToolbar.style.display = 'none';
+                }
+            }
+
+            // Select All checkbox
+            selectAllCheckbox.addEventListener('change', function() {
+                backupCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateBulkActionsUI();
+            });
+
+            // Individual checkboxes
+            backupCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const allChecked = Array.from(backupCheckboxes).every(cb => cb.checked);
+                    const someChecked = Array.from(backupCheckboxes).some(cb => cb.checked);
+                    
+                    selectAllCheckbox.checked = allChecked;
+                    selectAllCheckbox.indeterminate = someChecked && !allChecked;
+                    
+                    updateBulkActionsUI();
+                });
+            });
+
+            // Bulk Delete Button
+            bulkDeleteBtn.addEventListener('click', function() {
+                const checkedCount = document.querySelectorAll('.backup-checkbox:checked').length;
+                
+                if (checkedCount === 0) {
+                    alert('Vui lòng chọn ít nhất một backup để xóa.');
+                    return;
+                }
+
+                const confirmMessage = `Bạn có chắc chắn muốn xóa ${checkedCount} backup đã chọn?\n\nHành động này không thể hoàn tác!`;
+                
+                if (confirm(confirmMessage)) {
+                    bulkDeleteForm.submit();
+                }
+            });
+        });
+    </script>
 @endsection

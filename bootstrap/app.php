@@ -52,7 +52,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule) {
         $schedule->command('surveys:update-status')->everyFiveMinutes();
         $schedule->command('backup:db --gzip')->dailyAt('02:15');
-        $schedule->command('backup:cleanup --days=60')->dailyAt('03:00');
+        $schedule->command('backup:cleanup --days=60 --force')->dailyAt('03:00');
     })
     ->create();
 

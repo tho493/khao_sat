@@ -31,14 +31,8 @@ class DBBackupController extends Controller
                 ->values();
         }
 
-        $cutoffTime = now()->subDays(30)->timestamp;
-        $oldBackups = $files->filter(fn($file) => $file['time'] < $cutoffTime);
-        $oldBackupsSize = $oldBackups->sum('size');
-
         return view('admin.db-backups.index', [
             'files' => $files,
-            'oldBackupsCount' => $oldBackups->count(),
-            'oldBackupsSize' => $oldBackupsSize,
         ]);
     }
 
@@ -170,7 +164,7 @@ class DBBackupController extends Controller
     public function cleanup(Request $request)
     {
         $request->validate([
-            'days' => 'nullable|integer|min:1|max:365',
+            'days' => 'nullable|numeric|min:1|max:365',
             'confirm' => 'required|boolean',
         ]);
 
@@ -181,15 +175,97 @@ class DBBackupController extends Controller
             return back()->with('error', 'Vui lòng xác nhận để tiếp tục xóa backup cũ.');
         }
 
-        $result = Artisan::call('backup:cleanup', [
-            '--days' => $days,
+        $dirPath = storage_path("app/{$this->dir}");
+
+        if (!is_dir($dirPath)) {
+            return back()->with('error', 'Thư mục backup không tồn tại.');
+        }
+
+        $cutoffTime = now()->subDays($days)->timestamp;
+        $files = collect(scandir($dirPath))
+            ->filter(fn($file) => $file !== '.' && $file !== '..')
+            ->filter(fn($file) => str_ends_with(strtolower($file), '.sql') || str_ends_with(strtolower($file), '.sql.gz'))
+            ->map(fn($file) => [
+                'name' => $file,
+                'path' => "{$dirPath}/{$file}",
+                'time' => filemtime("{$dirPath}/{$file}"),
+                'size' => filesize("{$dirPath}/{$file}"),
+            ])
+            ->filter(fn($file) => $file['time'] < $cutoffTime);
+
+        if ($files->isEmpty()) {
+            return back()->with('status', "Không có file backup nào cũ hơn {$days} ngày để xóa.");
+        }
+
+        $deletedCount = 0;
+        $deletedSize = 0;
+        $errors = [];
+
+        foreach ($files as $file) {
+            try {
+                if (unlink($file['path'])) {
+                    $deletedCount++;
+                    $deletedSize += $file['size'];
+                } else {
+                    $errors[] = "Không thể xóa: {$file['name']}";
+                }
+            } catch (\Exception $e) {
+                $errors[] = "Lỗi khi xóa {$file['name']}: " . $e->getMessage();
+            }
+        }
+
+        if ($deletedCount > 0) {
+            $deletedSizeMB = number_format($deletedSize / (1024 * 1024), 2);
+            $message = "Đã xóa thành công {$deletedCount} file backup cũ hơn {$days} ngày, giải phóng {$deletedSizeMB} MB.";
+
+            if (!empty($errors)) {
+                $message .= " Tuy nhiên có " . count($errors) . " lỗi xảy ra.";
+            }
+
+            return back()->with('status', $message);
+        }
+
+        return back()->with('error', 'Có lỗi xảy ra khi xóa backup cũ. ' . implode(' ', $errors));
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'files' => 'required|array|min:1',
+            'files.*' => 'required|string',
         ]);
 
-        if ($result === 0) {
-            $output = Artisan::output();
-            return back()->with('status', "Đã xóa backup cũ hơn {$days} ngày thành công.");
-        } else {
-            return back()->with('error', 'Có lỗi xảy ra khi xóa backup cũ.');
+        $files = $request->input('files', []);
+        $deletedCount = 0;
+        $errors = [];
+
+        foreach ($files as $file) {
+            $file = basename($file);
+            $path = storage_path("app/{$this->dir}/{$file}");
+
+            if (file_exists($path)) {
+                try {
+                    if (unlink($path)) {
+                        $deletedCount++;
+                    } else {
+                        $errors[] = "Không thể xóa: {$file}";
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = "Lỗi khi xóa {$file}: " . $e->getMessage();
+                }
+            } else {
+                $errors[] = "File không tồn tại: {$file}";
+            }
         }
+
+        if ($deletedCount > 0) {
+            $message = "Đã xóa thành công {$deletedCount} file backup.";
+            if (!empty($errors)) {
+                $message .= " Có " . count($errors) . " lỗi xảy ra.";
+            }
+            return back()->with('status', $message);
+        }
+
+        return back()->with('error', 'Không có file nào được xóa. ' . implode(' ', $errors));
     }
 }

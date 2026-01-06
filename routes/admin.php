@@ -126,6 +126,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::post('/upload', [DBBackupController::class, 'upload'])->name('upload');
         Route::post('/restore', [DBBackupController::class, 'restore'])->name('restore');
         Route::post('/cleanup', [DBBackupController::class, 'cleanup'])->name('cleanup');
+        Route::post('/bulk-delete', [DBBackupController::class, 'bulkDelete'])->name('bulk-delete');
         Route::get('/download/{file}', [DBBackupController::class, 'download'])->name('download');
         Route::delete('/delete/{file}', [DBBackupController::class, 'destroy'])->name('destroy');
     });

@@ -7,13 +7,14 @@ use Illuminate\Support\Facades\Storage;
 
 class CleanupOldBackups extends Command
 {
-    protected $signature = 'backup:cleanup {--days=30 : Số ngày để giữ lại backup} {--dry-run : Chỉ hiển thị file sẽ bị xóa mà không thực sự xóa}';
+    protected $signature = 'backup:cleanup {--days=30 : Số ngày để giữ lại backup} {--dry-run : Chỉ hiển thị file sẽ bị xóa mà không thực sự xóa} {--force : Bỏ qua xác nhận}';
     protected $description = 'Xóa các bản backup cũ hơn số ngày chỉ định (mặc định 30 ngày)';
 
     public function handle(): int
     {
         $days = (int) $this->option('days');
         $dryRun = $this->option('dry-run');
+        $force = $this->option('force');
         $dir = 'backup/db';
         $dirPath = storage_path("app/{$dir}");
 
@@ -56,7 +57,7 @@ class CleanupOldBackups extends Command
             return self::SUCCESS;
         }
 
-        if (!$this->confirm("Bạn có chắc chắn muốn xóa {$files->count()} file backup này?")) {
+        if (!$force && !$this->confirm("Bạn có chắc chắn muốn xóa {$files->count()} file backup này?")) {
             $this->info("Đã hủy thao tác xóa backup.");
             return self::SUCCESS;
         }
