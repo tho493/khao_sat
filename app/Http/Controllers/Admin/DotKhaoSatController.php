@@ -207,12 +207,7 @@ class DotKhaoSatController extends Controller
 
     public function edit(DotKhaoSat $dotKhaoSat)
     {
-        // Chỉ cho phép sửa khi ở trạng thái draft
-        if ($dotKhaoSat->trangthai !== 'draft') {
-            return redirect()->route('admin.dot-khao-sat.show', $dotKhaoSat)
-                ->with('error', 'Không thể sửa đợt khảo sát đã kích hoạt');
-        }
-
+        // Cho phép sửa ở mọi trạng thái
         $mauKhaoSats = MauKhaoSat::where('trangthai', 'active')->get();
         $namHocs = NamHoc::where('trangthai', 1)->orderBy('namhoc', 'desc')->get();
 
@@ -221,11 +216,7 @@ class DotKhaoSatController extends Controller
 
     public function update(Request $request, DotKhaoSat $dotKhaoSat)
     {
-        // Chỉ cho phép sửa khi ở trạng thái draft
-        if ($dotKhaoSat->trangthai !== 'draft') {
-            return back()->with('error', 'Không thể sửa đợt khảo sát đã kích hoạt');
-        }
-
+        // Cho phép sửa ở mọi trạng thái
         $validated = $request->validate(
             [
                 'ten_dot' => 'required|max:255',
@@ -233,6 +224,7 @@ class DotKhaoSatController extends Controller
                 'namhoc_id' => 'required|exists:namhoc,id',
                 'tungay' => 'required|date',
                 'denngay' => 'required|date|after:tungay',
+                'trangthai' => 'required|in:draft,active,closed',
                 'mota' => 'nullable',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
             ]
@@ -246,8 +238,8 @@ class DotKhaoSatController extends Controller
                 'namhoc_id' => $validated['namhoc_id'],
                 'tungay' => $validated['tungay'],
                 'denngay' => $validated['denngay'],
-                'mota' => $validated['mota'],
-                'trangthai' => 'draft'
+                'trangthai' => $validated['trangthai'],
+                'mota' => $validated['mota']
             ];
 
             if ($request->hasFile('image')) {

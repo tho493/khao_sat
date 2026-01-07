@@ -82,6 +82,25 @@
                                 @enderror
                             </div>
 
+                            <div class="mb-3">
+                                <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                                <select class="form-select @error('trangthai') is-invalid @enderror" 
+                                        name="trangthai" required>
+                                    <option value="draft" {{ old('trangthai', $dotKhaoSat->trangthai) == 'draft' ? 'selected' : '' }}>
+                                        Nháp
+                                    </option>
+                                    <option value="active" {{ old('trangthai', $dotKhaoSat->trangthai) == 'active' ? 'selected' : '' }}>
+                                        Đang hoạt động
+                                    </option>
+                                    <option value="closed" {{ old('trangthai', $dotKhaoSat->trangthai) == 'closed' ? 'selected' : '' }}>
+                                        Đã đóng
+                                    </option>
+                                </select>
+                                @error('trangthai')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>

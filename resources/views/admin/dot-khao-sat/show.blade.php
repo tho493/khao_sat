@@ -95,6 +95,10 @@
                             <i class="bi bi-arrow-left"></i> Quay lại danh sách
                         </a>
 
+                        <a href="{{ route('admin.dot-khao-sat.edit', $dotKhaoSat) }}" class="btn btn-info">
+                            <i class="bi bi-pencil"></i> Chỉnh sửa đợt khảo sát
+                        </a>
+
                         @if($dotKhaoSat->trangthai == 'draft')
                             <form action="{{ route('admin.dot-khao-sat.activate', $dotKhaoSat) }}" method="POST">
                                 @csrf
