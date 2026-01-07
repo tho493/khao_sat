@@ -211,7 +211,10 @@ class DotKhaoSatController extends Controller
         $mauKhaoSats = MauKhaoSat::where('trangthai', 'active')->get();
         $namHocs = NamHoc::where('trangthai', 1)->orderBy('namhoc', 'desc')->get();
 
-        return view('admin.dot-khao-sat.edit', compact('dotKhaoSat', 'mauKhaoSats', 'namHocs'));
+        // Kiểm tra xem đợt đã có phiếu trả lời chưa
+        $hasResponses = $dotKhaoSat->phieuKhaoSat()->count() > 0;
+
+        return view('admin.dot-khao-sat.edit', compact('dotKhaoSat', 'mauKhaoSats', 'namHocs', 'hasResponses'));
     }
 
     public function update(Request $request, DotKhaoSat $dotKhaoSat)
@@ -229,6 +232,14 @@ class DotKhaoSatController extends Controller
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
             ]
         );
+
+        // Kiểm tra xem đợt đã có phiếu trả lời chưa
+        $hasResponses = $dotKhaoSat->phieuKhaoSat()->count() > 0;
+
+        // Nếu đã có phiếu trả lời, không cho phép đổi mẫu khảo sát
+        if ($hasResponses && $validated['mau_khaosat_id'] != $dotKhaoSat->mau_khaosat_id) {
+            return back()->with('error', 'Không thể thay đổi mẫu khảo sát vì đợt này đã có phiếu trả lời.');
+        }
 
         DB::beginTransaction();
         try {

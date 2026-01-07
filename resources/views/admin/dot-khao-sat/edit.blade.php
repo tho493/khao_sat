@@ -53,7 +53,7 @@
                             <div class="mb-3">
                                 <label class="form-label">Mẫu khảo sát <span class="text-danger">*</span></label>
                                 <select class="form-select @error('mau_khaosat_id') is-invalid @enderror" 
-                                        name="mau_khaosat_id" required>
+                                        name="mau_khaosat_id" required {{ isset($hasResponses) && $hasResponses ? 'disabled' : '' }}>
                                     @foreach($mauKhaoSats as $mau)
                                         <option value="{{ $mau->id }}" 
                                             {{ old('mau_khaosat_id', $dotKhaoSat->mau_khaosat_id) == $mau->id ? 'selected' : '' }}>
@@ -61,6 +61,12 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                @if(isset($hasResponses) && $hasResponses)
+                                    <small class="text-warning">
+                                        <i class="bi bi-exclamation-triangle"></i> Không thể thay đổi mẫu khảo sát vì đợt này đã có phiếu trả lời.
+                                    </small>
+                                    <input type="hidden" name="mau_khaosat_id" value="{{ $dotKhaoSat->mau_khaosat_id }}">
+                                @endif
                                 @error('mau_khaosat_id')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
