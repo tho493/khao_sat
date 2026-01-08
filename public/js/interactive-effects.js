@@ -63,42 +63,99 @@
         });
     }
 
-    // Global Link Transition Handler
-    function initGlobalLinkTransitions() {
+    // Apply transition effect to a single link
+    function applyTransitionToLink(link) {
         const overlay = getOverlay();
 
+        // Check if already has listener to avoid duplicates
+        if (link.dataset.hasTransition) {
+            return;
+        }
+
+        link.dataset.hasTransition = 'true';
+
+        link.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+
+            // Skip if no href or javascript: links
+            if (!href || href.startsWith('javascript:') || href === '#') {
+                return;
+            }
+
+            // Skip if it's the current page
+            if (href === window.location.href || href === window.location.pathname) {
+                return;
+            }
+
+            e.preventDefault();
+
+            // Fast fade out
+            document.body.style.transition = 'opacity 0.3s ease-out';
+            document.body.style.opacity = '0';
+            overlay.style.transition = 'opacity 0.3s ease-out';
+            overlay.classList.add('active');
+
+            // Navigate after fade
+            setTimeout(() => {
+                window.location.href = href;
+            }, 300);
+        });
+    }
+
+    // Global Link Transition Handler
+    function initGlobalLinkTransitions() {
         // Get all links that navigate to different pages (including survey cards now)
         const links = document.querySelectorAll('a[href]:not([href^="#"]):not([target="_blank"])');
 
         links.forEach(link => {
-            link.addEventListener('click', function (e) {
-                const href = this.getAttribute('href');
+            applyTransitionToLink(link);
+        });
 
-                // Skip if no href or javascript: links
-                if (!href || href.startsWith('javascript:') || href === '#') {
-                    return;
-                }
+        // Watch for dynamically added links
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    // Check if the added node is a link
+                    if (node.nodeType === 1) { // Element node
+                        if (node.tagName === 'A' &&
+                            node.hasAttribute('href') &&
+                            !node.getAttribute('href').startsWith('#') &&
+                            node.getAttribute('target') !== '_blank') {
+                            applyTransitionToLink(node);
+                        }
 
-                // Skip if it's the current page
-                if (href === window.location.href || href === window.location.pathname) {
-                    return;
-                }
-
-                e.preventDefault();
-
-                // Fast fade out
-                document.body.style.transition = 'opacity 0.3s ease-out';
-                document.body.style.opacity = '0';
-                overlay.style.transition = 'opacity 0.3s ease-out';
-                overlay.classList.add('active');
-
-                // Navigate after fade
-                setTimeout(() => {
-                    window.location.href = href;
-                }, 300);
+                        // Check if the added node contains links
+                        const nestedLinks = node.querySelectorAll('a[href]:not([href^="#"]):not([target="_blank"])');
+                        nestedLinks.forEach(link => {
+                            applyTransitionToLink(link);
+                        });
+                    }
+                });
             });
         });
+
+        // Start observing the document body for changes
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
     }
+
+    // Global function to programmatically trigger transition
+    window.navigateWithTransition = function (url) {
+        const overlay = getOverlay();
+
+        // Fast fade out
+        document.body.style.transition = 'opacity 0.3s ease-out';
+        document.body.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.3s ease-out';
+        overlay.classList.add('active');
+
+        // Navigate after fade
+        setTimeout(() => {
+            window.location.href = url;
+        }, 300);
+    };
 
 
     // Entrance Animations
@@ -134,7 +191,7 @@
     function init() {
         if (!prefersReducedMotion) {
             initScrollAnimations();
-            initGlobalLinkTransitions(); // Global fade transitions
+            initGlobalLinkTransitions();
         }
         initSmoothScroll();
     }

@@ -5,7 +5,7 @@
 
 body {
     font-family: "Be Vietnam Pro", sans-serif;
-    background-color: #e8f1fe;
+    background-color: #d9e8f7;
     /* background-image: linear-gradient(to top right, #1f66b3, #2a76c9, #6aa8f7); */
     transition: opacity 0.3s ease-out;
 }
@@ -537,7 +537,7 @@ body.page-zooming-out .survey-card-link:not(.zooming-in) {
 .survey-card-link .ripple {
     position: absolute;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.7);
+    background: #d9e8f7;
     transform: scale(0);
     animation: ripple-expand 0.6s ease-out;
     pointer-events: none;

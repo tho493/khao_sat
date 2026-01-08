@@ -33,7 +33,7 @@
     <link rel="canonical" href="{{ url()->current() }}">
 
     <link rel="stylesheet" href="/css/splash-screen.css">
-    <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script>
+    <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
     
     {{-- CSS for Glassmorphism & Improvements --}}
     <link rel="stylesheet" href="/css/home.css">
