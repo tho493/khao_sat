@@ -93,7 +93,8 @@ class MauKhaoSatController extends Controller
     public function edit(MauKhaoSat $mauKhaoSat)
     {
         $mauKhaoSat->load(['cauHoi', 'dotKhaoSat']);
-        $isLocked = $mauKhaoSat->dotKhaoSat()->where('trangthai', 'active')->exists();
+
+        $isLocked = $mauKhaoSat->dotKhaoSat()->exists();
 
         $allQuestions = $mauKhaoSat->cauHoi()->orderBy('thutu')->get();
 

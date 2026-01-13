@@ -74,11 +74,11 @@ class CauHoiController extends Controller
     public function update(Request $request, CauHoiKhaoSat $cauHoi)
     {
         $validated = $request->validate([
-            'noidung_cauhoi' => 'required|string',
-            'loai_cauhoi' => 'required|in:single_choice,multiple_choice,text,likert,rating,date,number,custom_select',
-            'batbuoc' => 'boolean',
-            'is_personal_info' => 'boolean',
-            'page' => 'required|integer|min:1',
+            'noidung_cauhoi' => 'sometimes|required|string',
+            'loai_cauhoi' => 'sometimes|required|in:single_choice,multiple_choice,text,likert,rating,date,number,custom_select',
+            'batbuoc' => 'sometimes|boolean',
+            'is_personal_info' => 'sometimes|boolean',
+            'page' => 'sometimes|required|integer|min:1',
             'check_duplicate' => 'nullable|boolean',
             'phuong_an' => 'sometimes|array',
             'phuong_an.*' => 'required|string|max:500',
@@ -89,17 +89,30 @@ class CauHoiController extends Controller
 
         DB::beginTransaction();
         try {
-            $cauHoi->update([
-                'noidung_cauhoi' => $validated['noidung_cauhoi'],
-                'loai_cauhoi' => $validated['loai_cauhoi'],
-                'batbuoc' => $validated['batbuoc'] ?? true,
-                'is_personal_info' => $validated['is_personal_info'] ?? false,
-                'page' => $validated['page'],
-                'check_duplicate' => $validated['check_duplicate'] ?? 0,
-                'cau_dieukien_id' => $validated['cau_dieukien_id'] ?? null,
-                'dieukien_hienthi' => $validated['dieukien_hienthi'] ?? null,
-                'data_source_id' => $validated['data_source_id'] ?? null,
-            ]);
+            $updateData = [];
+
+            if ($request->has('noidung_cauhoi'))
+                $updateData['noidung_cauhoi'] = $validated['noidung_cauhoi'];
+            if ($request->has('loai_cauhoi'))
+                $updateData['loai_cauhoi'] = $validated['loai_cauhoi'];
+            if ($request->has('batbuoc'))
+                $updateData['batbuoc'] = $validated['batbuoc'];
+            if ($request->has('is_personal_info'))
+                $updateData['is_personal_info'] = $validated['is_personal_info'];
+            if ($request->has('page'))
+                $updateData['page'] = $validated['page'];
+            if ($request->has('check_duplicate'))
+                $updateData['check_duplicate'] = $validated['check_duplicate'] ?? 0;
+            if ($request->has('data_source_id'))
+                $updateData['data_source_id'] = $validated['data_source_id'] ?? null;
+
+            // Always allow updating conditional logic
+            if ($request->has('cau_dieukien_id'))
+                $updateData['cau_dieukien_id'] = $validated['cau_dieukien_id'];
+            if ($request->has('dieukien_hienthi'))
+                $updateData['dieukien_hienthi'] = $validated['dieukien_hienthi'];
+
+            $cauHoi->update($updateData);
 
             if ($request->has('phuong_an')) {
                 $cauHoi->phuongAnTraLoi()->delete();
