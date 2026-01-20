@@ -215,26 +215,15 @@
                                                     Tải xuống
                                                 </a>
 
-                                                <button type="button" class="btn btn-outline-success btn-sm" title="Khôi phục"
-                                                    onclick="if(confirm('Khôi phục từ {{ $f['name'] }}? DỮ LIỆU HIỆN TẠI SẼ BỊ GHI ĐÈ!')){ document.getElementById('restore-form-{{ md5($f['name']) }}').submit(); }">
+                                                <button type="button" class="btn btn-outline-success btn-sm restore-btn"
+                                                    title="Khôi phục" data-file-name="{{ $f['name'] }}">
                                                     Khôi phục
                                                 </button>
-                                                <form id="restore-form-{{ md5($f['name']) }}" method="POST"
-                                                    action="{{ route('admin.dbbackups.restore') }}" class="d-none">
-                                                    @csrf
-                                                    <input type="hidden" name="file" value="{{ $f['name'] }}">
-                                                    <input type="hidden" name="force" value="1">
-                                                </form>
 
-                                                <button type="button" class="btn btn-outline-danger btn-sm" title="Xóa"
-                                                    onclick="if(confirm('Xóa backup {{ $f['name'] }}?')){ document.getElementById('delete-form-{{ md5($f['name']) }}').submit(); }">
+                                                <button type="button" class="btn btn-outline-danger btn-sm delete-btn"
+                                                    title="Xóa" data-file-name="{{ $f['name'] }}">
                                                     Xóa
                                                 </button>
-                                                <form id="delete-form-{{ md5($f['name']) }}" method="POST"
-                                                    action="{{ route('admin.dbbackups.destroy', $f['name']) }}" class="d-none">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                </form>
                                             </div>
                                         </td>
                                     </tr>
@@ -398,6 +387,84 @@
                 if (confirm(confirmMessage)) {
                     bulkDeleteForm.submit();
                 }
+            });
+        });
+    </script>
+    <script>
+        // Restore and Delete Button Handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Restore button handlers
+            document.querySelectorAll('.restore-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const fileName = this.getAttribute('data-file-name');
+                    
+                    if (confirm(`Khôi phục từ ${fileName}? DỮ LIỆU HIỆN TẠI SẼ BỊ GHI ĐÈ!`)) {
+                        // Create form dynamically
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '{{ route('admin.dbbackups.restore') }}';
+
+                        // Add CSRF token
+                        const csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = '_token';
+                        csrfInput.value = '{{ csrf_token() }}';
+                        form.appendChild(csrfInput);
+
+                        // Add file input
+                        const fileInput = document.createElement('input');
+                        fileInput.type = 'hidden';
+                        fileInput.name = 'file';
+                        fileInput.value = fileName;
+                        form.appendChild(fileInput);
+
+                        // Add force input
+                        const forceInput = document.createElement('input');
+                        forceInput.type = 'hidden';
+                        forceInput.name = 'force';
+                        forceInput.value = '1';
+                        form.appendChild(forceInput);
+
+                        // Append to body and submit
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
+            });
+
+            // Delete button handlers
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const fileName = this.getAttribute('data-file-name');
+                    
+                    if (confirm(`Xóa backup ${fileName}?`)) {
+                        // Create form dynamically
+                        // Fix: Create a dummy route first to avoid "Missing required parameter" error
+                        // Then replace the dummy value in JS
+                        let infoUrl = '{{ route('admin.dbbackups.destroy', ['file' => 'PLACEHOLDER']) }}';
+                        const actionUrl = infoUrl.replace('PLACEHOLDER', encodeURIComponent(fileName));
+
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = actionUrl;
+
+                        // Add CSRF token and method spoofing...
+                        const csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = '_token';
+                        csrfInput.value = '{{ csrf_token() }}';
+                        form.appendChild(csrfInput);
+
+                        const methodInput = document.createElement('input');
+                        methodInput.type = 'hidden';
+                        methodInput.name = '_method';
+                        methodInput.value = 'DELETE';
+                        form.appendChild(methodInput);
+
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
             });
         });
     </script>
