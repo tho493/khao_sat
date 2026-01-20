@@ -186,58 +186,49 @@
                                     @foreach ($files as $f)
                                         <tr>
                                             <td>
-                                                <input type="checkbox" name="files[]" value="{{ $f['name'] }}" class="form-check-input backup-checkbox">
+                                                <input type="checkbox" name="files[]" value="{{ $f['name'] }}"
+                                                    class="form-check-input backup-checkbox">
                                             </td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                @if(str_ends_with(strtolower($f['name']), '.gz'))
-                                                    <i class="fas fa-file-archive text-warning me-2"></i>
-                                                @else
-                                                    <i class="fas fa-file-code text-info me-2"></i>
-                                                @endif
-                                                <span class="fw-medium">{{ $f['name'] }}</span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-secondary">
-                                                {{ number_format($f['size'] / 1024, 1) }} KB
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <small class="text-muted">
-                                                {{ \Carbon\Carbon::createFromTimestamp($f['time'])->format('d/m/Y H:i:s') }}
-                                            </small>
-                                        </td>
-                                        <td class="text-end">
-                                            <div class="btn-group" role="group">
-                                                <a class="btn btn-outline-primary btn-sm"
-                                                    href="{{ route('admin.dbbackups.download', $f['name']) }}" title="Tải xuống">
-                                                    Tải xuống
-                                                </a>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    @if(str_ends_with(strtolower($f['name']), '.gz'))
+                                                        <i class="fas fa-file-archive text-warning me-2"></i>
+                                                    @else
+                                                        <i class="fas fa-file-code text-info me-2"></i>
+                                                    @endif
+                                                    <span class="fw-medium">{{ $f['name'] }}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">
+                                                    {{ number_format($f['size'] / 1024, 1) }} KB
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">
+                                                    {{ \Carbon\Carbon::createFromTimestamp($f['time'])->format('d/m/Y H:i:s') }}
+                                                </small>
+                                            </td>
+                                            <td class="text-end">
+                                                <div class="btn-group" role="group">
+                                                    <a class="btn btn-outline-primary btn-sm"
+                                                        href="{{ route('admin.dbbackups.download', $f['name']) }}"
+                                                        title="Tải xuống">
+                                                        Tải xuống
+                                                    </a>
 
-                                                <button type="button" class="btn btn-outline-success btn-sm" title="Khôi phục"
-                                                    onclick="if(confirm('Khôi phục từ {{ $f['name'] }}? DỮ LIỆU HIỆN TẠI SẼ BỊ GHI ĐÈ!')){ document.getElementById('restore-form-{{ md5($f['name']) }}').submit(); }">
-                                                    Khôi phục
-                                                </button>
-                                                <form id="restore-form-{{ md5($f['name']) }}" method="POST"
-                                                    action="{{ route('admin.dbbackups.restore') }}" class="d-none">
-                                                    @csrf
-                                                    <input type="hidden" name="file" value="{{ $f['name'] }}">
-                                                    <input type="hidden" name="force" value="1">
-                                                </form>
+                                                    <button type="button" class="btn btn-outline-success btn-sm restore-btn"
+                                                        title="Khôi phục" data-file-name="{{ $f['name'] }}">
+                                                        Khôi phục
+                                                    </button>
 
-                                                <button type="button" class="btn btn-outline-danger btn-sm" title="Xóa"
-                                                    onclick="if(confirm('Xóa backup {{ $f['name'] }}?')){ document.getElementById('delete-form-{{ md5($f['name']) }}').submit(); }">
-                                                    Xóa
-                                                </button>
-                                                <form id="delete-form-{{ md5($f['name']) }}" method="POST"
-                                                    action="{{ route('admin.dbbackups.destroy', $f['name']) }}" class="d-none">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm delete-btn"
+                                                        title="Xóa" data-file-name="{{ $f['name'] }}">
+                                                        Xóa
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     @endforeach
                                 </tbody>
                             </table>
@@ -311,13 +302,13 @@
 
                 if (count > 0) {
                     const sizeMB = (totalSize / (1024 * 1024)).toFixed(1);
-                    
+
                     // Cập nhật card cleanup
                     cleanupAlert.className = 'alert alert-warning alert-sm mb-3';
                     cleanupAlert.querySelector('i').className = 'fas fa-info-circle me-1';
                     cleanupMessage.innerHTML = `Có <strong>${count}</strong> backup cũ hơn <strong>${selectedDays}</strong> ngày (${sizeMB} MB)`;
                     submitBtn.disabled = false;
-                    
+
                     // Cập nhật header
                     headerOldBackupsInfo.style.display = 'inline';
                     headerOldBackupsText.textContent = `${count} backup cũ hơn ${selectedDays} ngày (${sizeMB} MB)`;
@@ -328,7 +319,7 @@
                     cleanupMessage.innerHTML = `Không có backup cũ hơn <strong>${selectedDays}</strong> ngày`;
                     submitBtn.disabled = true;
                     confirmCheckbox.checked = false;
-                    
+
                     // Ẩn thông báo ở header
                     headerOldBackupsInfo.style.display = 'none';
                 }
@@ -342,7 +333,7 @@
         });
 
         // Bulk Delete Functionality
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const selectAllCheckbox = document.getElementById('select-all');
             const backupCheckboxes = document.querySelectorAll('.backup-checkbox');
             const bulkActionsToolbar = document.getElementById('bulk-actions-toolbar');
@@ -355,7 +346,7 @@
             function updateBulkActionsUI() {
                 const checkedCount = document.querySelectorAll('.backup-checkbox:checked').length;
                 selectedCountSpan.textContent = checkedCount;
-                
+
                 if (checkedCount > 0) {
                     bulkActionsToolbar.style.display = 'block';
                 } else {
@@ -364,7 +355,7 @@
             }
 
             // Select All checkbox
-            selectAllCheckbox.addEventListener('change', function() {
+            selectAllCheckbox.addEventListener('change', function () {
                 backupCheckboxes.forEach(checkbox => {
                     checkbox.checked = this.checked;
                 });
@@ -373,31 +364,109 @@
 
             // Individual checkboxes
             backupCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
+                checkbox.addEventListener('change', function () {
                     const allChecked = Array.from(backupCheckboxes).every(cb => cb.checked);
                     const someChecked = Array.from(backupCheckboxes).some(cb => cb.checked);
-                    
+
                     selectAllCheckbox.checked = allChecked;
                     selectAllCheckbox.indeterminate = someChecked && !allChecked;
-                    
+
                     updateBulkActionsUI();
                 });
             });
 
             // Bulk Delete Button
-            bulkDeleteBtn.addEventListener('click', function() {
+            bulkDeleteBtn.addEventListener('click', function () {
                 const checkedCount = document.querySelectorAll('.backup-checkbox:checked').length;
-                
+
                 if (checkedCount === 0) {
                     alert('Vui lòng chọn ít nhất một backup để xóa.');
                     return;
                 }
 
                 const confirmMessage = `Bạn có chắc chắn muốn xóa ${checkedCount} backup đã chọn?\n\nHành động này không thể hoàn tác!`;
-                
+
                 if (confirm(confirmMessage)) {
                     bulkDeleteForm.submit();
                 }
+            });
+        });
+    </script>
+    <script>
+        // Restore and Delete Button Handlers
+        document.addEventListener('DOMContentLoaded', function () {
+            // Restore button handlers
+            document.querySelectorAll('.restore-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const fileName = this.getAttribute('data-file-name');
+
+                    if (confirm(`Khôi phục từ ${fileName}? DỮ LIỆU HIỆN TẠI SẼ BỊ GHI ĐÈ!`)) {
+                        // Create form dynamically
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '{{ route('admin.dbbackups.restore') }}';
+
+                        // Add CSRF token
+                        const csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = '_token';
+                        csrfInput.value = '{{ csrf_token() }}';
+                        form.appendChild(csrfInput);
+
+                        // Add file input
+                        const fileInput = document.createElement('input');
+                        fileInput.type = 'hidden';
+                        fileInput.name = 'file';
+                        fileInput.value = fileName;
+                        form.appendChild(fileInput);
+
+                        // Add force input
+                        const forceInput = document.createElement('input');
+                        forceInput.type = 'hidden';
+                        forceInput.name = 'force';
+                        forceInput.value = '1';
+                        form.appendChild(forceInput);
+
+                        // Append to body and submit
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
+            });
+
+            // Delete button handlers
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const fileName = this.getAttribute('data-file-name');
+
+                    if (confirm(`Xóa backup ${fileName}?`)) {
+                        // Create form dynamically
+                        // Fix: Create a dummy route first to avoid "Missing required parameter" error
+                        // Then replace the dummy value in JS
+                        let infoUrl = '{{ route('admin.dbbackups.destroy', ['file' => 'PLACEHOLDER']) }}';
+                        const actionUrl = infoUrl.replace('PLACEHOLDER', encodeURIComponent(fileName));
+
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = actionUrl;
+
+                        // Add CSRF token and method spoofing...
+                        const csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = '_token';
+                        csrfInput.value = '{{ csrf_token() }}';
+                        form.appendChild(csrfInput);
+
+                        const methodInput = document.createElement('input');
+                        methodInput.type = 'hidden';
+                        methodInput.name = '_method';
+                        methodInput.value = 'DELETE';
+                        form.appendChild(methodInput);
+
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
             });
         });
     </script>
