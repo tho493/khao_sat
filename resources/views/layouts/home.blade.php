@@ -2,18 +2,19 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://www.google.com https://www.gstatic.com https://unpkg.com https://cdn.jsdelivr.net https://code.jquery.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com https://unpkg.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; img-src 'self' data: https:; frame-src 'self' https://www.google.com https://www.gstatic.com; connect-src 'self' https://www.google.com https://www.gstatic.com https://maps.googleapis.com">
     <meta name="referrer" content="strict-origin-when-cross-origin"> -->
     <meta name="description"
-    content="@yield('description', 'Hệ thống khảo sát trực tuyến - Nền tảng khảo sát hiện đại, bảo mật và dễ sử dụng.')" />
+        content="@yield('description', 'Hệ thống khảo sát trực tuyến - Nền tảng khảo sát hiện đại, bảo mật và dễ sử dụng.')" />
     <title> @yield('title', "Trang chủ") - Hệ thống khảo sát trực tuyến </title>
-    
+
     <meta property="og:site_name" content="Hệ thống khảo sát trực tuyến">
-    <meta name="keywords" content="khảo sát, survey, trực tuyến, online, hệ thống, khảo sát trực tuyến, sdu, sao đỏ, trường đại học sao đỏ" />
+    <meta name="keywords"
+        content="khảo sát, survey, trực tuyến, online, hệ thống, khảo sát trực tuyến, sdu, sao đỏ, trường đại học sao đỏ" />
     <meta name="author" content="Hệ thống khảo sát trực tuyến" />
     <meta name="robots" content="index, follow" />
     <meta property="og:title" content="@yield('title', 'Trang chủ') - Hệ thống khảo sát trực tuyến" />
@@ -34,18 +35,18 @@
 
     <link rel="stylesheet" href="/css/splash-screen.css">
     <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script>
-    
+
     {{-- CSS for Glassmorphism & Improvements --}}
     <link rel="stylesheet" href="/css/home.css">
-    
+
     {{-- Christmas Theme CSS --}}
     @if (date('m') == 12 && date('d') >= 22 && date('d') <= 25)
-    <link rel="stylesheet" href="/css/christmas-theme.css">
+        <link rel="stylesheet" href="/css/christmas-theme.css">
     @endif
 
     {{-- Happy New Year 2025 Theme CSS (Dec 28 - Jan 5) --}}
     @if ((date('m') == 12 && date('d') >= 29) || (date('m') == 1 && date('d') <= 3))
-    <link rel="stylesheet" href="/css/newyear-theme.css">
+        <link rel="stylesheet" href="/css/newyear-theme.css">
     @endif
 
 
@@ -82,11 +83,11 @@
         <div id="main-content" style="visibility: hidden;">
 
             {{-- Chatbot Container --}}
-            <button class="chatbot-toggler">
+            <!-- <button class="chatbot-toggler">
                 <i class="bi bi-chat-dots-fill"></i>
-            </button>
+            </button> -->
 
-            <div class="chatbot-container">
+            <!-- <div class="chatbot-container">
                 <div class="chatbot-header">
                     <h2>Trợ lý ảo</h2>
                 </div>
@@ -99,29 +100,33 @@
                     <textarea placeholder="Nhập câu hỏi của bạn..." required></textarea>
                     <button id="send-btn"><i class="bi bi-send-fill"></i></button>
                 </div>
-            </div>
+            </div> -->
 
             <header class="sticky-header">
                 <div class="mx-auto px-2 sm:px-4" style="max-width: 90%;">
                     <div class="flex items-center justify-between py-2">
                         <a href="{{ route('khao-sat.index') }}" class="flex items-center gap-2 sm:gap-3">
-                            <div class="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white/95 grid place-items-center shadow-md p-1">
+                            <div
+                                class="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white/95 grid place-items-center shadow-md p-1">
                                 <img src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ"
                                     class="h-full w-full object-contain">
                             </div>
                             <span class="hidden min-[320px]:block">
                                 <span class="text-white font-bold text-base sm:text-lg">Hệ thống khảo sát</span>
-                                <span class="hidden sm:block text-white/80 text-xs font-medium">Thu thập ý kiến, nâng cao chất lượng</span>
+                                <span class="hidden sm:block text-white/80 text-xs font-medium">Thu thập ý kiến, nâng
+                                    cao chất lượng</span>
                             </span>
                         </a>
                         <nav class="flex items-center gap-2 sm:gap-4">
                             <a href="https://saodo.edu.vn/vi/about/Gioi-thieu-ve-truong-Dai-hoc-Sao-Do.html"
                                 target="_blank"
-                                class="text-white/90 hover:text-white text-xs sm:text-sm font-medium transition xs:inline">GIỚI THIỆU</a>
+                                class="text-white/90 hover:text-white text-xs sm:text-sm font-medium transition xs:inline">GIỚI
+                                THIỆU</a>
                             <a href="{{ route('admin.dashboard') }}"
                                 class="px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-white/20 text-white text-xs font-semibold hover:bg-white/30 transition backdrop-blur-sm"
                                 title="Truy cập trang quản trị">
-                                <i class="bi bi-shield-lock-fill sm:mr-1"></i> <span class="hidden xs:inline">Quản trị</span>
+                                <i class="bi bi-shield-lock-fill sm:mr-1"></i> <span class="hidden xs:inline">Quản
+                                    trị</span>
                             </a>
                         </nav>
                     </div>
@@ -148,7 +153,8 @@
                             </div>
                             <div>
                                 <h4 class="font-extrabold text-xl">Trường Đại học Sao Đỏ</h4>
-                                <p class="text-white/80 text-sm">Chất lượng toàn diện - Hợp tác sâu rộng - Phát triển bền vững</p>
+                                <p class="text-white/80 text-sm">Chất lượng toàn diện - Hợp tác sâu rộng - Phát triển
+                                    bền vững</p>
                             </div>
                         </div>
                         <p class="text-white/70 text-sm mb-6">
@@ -179,7 +185,8 @@
                                 <span class="flex-shrink-0 flex items-center justify-center" style="height:1.6em;">
                                     <i class="bi bi-geo-alt-fill mr-3 text-base" style="vertical-align:middle;"></i>
                                 </span>
-                                <span class="flex-1">Số 76, Nguyễn Thị Duệ, Thái Học 2, phường Chu Văn An, thành phố Hải Phòng.</span>
+                                <span class="flex-1">Số 76, Nguyễn Thị Duệ, Thái Học 2, phường Chu Văn An, thành phố Hải
+                                    Phòng.</span>
                             </div>
                             <div class="flex flex-row items-start gap-0" style="line-height:1.9;">
                                 <span class="flex-shrink-0 flex items-center justify-center" style="height:1.6em;">
@@ -218,15 +225,21 @@
                 </div>
 
                 <div class="mt-12 border-t border-white/20 pt-6 text-center text-white/60 text-sm">
-                    © {{ date('Y') }} Trường Đại học Sao Đỏ · Hệ thống khảo sát trực tuyến.
+                    © 2025 Trường Đại học Sao Đỏ · Hệ thống khảo sát trực tuyến.
+                    <span class="text-white">
+                        Designed by
+                        <a href="https://github.com/tho493" target="_blank" class="no-underline transition">
+                            tho493
+                        </a>
+                    </span>
                 </div>
             </footer>
         </div>
     </div>
-    
+
     {{-- Interactive Effects Script --}}
     <script src="/js/interactive-effects.js"></script>
-    
+
     <script src="https://unpkg.com/scrollreveal"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
@@ -242,7 +255,7 @@
             $(document).on('ajaxStart', () => NProgress.start());
             $(document).on('ajaxStop', () => NProgress.done());
         }
-        
+
         const header = document.querySelector('header.sticky-header');
         if (header) {
             window.addEventListener('scroll', () => {
@@ -277,252 +290,255 @@
             sr.reveal('.reveal-survey-card', { interval: 100 });
         });
 
-        $(document).ready(function () {
-            const chatbotToggler = $('.chatbot-toggler');
-            const chatbotContainer = $('.chatbot-container');
-            const chatInput = $('.chat-input textarea');
-            const sendChatBtn = $('#send-btn');
-            const chatbox = $('.chatbox');
-            const API_URL = "/api/ask";
+        {{--
+//         $(document).ready(function () {
+//             const chatbotToggler = $('.chatbot-toggler');
+//             const chatbotContainer = $('.chatbot-container');
+//             const chatInput = $('.chat-input textarea');
+//             const sendChatBtn = $('#send-btn');
+//             const chatbox = $('.chatbox');
+//             const API_URL = "/api/ask";
 
-            chatbotToggler.on('click', () => chatbotContainer.toggleClass('show'));
+//             chatbotToggler.on('click', () => chatbotContainer.toggleClass('show'));
 
-            const createChatLi = (message, className) => {
-                const chatLi = $('<li>').addClass(`chat ${className}`);
-                chatLi.append($('<p>').html(message));
-                return chatLi;
-            }
+//             const createChatLi = (message, className) => {
+//                 const chatLi = $('<li>').addClass(`chat ${className}`);
+//                 chatLi.append($('<p>').html(message));
+//                 return chatLi;
+//             }
 
-            const scrollToBottom = () => {
-                chatbox.scrollTop(chatbox[0].scrollHeight);
-            };
+//             const scrollToBottom = () => {
+//                 chatbox.scrollTop(chatbox[0].scrollHeight);
+//             };
 
-            const generateResponse = (userMessage) => {
-                const surveyForm = $('#formKhaoSat');
-                @php
-$surveyIdForJs = null;
-if (isset($dotKhaoSat) && $dotKhaoSat) {
-    $surveyIdForJs = $dotKhaoSat->id;
-}
-                @endphp
-                const surveyId = surveyForm.length ? "{{ $surveyIdForJs }}" : null;
-                const requestData = {
-                    _token: '{{ csrf_token() }}',
-                    message: userMessage
-                };
+//             const generateResponse = (userMessage) => {
+//                 const surveyForm = $('#formKhaoSat');
+//                 @php
+    // $surveyIdForJs = null;
+    // if (isset($dotKhaoSat) && $dotKhaoSat) {
+    //     $surveyIdForJs = $dotKhaoSat->id;
+    // }
+//                 @endphp
+//                 const surveyId = surveyForm.length ? "{{ $surveyIdForJs }}" : null;
+//                 const requestData = {
+//                     _token: '{{ csrf_token() }}',
+//                     message: userMessage
+//                 };
 
-                if (surveyId) {
-                    requestData.survey_id = surveyId;
-                }
+//                 if (surveyId) {
+//                     requestData.survey_id = surveyId;
+//                 }
 
-                const thinkingLi = createChatLi("...", "incoming");
-                chatbox.append(thinkingLi);
-                scrollToBottom();
+//                 const thinkingLi = createChatLi("...", "incoming");
+//                 chatbox.append(thinkingLi);
+//                 scrollToBottom();
 
-                $.ajax({
-                    url: API_URL,
-                    method: 'POST',
-                    data: requestData,
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function (response) {
-                        if (response.success) {
-                            if (response.type === 'action') {
-                                thinkingLi.remove();
-                                handleAiAction(response.data);
-                            } else {
-                                thinkingLi.find("p").html(response.answer);
-                            }
-                        } else {
-                            thinkingLi.find("p").html(response.answer || "Có lỗi xảy ra.");
-                        }
-                    },
-                    error: function (xhr, ajaxOptions, thrownError) {
-                        console.log(xhr.responseText);
-                        thinkingLi.find("p").html("Ôi! Server hỗ trợ có vẻ đang lỗi rồi. Bạn thông cảm mình chưa nói chuyện với nhau được đâu nhé.");
-                    }
-                });
-            }
+//                 $.ajax({
+//                     url: API_URL,
+//                     method: 'POST',
+//                     data: requestData,
+//                     headers: {
+//                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+//                     },
+//                     success: function (response) {
+//                         if (response.success) {
+//                             if (response.type === 'action') {
+//                                 thinkingLi.remove();
+//                                 handleAiAction(response.data);
+//                             } else {
+//                                 thinkingLi.find("p").html(response.answer);
+//                             }
+//                         } else {
+//                             thinkingLi.find("p").html(response.answer || "Có lỗi xảy ra.");
+//                         }
+//                     },
+//                     error: function (xhr, ajaxOptions, thrownError) {
+//                         console.log(xhr.responseText);
+//                         thinkingLi.find("p").html("Ôi! Server hỗ trợ có vẻ đang lỗi rồi. Bạn thông cảm mình chưa nói chuyện với nhau được đâu nhé.");
+//                     }
+//                 });
+//             }
 
-            sendChatBtn.on('click', function (e) {
-                e.preventDefault();
-                const userMessage = chatInput.val().trim();
-                if (userMessage) {
-                    const userLi = createChatLi(userMessage, "outgoing");
-                    chatbox.append(userLi);
-                    scrollToBottom();
-                    chatInput.val('');
-                    generateResponse(userMessage);
-                }
-            });
+//             sendChatBtn.on('click', function (e) {
+//                 e.preventDefault();
+//                 const userMessage = chatInput.val().trim();
+//                 if (userMessage) {
+//                     const userLi = createChatLi(userMessage, "outgoing");
+//                     chatbox.append(userLi);
+//                     scrollToBottom();
+//                     chatInput.val('');
+//                     generateResponse(userMessage);
+//                 }
+//             });
 
-            // Gửi khi nhấn Enter (không phải Shift+Enter)
-            chatInput.on('keydown', function (e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendChatBtn.click();
-                }
-            });
+//             // Gửi khi nhấn Enter (không phải Shift+Enter)
+//             chatInput.on('keydown', function (e) {
+//                 if (e.key === 'Enter' && !e.shiftKey) {
+//                     e.preventDefault();
+//                     sendChatBtn.click();
+//                 }
+//             });
 
-            function handleAiAction(actionData) {
-                console.log("Executing AI Action:", actionData);
-                let feedbackMessage = null; // Mặc định không có phản hồi nếu hành động thành công
-                let error = false;
+//             function handleAiAction(actionData) {
+//                 console.log("Executing AI Action:", actionData);
+//                 let feedbackMessage = null; // Mặc định không có phản hồi nếu hành động thành công
+//                 let error = false;
 
-                if (!actionData || !actionData.action) {
-                    console.error("Dữ liệu hành động không hợp lệ:", actionData);
-                    return;
-                }
+//                 if (!actionData || !actionData.action) {
+//                     console.error("Dữ liệu hành động không hợp lệ:", actionData);
+//                     return;
+//                 }
 
-                let targetElementContainer = null;
-                if (actionData.selector) {
-                    targetElementContainer = $(actionData.selector).first().closest('.glass-effect, .question-card');
-                }
+//                 let targetElementContainer = null;
+//                 if (actionData.selector) {
+//                     targetElementContainer = $(actionData.selector).first().closest('.glass-effect, .question-card');
+//                 }
 
-                switch (actionData.action) {
-                    case 'show_message':
-                        feedbackMessage = actionData.message;
-                        break;
-                    case 'fill_text': {
-                        const element = $(actionData.selector);
-                        if (element.length) {
-                            element.val(actionData.value).trigger('change');
-                            feedbackMessage = `Đã điền "<strong>${actionData.value}</strong>" giúp bạn.`;
-                        } else {
-                            error = true;
-                            feedbackMessage = `Lỗi: Không tìm thấy ô nhập liệu với selector: ${actionData.selector}`;
-                        }
-                        break;
-                    }
+//                 switch (actionData.action) {
+//                     case 'show_message':
+//                         feedbackMessage = actionData.message;
+//                         break;
+//                     case 'fill_text': {
+//                         const element = $(actionData.selector);
+//                         if (element.length) {
+//                             element.val(actionData.value).trigger('change');
+//                             feedbackMessage = `Đã điền "<strong>${actionData.value}</strong>" giúp bạn.`;
+//                         } else {
+//                             error = true;
+//                             feedbackMessage = `Lỗi: Không tìm thấy ô nhập liệu với selector: ${actionData.selector}`;
+//                         }
+//                         break;
+//                     }
 
-                    case 'select_single': {
-                        const selector = `${actionData.selector}[value="${actionData.value}"]`;
-                        const radioElement = $(selector);
+//                     case 'select_single': {
+//                         const selector = `${actionData.selector}[value="${actionData.value}"]`;
+//                         const radioElement = $(selector);
 
-                        if (radioElement.length) {
-                            radioElement.prop('checked', true).trigger('change');
-                            feedbackMessage = `Đã chọn giúp bạn.`;
-                        } else {
-                            error = true;
-                            feedbackMessage = `Lỗi: Không tìm thấy lựa chọn với selector: ${selector}`;
-                        }
-                        break;
-                    }
-                    
-                    case 'select_multiple': {
-                        const checkboxGroup = $(actionData.selector);
-                        if (checkboxGroup.length) {
-                            const values = Array.isArray(actionData.values) ? actionData.values : [actionData.values];
-                            
-                            checkboxGroup.each(function() {
-                                if (!values.includes($(this).val())) {
-                                    $(this).prop('checked', false);
-                                }
-                            });
+//                         if (radioElement.length) {
+//                             radioElement.prop('checked', true).trigger('change');
+//                             feedbackMessage = `Đã chọn giúp bạn.`;
+//                         } else {
+//                             error = true;
+//                             feedbackMessage = `Lỗi: Không tìm thấy lựa chọn với selector: ${selector}`;
+//                         }
+//                         break;
+//                     }
 
-                            values.forEach(val => {
-                                checkboxGroup.filter(`[value="${val}"]`).prop('checked', true);
-                            });
+//                     case 'select_multiple': {
+//                         const checkboxGroup = $(actionData.selector);
+//                         if (checkboxGroup.length) {
+//                             const values = Array.isArray(actionData.values) ? actionData.values : [actionData.values];
 
-                            checkboxGroup.first().trigger('change');
-                            feedbackMessage = `Đã chọn các phương án giúp bạn.`;
-                        } else {
-                            error = true;
-                            feedbackMessage = `Lỗi: Không tìm thấy nhóm lựa chọn với selector: ${actionData.selector}`;
-                        }
-                        break;
-                    }
-                        
-                    case 'scroll_to_question': {
-                        const qNumber = parseInt(actionData.question_number);
-                        if (isNaN(qNumber) || qNumber < 1) {
-                            feedbackMessage = `Số câu hỏi không hợp lệ.`;
-                            break;
-                        }
-                        const questionCard = $(`.question-card:eq(${qNumber - 1})`);
-                        if (questionCard.length) {
-                            targetElementContainer = questionCard;
-                            questionCard[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            feedbackMessage = `Ok, đã chuyển đến câu hỏi số <strong>${qNumber}</strong>.`;
-                        } else {
-                            error = true;
-                            feedbackMessage = `Lỗi: Không tìm thấy câu hỏi số ${qNumber}.`;
-                        }
-                        break;
-                    }
+//                             checkboxGroup.each(function() {
+//                                 if (!values.includes($(this).val())) {
+//                                     $(this).prop('checked', false);
+//                                 }
+//                             });
 
-                    case 'check_missing': {
-                        const missingRequired = [];
-                        $('#formKhaoSat [required]').each(function() {
-                            let isMissing = false;
-                            const name = $(this).attr('name');
-                            if ($(this).is(':radio')) {
-                                if ($(`input[name="${name}"]:checked`).length === 0) isMissing = true;
-                            } else if (!$(this).val() || $(this).val().trim() === '') {
-                                isMissing = true;
-                            }
-                            if (isMissing) {
-                                const label = $(this).closest('.p-6, .grid, .mb-4').find('label').first().text().replace('*', '').trim();
-                                if (label && !missingRequired.includes(label)) {
-                                    missingRequired.push(label);
-                                }
-                            }
-                        });
+//                             values.forEach(val => {
+//                                 checkboxGroup.filter(`[value="${val}"]`).prop('checked', true);
+//                             });
 
-                        if (missingRequired.length > 0) {
-                            feedbackMessage = 'Bạn còn thiếu các câu bắt buộc sau:<ul class="list-disc ps-4 mt-2 text-start">';
-                            missingRequired.forEach(label => feedbackMessage += `<li>${label}</li>`);
-                            feedbackMessage += '</ul>';
-                        } else {
-                            feedbackMessage = 'Tuyệt vời! Bạn đã trả lời tất cả các câu hỏi bắt buộc.';
-                        }
-                        break;
-                    }
-                }
+//                             checkboxGroup.first().trigger('change');
+//                             feedbackMessage = `Đã chọn các phương án giúp bạn.`;
+//                         } else {
+//                             error = true;
+//                             feedbackMessage = `Lỗi: Không tìm thấy nhóm lựa chọn với selector: ${actionData.selector}`;
+//                         }
+//                         break;
+//                     }
 
-                if (!error && targetElementContainer && targetElementContainer.length) {
-                    targetElementContainer.addClass('flash-effect');
-                    setTimeout(() => targetElementContainer.removeClass('flash-effect'), 2000);
-                }
+//                     case 'scroll_to_question': {
+//                         const qNumber = parseInt(actionData.question_number);
+//                         if (isNaN(qNumber) || qNumber < 1) {
+//                             feedbackMessage = `Số câu hỏi không hợp lệ.`;
+//                             break;
+//                         }
+//                         const questionCard = $(`.question-card:eq(${qNumber - 1})`);
+//                         if (questionCard.length) {
+//                             targetElementContainer = questionCard;
+//                             questionCard[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+//                             feedbackMessage = `Ok, đã chuyển đến câu hỏi số <strong>${qNumber}</strong>.`;
+//                         } else {
+//                             error = true;
+//                             feedbackMessage = `Lỗi: Không tìm thấy câu hỏi số ${qNumber}.`;
+//                         }
+//                         break;
+//                     }
 
-                if (feedbackMessage) {
-                    const botMessageLi = createChatLi(feedbackMessage, "incoming");
-                    chatbox.append(botMessageLi);
-                    scrollToBottom();
-                }
-            }
-        });
-        </script>
-        <div id="cookie-consent" class="fixed bottom-20 right-0 left-0 sm:left-auto sm:bottom-24 sm:right-4 z-[100] p-4 max-w-md transition-all duration-500 transform translate-y-full opacity-0">
-            <div class="glass-effect p-5 rounded-xl shadow-lg flex items-start gap-4">
-                <div class="text-2xl text-blue-500 mt-1">
-                    <i class="bi bi-cookie"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-slate-700 mb-3">
-                        Trang web này sử dụng cookie để đảm bảo bạn có trải nghiệm tốt nhất. Vui lòng chấp nhận để tiếp tục.
-                    </p>
-                    <div class="flex justify-end">
-                        <button id="cookie-accept"
-                            class="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors">
-                            Chấp nhận
-                        </button>
-                    </div>
+//                     case 'check_missing': {
+//                         const missingRequired = [];
+//                         $('#formKhaoSat [required]').each(function() {
+//                             let isMissing = false;
+//                             const name = $(this).attr('name');
+//                             if ($(this).is(':radio')) {
+//                                 if ($(`input[name="${name}"]:checked`).length === 0) isMissing = true;
+//                             } else if (!$(this).val() || $(this).val().trim() === '') {
+//                                 isMissing = true;
+//                             }
+//                             if (isMissing) {
+//                                 const label = $(this).closest('.p-6, .grid, .mb-4').find('label').first().text().replace('*', '').trim();
+//                                 if (label && !missingRequired.includes(label)) {
+//                                     missingRequired.push(label);
+//                                 }
+//                             }
+//                         });
+
+//                         if (missingRequired.length > 0) {
+//                             feedbackMessage = 'Bạn còn thiếu các câu bắt buộc sau:<ul class="list-disc ps-4 mt-2 text-start">';
+//                             missingRequired.forEach(label => feedbackMessage += `<li>${label}</li>`);
+//                             feedbackMessage += '</ul>';
+//                         } else {
+//                             feedbackMessage = 'Tuyệt vời! Bạn đã trả lời tất cả các câu hỏi bắt buộc.';
+//                         }
+//                         break;
+//                     }
+//                 }
+
+//                 if (!error && targetElementContainer && targetElementContainer.length) {
+//                     targetElementContainer.addClass('flash-effect');
+//                     setTimeout(() => targetElementContainer.removeClass('flash-effect'), 2000);
+//                 }
+
+//                 if (feedbackMessage) {
+//                     const botMessageLi = createChatLi(feedbackMessage, "incoming");
+//                     chatbox.append(botMessageLi);
+//                     scrollToBottom();
+//                 }
+//             }
+//         });
+        --}}
+    </script>
+    <div id="cookie-consent"
+        class="fixed bottom-20 right-0 left-0 sm:left-auto sm:bottom-24 sm:right-4 z-[100] p-4 max-w-md transition-all duration-500 transform translate-y-full opacity-0">
+        <div class="glass-effect p-5 rounded-xl shadow-lg flex items-start gap-4">
+            <div class="text-2xl text-blue-500 mt-1">
+                <i class="bi bi-cookie"></i>
+            </div>
+            <div>
+                <p class="text-sm text-slate-700 mb-3">
+                    Trang web này sử dụng cookie để đảm bảo bạn có trải nghiệm tốt nhất. Vui lòng chấp nhận để tiếp tục.
+                </p>
+                <div class="flex justify-end">
+                    <button id="cookie-accept"
+                        class="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                        Chấp nhận
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
 
     @stack('scripts')
 
     {{-- Christmas Theme JS --}}
     @if (date('m') == 12 && date('d') >= 22 && date('d') <= 25)
-    <script src="/js/christmas-theme.js"></script>
+        <script src="/js/christmas-theme.js"></script>
     @endif
 
     {{-- Happy New Year 2025 Theme JS (Dec 28 - Jan 5) --}}
     @if ((date('m') == 12 && date('d') >= 29) || (date('m') == 1 && date('d') <= 3))
-    <script src="/js/newyear-theme.js"></script>
+        <script src="/js/newyear-theme.js"></script>
     @endif
 
     <script>
@@ -545,6 +561,8 @@ if (isset($dotKhaoSat) && $dotKhaoSat) {
 
         // Hàm hiển thị thông báo
         function alert(type, title, message) {
+            type = type != null ? type : 'success';
+            title = title != null ? title : 'Thông báo';
             const alertClass = type === 'success' ? 'bg-success text-white' : 'bg-danger text-white';
             const iconClass = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
 

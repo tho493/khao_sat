@@ -82,12 +82,12 @@
                         <i class="bi bi-people-fill"></i> <span>Người dùng</span>
                     </a>
                 </li>
-                <li>
+                <!-- <li>
                     <a href="{{ route('admin.faq.index') }}"
                         class="{{ request()->routeIs('admin.faq.*') ? 'active' : '' }}" title="FAQ Chatbot">
                         <i class="bi bi-chat-left-dots-fill"></i> <span>FAQ Chatbot</span>
                     </a>
-                </li>
+                </li> -->
                 <li>
                     <a href="{{ route('admin.logs.index') }}"
                         class="{{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
