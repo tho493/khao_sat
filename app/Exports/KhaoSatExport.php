@@ -6,14 +6,15 @@ use App\Models\DotKhaoSat;
 use App\Models\PhieuKhaoSat;
 use App\Models\DataSource;
 use App\Models\DataSourceValue;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\WithCustomChunkSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
+class KhaoSatExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithStyles, WithCustomChunkSize
 {
     protected $dotKhaoSat;
     protected $cauHoiHeaders = [];
@@ -30,10 +31,7 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
                 $query->orderBy('thutu');
             },
             'mauKhaoSat.cauHoi.dataSource.values',
-            'phieuKhaoSat' => function ($query) {
-                $query->where('trangthai', 'completed')
-                    ->with(['chiTiet.phuongAn']);
-            },
+
             'hiddenQuestions'
         ]);
 
@@ -56,11 +54,11 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
     }
 
     /**
-     * @return \Illuminate\Support\Collection
+     * @return \Illuminate\Database\Query\Builder|\Illuminate\Database\Eloquent\Builder
      */
-    public function collection()
+    public function query()
     {
-        $query = PhieuKhaoSat::where('dot_khaosat_id', $this->dotKhaoSat->id)
+        $query = PhieuKhaoSat::query()->where('dot_khaosat_id', $this->dotKhaoSat->id)
             ->where('trangthai', 'completed')
             ->where('is_duplicate', 0)
             ->with(['chiTiet.phuongAn']);
@@ -69,7 +67,7 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
             $query->whereIn('id', $this->filteredSurveyIds);
         }
 
-        return $query->get();
+        return $query;
     }
 
     /**
@@ -161,6 +159,9 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
      */
     public function styles(Worksheet $sheet)
     {
+        // Khóa dòng header
+        $sheet->freezePane('A2');
+
         // In đậm và tô màu nền cho dòng header
         return [
             1 => [
@@ -171,5 +172,13 @@ class KhaoSatExport implements FromCollection, WithHeadings, WithMapping, Should
                 ]
             ],
         ];
+    }
+
+    /**
+     * @return int
+     */
+    public function chunkSize(): int
+    {
+        return 500;
     }
 }
