@@ -91,7 +91,8 @@ class KhaoSatController extends Controller
         $personalInfoQuestions = $mauKhaoSat->cauHoi->where('is_personal_info', true);
         $questionsByPage = $mauKhaoSat->cauHoi
             ->where('is_personal_info', false)
-            ->groupBy('page');
+            ->groupBy('page')
+            ->sortKeys();
 
         // Nếu là admin (đăng nhập), hiển thị cảnh báo chế độ admin
         $adminModeWarning = ($isAdminMode) ? 'Bạn đang ở chế độ quản trị viên (Admin) nên có thể xem trước. Khảo sát đang ở chế độ ' . $dotKhaoSat->trangthai : null;

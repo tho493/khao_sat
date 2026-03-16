@@ -1437,8 +1437,12 @@
         });
 
     // Hàm điều khiển trang khảo sát
-    let currentPage = 1;
-    const totalPages = $('.survey-page').length;
+    // Lấy danh sách các page key thực tế từ DOM (để khớp với id="survey-page-X")
+    const pageKeys = $('.survey-page').map(function() {
+        return $(this).attr('id').replace('survey-page-', '');
+    }).get(); // e.g. ['1','2'] hoặc ['2','3'] tuỳ DB
+    const totalPages = pageKeys.length;
+    let currentPageIndex = 0; // index trong mảng pageKeys
 
 // Biến kiểm tra trạng thái
 var isCaptchaRendered = false;
@@ -1449,10 +1453,10 @@ var onloadCallback = function() {
 
 function updateNavigationButtons() {
     // Ẩn/hiện nút Quay lại
-    $('#prevBtn').toggle(currentPage > 1);
-    $('#prev-placeholder').toggle(currentPage <= 1);
+    $('#prevBtn').toggle(currentPageIndex > 0);
+    $('#prev-placeholder').toggle(currentPageIndex <= 0);
 
-    if (currentPage === totalPages) {
+    if (currentPageIndex === totalPages - 1) {
         $('#nextBtn').hide();
         $('#submitBtn').show();
         
@@ -1473,13 +1477,14 @@ function updateNavigationButtons() {
     }
 }
 
-    function goToPage(pageNumber) {
-        if (pageNumber < 1 || pageNumber > totalPages) return;
+    function goToPage(newIndex) {
+        if (newIndex < 0 || newIndex >= totalPages) return;
 
         let isValid = true;
+        const currentPageKey = pageKeys[currentPageIndex];
 
         const checkedNames = new Set();
-        $(`#survey-page-${currentPage} [required]:visible`).each(function() {
+        $(`#survey-page-${currentPageKey} [required]:visible`).each(function() {
             const $input = $(this);
             const inputType = $input.attr('type');
             const inputName = $input.attr('name');
@@ -1487,14 +1492,14 @@ function updateNavigationButtons() {
             if ((inputType === 'radio' || inputType === 'checkbox') && !checkedNames.has(inputName)) {
                 checkedNames.add(inputName);
                 if (
-                    $(`#survey-page-${currentPage} input[name="${inputName}"]:checked`).length === 0 &&
-                    pageNumber > currentPage
+                    $(`#survey-page-${currentPageKey} input[name="${inputName}"]:checked`).length === 0 &&
+                    newIndex > currentPageIndex
                 ) {
                     isValid = false;
                     return false;
                 }
             } else if (inputType !== 'radio' && inputType !== 'checkbox') {
-                if (!this.checkValidity() && pageNumber > currentPage) {
+                if (!this.checkValidity() && newIndex > currentPageIndex) {
                     isValid = false;
                 }
             }
@@ -1505,9 +1510,10 @@ function updateNavigationButtons() {
             return;
         }
 
+        const newPageKey = pageKeys[newIndex];
         $('.survey-page').hide();
-        $(`#survey-page-${pageNumber}`).fadeIn();
-        currentPage = pageNumber;
+        $(`#survey-page-${newPageKey}`).fadeIn();
+        currentPageIndex = newIndex;
         updateNavigationButtons();
         const container = document.getElementById('survey-pages-container');
         if (container) {
@@ -1516,8 +1522,8 @@ function updateNavigationButtons() {
     }
 
     // Gắn sự kiện
-    $('#nextBtn').on('click', () => goToPage(currentPage + 1));
-    $('#prevBtn').on('click', () => goToPage(currentPage - 1));
+    $('#nextBtn').on('click', () => goToPage(currentPageIndex + 1));
+    $('#prevBtn').on('click', () => goToPage(currentPageIndex - 1));
 
     updateNavigationButtons();
     });
