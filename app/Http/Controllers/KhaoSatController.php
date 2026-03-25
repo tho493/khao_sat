@@ -17,6 +17,9 @@ class KhaoSatController extends Controller
     public function index()
     {
         $dotKhaoSats = DotKhaoSat::with(['mauKhaoSat'])
+            ->withCount(['phieuKhaoSat as responses_count' => function ($query) {
+                $query->where('trangthai', 'completed');
+            }])
             ->where('trangthai', 'active')
             ->where('tungay', '<=', now())
             ->where('denngay', '>=', now())
