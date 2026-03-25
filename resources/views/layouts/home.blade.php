@@ -228,7 +228,8 @@
                     © 2025 Trường Đại học Sao Đỏ · Hệ thống khảo sát trực tuyến.
                     <span class="text-white">
                         Designed by
-                        <a href="https://github.com/tho493" target="_blank" class="no-underline transition">
+                        <a style="color: aquamarine;" href="https://github.com/tho493" target="_blank"
+                            class="no-underline transition">
                             tho493
                         </a>
                     </span>
@@ -238,7 +239,7 @@
     </div>
 
     {{-- Interactive Effects Script --}}
-    <script src="/js/interactive-effects.js"></script>
+    <!-- <script src="/js/interactive-effects.js"></script> -->
 
     <script src="https://unpkg.com/scrollreveal"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
