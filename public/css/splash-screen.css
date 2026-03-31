@@ -9,7 +9,7 @@
     display: grid;
     place-items: center;
     opacity: 1;
-    transition: opacity 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+    transition: opacity 0.4s cubic-bezier(0.77, 0, 0.175, 1);
     overflow: hidden;
 }
 
@@ -19,11 +19,11 @@
 }
 
 #splash-screen.shrinking {
-    animation: fadeOut 0.3s 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: fadeOut 0.4s 0.4s ease forwards;
 }
 
 #splash-screen.shrinking .splash-content {
-    animation: expandOut 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: expandOut 0.6s ease forwards;
 }
 
 .splash-content {
@@ -36,7 +36,7 @@
     margin: 0 auto 24px auto;
     opacity: 0;
     transform: scale(0.5);
-    animation: popIn 0.6s 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation: popIn 0.3s 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .splash-title {
@@ -46,8 +46,8 @@
     margin-bottom: 8px;
     opacity: 0;
     transform: translateY(20px);
-    animation: slideUp 0.6s 0.4s ease-out forwards,
-        shimmer 2s 1.6s ease-in-out infinite;
+    animation: slideUp 0.3s 0.15s ease-out forwards,
+        shimmer 1.5s 0.5s ease-in-out infinite;
     background: linear-gradient(90deg, #1e293b 25%, #d8e1fe 50%, #1e293b 75%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -61,8 +61,8 @@
     margin-bottom: 32px;
     opacity: 0;
     transform: translateY(20px);
-    animation: slideUp 0.6s 0.6s ease-out forwards,
-        shimmer 2s 1.8s ease-in-out infinite;
+    animation: slideUp 0.3s 0.2s ease-out forwards,
+        shimmer 1.5s 0.6s ease-in-out infinite;
     background: linear-gradient(90deg, #475b78 25%, #d2dbfa 50%, #64748b 75%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -76,7 +76,7 @@
     margin-bottom: 32px;
     opacity: 0;
     transform: translateY(20px);
-    animation: slideUp 0.6s 2s ease-out forwards;
+    animation: slideUp 0.3s 0.4s ease-out forwards;
 }
 
 @keyframes popIn {

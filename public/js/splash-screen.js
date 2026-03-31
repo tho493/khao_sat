@@ -17,9 +17,9 @@
 
                 setTimeout(function () {
                     splashScreen.remove();
-                }, 1500); // 1.5s để đợi animation fadeOut hoàn thành
+                }, 1000); // 1s để đợi animation fadeOut hoàn thành
 
-            }, 1000); // 1s delay để bắt đầu animation shrinkOut
+            }, 400); // 0.4s delay để bắt đầu animation shrinkOut
         });
     }
 
