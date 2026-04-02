@@ -19,6 +19,20 @@ body {
     overflow-x: hidden;
 }
 
+/* Make custom cursor universal and seamless */
+html, * {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='28' height='28' fill='none'><defs><filter id='shadow'><feDropShadow dx='0' dy='1' stdDeviation='1.2' flood-color='rgba(0,0,0,0.5)'/></filter></defs><g filter='url(%23shadow)'><path d='M5.5 3.21l11.68 11.68c.32.32.1.85-.35.85H10.4a1 1 0 0 0-.7.29l-4.55 4.55c-.32.32-.85.1-.85-.35V3.56c0-.45.54-.67.85-.35z' fill='white'/><path d='M5.5 3.21l11.68 11.68c.32.32.1.85-.35.85H10.4a1 1 0 0 0-.7.29l-4.55 4.55c-.32.32-.85.1-.85-.35V3.56c0-.45.54-.67.85-.35z' stroke='%234f46e5' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></g></svg>") 0 0, auto !important;
+}
+
+a, button, input[type="submit"], input[type="button"], .btn, .cursor-pointer,
+a *, button *, .btn *, .cursor-pointer *, .dropdown-item, .dropdown-item * {
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='28' height='28' fill='none'><defs><filter id='shadow'><feDropShadow dx='0' dy='1' stdDeviation='1.2' flood-color='rgba(0,0,0,0.5)'/></filter></defs><g filter='url(%23shadow)'><path d='M5.5 3.21l11.68 11.68c.32.32.1.85-.35.85H10.4a1 1 0 0 0-.7.29l-4.55 4.55c-.32.32-.85.1-.85-.35V3.56c0-.45.54-.67.85-.35z' fill='%234f46e5'/><path d='M5.5 3.21l11.68 11.68c.32.32.1.85-.35.85H10.4a1 1 0 0 0-.7.29l-4.55 4.55c-.32.32-.85.1-.85-.35V3.56c0-.45.54-.67.85-.35z' stroke='white' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/></g></svg>") 0 0, pointer !important;
+}
+
+input[type="text"], input[type="password"], input[type="email"], input[type="number"], input[type="search"], textarea {
+    cursor: text !important;
+}
+
 #wrapper {
     display: flex;
     overflow-x: hidden;
