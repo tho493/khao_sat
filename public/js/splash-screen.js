@@ -11,15 +11,13 @@
         }
 
         window.addEventListener('load', function () {
+            // Dismiss ngay khi load xong, không delay thêm
+            splashScreen.classList.add('shrinking');
+            mainContent.style.visibility = 'visible';
+
             setTimeout(function () {
-                splashScreen.classList.add('shrinking');
-                mainContent.style.visibility = 'visible';
-
-                setTimeout(function () {
-                    splashScreen.remove();
-                }, 1000); // 1s để đợi animation fadeOut hoàn thành
-
-            }, 400); // 0.4s delay để bắt đầu animation shrinkOut
+                splashScreen.remove();
+            }, 300); // khớp với duration fadeOut trong CSS
         });
     }
 
