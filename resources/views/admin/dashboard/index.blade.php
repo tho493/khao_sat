@@ -2,15 +2,15 @@
 
 @section('title', 'Admin Dashboard')
 
-@push('styles')
+<!-- @push('styles')
     <link rel="stylesheet" href="/css/splash-screen.css">
-@endpush
+@endpush -->
 
-
+<!-- 
 @section('splash-screen')
     @include('layouts.splash-screen')
     <script src="/js/splash-screen.js"></script>
-@endsection
+@endsection -->
 
 @section('content')
     <div class="container-fluid">

@@ -40,11 +40,11 @@
     <link rel="stylesheet" href="/css/home.css">
 
     {{-- Christmas Theme CSS --}}
-    @if (date('m') == 12 && date('d') >= 22 && date('d') <= 25)
+    @if (date('m') == 12 && date('d') >= 20 && date('d') <= 25)
         <link rel="stylesheet" href="/css/christmas-theme.css">
     @endif
 
-    {{-- Happy New Year 2025 Theme CSS (Dec 28 - Jan 5) --}}
+    {{-- Happy New Year Theme CSS (Dec 28 - Jan 5) --}}
     @if ((date('m') == 12 && date('d') >= 29) || (date('m') == 1 && date('d') <= 3))
         <link rel="stylesheet" href="/css/newyear-theme.css">
     @endif
@@ -75,7 +75,32 @@
 
 <body>
     <!-- Splash (overlay) -->
-    @include('layouts.splash-screen')
+    <div id="splash-screen">
+        <!-- Ambient orbs -->
+        <div class="splash-orb splash-orb-1"></div>
+        <div class="splash-orb splash-orb-2"></div>
+        <div class="splash-orb splash-orb-3"></div>
+
+        <div class="splash-content">
+            <div class="splash-logo-wrapper">
+                <div class="splash-logo-bg"></div>
+                <img src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ" class="splash-logo">
+            </div>
+
+            <h1 class="splash-title">Hệ thống Khảo sát Trực tuyến</h1>
+            <p class="splash-subtitle">Trường Đại học Sao Đỏ</p>
+
+            <noscript>
+                <div id="splash-noscript-warning">Trình duyệt của bạn đang không bật Javascript. Bạn cần bật nó để
+                    website có thể hoạt động.</div>
+            </noscript>
+        </div>
+
+        <!-- Progress bar -->
+        <div id="splash-progress-track">
+            <div id="splash-progress"></div>
+        </div>
+    </div>
     <script src="/js/splash-screen.js"></script>
 
     <div class="bg-gradient-to-br from-blue-500 to-slate-50 text-slate-800">
@@ -314,11 +339,11 @@
     @stack('scripts')
 
     {{-- Christmas Theme JS --}}
-    @if (date('m') == 12 && date('d') >= 22 && date('d') <= 25)
+    @if (date('m') == 12 && date('d') >= 20 && date('d') <= 25)
         <script src="/js/christmas-theme.js"></script>
     @endif
 
-    {{-- Happy New Year 2025 Theme JS (Dec 28 - Jan 5) --}}
+    {{-- Happy New Year Theme JS (Dec 28 - Jan 5) --}}
     @if ((date('m') == 12 && date('d') >= 29) || (date('m') == 1 && date('d') <= 3))
         <script src="/js/newyear-theme.js"></script>
     @endif
