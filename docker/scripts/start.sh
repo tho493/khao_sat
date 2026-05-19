@@ -40,6 +40,12 @@ if ! grep -q "^APP_KEY=" .env; then
     php artisan key:generate
 fi
 
+# Xóa cache files thủ công TRƯỚC bất kỳ lệnh artisan nào
+rm -f bootstrap/cache/config.php
+rm -f bootstrap/cache/services.php
+rm -f bootstrap/cache/routes-v7.php
+rm -f bootstrap/cache/events.php
+
 # Run database migrations (non-interactive); do not block startup on failure
 php artisan migrate --force --no-interaction || echo "[start] Migrate failed; continuing startup"
 
