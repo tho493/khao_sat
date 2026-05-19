@@ -33,11 +33,11 @@
     <meta property="og:locale" content="vi_VN">
     <link rel="canonical" href="{{ url()->current() }}">
 
-    <link rel="stylesheet" href="/css/splash-screen.css">
+    <link rel="stylesheet" href="{{ asset('css/splash-screen.css') }}?v={{ @filemtime(public_path('css/splash-screen.css')) }}">
     <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
 
     {{-- CSS for Glassmorphism & Improvements --}}
-    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="{{ asset('css/home.css') }}?v={{ @filemtime(public_path('css/home.css')) }}">
 
     {{-- Christmas Theme CSS --}}
     @if (date('m') == 12 && date('d') >= 20 && date('d') <= 25)
@@ -101,7 +101,7 @@
             <div id="splash-progress"></div>
         </div>
     </div>
-    <script src="/js/splash-screen.js"></script>
+    <script src="{{ asset('js/splash-screen.js') }}?v={{ @filemtime(public_path('js/splash-screen.js')) }}"></script>
 
     <div class="bg-gradient-to-br from-blue-500 to-slate-50 text-slate-800">
         {{-- Main Content Wrapper --}}

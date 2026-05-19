@@ -43,6 +43,7 @@ fi
 # Xóa cache files thủ công TRƯỚC bất kỳ lệnh artisan nào
 rm -f bootstrap/cache/config.php
 rm -f bootstrap/cache/services.php
+rm -f bootstrap/cache/packages.php
 rm -f bootstrap/cache/routes-v7.php
 rm -f bootstrap/cache/events.php
 
