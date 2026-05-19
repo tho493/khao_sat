@@ -296,3 +296,21 @@ Bạn có thể cài đặt theo 2 cách:
 
 - **Giáo viên hướng dẫn:** ThS. Phạm Văn Kiên
 - Phần mềm là sản phẩm thử nghiệm.
+
+###
+
+```sh
+git pull
+
+docker compose down
+
+docker compose up -d --build
+
+docker exec -it khao_sat_app sh -c "
+rm -rf bootstrap/cache/* &&
+rm -rf storage/framework/cache/* &&
+rm -rf storage/framework/views/* &&
+rm -rf storage/framework/sessions/* &&
+php artisan optimize:clear
+"
+```
