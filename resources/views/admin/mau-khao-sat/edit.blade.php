@@ -628,7 +628,7 @@
                 if (!palette.classList.contains('palette-fixed')) {
                     const rect = palette.getBoundingClientRect();
                     const parentRect = paletteParent.getBoundingClientRect();
-                    paletteOffsetTop = rect.top + window.pageYOffset;
+                    paletteOffsetTop = rect.top + window.pageYOffset + 80;
                     paletteWidth = rect.width;
                     paletteLeft = rect.left;
                 }
