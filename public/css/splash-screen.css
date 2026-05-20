@@ -6,7 +6,13 @@
     inset: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #0a0f1e 0%, #0f2044 40%, #1a1040 70%, #0a0f1e 100%);
+    background: linear-gradient(
+        135deg,
+        #0a0f1e 0%,
+        #0f2044 40%,
+        #1a1040 70%,
+        #0a0f1e 100%
+    );
     z-index: 99999;
     display: grid;
     place-items: center;
@@ -18,6 +24,7 @@
 /* --- Blur-fade dismiss --- */
 #splash-screen.dismissing {
     animation: blur-fade-out 0.28s ease-out forwards;
+    -webkit-animation: blur-fade-out 0.28s ease-out forwards;
 }
 
 /* --- Ambient orbs --- */
@@ -30,7 +37,11 @@
 .splash-orb-1 {
     width: 420px;
     height: 420px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, transparent 70%);
+    background: radial-gradient(
+        circle,
+        rgba(59, 130, 246, 0.18) 0%,
+        transparent 70%
+    );
     top: -120px;
     left: -100px;
     animation: float-a 7s ease-in-out infinite;
@@ -39,7 +50,11 @@
 .splash-orb-2 {
     width: 320px;
     height: 320px;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.14) 0%, transparent 70%);
+    background: radial-gradient(
+        circle,
+        rgba(139, 92, 246, 0.14) 0%,
+        transparent 70%
+    );
     bottom: -80px;
     right: -80px;
     animation: float-b 9s ease-in-out infinite;
@@ -48,7 +63,11 @@
 .splash-orb-3 {
     width: 220px;
     height: 220px;
-    background: radial-gradient(circle, rgba(16, 185, 129, 0.10) 0%, transparent 70%);
+    background: radial-gradient(
+        circle,
+        rgba(16, 185, 129, 0.1) 0%,
+        transparent 70%
+    );
     top: 45%;
     left: 55%;
     animation: float-a 11s ease-in-out infinite reverse;
@@ -75,7 +94,7 @@
 /* Pulse ring */
 .splash-logo-wrapper::before,
 .splash-logo-wrapper::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: -10px;
     border-radius: 50%;
@@ -94,7 +113,11 @@
     position: absolute;
     inset: -4px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, transparent 70%);
+    background: radial-gradient(
+        circle,
+        rgba(59, 130, 246, 0.25) 0%,
+        transparent 70%
+    );
 }
 
 .splash-logo {
@@ -105,10 +128,13 @@
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.97);
     padding: 10px;
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.35), 0 8px 32px rgba(0, 0, 0, 0.4);
+    box-shadow:
+        0 0 30px rgba(59, 130, 246, 0.35),
+        0 8px 32px rgba(0, 0, 0, 0.4);
     opacity: 0;
     transform: scale(0.6);
-    animation: pop-in 0.45s 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation: pop-in 0.45s 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275)
+        forwards;
 }
 
 /* --- Title --- */
@@ -119,13 +145,20 @@
     letter-spacing: -0.02em;
     opacity: 0;
     transform: translateY(18px);
-    background: linear-gradient(90deg, #93c5fd 0%, #e2e8f0 40%, #a78bfa 70%, #93c5fd 100%);
+    background: linear-gradient(
+        90deg,
+        #93c5fd 0%,
+        #e2e8f0 40%,
+        #a78bfa 70%,
+        #93c5fd 100%
+    );
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     background-size: 300% 100%;
-    animation: slide-up 0.4s 0.25s ease-out forwards,
-               shimmer 2.5s 0.7s ease-in-out infinite;
+    animation:
+        slide-up 0.4s 0.25s ease-out forwards,
+        shimmer 2.5s 0.7s ease-in-out infinite;
 }
 
 /* --- Subtitle --- */
@@ -134,13 +167,20 @@
     margin-bottom: 40px;
     opacity: 0;
     transform: translateY(18px);
-    background: linear-gradient(90deg, #64748b 0%, #94a3b8 40%, #7c9bbf 70%, #64748b 100%);
+    background: linear-gradient(
+        90deg,
+        #64748b 0%,
+        #94a3b8 40%,
+        #7c9bbf 70%,
+        #64748b 100%
+    );
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     background-size: 300% 100%;
-    animation: slide-up 0.4s 0.35s ease-out forwards,
-               shimmer 2.5s 0.9s ease-in-out infinite;
+    animation:
+        slide-up 0.4s 0.35s ease-out forwards,
+        shimmer 2.5s 0.9s ease-in-out infinite;
 }
 
 /* --- No-JS warning (dùng <noscript>) --- */
@@ -179,40 +219,96 @@
 /* ===== Keyframes ===== */
 
 @keyframes blur-fade-out {
-    0%   { opacity: 1; filter: blur(0px);   transform: scale(1); }
-    100% { opacity: 0; filter: blur(16px);  transform: scale(1.04); }
+    0% {
+        opacity: 1;
+        filter: blur(0px);
+        -webkit-filter: blur(0px);
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        filter: blur(16px);
+        -webkit-filter: blur(16px);
+        transform: scale(1.04);
+    }
+}
+
+@-webkit-keyframes blur-fade-out {
+    0% {
+        opacity: 1;
+        -webkit-filter: blur(0px);
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        -webkit-filter: blur(16px);
+        transform: scale(1.04);
+    }
 }
 
 @keyframes pop-in {
-    to { opacity: 1; transform: scale(1); }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 @keyframes slide-up {
-    to { opacity: 1; transform: translateY(0); }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes shimmer {
-    0%   { background-position: 100% 0; }
-    100% { background-position: -100% 0; }
+    0% {
+        background-position: 100% 0;
+    }
+    100% {
+        background-position: -100% 0;
+    }
 }
 
 @keyframes progress-shimmer {
-    0%   { background-position: 100% 0; }
-    100% { background-position: -100% 0; }
+    0% {
+        background-position: 100% 0;
+    }
+    100% {
+        background-position: -100% 0;
+    }
 }
 
 @keyframes float-a {
-    0%, 100% { transform: translateY(0px) scale(1); }
-    33%       { transform: translateY(-28px) scale(1.04); }
-    66%       { transform: translateY(14px) scale(0.97); }
+    0%,
+    100% {
+        transform: translateY(0px) scale(1);
+    }
+    33% {
+        transform: translateY(-28px) scale(1.04);
+    }
+    66% {
+        transform: translateY(14px) scale(0.97);
+    }
 }
 
 @keyframes float-b {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50%       { transform: translateY(-22px) rotate(8deg); }
+    0%,
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-22px) rotate(8deg);
+    }
 }
 
 @keyframes pulse-ring {
-    0%, 100% { transform: scale(1);    opacity: 0.5; }
-    50%       { transform: scale(1.18); opacity: 0.15; }
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.18);
+        opacity: 0.15;
+    }
 }
