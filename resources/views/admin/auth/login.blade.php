@@ -12,295 +12,240 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script>
+    
     <style>
         body {
             font-family: 'Be Vietnam Pro', sans-serif;
-            color: white;
-            background-size: 200% 200%;
-            background-image: linear-gradient(
-                45deg, 
-                #667eea, 
-                #764ba2, 
-                #25dce2, 
-                #667eea
-            );
-            animation: gradientAnimation 10s ease infinite;
+            background-color: #f3f4f6;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: #1f2937;
+            margin: 0;
         }
 
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        .login-wrapper {
+            width: 100%;
+            max-width: 420px;
+            padding: 2rem;
         }
 
         .login-card {
-            background: rgba(255, 255, 255, 0.35);
-            border-radius: 1.5rem;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            color: white;
+            background: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Tăng shadow tạo chiều sâu */
+            padding: 2.5rem 2rem;
+            border: 1px solid #e5e7eb; /* Thêm border tinh tế */
+        }
+
+        .logo-section img {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
         }
 
         .login-header h3 {
-            font-weight: 700;
-            color: #ffffff;
+            font-weight: 600; /* Giảm weight xuống 600 */
+            color: #111827;
+            font-size: 1.5rem;
+            margin-bottom: 0.4rem;
         }
         
         .login-header p {
-            color: rgba(255, 255, 255, 0.8);
+            color: #6b7280; /* Màu text phụ */
+            font-size: 0.95rem;
+            line-height: 1.6; /* Tăng line-height */
+            font-weight: 400;
         }
 
         .form-label {
-            color: rgba(255, 255, 255, 0.9);
             font-weight: 500;
+            color: #374151;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
         }
 
-        .form-control, .input-group-text {
-            background-color: rgba(255, 255, 255, 0.2) !important;
-            border: 1px solid rgba(255, 255, 255, 0.3) !important;
-            color: white !important;
-            border-radius: 0.5rem;
+        /* Đồng nhất chiều cao cho input và button */
+        .form-control, .input-group-text, .btn-login {
+            height: 46px; 
         }
-        
-        .form-control::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
-            color: rgba(255, 255, 255, 0.6);
-            opacity: 1; /* Firefox */
-        }
-        
-        .form-control:focus {
-            box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
+
+        .form-control {
+            background-color: #f9fafb;
+            border: 1px solid #d1d5db;
+            color: #1f2937;
+            padding: 0.5rem 1rem; /* Giảm padding để fit với height 46px */
+            box-shadow: none;
+            transition: all 0.2s ease;
         }
         
         .input-group-text {
-            border-right: none;
+            background-color: #f3f4f6;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
         }
-        .form-control {
-            border-left: none;
+
+        .form-control:focus {
+            background-color: #ffffff;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+        
+        /* Trạng thái lỗi (Red Border) */
+        .input-error {
+            border-color: #ef4444 !important;
+        }
+        .input-error:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+        }
+
+        .form-control::placeholder {
+            color: #9ca3af;
+            font-size: 0.95rem;
         }
 
         .btn-login {
-            background: #ffffff;
-            color: #3B82F6; /* Màu xanh dương đậm */
+            background: #2563eb;
+            color: #ffffff;
             border: none;
             border-radius: 0.5rem;
-            padding: 12px;
-            font-size: 1rem;
             font-weight: 600;
-            transition: all 0.3s;
             width: 100%;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .btn-login:hover {
-            background: #f0f0f0;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: #1d4ed8;
+            color: #ffffff;
+        }
+
+        .btn-login:disabled {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 1.5rem;
         }
 
         .back-link a {
-            color: rgba(255, 255, 255, 0.8);
+            color: #6b7280;
             text-decoration: none;
-            transition: color 0.3s;
-        }
-        .back-link a:hover {
-            color: #ffffff;
+            font-size: 0.9rem;
+            transition: color 0.2s;
         }
         
-        .logo-section img {
-            width: 80px;
-            height: 80px;
+        .back-link a:hover {
+            color: #111827;
+        }
+        
+        .footer-text {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.8rem;
+            margin-top: 1.25rem; /* Đưa gần với card hơn */
+            opacity: 0.8; /* Làm mờ đi một chút */
         }
 
-        /* Cookie Consent */
-        .cookie-consent {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            color: #fff;
-            padding: 15px 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        /* reCAPTCHA fix khoảng cách */
+        .recaptcha-container {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1001;
-            transform: translateY(200%);
-            transition: transform 0.5s ease-in-out;
-        }
-
-        .cookie-consent.show {
-            transform: translateY(0);
-        }
-
-        .cookie-consent p {
-            margin: 0;
-            font-size: 14px;
-        }
-
-        .cookie-consent-buttons button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-left: 10px;
-            transition: background 0.3s;
-        }
-
-        .cookie-consent-buttons button:hover {
-            background: #45a049;
+            justify-content: center;
+            margin: 1.25rem 0; 
+            min-height: 78px; /* Giữ sẵn khoảng trống để không giật UI */
+            transform: scale(0.96);
+            transform-origin: center;
         }
     </style>
 </head>
 <body>
-    <div class="container" id="main-content">
-        <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-5 col-xl-4">
-                <div class="login-card p-4 p-md-5">
-                    <div class="logo-section text-center mb-4">
-                        <img src="image/logo.png" alt="Logo Trường Đại học Sao Đỏ">
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="logo-section text-center mb-4">
+                <img src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ">
+            </div>
+
+            <div class="login-header text-center mb-4">
+                <h3>Đăng nhập Quản trị</h3>
+                <p>Hệ thống Khảo sát Trực tuyến</p>
+            </div>
+
+            @if($errors->any())
+                <div class="alert alert-danger border-0 small p-3 text-center mb-4 rounded-3 bg-danger bg-opacity-10 text-danger fade show">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i>{{ $errors->first() }}
+                </div>
+            @endif
+
+            <form method="POST" action="/login" id="loginForm">
+                @csrf
+                <div class="mb-3">
+                    <label for="tendangnhap" class="form-label">Tên đăng nhập</label>
+                    <div class="input-group">
+                        <span class="input-group-text {{ $errors->any() ? 'input-error bg-danger bg-opacity-10 text-danger' : '' }}"><i class="bi bi-person"></i></span>
+                        <input type="text" class="form-control {{ $errors->any() ? 'input-error' : '' }}" id="tendangnhap" name="tendangnhap" value="{{ old('tendangnhap') }}" placeholder="Nhập tên đăng nhập" required autofocus autocomplete="username">
                     </div>
+                </div>
 
-                    <div class="login-header text-center mb-4">
-                        <h3>Đăng nhập Quản trị</h3>
-                        <p>Hệ thống Khảo sát Trực tuyến</p>
-                    </div>
-
-                    @if($errors->any())
-                        <div class="alert alert-danger bg-danger/50 text-white border-0 small p-2 text-center mb-3">
-                            {{ $errors->first() }}
-                        </div>
-                    @endif
-
-                    <form method="POST" action="/login" id="loginForm">
-                        @csrf
-
-                        <div class="mb-3">
-                            <label for="tendangnhap" class="form-label">Tên đăng nhập</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <input type="text" class="form-control"
-                                    id="tendangnhap" name="tendangnhap" value="{{ old('tendangnhap') }}"
-                                    placeholder="Tên đăng nhập của bạn" required autofocus>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="matkhau" class="form-label">Mật khẩu</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                                <input type="password" class="form-control" id="matkhau"
-                                    name="matkhau" placeholder="Nhập mật khẩu" required>
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword" style="border: 1px solid rgba(255, 255, 255, 0.3) !important; border-left: none !important; color: white;">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-4 d-flex justify-content-center">
-                            <div class="g-recaptcha" data-theme="dark" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
-                        </div>
-
-                        <button type="submit" class="btn btn-login" id="loginBtn">
-                            Đăng nhập
+                <div class="mb-3">
+                    <label for="matkhau" class="form-label">Mật khẩu</label>
+                    <div class="input-group">
+                        <span class="input-group-text {{ $errors->any() ? 'input-error bg-danger bg-opacity-10 text-danger' : '' }}"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control border-end-0 {{ $errors->any() ? 'input-error' : '' }}" id="matkhau" name="matkhau" placeholder="Nhập mật khẩu" required autocomplete="current-password">
+                        <button class="btn btn-outline-secondary bg-white border-start-0 {{ $errors->any() ? 'input-error' : '' }}" style="border-color: #d1d5db;" type="button" id="togglePassword" tabindex="-1">
+                            <i class="bi bi-eye text-muted" id="toggleIcon"></i>
                         </button>
-                    </form>
-
-                    <div class="back-link text-center mt-4">
-                        <a href="{{ route('khao-sat.index') }}">
-                            <i class="bi bi-arrow-left me-1"></i> Quay lại trang chủ
-                        </a>
                     </div>
                 </div>
-
-                <div class="text-center mt-4">
-                    <p class="text-white/70 small mb-0">
-                        &copy; {{ date('Y') }} Trường Đại học Sao Đỏ.
-                    </p>
+                
+                <div class="recaptcha-container">
+                    <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
                 </div>
+
+                <button type="submit" class="btn btn-login" id="loginBtn">
+                    Đăng nhập
+                </button>
+            </form>
+
+            <div class="back-link">
+                <a href="{{ route('khao-sat.index') }}">
+                    <i class="bi bi-arrow-left me-1"></i> Quay lại trang chủ
+                </a>
             </div>
         </div>
-    </div>
-
-    <div id="cookie-consent" class="cookie-consent">
-        <p>Trang web này sử dụng cookie để đảm bảo bạn có trải nghiệm tốt nhất. Vui lòng chấp nhận để tiếp tục.</p>
-        <div class="cookie-consent-buttons">
-            <button id="cookie-accept">Chấp nhận</button>
+        
+        <div class="footer-text">
+            &copy; {{ date('Y') }} Trường Đại học Sao Đỏ.
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // Toggle password visibility
-    document.getElementById('togglePassword').addEventListener('click', function () {
-        const passwordInput = document.getElementById('matkhau');
-        const icon = this.querySelector('i');
+    <script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const passwordInput = document.getElementById('matkhau');
+            const icon = document.getElementById('toggleIcon');
 
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            icon.classList.remove('bi-eye');
-            icon.classList.add('bi-eye-slash');
-        } else {
-            passwordInput.type = 'password';
-            icon.classList.remove('bi-eye-slash');
-            icon.classList.add('bi-eye');
-        }
-    });
-
-    // Form submission
-    document.getElementById('loginForm').addEventListener('submit', function (e) {
-        const btn = document.getElementById('loginBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang đăng nhập...';
-        
-        // Đảm bảo CSRF token được gửi đúng cách cho iOS WebKit
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const form = document.getElementById('loginForm');
-        
-        // Thêm CSRF token vào form nếu chưa có
-        if (!form.querySelector('input[name="_token"]')) {
-            const tokenInput = document.createElement('input');
-            tokenInput.type = 'hidden';
-            tokenInput.name = '_token';
-            tokenInput.value = csrfToken;
-            form.appendChild(tokenInput);
-        }
-    });
-
-    // Auto-hide alerts
-    setTimeout(function () {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(function (alert) {
-            const bsAlert = new bootstrap.Alert(alert);
-            bsAlert.close();
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+            // Giữ focus lại cho ô input sau khi click
+            passwordInput.focus();
         });
-    }, 5000);
 
-    // Cookie Consent
-    document.addEventListener('DOMContentLoaded', function () {
-        const cookieConsent = document.getElementById('cookie-consent');
-        const acceptButton = document.getElementById('cookie-accept');
-
-        if (!localStorage.getItem('cookie_accepted')) {
-            setTimeout(() => {
-                cookieConsent.classList.add('show');
-            }, 1000);
-        }
-
-        acceptButton.addEventListener('click', function () {
-            localStorage.setItem('cookie_accepted', 'true');
-            cookieConsent.classList.remove('show');
+        // Form submission state
+        document.getElementById('loginForm').addEventListener('submit', function () {
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Đang đăng nhập...';
         });
-    });
-</script>
+    </script>
 </body>
 </html>
