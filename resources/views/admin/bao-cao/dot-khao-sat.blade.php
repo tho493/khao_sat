@@ -72,7 +72,7 @@
                                 $activeFilters = [];
                                 if (!empty($personalInfoFilters)) {
                                     foreach ($personalInfoFilters as $qId => $filterValue) {
-                                        $question = $personalInfoQuestions->firstWhere('id', $qId);
+                                        $question = $filterQuestions->firstWhere('id', $qId);
                                         if ($question && $filterValue) {
                                             $filterLabel = $filterValue;
                                             if ($question->phuongAnTraLoi->count() > 0) {
@@ -192,17 +192,17 @@
         </div>
 
         <!-- Bộ lọc -->
-        @if(isset($personalInfoQuestions) && $personalInfoQuestions->count() > 0)
+        @if(isset($filterQuestions) && $filterQuestions->count() > 0)
             <div class="card shadow mb-4">
                 <div class="card-header bg-light">
                     <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="bi bi-funnel"></i> Bộ lọc theo câu hỏi thông tin cá nhân
+                        <i class="bi bi-funnel"></i> Bộ lọc theo thông tin & câu hỏi khảo sát
                     </h6>
                 </div>
                 <div class="card-body">
                     <form method="GET" action="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}" id="filterForm">
                         <div class="row g-3">
-                            @foreach($personalInfoQuestions as $q)
+                            @foreach($filterQuestions as $q)
                                 @php
                                     $currentValue = $personalInfoFilters[$q->id] ?? null;
                                     $isSelectType = in_array($q->loai_cauhoi, ['single_choice', 'multiple_choice', 'custom_select']);

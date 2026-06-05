@@ -8,10 +8,10 @@
         .question-palette {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             padding: 20px;
         }
-        
+
         /* Fixed state when scrolling */
         .question-palette.palette-fixed {
             position: fixed !important;
@@ -45,7 +45,7 @@
 
         .question-type-item:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .question-type-item:active {
@@ -80,14 +80,37 @@
         }
 
         /* Question Type Colors */
-        .qtype-single_choice .question-type-icon { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .qtype-multiple_choice .question-type-icon { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .qtype-text .question-type-icon { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .qtype-likert .question-type-icon { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-        .qtype-rating .question-type-icon { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-        .qtype-date .question-type-icon { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
-        .qtype-number .question-type-icon { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
-        .qtype-custom_select .question-type-icon { background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%); }
+        .qtype-single_choice .question-type-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .qtype-multiple_choice .question-type-icon {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .qtype-text .question-type-icon {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .qtype-likert .question-type-icon {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .qtype-rating .question-type-icon {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .qtype-date .question-type-icon {
+            background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+        }
+
+        .qtype-number .question-type-icon {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .qtype-custom_select .question-type-icon {
+            background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%);
+        }
 
         /* Page Container Styles */
         .page-container {
@@ -161,7 +184,7 @@
 
         .question-item:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         /* Sortable Drag States */
@@ -173,7 +196,7 @@
         .sortable-drag {
             opacity: 0.8;
             transform: rotate(3deg);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
 
         .sortable-chosen {
@@ -217,32 +240,35 @@
             border: 2px dashed #2196f3;
             border-radius: 6px;
         }
-        
+
         /* Force proper scrolling */
-        body, html {
+        body,
+        html {
             overflow-y: auto !important;
             height: auto !important;
         }
-        
+
         .container-fluid {
             overflow: visible !important;
         }
-        
+
         /* Fix parent containers for sticky to work */
         .row {
             overflow: visible !important;
         }
-        
+
         .col-lg-4 {
             position: static !important;
             overflow: visible !important;
         }
-        
+
         .col-lg-8 {
             position: static !important;
         }
-        
-        #main-content, #content, #wrapper {
+
+        #main-content,
+        #content,
+        #wrapper {
             overflow-x: hidden !important;
             overflow-y: visible !important;
         }
@@ -271,7 +297,8 @@
 
         <!-- Form Thông tin mẫu - Full width, collapsible -->
         <div class="card shadow mb-4">
-            <div class="card-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#surveyInfoCollapse">
+            <div class="card-header" style="cursor: pointer;" data-bs-toggle="collapse"
+                data-bs-target="#surveyInfoCollapse">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Thông tin mẫu khảo sát</h5>
                     <i class="bi bi-chevron-down"></i>
@@ -279,8 +306,7 @@
             </div>
             <div class="collapse show" id="surveyInfoCollapse">
                 <div class="card-body">
-                    <form method="POST" action="{{ route('admin.mau-khao-sat.update', $mauKhaoSat) }}"
-                        id="formUpdateMau">
+                    <form method="POST" action="{{ route('admin.mau-khao-sat.update', $mauKhaoSat) }}" id="formUpdateMau">
                         @csrf
                         @method('PUT')
                         <div class="row mb-3">
@@ -329,7 +355,8 @@
                             <tr>
                                 <td class="text-muted">Số câu hỏi:</td>
                                 <td>
-                                    <span class="badge bg-info" id="question-count">{{ $mauKhaoSat->cauHoi->count() ?? 0 }}</span>
+                                    <span class="badge bg-info"
+                                        id="question-count">{{ $mauKhaoSat->cauHoi->count() ?? 0 }}</span>
                                 </td>
                             </tr>
                             <tr>
@@ -338,11 +365,13 @@
                             </tr>
                             <tr>
                                 <td class="text-muted">Ngày tạo:</td>
-                                <td>{{ $mauKhaoSat->created_at ? $mauKhaoSat->created_at->format('d/m/Y H:i') : 'N/A' }}</td>
+                                <td>{{ $mauKhaoSat->created_at ? $mauKhaoSat->created_at->format('d/m/Y H:i') : 'N/A' }}
+                                </td>
                             </tr>
                             <tr>
                                 <td class="text-muted">Cập nhật:</td>
-                                <td>{{ $mauKhaoSat->updated_at ? $mauKhaoSat->updated_at->format('d/m/Y H:i') : 'N/A' }}</td>
+                                <td>{{ $mauKhaoSat->updated_at ? $mauKhaoSat->updated_at->format('d/m/Y H:i') : 'N/A' }}
+                                </td>
                             </tr>
                         </table>
                         @if(isset($mauKhaoSat->dotKhaoSat) && $mauKhaoSat->dotKhaoSat->isNotEmpty())
@@ -354,7 +383,8 @@
                             @endphp
                             <div class="alert alert-info">
                                 <h6 class="alert-heading fw-bold"><i class="bi bi-info-circle-fill"></i> Tình trạng sử dụng</h6>
-                                <p class="mb-2">Mẫu khảo sát này đang được sử dụng trong tổng cộng <strong>{{ $totalCount }}</strong> đợt khảo sát:</p>
+                                <p class="mb-2">Mẫu khảo sát này đang được sử dụng trong tổng cộng
+                                    <strong>{{ $totalCount }}</strong> đợt khảo sát:</p>
                                 <ul class="list-unstyled mb-0">
                                     @if($activeCount > 0)
                                         <li>
@@ -393,7 +423,8 @@
                                 <i class="bi bi-files"></i> Sao chép mẫu này
                             </button>
                             @if($mauKhaoSat->trangthai == 'active' && ($mauKhaoSat->cauHoi->count() ?? 0) > 0)
-                                <a href="{{ route('admin.dot-khao-sat.create') }}?mau_khaosat_id={{ $mauKhaoSat->id }}" class="btn btn-success">
+                                <a href="{{ route('admin.dot-khao-sat.create') }}?mau_khaosat_id={{ $mauKhaoSat->id }}"
+                                    class="btn btn-success">
                                     <i class="bi bi-calendar-plus"></i> Tạo đợt khảo sát
                                 </a>
                             @endif
@@ -425,8 +456,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                         <div id="personal-questions-list" class="sortable" 
-                            data-list-type="personal">
+                        <div id="personal-questions-list" class="sortable" data-list-type="personal">
                             {{-- JS sẽ render nội dung ở đây --}}
                         </div>
                     </div>
@@ -454,7 +484,7 @@
                     <div class="palette-header">
                         <i class="bi bi-palette me-2"></i>Loại Câu Hỏi
                     </div>
-                    
+
                     <div class="question-type-item qtype-single_choice" draggable="true" data-question-type="single_choice">
                         <div class="question-type-icon">
                             <i class="bi bi-ui-radios"></i>
@@ -465,7 +495,8 @@
                         </div>
                     </div>
 
-                    <div class="question-type-item qtype-multiple_choice" draggable="true" data-question-type="multiple_choice">
+                    <div class="question-type-item qtype-multiple_choice" draggable="true"
+                        data-question-type="multiple_choice">
                         <div class="question-type-icon">
                             <i class="bi bi-ui-checks"></i>
                         </div>
@@ -555,8 +586,10 @@
                             <input class="form-check-input" type="checkbox" id="enableConditionalLogic">
                             <label class="form-check-label" for="enableConditionalLogic">
                                 <strong>Bật điều kiện hiển thị</strong>
-                                <small class="d-block text-muted">Chỉ hiển thị câu hỏi này khi một câu trả lời khác được chọn.</small>
-                                <small class="d-block text-muted">Chỉ những câu hỏi có lựa chọn mới có thể làm câu hỏi điều kiện (single_choice, multiple_choice, likert, rating).</small>
+                                <small class="d-block text-muted">Chỉ hiển thị câu hỏi này khi một câu trả lời khác được
+                                    chọn.</small>
+                                <small class="d-block text-muted">Chỉ những câu hỏi có lựa chọn mới có thể làm câu hỏi điều
+                                    kiện (single_choice, multiple_choice, likert, rating).</small>
                             </label>
                         </div>
                         <div id="conditional-rules" class="p-3 border rounded bg-light" style="display: none;">
@@ -566,8 +599,7 @@
                                     <select class="form-select form-select-sm" id="parentQuestion">
                                         <option value="">-- Chọn câu hỏi điều kiện --</option>
                                         @foreach($conditionalQuestions as $q)
-                                            <option value="{{ $q->id }}"
-                                                data-options="{{ json_encode($q->phuongAnTraLoi) }}"
+                                            <option value="{{ $q->id }}" data-options="{{ json_encode($q->phuongAnTraLoi) }}"
                                                 data-type="{{ $q->loai_cauhoi }}">
                                                 Câu: {{ Str::limit($q->noidung_cauhoi, 40) }}
                                             </option>
@@ -612,18 +644,18 @@
         const mauKhaoSatId = {{ $mauKhaoSat->id }};
         const isLocked = {{ $isLocked ? 'true' : 'false' }};
         const conditionalQuestionsData = @json($conditionalQuestions);
-        
+
         // Handle palette scroll behavior
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const palette = document.querySelector('.question-palette');
             if (!palette) return;
-            
+
             // Get initial position and dimensions
             const paletteParent = palette.parentElement;
             let paletteOffsetTop = 0;
             let paletteWidth = 0;
             let paletteLeft = 0;
-            
+
             function updatePalettePosition() {
                 if (!palette.classList.contains('palette-fixed')) {
                     const rect = palette.getBoundingClientRect();
@@ -633,14 +665,14 @@
                     paletteLeft = rect.left;
                 }
             }
-            
+
             // Initial measurement
             updatePalettePosition();
-            
+
             // Handle scroll
-            window.addEventListener('scroll', function() {
+            window.addEventListener('scroll', function () {
                 const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                
+
                 if (scrollTop > paletteOffsetTop - 100) {
                     if (!palette.classList.contains('palette-fixed')) {
                         palette.classList.add('palette-fixed');
@@ -655,11 +687,11 @@
                     }
                 }
             });
-            
+
             // Update on resize
             window.addEventListener('resize', updatePalettePosition);
         });
-    
+
     </script>
     <script type="module">
         import Sortable from 'https://cdn.jsdelivr.net/npm/sortablejs@latest/modular/sortable.esm.js';
@@ -709,18 +741,18 @@
             personalList.empty();
             if (personalQuestions.length === 0) {
                 personalList.html(`
-                    <div id="personal-placeholder" class="text-center text-muted p-4">
-                        <i class="bi bi-arrow-left-right fs-1 mb-2 d-block opacity-25"></i>
-                        <p class="mb-0">Kéo loại câu hỏi từ bên phải vào đây</p>
-                    </div>
-                `);
+                        <div id="personal-placeholder" class="text-center text-muted p-4">
+                            <i class="bi bi-arrow-left-right fs-1 mb-2 d-block opacity-25"></i>
+                            <p class="mb-0">Kéo loại câu hỏi từ bên phải vào đây</p>
+                        </div>
+                    `);
             } else {
                 personalQuestions.forEach((q, i) => personalList.append(createQuestionHtml(q, i + 1)));
             }
 
             // Render Survey Questions grouped by Page
             surveyContainer.html(''); // Clear container
-            
+
             // Group questions by page
             const questionsByPage = {};
             surveyQuestions.forEach(q => {
@@ -748,7 +780,7 @@
 
             // Re-initialize sortable after rendering
             initializeSortable();
-            
+
             // Setup drag-and-drop from palette
             checkAndAddEmptyPage();
             setupPaletteDragHandlers();
@@ -758,7 +790,7 @@
         function createPageContainerHtml(pageNum, questions) {
             const questionCount = questions.length;
             const isEmpty = questionCount === 0;
-            
+
             let questionsHtml = '';
             if (isEmpty) {
                 questionsHtml = '<div class="text-center text-muted">Chưa có câu hỏi trong trang này</div>';
@@ -769,26 +801,37 @@
             }
 
             return `
-                <div class="page-container" data-page="${pageNum}">
-                    <div class="page-header">
-                        <div class="page-title">
-                            <i class="bi bi-file-earmark-text me-2"></i>
-                            Trang ${pageNum}
-                            <span class="badge bg-light text-dark ms-2">${questionCount} câu hỏi</span>
+                    <div class="page-container" data-page="${pageNum}">
+                        <div class="page-header">
+                            <div class="page-title">
+                                <i class="bi bi-file-earmark-text me-2"></i>
+                                Trang ${pageNum}
+                                <span class="badge bg-light text-dark ms-2">${questionCount} câu hỏi</span>
+                            </div>
+                        </div>
+                        <div class="page-body ${isEmpty ? 'empty' : ''} sortable-page" data-page="${pageNum}">
+                            ${questionsHtml}
                         </div>
                     </div>
-                    <div class="page-body ${isEmpty ? 'empty' : ''} sortable-page" data-page="${pageNum}">
-                        ${questionsHtml}
-                    </div>
-                </div>
-            `;
+                `;
         }
 
         function createQuestionHtml(cauHoi, stt) {
-            let duplicateCheckHtml = (cauHoi.check_duplicate == true || cauHoi.check_duplicate == 1 || cauHoi.check_duplicate === '1') 
+            let duplicateCheckHtml = (cauHoi.check_duplicate == true || cauHoi.check_duplicate == 1 || cauHoi.check_duplicate === '1')
                 ? `<span class="badge bg-warning text-dark"><i class="bi bi-shield-check me-1"></i>Kiểm tra trùng lặp</span>`
                 : '';
-            
+
+            let filterToggleHtml = '';
+            if (!cauHoi.is_personal_info) {
+                const isChecked = (cauHoi.allow_filter == true || cauHoi.allow_filter == 1 || cauHoi.allow_filter === '1') ? 'checked' : '';
+                filterToggleHtml = `
+                        <div class="form-check form-switch mb-0 d-flex align-items-center gap-1">
+                            <input class="form-check-input" type="checkbox" role="switch" id="toggle-filter-${cauHoi.id}" ${isChecked} onchange="toggleQuestionFilter(${cauHoi.id}, this.checked)" style="cursor: pointer;">
+                            <label class="form-check-label small text-muted" for="toggle-filter-${cauHoi.id}" style="cursor: pointer; user-select: none;">Dùng làm bộ lọc báo cáo</label>
+                        </div>
+                    `;
+            }
+
             let optionsHtml = '';
             if (
                 ['single_choice', 'multiple_choice', 'likert'].includes(cauHoi.loai_cauhoi)
@@ -801,11 +844,12 @@
                 optionsHtml += '</ol>';
             }
             let extraInfoHtml = `
-                                    <div class="mt-2 d-flex align-items-center gap-3 small text-muted">
-                                        ${duplicateCheckHtml}
-                                `;
+                                        <div class="mt-2 d-flex align-items-center gap-3 small text-muted">
+                                            ${duplicateCheckHtml}
+                                            ${filterToggleHtml}
+                                    `;
             if (cauHoi.loai_cauhoi === 'custom_select' && cauHoi.data_source) {
-                 extraInfoHtml += `<div class="border-start ps-3"><i class="bi bi-database me-1"></i>Nguồn: <strong>${cauHoi.data_source.name}</strong></div>`;
+                extraInfoHtml += `<div class="border-start ps-3"><i class="bi bi-database me-1"></i>Nguồn: <strong>${cauHoi.data_source.name}</strong></div>`;
             }
             if (cauHoi.cau_dieukien_id && cauHoi.dieukien_hienthi) {
                 try {
@@ -813,7 +857,7 @@
                     const parentQ = allQuestionsData.find(q => q.id == cauHoi.cau_dieukien_id);
                     const parentQuestionText = parentQ ? parentQ.noidung_cauhoi : `Câu hỏi #${cauHoi.cau_dieukien_id}`;
                     let conditionText = `<strong>${escapeHtml(condition.value)}</strong>`;
-                    
+
                     // Try to find answer text from parent question's options
                     if (parentQ && parentQ.phuong_an_tra_loi && parentQ.phuong_an_tra_loi.length > 0) {
                         const parentAnswer = parentQ.phuong_an_tra_loi.find(pa => pa.noidung == condition.value);
@@ -821,51 +865,53 @@
                             conditionText = `<strong>"${escapeHtml(parentAnswer.noidung)}"</strong>`;
                         }
                     }
-                    
+
                     extraInfoHtml += `
-                                            <div class="border-start ps-3">
-                                                <i class="bi bi-magic me-1 text-info"></i>
-                                                Hiện khi: <em>${escapeHtml(Str_limit(parentQuestionText, 25))}</em> là ${conditionText}
-                                            </div>
-                                        `;
+                                                <div class="border-start ps-3">
+                                                    <i class="bi bi-magic me-1 text-info"></i>
+                                                    Hiện khi: <em>${escapeHtml(Str_limit(parentQuestionText, 25))}</em> là ${conditionText}
+                                                </div>
+                                            `;
                 } catch (e) { console.log(e) }
             }
             extraInfoHtml += `</div>`;
             let buttons = '';
             if (!isLocked) {
                 buttons = `
-                                        <div class="btn-group btn-group-sm">
-                                            <button class="btn btn-outline-secondary handle" title="Kéo để sắp xếp"><i class="bi bi-grip-vertical"></i></button>
-                                            <button class="btn btn-outline-primary" onclick="editQuestionInline(${cauHoi.id})" title="Sửa"><i class="bi bi-pencil"></i></button>
-                                            <button class="btn btn-outline-info" onclick="showConditionalModal(${cauHoi.id})" title="Logic điều kiện"><i class="bi bi-magic"></i></button>
-                                            <button class="btn btn-outline-danger" onclick="deleteCauHoi(${cauHoi.id})" title="Xóa"><i class="bi bi-trash"></i></button>
-                                        </div>
-                                    `;
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-secondary handle" title="Kéo để sắp xếp"><i class="bi bi-grip-vertical"></i></button>
+                                                <button class="btn btn-outline-primary" onclick="editQuestionInline(${cauHoi.id})" title="Sửa"><i class="bi bi-pencil"></i></button>
+                                                <button class="btn btn-outline-info" onclick="showConditionalModal(${cauHoi.id})" title="Logic điều kiện"><i class="bi bi-magic"></i></button>
+                                                <button class="btn btn-outline-danger" onclick="deleteCauHoi(${cauHoi.id})" title="Xóa"><i class="bi bi-trash"></i></button>
+                                            </div>
+                                        `;
             } else {
                 buttons = `
-                                        <div class="btn-group btn-group-sm">
-                                            <button class="btn btn-outline-secondary handle" title="Kéo để sắp xếp"><i class="bi bi-grip-vertical"></i></button>
-                                        </div>
-                                    `;
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-secondary handle" title="Kéo để sắp xếp"><i class="bi bi-grip-vertical"></i></button>
+                                            </div>
+                                        `;
             }
             return `
-                                    <div class="card mb-3 question-item" data-id="${cauHoi.id}">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div class="flex-grow-1">
-                                                    <div class="d-flex align-items-center mb-2">
-                                                        <span class="badge bg-secondary me-2">Câu ${stt}</span>
-                                                        <h6 class="mb-0">${escapeHtml(cauHoi.noidung_cauhoi)} ${cauHoi.batbuoc ? '<span class="text-danger">*</span>' : ''}</h6>
+                                        <div class="card mb-3 question-item" data-id="${cauHoi.id}">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div class="flex-grow-1">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <span class="badge bg-secondary me-2">Câu ${stt}</span>
+                                                            <h6 class="mb-0">${escapeHtml(cauHoi.noidung_cauhoi)} ${cauHoi.batbuoc ? '<span class="text-danger">*</span>' : ''}</h6>
+                                                        </div>
+                                                        <div class="mb-2">
+                                                            <span class="badge bg-info">${getQuestionTypeName(cauHoi.loai_cauhoi)}</span>
+                                                        </div>
+                                                        ${optionsHtml}
+                                                        ${extraInfoHtml}
                                                     </div>
-                                                    <div class="mb-2"><span class="badge bg-info">${getQuestionTypeName(cauHoi.loai_cauhoi)}</span></div>
-                                                    ${optionsHtml}
-                                                    ${extraInfoHtml}
+                                                    ${buttons}
                                                 </div>
-                                                ${buttons}
                                             </div>
                                         </div>
-                                    </div>
-                                `;
+                                    `;
         }
 
         function loadInitialQuestions() {
@@ -881,26 +927,36 @@
                 });
         }
 
-        // === INLINE EDITING (Temporary stubs - will be implemented fully) ===
-        window.addNewPersonalQuestion = function() {
-            if (isLocked) {
-                alert('Mẫu khảo sát đang bị khóa, không thể thêm câu hỏi mới.');
-                return;
-            }
-            alert('Tính năng thêm câu hỏi inline đang được phát triển.');
+        window.toggleQuestionFilter = function (questionId, isEnabled) {
+            $.ajax({
+                url: `/admin/cau-hoi/${questionId}`,
+                method: 'PUT',
+                data: {
+                    allow_filter: isEnabled ? 1 : 0
+                },
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                success: function (response) {
+                    if (response.success) {
+                        loadInitialQuestions();
+                    }
+                },
+                error: function (xhr) {
+                    alert('error', 'Lỗi', 'Đã xảy ra lỗi khi cập nhật bộ lọc!');
+                    loadInitialQuestions();
+                }
+            });
         }
-        
-        
-        window.editQuestionInline = function(questionId) {
+
+        window.editQuestionInline = function (questionId) {
             if (isLocked) {
-                alert('Mẫu khảo sát đang bị khóa, không thể chỉnh sửa câu hỏi này.');
+                alert('error', 'Lỗi', 'Mẫu khảo sát đang bị khóa, không thể chỉnh sửa câu hỏi này.');
                 return;
             }
 
             // Find question data
             const question = allQuestionsData.find(q => q.id === questionId);
             if (!question) {
-                alert('Không tìm thấy câu hỏi!');
+                alert('error', 'Lỗi', 'Không tìm thấy câu hỏi!');
                 return;
             }
 
@@ -910,43 +966,43 @@
             // Hide the question card
             const questionCard = document.querySelector(`.question-item[data-id="${questionId}"]`);
             if (!questionCard) return;
-            
+
             questionCard.style.display = 'none';
 
             const formId = 'edit-form-' + questionId;
             const questionType = question.loai_cauhoi;
             const needsOptions = ['single_choice', 'multiple_choice', 'likert'].includes(questionType);
             const needsDataSource = questionType === 'custom_select';
-            
+
             let optionsHtml = '';
             if (needsOptions) {
                 if (questionType === 'likert') {
                     optionsHtml = `
-                        <div class="mb-3">
-                            <label class="form-label">Phương án (Likert)</label>
-                            <div class="small text-muted">Thang đo Likert chuẩn 5 mức</div>
-                        </div>
-                    `;
+                            <div class="mb-3">
+                                <label class="form-label">Phương án (Likert)</label>
+                                <div class="small text-muted">Thang đo Likert chuẩn 5 mức</div>
+                            </div>
+                        `;
                 } else {
                     optionsHtml = '<div class="mb-3"><label class="form-label">Phương án trả lời <span class="text-danger">*</span></label><div id="' + formId + '-options">';
-                    
+
                     if (question.phuong_an_tra_loi && question.phuong_an_tra_loi.length > 0) {
                         question.phuong_an_tra_loi.forEach((opt, idx) => {
                             optionsHtml += `
-                                <div class="input-group mb-2">
-                                    <span class="input-group-text">${idx + 1}</span>
-                                    <input type="text" class="form-control option-input" value="${escapeHtml(opt.noidung)}">
-                                    <button class="btn btn-outline-danger" type="button" onclick="removeEditOption(this, '${formId}')"><i class="bi bi-trash"></i></button>
-                                </div>
-                            `;
+                                    <div class="input-group mb-2">
+                                        <span class="input-group-text">${idx + 1}</span>
+                                        <input type="text" class="form-control option-input" value="${escapeHtml(opt.noidung)}">
+                                        <button class="btn btn-outline-danger" type="button" onclick="removeEditOption(this, '${formId}')"><i class="bi bi-trash"></i></button>
+                                    </div>
+                                `;
                         });
                     } else {
                         optionsHtml += `
-                            <div class="input-group mb-2"><span class="input-group-text">1</span><input type="text" class="form-control option-input"></div>
-                            <div class="input-group mb-2"><span class="input-group-text">2</span><input type="text" class="form-control option-input"></div>
-                        `;
+                                <div class="input-group mb-2"><span class="input-group-text">1</span><input type="text" class="form-control option-input"></div>
+                                <div class="input-group mb-2"><span class="input-group-text">2</span><input type="text" class="form-control option-input"></div>
+                            `;
                     }
-                    
+
                     optionsHtml += '</div><button type="button" class="btn btn-sm btn-secondary" onclick="addOptionToForm(\'' + formId + '\')"><i class="bi bi-plus"></i> Thêm phương án</button></div>';
                 }
             }
@@ -954,60 +1010,66 @@
             let dataSourceHtml = '';
             if (needsDataSource) {
                 dataSourceHtml = `
-                    <div class="mb-3">
-                        <label class="form-label">Nguồn dữ liệu <span class="text-danger">*</span></label>
-                        <select class="form-select" id="${formId}-datasource">
-                            <option value="">-- Chọn nguồn dữ liệu --</option>
-                            @foreach($dataSources as $ds)
-                                <option value="{{ $ds->id }}" ${question.data_source_id == {{ $ds->id }} ? 'selected' : ''}>{{ $ds->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                `;
+                        <div class="mb-3">
+                            <label class="form-label">Nguồn dữ liệu <span class="text-danger">*</span></label>
+                            <select class="form-select" id="${formId}-datasource">
+                                <option value="">-- Chọn nguồn dữ liệu --</option>
+                                @foreach($dataSources as $ds)
+                                    <option value="{{ $ds->id }}" ${question.data_source_id == {{ $ds->id }} ? 'selected' : ''}>{{ $ds->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    `;
             }
 
             const formHtml = `
-                <div class="question-form-inline" id="${formId}">
-                    <h6 class="mb-3">
-                        <i class="bi bi-pencil me-2"></i>
-                        Sửa câu hỏi: ${getQuestionTypeName(questionType)}
-                    </h6>
-                    <div class="mb-3">
-                        <label class="form-label">Nội dung câu hỏi <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="${formId}-content" rows="2">${escapeHtml(question.noidung_cauhoi)}</textarea>
-                    </div>
-                    ${optionsHtml}
-                    ${dataSourceHtml}
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="${formId}-required" ${question.batbuoc ? 'checked' : ''}>
-                            <label class="form-check-label" for="${formId}-required">
-                                Bắt buộc trả lời
-                            </label>
+                    <div class="question-form-inline" id="${formId}">
+                        <h6 class="mb-3">
+                            <i class="bi bi-pencil me-2"></i>
+                            Sửa câu hỏi: ${getQuestionTypeName(questionType)}
+                        </h6>
+                        <div class="mb-3">
+                            <label class="form-label">Nội dung câu hỏi <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="${formId}-content" rows="2">${escapeHtml(question.noidung_cauhoi)}</textarea>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="${formId}-checkdup" ${question.check_duplicate ? 'checked' : ''}>
-                            <label class="form-check-label" for="${formId}-checkdup">
-                                Kiểm tra trùng lặp
-                            </label>
+                        ${optionsHtml}
+                        ${dataSourceHtml}
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="${formId}-required" ${question.batbuoc ? 'checked' : ''}>
+                                <label class="form-check-label" for="${formId}-required">
+                                    Bắt buộc trả lời
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="${formId}-checkdup" ${question.check_duplicate ? 'checked' : ''}>
+                                <label class="form-check-label" for="${formId}-checkdup">
+                                    Kiểm tra trùng lặp
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="${formId}-allowfilter" ${question.allow_filter ? 'checked' : ''}>
+                                <label class="form-check-label" for="${formId}-allowfilter">
+                                    Cho phép lọc trong báo cáo
+                                </label>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-primary" onclick="saveEditedQuestion(${questionId}, '${formId}', '${questionType}')">
+                                <i class="bi bi-save"></i> Lưu thay đổi
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="cancelEdit(${questionId}, '${formId}')">
+                                <i class="bi bi-x"></i> Hủy
+                            </button>
                         </div>
                     </div>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-primary" onclick="saveEditedQuestion(${questionId}, '${formId}', '${questionType}')">
-                            <i class="bi bi-save"></i> Lưu thay đổi
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="cancelEdit(${questionId}, '${formId}')">
-                            <i class="bi bi-x"></i> Hủy
-                        </button>
-                    </div>
-                </div>
-            `;
+                `;
 
             questionCard.insertAdjacentHTML('afterend', formHtml);
             document.getElementById(`${formId}-content`).focus();
         }
 
-        window.removeEditOption = function(btn, formId) {
+        window.removeEditOption = function (btn, formId) {
             const container = document.getElementById(`${formId}-options`);
             if (container.querySelectorAll('.input-group').length > 2) {
                 btn.closest('.input-group').remove();
@@ -1016,20 +1078,20 @@
                     group.querySelector('.input-group-text').textContent = idx + 1;
                 });
             } else {
-                alert('Phải có ít nhất 2 phương án!');
+                alert('warning', 'Cảnh báo', 'Phải có ít nhất 2 phương án!');
             }
         }
 
-        window.cancelEdit = function(questionId, formId) {
+        window.cancelEdit = function (questionId, formId) {
             document.getElementById(formId)?.remove();
             const questionCard = document.querySelector(`.question-item[data-id="${questionId}"]`);
             if (questionCard) questionCard.style.display = '';
         }
 
-        window.saveEditedQuestion = function(questionId, formId, questionType) {
+        window.saveEditedQuestion = function (questionId, formId, questionType) {
             const content = document.getElementById(`${formId}-content`).value.trim();
             if (!content) {
-                alert('Vui lòng nhập nội dung câu hỏi!');
+                alert('warning', 'Cảnh báo', 'Vui lòng nhập nội dung câu hỏi!');
                 return;
             }
 
@@ -1042,6 +1104,7 @@
                 page: question.page,
                 batbuoc: document.getElementById(`${formId}-required`).checked ? 1 : 0,
                 check_duplicate: document.getElementById(`${formId}-checkdup`).checked ? 1 : 0,
+                allow_filter: document.getElementById(`${formId}-allowfilter`).checked ? 1 : 0,
                 phuong_an: [],
                 is_personal_info: question.is_personal_info ? 1 : 0,
                 data_source_id: null,
@@ -1054,9 +1117,9 @@
                 const options = Array.from(document.querySelectorAll(`#${formId} .option-input`))
                     .map(input => input.value.trim())
                     .filter(val => val !== '');
-                
+
                 if (options.length < 2) {
-                    alert('Vui lòng nhập ít nhất 2 phương án!');
+                    alert('warning', 'Cảnh báo', 'Vui lòng nhập ít nhất 2 phương án!');
                     return;
                 }
                 data.phuong_an = options;
@@ -1065,7 +1128,7 @@
             } else if (questionType === 'custom_select') {
                 const dsId = document.getElementById(`${formId}-datasource`)?.value;
                 if (!dsId) {
-                    alert('Vui lòng chọn nguồn dữ liệu!');
+                    alert('warning', 'Cảnh báo', 'Vui lòng chọn nguồn dữ liệu!');
                     return;
                 }
                 data.data_source_id = dsId;
@@ -1077,18 +1140,18 @@
                 method: 'PUT',
                 data: data,
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                success: function(response) {
+                success: function (response) {
                     if (response.success) {
                         cancelEdit(questionId, formId);
                         loadInitialQuestions();
                     }
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     if (xhr.status === 422) {
                         let errors = Object.values(xhr.responseJSON.errors).flat();
-                        alert('Lỗi: \\n' + errors.join('\\n'));
+                        alert('error', 'Lỗi', errors.join('<br>'));
                     } else {
-                        alert('Đã xảy ra lỗi khi lưu câu hỏi!');
+                        alert('error', 'Lỗi', 'Đã xảy ra lỗi khi lưu câu hỏi!');
                     }
                 }
             });
@@ -1119,14 +1182,14 @@
         // Setup palette drag events
         function setupPaletteDragHandlers() {
             document.querySelectorAll('.question-type-item').forEach(item => {
-                item.addEventListener('dragstart', function(e) {
+                item.addEventListener('dragstart', function (e) {
                     draggedQuestionType = this.dataset.questionType;
                     draggedFromPalette = true;
                     e.dataTransfer.effectAllowed = 'copy';
                     this.style.opacity = '0.5';
                 });
 
-                item.addEventListener('dragend', function(e) {
+                item.addEventListener('dragend', function (e) {
                     this.style.opacity = '';
                     draggedQuestionType = null;
                     draggedFromPalette = false;
@@ -1139,7 +1202,7 @@
             // Handle personal questions list
             const personalList = document.getElementById('personal-questions-list');
             if (personalList) {
-                personalList.addEventListener('dragover', function(e) {
+                personalList.addEventListener('dragover', function (e) {
                     if (draggedFromPalette) {
                         e.preventDefault();
                         e.dataTransfer.dropEffect = 'copy';
@@ -1147,16 +1210,16 @@
                     }
                 });
 
-                personalList.addEventListener('dragleave', function(e) {
+                personalList.addEventListener('dragleave', function (e) {
                     if (e.target === this) {
                         this.classList.remove('drag-over');
                     }
                 });
 
-                personalList.addEventListener('drop', function(e) {
+                personalList.addEventListener('drop', function (e) {
                     e.preventDefault();
                     this.classList.remove('drag-over');
-                    
+
                     if (draggedFromPalette && draggedQuestionType) {
                         createInlineQuestionForm(draggedQuestionType, 1, this, true);
                     }
@@ -1165,7 +1228,7 @@
 
             // Handle survey page containers
             document.querySelectorAll('.page-body').forEach(pageBody => {
-                pageBody.addEventListener('dragover', function(e) {
+                pageBody.addEventListener('dragover', function (e) {
                     if (draggedFromPalette || e.dataTransfer.types.includes('text/plain')) {
                         e.preventDefault();
                         e.dataTransfer.dropEffect = 'copy';
@@ -1173,16 +1236,16 @@
                     }
                 });
 
-                pageBody.addEventListener('dragleave', function(e) {
+                pageBody.addEventListener('dragleave', function (e) {
                     if (e.target === this) {
                         this.classList.remove('drag-over');
                     }
                 });
 
-                pageBody.addEventListener('drop', function(e) {
+                pageBody.addEventListener('drop', function (e) {
                     e.preventDefault();
                     this.classList.remove('drag-over');
-                    
+
                     if (draggedFromPalette && draggedQuestionType) {
                         const pageNum = parseInt(this.dataset.page);
                         createInlineQuestionForm(draggedQuestionType, pageNum, this, false);
@@ -1194,7 +1257,7 @@
         // Create inline form for new question
         function createInlineQuestionForm(questionType, pageNum, container, isPersonalInfo = false) {
             if (isLocked) {
-                alert('Mẫu khảo sát đang bị khóa!');
+                alert('error', 'Lỗi', 'Mẫu khảo sát đang bị khóa!');
                 return;
             }
 
@@ -1204,90 +1267,96 @@
             const formId = 'inline-form-' + Date.now();
             const needsOptions = ['single_choice', 'multiple_choice', 'likert'].includes(questionType);
             const needsDataSource = questionType === 'custom_select';
-            
+
             let optionsHtml = '';
             if (needsOptions) {
                 if (questionType === 'likert') {
                     optionsHtml = `
-                        <div class="mb-3">
-                            <label class="form-label">Phương án (Likert)</label>
-                            <div class="small text-muted">Thang đo Likert chuẩn 5 mức</div>
-                        </div>
-                    `;
+                            <div class="mb-3">
+                                <label class="form-label">Phương án (Likert)</label>
+                                <div class="small text-muted">Thang đo Likert chuẩn 5 mức</div>
+                            </div>
+                        `;
                 } else {
                     optionsHtml = `
-                        <div class="mb-3">
-                            <label class="form-label">Phương án trả lời <span class="text-danger">*</span></label>
-                            <div id="${formId}-options">
-                                <div class="input-group mb-2">
-                                    <span class="input-group-text">1</span>
-                                    <input type="text" class="form-control option-input" placeholder="Phương án 1">
+                            <div class="mb-3">
+                                <label class="form-label">Phương án trả lời <span class="text-danger">*</span></label>
+                                <div id="${formId}-options">
+                                    <div class="input-group mb-2">
+                                        <span class="input-group-text">1</span>
+                                        <input type="text" class="form-control option-input" placeholder="Phương án 1">
+                                    </div>
+                                    <div class="input-group mb-2">
+                                        <span class="input-group-text">2</span>
+                                        <input type="text" class="form-control option-input" placeholder="Phương án 2">
+                                    </div>
                                 </div>
-                                <div class="input-group mb-2">
-                                    <span class="input-group-text">2</span>
-                                    <input type="text" class="form-control option-input" placeholder="Phương án 2">
-                                </div>
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="addOptionToForm('${formId}')">
+                                    <i class="bi bi-plus"></i> Thêm phương án
+                                </button>
                             </div>
-                            <button type="button" class="btn btn-sm btn-secondary" onclick="addOptionToForm('${formId}')">
-                                <i class="bi bi-plus"></i> Thêm phương án
-                            </button>
-                        </div>
-                    `;
+                        `;
                 }
             }
 
             let dataSourceHtml = '';
             if (needsDataSource) {
                 dataSourceHtml = `
-                    <div class="mb-3">
-                        <label class="form-label">Nguồn dữ liệu <span class="text-danger">*</span></label>
-                        <select class="form-select" id="${formId}-datasource">
-                            <option value="">-- Chọn nguồn dữ liệu --</option>
-                            @foreach($dataSources as $ds)
-                                <option value="{{ $ds->id }}">{{ $ds->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                `;
+                        <div class="mb-3">
+                            <label class="form-label">Nguồn dữ liệu <span class="text-danger">*</span></label>
+                            <select class="form-select" id="${formId}-datasource">
+                                <option value="">-- Chọn nguồn dữ liệu --</option>
+                                @foreach($dataSources as $ds)
+                                    <option value="{{ $ds->id }}">{{ $ds->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    `;
             }
 
             const questionTypeLabel = isPersonalInfo ? 'Tạo câu hỏi thông tin cá nhân' : 'Tạo câu hỏi';
             const formHtml = `
-                <div class="question-form-inline" id="${formId}">
-                    <h6 class="mb-3">
-                        <i class="bi bi-plus-circle me-2"></i>
-                        ${questionTypeLabel}: ${getQuestionTypeName(questionType)}
-                    </h6>
-                    <div class="mb-3">
-                        <label class="form-label">Nội dung câu hỏi <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="${formId}-content" rows="2" placeholder="Nhập nội dung câu hỏi..."></textarea>
-                    </div>
-                    ${optionsHtml}
-                    ${dataSourceHtml}
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="${formId}-required" checked>
-                            <label class="form-check-label" for="${formId}-required">
-                                Bắt buộc trả lời
-                            </label>
+                    <div class="question-form-inline" id="${formId}">
+                        <h6 class="mb-3">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            ${questionTypeLabel}: ${getQuestionTypeName(questionType)}
+                        </h6>
+                        <div class="mb-3">
+                            <label class="form-label">Nội dung câu hỏi <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="${formId}-content" rows="2" placeholder="Nhập nội dung câu hỏi..."></textarea>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="${formId}-checkdup">
-                            <label class="form-check-label" for="${formId}-checkdup">
-                                Kiểm tra trùng lặp
-                            </label>
+                        ${optionsHtml}
+                        ${dataSourceHtml}
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="${formId}-required" checked>
+                                <label class="form-check-label" for="${formId}-required">
+                                    Bắt buộc trả lời
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="${formId}-checkdup">
+                                <label class="form-check-label" for="${formId}-checkdup">
+                                    Kiểm tra trùng lặp
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="${formId}-allowfilter">
+                                <label class="form-check-label" for="${formId}-allowfilter">
+                                    Cho phép lọc trong báo cáo
+                                </label>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-primary" onclick="saveInlineQuestion('${formId}', '${questionType}', ${pageNum}, ${isPersonalInfo})">
+                                <i class="bi bi-save"></i> Lưu câu hỏi
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="cancelInlineForm('${formId}')">
+                                <i class="bi bi-x"></i> Hủy
+                            </button>
                         </div>
                     </div>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-primary" onclick="saveInlineQuestion('${formId}', '${questionType}', ${pageNum}, ${isPersonalInfo})">
-                            <i class="bi bi-save"></i> Lưu câu hỏi
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="cancelInlineForm('${formId}')">
-                            <i class="bi bi-x"></i> Hủy
-                        </button>
-                    </div>
-                </div>
-            `;
+                `;
 
             // Insert at the end of page body
             container.insertAdjacentHTML('beforeend', formHtml);
@@ -1302,43 +1371,43 @@
             document.getElementById(`${formId}-content`).focus();
         }
 
-        window.addOptionToForm = function(formId) {
+        window.addOptionToForm = function (formId) {
             const container = document.getElementById(`${formId}-options`);
             const count = container.querySelectorAll('.input-group').length + 1;
             const html = `
-                <div class="input-group mb-2">
-                    <span class="input-group-text">${count}</span>
-                    <input type="text" class="form-control option-input" placeholder="Phương án ${count}">
-                </div>
-            `;
+                    <div class="input-group mb-2">
+                        <span class="input-group-text">${count}</span>
+                        <input type="text" class="form-control option-input" placeholder="Phương án ${count}">
+                    </div>
+                `;
             container.insertAdjacentHTML('beforeend', html);
         }
 
-        window.cancelInlineForm = function(formId) {
+        window.cancelInlineForm = function (formId) {
             const form = document.getElementById(formId);
             if (!form) return;
-            
+
             // Check if this was in personal list
             const isInPersonalList = form.closest('#personal-questions-list') !== null;
-            
+
             form.remove();
-            
+
             // Show placeholder again if personal list is now empty
             if (isInPersonalList) {
                 const personalList = document.getElementById('personal-questions-list');
                 const hasQuestions = personalList.querySelector('.question-item') !== null;
                 const placeholder = document.getElementById('personal-placeholder');
-                
+
                 if (!hasQuestions && placeholder) {
                     placeholder.style.display = 'block';
                 }
             }
         }
 
-        window.saveInlineQuestion = function(formId, questionType, pageNum, isPersonalInfo = false) {
+        window.saveInlineQuestion = function (formId, questionType, pageNum, isPersonalInfo = false) {
             const content = document.getElementById(`${formId}-content`).value.trim();
             if (!content) {
-                alert('Vui lòng nhập nội dung câu hỏi!');
+                alert('warning', 'Cảnh báo', 'Vui lòng nhập nội dung câu hỏi!');
                 return;
             }
 
@@ -1348,6 +1417,7 @@
                 page: pageNum,
                 batbuoc: document.getElementById(`${formId}-required`).checked ? 1 : 0,
                 check_duplicate: document.getElementById(`${formId}-checkdup`).checked ? 1 : 0,
+                allow_filter: document.getElementById(`${formId}-allowfilter`).checked ? 1 : 0,
                 phuong_an: [],
                 is_personal_info: isPersonalInfo ? 1 : 0,
                 data_source_id: null
@@ -1358,9 +1428,9 @@
                 const options = Array.from(document.querySelectorAll(`#${formId} .option-input`))
                     .map(input => input.value.trim())
                     .filter(val => val !== '');
-                
+
                 if (options.length < 2) {
-                    alert('Vui lòng nhập ít nhất 2 phương án!');
+                    alert('warning', 'Cảnh báo', 'Vui lòng nhập ít nhất 2 phương án!');
                     return;
                 }
                 data.phuong_an = options;
@@ -1369,7 +1439,7 @@
             } else if (questionType === 'custom_select') {
                 const dsId = document.getElementById(`${formId}-datasource`)?.value;
                 if (!dsId) {
-                    alert('Vui lòng chọn nguồn dữ liệu!');
+                    alert('warning', 'Cảnh báo', 'Vui lòng chọn nguồn dữ liệu!');
                     return;
                 }
                 data.data_source_id = dsId;
@@ -1381,18 +1451,18 @@
                 method: 'POST',
                 data: data,
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                success: function(response) {
+                success: function (response) {
                     if (response.success) {
                         cancelInlineForm(formId);
                         loadInitialQuestions();
                     }
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     if (xhr.status === 422) {
                         let errors = Object.values(xhr.responseJSON.errors).flat();
-                        alert('Lỗi: \\n' + errors.join('\\n'));
+                        alert('error', 'Lỗi', errors.join('<br>'));
                     } else {
-                        alert('Đã xảy ra lỗi khi lưu câu hỏi!');
+                        alert('error', 'Lỗi', 'Đã xảy ra lỗi khi lưu câu hỏi!');
                     }
                 }
             });
@@ -1408,17 +1478,17 @@
 
             // Find max page number
             const maxPage = Math.max(...surveyQuestions.map(q => q.page || 1));
-            
+
             // Check if max page has questions
             const maxPageHasQuestions = surveyQuestions.some(q => (q.page || 1) === maxPage);
-            
+
             if (maxPageHasQuestions) {
                 // Need to add empty page
                 const newPageNum = maxPage + 1;
                 const surveyContainer = $('#survey-questions-container');
                 const emptyPageHtml = createPageContainerHtml(newPageNum, []);
                 surveyContainer.append(emptyPageHtml);
-                
+
                 // Re-setup drop zones
                 setupPageDropZones();
             }
@@ -1471,7 +1541,7 @@
                     chosenClass: 'sortable-chosen',
                     onEnd: function (evt) {
                         const order = Array.from(personalList.children).map(item => parseInt(item.dataset.id));
-                        
+
                         // Update order in data
                         const personalQuestions = allQuestionsData.filter(q => q.is_personal_info);
                         order.forEach((id, index) => {
@@ -1505,12 +1575,12 @@
                     onEnd: function (evt) {
                         const newPageNum = parseInt($(evt.to).data('page'));
                         const questionId = parseInt(evt.item.dataset.id);
-                        
+
                         // Find and update the question's page
                         const question = allQuestionsData.find(q => q.id === questionId);
                         if (question && question.page !== newPageNum) {
                             question.page = newPageNum;
-                            
+
                             // Send page update to server
                             $.ajax({
                                 url: `/admin/cau-hoi/${questionId}`,
@@ -1555,7 +1625,7 @@
         }
 
         // === CONDITIONAL LOGIC ===
-        window.showConditionalModal = function(questionId) {
+        window.showConditionalModal = function (questionId) {
             const modal = new bootstrap.Modal(document.getElementById('conditionalModal'));
             const question = allQuestionsData.find(q => q.id === questionId);
             if (!question) return;
@@ -1564,7 +1634,7 @@
             document.getElementById('conditionalQuestionId').value = questionId;
 
             // Setup enable/disable toggle
-            $('#enableConditionalLogic').off('change').on('change', function() {
+            $('#enableConditionalLogic').off('change').on('change', function () {
                 if (this.checked) {
                     $('#conditional-rules').slideDown();
                 } else {
@@ -1575,17 +1645,17 @@
             });
 
             // Setup parent question change handler
-            $('#parentQuestion').off('change').on('change', function() {
+            $('#parentQuestion').off('change').on('change', function () {
                 const selectedOption = $(this).find('option:selected');
                 const options = selectedOption.data('options');
                 const answerSelect = $('#parentAnswer');
                 answerSelect.html('<option value="">-- Chọn phương án --</option>');
-                
+
                 if (options && Array.isArray(options)) {
                     options.forEach(opt => {
                         answerSelect.append(`
-                            <option value="${escapeHtml(opt.noidung)}">${escapeHtml(opt.noidung)}</option>
-                        `);
+                                <option value="${escapeHtml(opt.noidung)}">${escapeHtml(opt.noidung)}</option>
+                            `);
                     });
                 }
             });
@@ -1595,8 +1665,8 @@
                 $('#enableConditionalLogic').prop('checked', true).trigger('change');
                 $('#parentQuestion').val(question.cau_dieukien_id).trigger('change');
                 setTimeout(() => {
-                    const condition = typeof question.dieukien_hienthi === 'string' 
-                        ? JSON.parse(question.dieukien_hienthi) 
+                    const condition = typeof question.dieukien_hienthi === 'string'
+                        ? JSON.parse(question.dieukien_hienthi)
                         : question.dieukien_hienthi;
                     $('#parentAnswer').val(condition.value);
                 }, 200);
@@ -1607,26 +1677,26 @@
             modal.show();
         };
 
-        window.saveConditionalLogic = function() {
+        window.saveConditionalLogic = function () {
             const questionId = document.getElementById('conditionalQuestionId').value;
             const enabled = $('#enableConditionalLogic').is(':checked');
-            
+
             let data = {};
-            
+
             if (enabled) {
                 const parentId = $('#parentQuestion').val();
                 const answerValue = $('#parentAnswer').val();
-                
+
                 if (!parentId || !answerValue) {
                     alert('error', 'Lỗi', 'Vui lòng chọn đầy đủ câu hỏi điều kiện và phương án trả lời');
                     return;
                 }
-                
+
                 data = {
                     cau_dieukien_id: parentId,
-                    dieukien_hienthi: JSON.stringify({ 
+                    dieukien_hienthi: JSON.stringify({
                         operator: 'equals',
-                        value: answerValue 
+                        value: answerValue
                     })
                 };
             } else {
@@ -1641,14 +1711,14 @@
                 method: 'PUT',
                 data: data,
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                success: function() {
+                success: function () {
                     alert('success', 'Thành công', 'Đã lưu logic điều kiện');
                     bootstrap.Modal.getInstance(document.getElementById('conditionalModal')).hide();
-                    
+
                     // Reload questions to reflect changes
                     loadInitialQuestions();
                 },
-                error: function() {
+                error: function () {
                     alert('error', 'Lỗi', 'Không thể lưu logic điều kiện');
                 }
             });
