@@ -14,6 +14,7 @@ class CauHoiKhaoSat extends Model
         'loai_cauhoi',
         'batbuoc',
         'is_personal_info',
+        'allow_filter',
         'thutu',
         'check_duplicate',
         'page',
@@ -27,6 +28,7 @@ class CauHoiKhaoSat extends Model
         'dieukien_hienthi' => 'array',
         'batbuoc' => 'boolean',
         'is_personal_info' => 'boolean',
+        'allow_filter' => 'boolean',
         'trangthai' => 'boolean'
     ];
 

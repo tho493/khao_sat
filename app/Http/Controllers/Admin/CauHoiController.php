@@ -17,6 +17,7 @@ class CauHoiController extends Controller
             'loai_cauhoi' => 'required|in:single_choice,multiple_choice,text,likert,rating,date,number,custom_select',
             'batbuoc' => 'boolean',
             'is_personal_info' => 'boolean',
+            'allow_filter' => 'nullable|boolean',
             'page' => 'required|integer|min:1',
             'check_duplicate' => 'nullable|boolean',
             'phuong_an' => 'required_if:loai_cauhoi,single_choice,multiple_choice,likert|array|min:2',
@@ -35,6 +36,7 @@ class CauHoiController extends Controller
                 'loai_cauhoi' => $validated['loai_cauhoi'],
                 'batbuoc' => $validated['batbuoc'] ?? true,
                 'is_personal_info' => $validated['is_personal_info'] ?? false,
+                'allow_filter' => $validated['allow_filter'] ?? false,
                 'thutu' => $thutu,
                 'page' => $validated['page'],
                 'check_duplicate' => $validated['check_duplicate'] ?? 0,
@@ -78,6 +80,7 @@ class CauHoiController extends Controller
             'loai_cauhoi' => 'sometimes|required|in:single_choice,multiple_choice,text,likert,rating,date,number,custom_select',
             'batbuoc' => 'sometimes|boolean',
             'is_personal_info' => 'sometimes|boolean',
+            'allow_filter' => 'nullable|boolean',
             'page' => 'sometimes|required|integer|min:1',
             'check_duplicate' => 'nullable|boolean',
             'phuong_an' => 'sometimes|array',
@@ -99,6 +102,8 @@ class CauHoiController extends Controller
                 $updateData['batbuoc'] = $validated['batbuoc'];
             if ($request->has('is_personal_info'))
                 $updateData['is_personal_info'] = $validated['is_personal_info'];
+            if ($request->has('allow_filter'))
+                $updateData['allow_filter'] = $validated['allow_filter'];
             if ($request->has('page'))
                 $updateData['page'] = $validated['page'];
             if ($request->has('check_duplicate'))
