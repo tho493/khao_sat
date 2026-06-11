@@ -31,11 +31,10 @@
         <nav id="sidebar">
             <div class="sidebar-header">
                 <a href="{{ route('admin.dashboard') }}"
-                    class="d-flex align-items-center justify-content-center text-decoration-none components">
-                    <img src="/image/logo.png" alt="Logo" style="height: 40px;" class="logo-collapsed">
-                    <div class="logo-expanded align-items-center gap-2">
-                        <img src="/image/logo.png" alt="Logo" style="height: 40px;">
-                    </div>
+                    class="d-flex align-items-center text-decoration-none components w-100">
+                    <img src="/image/logo.png" alt="Logo"
+                        style="height: 36px; width: 36px; min-width: 36px; object-fit: contain;">
+                    <!-- <span class="logo-text fs-5 fw-bold text-dark">Survey SDU</span> -->
                 </a>
             </div>
 
@@ -43,66 +42,107 @@
                 <li>
                     <a href="{{ route('admin.dashboard') }}"
                         class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                        <i class="bi bi-grid-1x2-fill"></i> <span>Dashboard</span>
+                        <i class="bi {{ request()->routeIs('admin.dashboard') ? 'bi-grid-fill' : 'bi-grid' }}"></i>
+                        <span>Dashboard</span>
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('admin.mau-khao-sat.index') }}"
                         class="{{ request()->routeIs('admin.mau-khao-sat.*') ? 'active' : '' }}">
-                        <i class="bi bi-file-earmark-text-fill"></i> <span>Mẫu khảo sát</span>
+                        <i
+                            class="bi {{ request()->routeIs('admin.mau-khao-sat.*') ? 'bi-file-earmark-text-fill' : 'bi-file-earmark-text' }}"></i>
+                        <span>Mẫu khảo sát</span>
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('admin.dot-khao-sat.index') }}"
                         class="{{ request()->routeIs('admin.dot-khao-sat.*') ? 'active' : '' }}">
-                        <i class="bi bi-calendar-check-fill"></i> <span>Đợt khảo sát</span>
+                        <i
+                            class="bi {{ request()->routeIs('admin.dot-khao-sat.*') ? 'bi-calendar-check-fill' : 'bi-calendar-check' }}"></i>
+                        <span>Đợt khảo sát</span>
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('admin.bao-cao.index') }}"
                         class="{{ request()->routeIs('admin.bao-cao.*') ? 'active' : '' }}">
-                        <i class="bi bi-graph-up-arrow"></i> <span>Báo cáo</span>
+                        <i
+                            class="bi {{ request()->routeIs('admin.bao-cao.*') ? 'bi-bar-chart-fill' : 'bi-bar-chart-line' }}"></i>
+                        <span>Báo cáo</span>
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('admin.data-source.index') }}"
                         class="{{ request()->routeIs('admin.data-source.*') ? 'active' : '' }}"
                         title="Câu hỏi tùy chỉnh">
-                        <i class="bi bi-database-fill"></i> <span>Câu hỏi tùy chỉnh</span>
+                        <i
+                            class="bi {{ request()->routeIs('admin.data-source.*') ? 'bi-database-fill' : 'bi-database' }}"></i>
+                        <span>Câu hỏi tùy chỉnh</span>
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('admin.nam-hoc.index') }}"
                         class="{{ request()->routeIs('admin.nam-hoc.*') ? 'active' : '' }}" title="Năm học">
-                        <i class="bi bi-calendar-range-fill"></i> <span>Năm học</span>
+                        <i
+                            class="bi {{ request()->routeIs('admin.nam-hoc.*') ? 'bi-calendar3-fill' : 'bi-calendar3' }}"></i>
+                        <span>Năm học</span>
                     </a>
                 </li>
-                <hr class="my-3" style="border-color: rgba(0,0,0,0.07);">
+                <hr class="my-2" style="border-color: rgba(0,0,0,0.05); margin: 8px 12px;">
                 <li>
                     <a href="{{ route('admin.users.index') }}"
                         class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                        <i class="bi bi-people-fill"></i> <span>Người dùng</span>
+                        <i class="bi {{ request()->routeIs('admin.users.*') ? 'bi-people-fill' : 'bi-people' }}"></i>
+                        <span>Người dùng</span>
                     </a>
                 </li>
-                <!-- <li>
-                    <a href="{{ route('admin.faq.index') }}"
-                        class="{{ request()->routeIs('admin.faq.*') ? 'active' : '' }}" title="FAQ Chatbot">
-                        <i class="bi bi-chat-left-dots-fill"></i> <span>FAQ Chatbot</span>
-                    </a>
-                </li> -->
                 <li>
                     <a href="{{ route('admin.logs.index') }}"
                         class="{{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
-                        <i class="bi bi-journal-text"></i> <span>Nhật ký</span>
+                        <i
+                            class="bi {{ request()->routeIs('admin.logs.*') ? 'bi-journal-richtext' : 'bi-journal-text' }}"></i>
+                        <span>Nhật ký</span>
                     </a>
                 </li>
                 <li>
                     <a href="{{ route('admin.dbbackups.index') }}"
                         class="{{ request()->routeIs('admin.dbbackups.*') ? 'active' : '' }}">
-                        <i class="bi bi-database-fill"></i> <span>Sao lưu CSDL</span>
+                        <i
+                            class="bi {{ request()->routeIs('admin.dbbackups.*') ? 'bi-device-hdd-fill' : 'bi-device-hdd' }}"></i>
+                        <span>Sao lưu CSDL</span>
                     </a>
                 </li>
             </ul>
+
+            <!-- Sidebar Footer (Profile / Dropup) -->
+            <div class="sidebar-footer dropup">
+                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle"
+                    id="sidebarUserDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="avatar-container d-flex align-items-center">
+                        <i class="bi bi-person-circle fs-4"></i>
+                    </div>
+                    <span class="user-name ms-3 text-truncate">{{ auth()->user()->hoten ?? 'Admin' }}</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-dark shadow glass-effect" aria-labelledby="sidebarUserDropdown"
+                    style="border-radius: 12px; margin-bottom: 10px; width: calc(100% - 24px); left: 12px;">
+                    <li>
+                        <a class="dropdown-item py-2" href="{{ route('admin.users.edit', auth()->user()->id) }}">
+                            <i class="bi bi-person me-2"></i> Thông tin cá nhân
+                        </a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider" style="border-color: rgba(255,255,255,0.15);">
+                    </li>
+                    <li>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit"
+                                class="dropdown-item py-2 text-danger d-flex align-items-center border-0 bg-transparent w-100">
+                                <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
         </nav>
 
         {{-- Backdrop cho mobile --}}
@@ -111,18 +151,19 @@
         <!-- Page Content -->
         <div id="content">
             <!-- Top Navbar -->
-            <nav class="navbar navbar-expand-lg navbar-light top-navbar" style="border-left: none !important">
-                <span id="text-admin-panel" class="fs-5 fw-bold">Admin Panel</span>
+            <nav class="navbar navbar-expand-lg navbar-light top-navbar">
+                <span id="text-admin-panel" class="fs-5 fw-bold position-absolute start-50 translate-middle-x">Admin
+                    Panel</span>
                 <button id="mobileSidebarToggle" class="btn btn-link d-lg-none me-3" aria-label="Mở menu">
                     <i class="bi bi-list fs-3"></i>
                 </button>
-                <div class="ms-auto profile-dropdown">
+                <div class="ms-auto profile-dropdown d-lg-none">
                     <div class="dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
+                        <!-- <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
                             data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle fs-5 me-2"></i>
                             <span class="fw-medium">{{ auth()->user()->hoten ?? 'Admin' }}</span>
-                        </a>
+                        </a> -->
                         <ul class="dropdown-menu dropdown-menu-end glass-effect">
                             <li>
                                 <a class="dropdown-item" href="{{ route('admin.users.edit', auth()->user()->id) }}">
@@ -190,31 +231,6 @@
             const sidebar = document.getElementById('sidebar');
             const backdrop = document.getElementById('sidebar-backdrop');
             const toggleBtn = document.getElementById('mobileSidebarToggle');
-            const textAdminPanel = document.getElementById('text-admin-panel');
-            const isDesktop = () => window.innerWidth >= 992;
-
-            function setupDesktopHover() {
-                sidebar.addEventListener('mouseenter', () => sidebar.classList.remove('collapsed'));
-                sidebar.addEventListener('mouseleave', () => sidebar.classList.add('collapsed'));
-            }
-
-            function removeDesktopHover() {
-                $(sidebar).off('mouseenter mouseleave');
-            }
-
-            function handleResize() {
-                if (isDesktop()) {
-                    sidebar.classList.add('collapsed');
-                    sidebar.classList.remove('active');
-                    backdrop.classList.remove('show');
-                    document.body.style.overflow = '';
-                    setupDesktopHover();
-                } else {
-                    textAdminPanel.style = "display: none;"
-                    sidebar.classList.remove('collapsed');
-                    removeDesktopHover();
-                }
-            }
 
             // Mobile toggle
             if (toggleBtn) {
@@ -231,9 +247,6 @@
                     document.body.style.overflow = '';
                 });
             }
-
-            window.addEventListener('resize', handleResize);
-            handleResize();
         });
     </script>
     @stack('scripts')

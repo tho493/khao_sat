@@ -1,11 +1,14 @@
 :root {
-    --sidebar-width: 250px;
-    --sidebar-width-collapsed: 88px;
-    --primary-color: #4f46e5;
-    --bg-color: #f1f5f9;
-    --text-dark: #1e293b;
-    --text-light: #64748b;
-    --transition: all 0.3s ease-in-out;
+    --sidebar-width: 244px;
+    --sidebar-width-collapsed: 82px;
+
+    --primary-color: #000000;
+    --bg-color: #ffffff;
+
+    --text-dark: #262626;
+    --text-light: #262626;
+
+    --transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 html {
@@ -20,16 +23,38 @@ body {
 }
 
 /* Make custom cursor universal and seamless */
-html, * {
-    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='28' height='28' fill='none'><defs><filter id='shadow'><feDropShadow dx='0' dy='1' stdDeviation='1.2' flood-color='rgba(0,0,0,0.5)'/></filter></defs><g filter='url(%23shadow)'><path d='M5.5 3.21l11.68 11.68c.32.32.1.85-.35.85H10.4a1 1 0 0 0-.7.29l-4.55 4.55c-.32.32-.85.1-.85-.35V3.56c0-.45.54-.67.85-.35z' fill='white'/><path d='M5.5 3.21l11.68 11.68c.32.32.1.85-.35.85H10.4a1 1 0 0 0-.7.29l-4.55 4.55c-.32.32-.85.1-.85-.35V3.56c0-.45.54-.67.85-.35z' stroke='%234f46e5' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></g></svg>") 0 0, auto !important;
+html,
+* {
+    cursor:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='28' height='28' fill='none'><defs><filter id='shadow'><feDropShadow dx='0' dy='1' stdDeviation='1.2' flood-color='rgba(0,0,0,0.5)'/></filter></defs><g filter='url(%23shadow)'><path d='M5.5 3.21l11.68 11.68c.32.32.1.85-.35.85H10.4a1 1 0 0 0-.7.29l-4.55 4.55c-.32.32-.85.1-.85-.35V3.56c0-.45.54-.67.85-.35z' fill='white'/><path d='M5.5 3.21l11.68 11.68c.32.32.1.85-.35.85H10.4a1 1 0 0 0-.7.29l-4.55 4.55c-.32.32-.85.1-.85-.35V3.56c0-.45.54-.67.85-.35z' stroke='%234f46e5' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></g></svg>")
+            0 0,
+        auto !important;
 }
 
-a, button, input[type="submit"], input[type="button"], .btn, .cursor-pointer,
-a *, button *, .btn *, .cursor-pointer *, .dropdown-item, .dropdown-item * {
-    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='28' height='28' fill='none'><defs><filter id='shadow'><feDropShadow dx='0' dy='1' stdDeviation='1.2' flood-color='rgba(0,0,0,0.5)'/></filter></defs><g filter='url(%23shadow)'><path d='M5.5 3.21l11.68 11.68c.32.32.1.85-.35.85H10.4a1 1 0 0 0-.7.29l-4.55 4.55c-.32.32-.85.1-.85-.35V3.56c0-.45.54-.67.85-.35z' fill='%234f46e5'/><path d='M5.5 3.21l11.68 11.68c.32.32.1.85-.35.85H10.4a1 1 0 0 0-.7.29l-4.55 4.55c-.32.32-.85.1-.85-.35V3.56c0-.45.54-.67.85-.35z' stroke='white' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/></g></svg>") 0 0, pointer !important;
+a,
+button,
+input[type="submit"],
+input[type="button"],
+.btn,
+.cursor-pointer,
+a *,
+button *,
+.btn *,
+.cursor-pointer *,
+.dropdown-item,
+.dropdown-item * {
+    cursor:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='28' height='28' fill='none'><defs><filter id='shadow'><feDropShadow dx='0' dy='1' stdDeviation='1.2' flood-color='rgba(0,0,0,0.5)'/></filter></defs><g filter='url(%23shadow)'><path d='M5.5 3.21l11.68 11.68c.32.32.1.85-.35.85H10.4a1 1 0 0 0-.7.29l-4.55 4.55c-.32.32-.85.1-.85-.35V3.56c0-.45.54-.67.85-.35z' fill='%234f46e5'/><path d='M5.5 3.21l11.68 11.68c.32.32.1.85-.35.85H10.4a1 1 0 0 0-.7.29l-4.55 4.55c-.32.32-.85.1-.85-.35V3.56c0-.45.54-.67.85-.35z' stroke='white' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/></g></svg>")
+            0 0,
+        pointer !important;
 }
 
-input[type="text"], input[type="password"], input[type="email"], input[type="number"], input[type="search"], textarea {
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="search"],
+textarea {
     cursor: text !important;
 }
 
@@ -44,7 +69,9 @@ input[type="text"], input[type="password"], input[type="email"], input[type="num
 }
 
 #nprogress .peg {
-    box-shadow: 0 0 10px #ff2d20, 0 0 5px #ff2d20 !important;
+    box-shadow:
+        0 0 10px #ff2d20,
+        0 0 5px #ff2d20 !important;
 }
 
 #nprogress .spinner-icon {
@@ -56,90 +83,203 @@ input[type="text"], input[type="password"], input[type="email"], input[type="num
 #sidebar {
     width: var(--sidebar-width-collapsed);
     height: 100vh;
-    background: rgba(255, 255, 255, 0.6);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    transition: var(--transition);
+    background: #ffffff;
+    border-right: none;
+    transition:
+        width 0.15s cubic-bezier(0.25, 1, 0.5, 1),
+        transform 0.15s cubic-bezier(0.25, 1, 0.5, 1),
+        box-shadow 0.15s cubic-bezier(0.25, 1, 0.5, 1);
     position: fixed;
     z-index: 1000;
+    display: flex;
+    flex-direction: column;
     overflow-x: hidden;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0);
 }
 
 #sidebar:hover {
     width: var(--sidebar-width);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.04);
+    /* transition khi mở rộng (hover chuột vào): trượt ra nhanh và mượt */
+    transition:
+        width 0.22s cubic-bezier(0.25, 1, 0.5, 1),
+        transform 0.22s cubic-bezier(0.25, 1, 0.5, 1),
+        box-shadow 0.22s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 #sidebar .sidebar-header {
-    padding: 24px;
-    text-align: center;
-    height: 79px;
+    padding: 22px 18px;
+    height: 80px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     border: none !important;
 }
 
-#sidebar .logo-expanded {
-    display: none;
-}
-
-#sidebar:hover .logo-expanded {
+#sidebar .sidebar-header a {
     display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
 }
 
-#sidebar:hover .logo-collapsed {
-    display: none;
+#sidebar .sidebar-header .logo-text {
+    position: absolute;
+    left: 48px; /* 36px logo + 12px spacing */
+    font-family: "Be Vietnam Pro", sans-serif;
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(-10px);
+    /* ẩn chữ ngay lập tức khi thu lại */
+    transition:
+        opacity 0.02s ease-out,
+        transform 0.02s ease-out;
+}
+
+#sidebar:hover .sidebar-header .logo-text,
+#sidebar.active .sidebar-header .logo-text {
+    opacity: 1;
+    transform: translateX(0);
+    /* hiển thị chữ mượt mà sau khi sidebar trượt ra */
+    transition:
+        opacity 0.2s ease 0.12s,
+        transform 0.2s ease 0.12s;
 }
 
 #sidebar ul.components {
-    padding: 16px;
+    padding: 0 12px;
+    margin: 0;
+    list-style: none;
 }
 
-#sidebar ul li a {
-    padding: 12px 16px;
-    font-size: 0.95rem;
-    font-weight: 500;
+#sidebar ul.components li a {
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 400;
     border-radius: 8px;
-    color: var(--text-light);
-    transition: var(--transition);
+    color: #000000;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     text-decoration: none;
-    margin-bottom: 4px;
+    margin-bottom: 12px; /* Tăng khoảng cách giữa các item cho thoáng giống Instagram */
     white-space: nowrap;
+    overflow: hidden;
+    position: relative;
+    transition:
+        background-color 0.25s cubic-bezier(0.25, 1, 0.5, 1),
+        transform 0.25s cubic-bezier(0.25, 1, 0.5, 1),
+        font-weight 0.2s ease;
 }
 
-#sidebar ul li a:hover {
-    color: var(--primary-color);
-    background-color: rgba(79, 70, 229, 0.08);
+#sidebar ul.components li a:hover {
+    background-color: #f2f2f2;
+    color: #000000;
+    transform: scale(
+        1.02
+    ); /* Hiệu ứng co giãn nhẹ tạo cảm giác nền nổi ra mượt mà */
 }
 
-#sidebar ul li a.active {
-    background: var(--primary-color);
-    color: white;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-    font-weight: 600;
+#sidebar ul.components li a:active {
+    transform: scale(0.98); /* Hiệu ứng phản hồi nhấn nút chân thực */
 }
 
-#sidebar ul li a i {
-    font-size: 1.25rem;
-    margin-right: 16px;
+#sidebar ul.components li a:hover i {
+    transform: scale(1.05);
+}
+
+#sidebar ul.components li a.active {
+    background-color: #f2f2f2;
+    color: #000000;
+    font-weight: 700;
+}
+
+#sidebar ul.components li a i {
+    font-size: 1.55rem;
     width: 24px;
-    transition: transform 0.3s;
-    flex-shrink: 0;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
 }
 
-#sidebar ul li a.active i {
-    transform: scale(1.1);
-}
-
-#sidebar ul li a span {
-    transition: opacity 0.2s ease 0.1s;
-}
-
-#sidebar:not(:hover) ul li a span {
+#sidebar ul.components li a span {
+    position: absolute;
+    left: 52px; /* 12px padding + 24px icon + 16px spacing */
+    white-space: nowrap;
     opacity: 0;
-    pointer-events: none;
+    transform: translateX(-10px);
+    /* ẩn chữ ngay lập tức khi thu lại */
+    transition:
+        opacity 0.02s ease-out,
+        transform 0.02s ease-out;
+}
+
+#sidebar:hover ul.components li a span,
+#sidebar.active ul.components li a span {
+    opacity: 1;
+    transform: translateX(0);
+    /* hiển thị chữ mượt mà sau khi sidebar trượt ra */
+    transition:
+        opacity 0.2s ease 0.12s,
+        transform 0.2s ease 0.12s;
+}
+
+/* Sidebar Footer (Profile / Dropup) */
+#sidebar .sidebar-footer {
+    margin-top: auto;
+    padding: 12px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+#sidebar .sidebar-footer > a {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 12px;
+    color: #000000;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
+    text-decoration: none;
+    overflow: hidden;
+    position: relative;
+}
+
+#sidebar .sidebar-footer > a:hover {
+    background-color: #fafafa;
+    transform: scale(1.02);
+}
+
+#sidebar .sidebar-footer .user-name {
+    position: absolute;
+    left: 52px; /* 12px padding + 24px icon + 16px spacing */
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition:
+        opacity 0.02s ease-out,
+        transform 0.02s ease-out;
+}
+
+#sidebar:hover .sidebar-footer .user-name,
+#sidebar.active .sidebar-footer .user-name {
+    opacity: 1;
+    transform: translateX(0);
+    transition:
+        opacity 0.2s ease 0.12s,
+        transform 0.2s ease 0.12s;
+}
+
+#sidebar .sidebar-footer .dropdown-toggle::after {
+    display: none;
 }
 
 /* === Charts (prevent overflow) === */
@@ -164,43 +304,42 @@ canvas.chartjs-render-monitor {
 /* === Content Area === */
 #content {
     width: 100%;
-    margin-left: var(--sidebar-width-collapsed);
-    transition: margin-left 0.3s ease-in-out;
+    transition: margin-left var(--transition);
     min-height: 100vh;
     overflow-x: hidden;
 }
 
-#sidebar:hover ~ #content {
-    margin-left: var(--sidebar-width);
-}
-
 #main-content {
     padding: 32px;
-    border-left: 1px solid #e2e8f0;
+    border-left: none;
     overflow-x: hidden;
 }
 
 /* === Top Navbar === */
 .top-navbar {
-    padding: 16px 32px;
-    background: rgba(255, 255, 255, 0.6);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    position: sticky;
-    top: 0;
-    z-index: 999;
+    height: 72px;
+    background: transparent;
+    border-bottom: none !important;
+    box-shadow: none;
+    padding: 0 24px;
+}
+
+.profile-dropdown .nav-link {
+    border-radius: 999px;
+    padding: 8px 14px;
+    transition: all 0.2s ease;
+}
+
+.profile-dropdown .nav-link:hover {
+    background: #f5f5f5;
 }
 
 .dropdown-menu.glass-effect {
-    background-color: rgba(255, 255, 255, 0.6);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
-    border-radius: 0.75rem;
-    padding: 0.5rem;
-    margin-top: 0.5rem !important;
+    background: #fff;
+    border: 1px solid #dbdbdb;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    backdrop-filter: none;
 }
 
 .dropdown-menu.glass-effect .dropdown-item {
@@ -230,10 +369,10 @@ canvas.chartjs-render-monitor {
 }
 
 .card {
-    border: none;
-    border-radius: 1rem;
-    background-color: #ffffff;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    background: #fff;
+    border: 1px solid #dbdbdb;
+    border-radius: 16px;
+    box-shadow: none;
 }
 
 .card-header {
@@ -248,28 +387,57 @@ canvas.chartjs-render-monitor {
     text-decoration: underline !important;
 }
 
-@media (max-width: 992px) {
+/* === Responsive Sidebar Layout === */
+@media (min-width: 992px) {
     #sidebar {
-        width: 280px;
-        transform: translateX(-100%);
+        width: var(--sidebar-width-collapsed);
     }
-
     #sidebar:hover {
-        width: 280px;
+        width: var(--sidebar-width);
+    }
+    #content {
+        margin-left: var(--sidebar-width-collapsed);
+    }
+}
+
+@media (max-width: 991.98px) {
+    #sidebar {
+        width: var(--sidebar-width);
+        transform: translateX(-100%);
     }
 
     #sidebar.active {
         transform: translateX(0);
     }
 
-    #content,
-    #sidebar:hover ~ #content {
+    #content {
         margin-left: 0;
     }
 
-    #sidebar:not(:hover) ul li a span {
+    #sidebar ul.components li a {
+        justify-content: flex-start;
+    }
+
+    #sidebar ul.components li a span {
         opacity: 1;
-        pointer-events: auto;
+        max-width: 150px;
+        margin-left: 16px;
+    }
+
+    #sidebar .sidebar-header .logo-text {
+        opacity: 1;
+        max-width: 150px;
+        margin-left: 12px;
+    }
+
+    #sidebar .sidebar-footer > a {
+        justify-content: flex-start;
+    }
+
+    #sidebar .sidebar-footer .user-name {
+        opacity: 1;
+        max-width: 150px;
+        margin-left: 16px;
     }
 
     .sidebar-backdrop {
@@ -279,7 +447,9 @@ canvas.chartjs-render-monitor {
         z-index: 999;
         opacity: 0;
         visibility: hidden;
-        transition: opacity 0.3s, visibility 0.3s;
+        transition:
+            opacity 0.3s,
+            visibility 0.3s;
     }
 
     .sidebar-backdrop.show {
