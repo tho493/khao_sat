@@ -7,6 +7,7 @@ use App\Models\DataSource;
 use App\Models\DataSourceValue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
 
 class DataSourceController extends Controller
 {
@@ -66,6 +67,7 @@ class DataSourceController extends Controller
         ]);
 
         $dataSource->update($validated);
+        $this->clearCacheForDataSource($dataSource);
 
         return redirect()->route('admin.data-source.edit', $dataSource)->with('success', 'Cập nhật nguồn dữ liệu thành công.');
     }
@@ -76,6 +78,7 @@ class DataSourceController extends Controller
             return back()->with('error', 'Không thể xóa. Nguồn dữ liệu này đang được sử dụng bởi các câu hỏi khảo sát.');
         }
 
+        $this->clearCacheForDataSource($dataSource);
         $dataSource->delete();
         return redirect()->route('admin.data-source.index')->with('success', 'Xóa nguồn dữ liệu thành công.');
     }
@@ -88,6 +91,7 @@ class DataSourceController extends Controller
         ]);
 
         $dataSource->values()->create($validated);
+        $this->clearCacheForDataSource($dataSource);
 
         return back()->with('success', 'Thêm giá trị thành công.');
     }
@@ -100,13 +104,38 @@ class DataSourceController extends Controller
         ]);
 
         $value->update($validated);
+        $this->clearCacheForDataSource($value->dataSource);
 
         return back()->with('success', 'Cập nhật giá trị thành công.');
     }
 
     public function destroyValue(DataSourceValue $value)
     {
+        $dataSource = $value->dataSource;
         $value->delete();
+        $this->clearCacheForDataSource($dataSource);
         return back()->with('success', 'Xóa giá trị thành công.');
+    }
+
+    /**
+     * Xóa cache các đợt khảo sát sử dụng nguồn dữ liệu này
+     */
+    private function clearCacheForDataSource($dataSource)
+    {
+        if ($dataSource) {
+            $mauKhaoSatIds = \App\Models\CauHoiKhaoSat::where('data_source_id', $dataSource->id)
+                ->pluck('mau_khaosat_id')
+                ->unique();
+
+            if ($mauKhaoSatIds->isNotEmpty()) {
+                $dotKhaoSatIds = \App\Models\DotKhaoSat::whereIn('mau_khaosat_id', $mauKhaoSatIds)
+                    ->pluck('id');
+
+                foreach ($dotKhaoSatIds as $dotId) {
+                    Cache::forget('survey_detail_' . $dotId);
+                }
+                Cache::forget('survey_active_dots');
+            }
+        }
     }
 }
