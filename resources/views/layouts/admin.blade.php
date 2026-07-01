@@ -3,10 +3,10 @@
 
 <head>
     <script>
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
+        if (localStorage.getItem('theme') === 'light') {
             document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
         }
     </script>
     <meta charset="UTF-8">
@@ -164,31 +164,34 @@
                 <button id="mobileSidebarToggle" class="btn btn-link d-lg-none me-3" aria-label="Mở menu">
                     <i class="bi bi-list fs-3"></i>
                 </button>
-                <div class="ms-auto profile-dropdown d-lg-none">
-                    <div class="dropdown">
-                        <!-- <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
-                            data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle fs-5 me-2"></i>
-                            <span class="fw-medium">{{ auth()->user()->hoten ?? 'Admin' }}</span>
-                        </a> -->
-                        <ul class="dropdown-menu dropdown-menu-end glass-effect">
-                            <li>
-                                <a class="dropdown-item" href="{{ route('admin.users.edit', auth()->user()->id) }}">
-                                    <i class="bi bi-person me-2"></i> Thông tin cá nhân
-                                </a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item text-danger">
-                                        <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
+                <div class="ms-auto d-flex align-items-center gap-2">
+                    {{-- Nút chuyển đổi Theme --}}
+                    <button id="adminThemeToggle" class="btn btn-link p-2" aria-label="Đổi chế độ sáng/tối"
+                        style="font-size: 1.25rem; color: inherit; text-decoration: none;">
+                        <i class="bi bi-sun-fill" id="themeIconLight" style="display:none;"></i>
+                        <i class="bi bi-moon-stars-fill" id="themeIconDark" style="display:none;"></i>
+                    </button>
+                    <div class="profile-dropdown d-lg-none">
+                        <div class="dropdown">
+                            <ul class="dropdown-menu dropdown-menu-end glass-effect">
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('admin.users.edit', auth()->user()->id) }}">
+                                        <i class="bi bi-person me-2"></i> Thông tin cá nhân
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </nav>
@@ -312,54 +315,144 @@
 
         // Hàm hiển thị thông báo
         function alert(type, title, message) {
-            const alertClass = type === 'success' ? 'bg-success text-white' : 'bg-danger text-white';
+            if (arguments.length === 1) {
+                message = type;
+                type = 'danger';
+                title = 'Thông báo';
+            } else {
+                type = type != null ? type : 'success';
+                title = title != null ? title : 'Thông báo';
+            }
+            const alertBg = type === 'success' ? 'background:#059669;' : 'background:#e11d48;';
             const iconClass = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
 
-            // Tạo vùng chứa toast nếu chưa có
             let toastContainer = document.getElementById('custom-toast-container');
             if (!toastContainer) {
                 toastContainer = document.createElement('div');
                 toastContainer.id = 'custom-toast-container';
-                toastContainer.style.position = 'fixed';
-                toastContainer.style.top = '24px';
-                toastContainer.style.right = '24px';
-                toastContainer.style.zIndex = 1080;
-                toastContainer.style.maxWidth = '350px';
+                Object.assign(toastContainer.style, { position: 'fixed', top: '24px', right: '24px', zIndex: '99999', maxWidth: '350px' });
                 document.body.appendChild(toastContainer);
             }
 
-            // Tạo HTML toast
             const toastId = 'toast-' + Date.now() + Math.floor(Math.random() * 10000);
             const toastHtml = `
-                <div id="${toastId}" class="toast align-items-center ${alertClass} border-0 show mb-2 shadow" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 250px;">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <i class="bi ${iconClass} me-2 fs-5"></i>
-                            <strong>${title}:</strong> ${message}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                <div id="${toastId}" style="${alertBg} color:#fff; padding:12px 16px; border-radius:12px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; min-width:280px; max-width:350px; box-shadow:0 10px 25px rgba(0,0,0,0.3); transition:opacity 0.3s,transform 0.3s;" role="alert">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <i class="bi ${iconClass}" style="font-size:1.1rem;"></i>
+                        <div style="font-size:0.875rem;font-weight:500;"><strong>${title}:</strong> ${message}</div>
                     </div>
+                    <button onclick="this.parentElement.style.opacity='0';setTimeout(()=>this.parentElement.remove(),300)" style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:1.1rem;cursor:pointer;margin-left:12px;" aria-label="Close">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
                 </div>
             `;
 
-            // Thêm toast vào vùng chứa
             toastContainer.insertAdjacentHTML('beforeend', toastHtml);
 
-            // Bắt sự kiện tắt bằng nút close
-            const toastElem = document.getElementById(toastId);
-            toastElem.querySelector('.btn-close').onclick = function () {
-                toastElem.classList.remove('show');
-                setTimeout(() => toastElem.remove(), 400);
-            };
-
-            // Tự động ẩn sau 5 giây
             setTimeout(() => {
-                if (toastElem) {
-                    toastElem.classList.remove('show');
-                    setTimeout(() => { if (toastElem) toastElem.remove(); }, 400);
-                }
+                const el = document.getElementById(toastId);
+                if (el) { el.style.opacity = '0'; setTimeout(() => { if (el) el.remove(); }, 300); }
             }, 5000);
         }
+
+        // Theme toggle logic
+        (function () {
+            const iconLight = document.getElementById('themeIconLight');
+            const iconDark = document.getElementById('themeIconDark');
+            const toggleBtn = document.getElementById('adminThemeToggle');
+
+            function updateIcons() {
+                const isDark = document.documentElement.classList.contains('dark');
+                if (iconLight && iconDark) {
+                    iconLight.style.display = isDark ? 'inline' : 'none';
+                    iconDark.style.display = isDark ? 'none' : 'inline';
+                }
+            }
+            updateIcons();
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function () {
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const targetThemeIsDark = !isDark;
+
+                    // Tạo lớp phủ chuyển đổi mờ ảo (translucent & blur)
+                    const overlay = document.createElement('div');
+                    Object.assign(overlay.style, {
+                        position: 'fixed',
+                        inset: '0',
+                        zIndex: '999999',
+                        pointerEvents: 'none',
+                        opacity: '0',
+                        transition: 'opacity 0.25s ease-in-out',
+                        backgroundColor: targetThemeIsDark ? 'rgba(15, 23, 42, 0.35)' : 'rgba(255, 255, 255, 0.35)',
+                        backdropFilter: 'blur(8px)',
+                        webkitBackdropFilter: 'blur(8px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    });
+
+                    // Icon tiến trình chuyển đổi ở giữa
+                    const spinner = document.createElement('div');
+                    const iconClass = targetThemeIsDark ? 'bi-moon-stars-fill' : 'bi-sun-fill';
+                    const iconColor = targetThemeIsDark ? '#38bdf8' : '#eab308'; // xanh dương trời hoặc vàng ấm
+                    const animationName = targetThemeIsDark ? 'theme-pulse' : 'theme-spin';
+
+                    spinner.innerHTML = `<i class="bi ${iconClass}" style="font-size: 3rem; color: ${iconColor}; display: inline-block; animation: ${animationName} 0.8s ease-in-out infinite;"></i>`;
+
+                    // Thêm keyframe animation cho spinner nếu chưa có
+                    if (!document.getElementById('theme-transition-style')) {
+                        const style = document.createElement('style');
+                        style.id = 'theme-transition-style';
+                        style.textContent = `
+                            @keyframes theme-spin {
+                                0% { transform: rotate(0deg); }
+                                100% { transform: rotate(360deg); }
+                            }
+                            @keyframes theme-pulse {
+                                0% { transform: scale(0.8); opacity: 0.7; }
+                                50% { transform: scale(1.15); opacity: 1; }
+                                100% { transform: scale(0.8); opacity: 0.7; }
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    }
+
+                    overlay.appendChild(spinner);
+                    document.body.appendChild(overlay);
+
+                    // Kích hoạt transition xuất hiện lớp phủ
+                    requestAnimationFrame(() => {
+                        overlay.style.opacity = '1';
+                    });
+
+                    // Thực hiện đổi theme khi lớp phủ đã sẵn sàng (250ms)
+                    setTimeout(() => {
+                        if (isDark) {
+                            document.documentElement.classList.remove('dark');
+                            localStorage.setItem('theme', 'light');
+                        } else {
+                            document.documentElement.classList.add('dark');
+                            localStorage.setItem('theme', 'dark');
+                        }
+                        updateIcons();
+
+                        // Đợi thêm 200ms để CSS transition của các thành phần UI (textarea, card) hoàn tất dưới lớp phủ
+                        setTimeout(() => {
+                            // Mờ dần lớp phủ đi sau khi đổi theme hoàn tất
+                            requestAnimationFrame(() => {
+                                overlay.style.opacity = '0';
+                            });
+
+                            // Xóa overlay khỏi DOM khi kết thúc transition mờ dần (250ms)
+                            setTimeout(() => {
+                                overlay.remove();
+                            }, 250);
+                        }, 200);
+                    }, 250);
+                });
+            }
+        })();
     </script>
 </body>
 

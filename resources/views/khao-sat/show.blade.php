@@ -1141,24 +1141,10 @@
             const savedData = localStorage.getItem(storageKey);
             
             if (savedData) {
-                Swal.fire({
-                    title: 'Tìm thấy dữ liệu chưa hoàn thành!',
-                    text: "Bạn có muốn khôi phục lại các câu trả lời từ lần làm việc trước không?",
-                    icon: 'question',
-                    showDenyButton: true,
-                    confirmButtonText: '<i class="bi bi-arrow-clockwise"></i> Khôi phục',
-                    denyButtonText: '<i class="bi bi-trash"></i> Xóa & Bắt đầu lại',
-                    confirmButtonColor: '#3085d6',
-                    denyButtonColor: '#d33',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        fillFormWithData(savedData);
-                        // Swal.fire('Đã khôi phục!', 'Các câu trả lời của bạn đã được tải lại.', 'success');
-                    } else if (result.isDenied) {
-                        clearProgress();
-                        // Swal.fire('Đã xóa!', 'Bạn có thể bắt đầu lại từ đầu.', 'info');
-                    }
-                });
+                fillFormWithData(savedData);
+                if (typeof alert === 'function') {
+                    alert('success', 'Khôi phục tiến trình', 'Đã tự động khôi phục các câu trả lời từ phiên làm việc trước của bạn.');
+                }
             }
         }
         
@@ -1166,27 +1152,64 @@
             try {
                 const data = JSON.parse(jsonData);
                 
+                // 1. Khôi phục các input thông thường trước (textarea, text, select, date...)
                 for (const name in data) {
                     const value = data[name];
                     const element = surveyForm.find(`[name="${name}"]`);
-
-                    if (Array.isArray(value)) {
-                        const checkboxGroup = surveyForm.find(`[name="${name}[]"]`);
-                        checkboxGroup.prop('checked', false);
-                        value.forEach(val => {
-                            checkboxGroup.filter(`[value="${val}"]`).prop('checked', true);
-                        });
-                    } else if (element.is(':radio')) {
-                        surveyForm.find(`[name="${name}"][value="${value}"]`).prop('checked', true);
-                    } else {
-                        element.val(value);
+                    if (element.length && !element.is(':radio') && !element.is(':checkbox')) {
+                        element.val(value).trigger('change');
                     }
                 }
-                
-                if (typeof updateUI === 'function') {
-                    updateUI();
-                }
-                console.log("Load question success")
+
+                // 2. Thăm dò và khôi phục trực tiếp vào state selected của các AlpineJS components
+                let checkAlpineInterval = setInterval(function() {
+                    let allRestored = true;
+                    
+                    $('[x-data*="selected"]').each(function() {
+                        const el = this;
+                        let alpineData = null;
+                        
+                        // Hỗ trợ cả AlpineJS v3 và v2
+                        if (typeof Alpine !== 'undefined' && Alpine.$data) {
+                            alpineData = Alpine.$data(el);
+                        } else if (el.__x) {
+                            alpineData = el.__x.$data;
+                        }
+
+                        if (alpineData) {
+                            const $inputs = $(el).find('input[name^="cau_tra_loi"]');
+                            if ($inputs.length) {
+                                const rawName = $inputs.first().attr('name');
+                                const cleanName = rawName.endsWith('[]') ? rawName.slice(0, -2) : rawName;
+                                
+                                if (data[cleanName] !== undefined) {
+                                    const savedValue = data[cleanName];
+                                    if (Array.isArray(savedValue)) {
+                                        alpineData.selected = [...savedValue];
+                                    } else {
+                                        alpineData.selected = savedValue;
+                                    }
+                                }
+                            }
+                        } else {
+                            allRestored = false;
+                        }
+                    });
+
+                    if (allRestored) {
+                        clearInterval(checkAlpineInterval);
+                        if (typeof updateUI === 'function') {
+                            updateUI();
+                        }
+                        console.log("AlpineJS state restored successfully");
+                    }
+                }, 50);
+
+                // Tự động hủy interval sau 3 giây để tránh rò rỉ bộ nhớ
+                setTimeout(function() {
+                    clearInterval(checkAlpineInterval);
+                }, 3000);
+
             } catch (e) {
                 console.error('Lỗi khi tải dữ liệu từ LocalStorage:', e);
                 clearProgress();
@@ -1412,6 +1435,13 @@
             debounceTimer = setTimeout(updateUI, 250);
         });
 
+        // Tự động lưu tiến trình khi người dùng click lựa chọn (khắc phục AlpineJS change event)
+        $(document).on('click', '.selectable-likert-card', function() {
+            setTimeout(function() {
+                updateUI();
+            }, 50);
+        });
+
         // Track khi người dùng đã interact với câu hỏi
         $('.question-card').on('focusin click', function() {
             $(this).data('touched', true);
@@ -1440,32 +1470,34 @@
             // Xóa các lỗi cũ trước khi kiểm tra
             $(selector).find('.question-card').removeClass('unanswered-question shake-effect');
 
-            const checkedNames = new Set();
-            $(selector).find('.question-card').each(function() {
-                const $card = $(this);
-                const $requiredInputs = $card.find('[required]:visible');
-                if ($requiredInputs.length === 0) return; // Không có trường bắt buộc
+            const checkedRadioNames = new Set();
 
+            $(selector).find('.question-card:visible').each(function() {
+                const $card = $(this);
                 let isCardValid = true;
 
-                $requiredInputs.each(function() {
-                    const $input = $(this);
-                    const inputType = $input.attr('type');
-                    const inputName = $input.attr('name');
+                // 1. Kiểm tra radio/checkbox bắt buộc (chúng bị hidden nên cần tìm theo group name)
+                const $radioGroups = {};
+                $card.find('input[type="radio"][required], input[type="checkbox"][required]').each(function() {
+                    const name = $(this).attr('name');
+                    if (!$radioGroups[name]) $radioGroups[name] = [];
+                    $radioGroups[name].push(this);
+                });
 
-                    if (inputType === 'radio' || inputType === 'checkbox') {
-                        if (!checkedNames.has(inputName)) {
-                            checkedNames.add(inputName);
-                            // Kiểm tra xem trong card này đã check phương án nào chưa
-                            const isChecked = $card.find(`input[name="${inputName}"]:checked`).length > 0;
-                            if (!isChecked) {
-                                isCardValid = false;
-                            }
-                        }
-                    } else {
-                        if (!this.checkValidity()) {
+                for (const name in $radioGroups) {
+                    if (!checkedRadioNames.has(name)) {
+                        checkedRadioNames.add(name);
+                        const isChecked = $card.find(`input[name="${name}"]:checked`).length > 0;
+                        if (!isChecked) {
                             isCardValid = false;
                         }
+                    }
+                }
+
+                // 2. Kiểm tra các input visible còn lại (text, select, textarea, date, number)
+                $card.find('input:not([type="radio"]):not([type="checkbox"])[required]:visible, textarea[required]:visible, select[required]:visible').each(function() {
+                    if (!this.checkValidity()) {
+                        isCardValid = false;
                     }
                 });
 

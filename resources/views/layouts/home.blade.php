@@ -5,19 +5,10 @@
     <script>
         (function () {
             const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                document.documentElement.classList.add('dark');
-            } else if (savedTheme === 'light') {
+            if (savedTheme === 'light') {
                 document.documentElement.classList.remove('dark');
             } else {
-                // Tự động bật chế độ tối từ 18h tối đến 6h sáng
-                const hours = new Date().getHours();
-                if (hours >= 18 || hours < 6) {
-                    document.documentElement.classList.add('dark');
-                    window.autoDarkThemeActivated = true;
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
+                document.documentElement.classList.add('dark');
             }
         })();
     </script>
@@ -309,26 +300,89 @@
             const themeToggleBtn = document.getElementById('theme-toggle');
             if (themeToggleBtn && themeToggleIcon) {
                 themeToggleBtn.addEventListener('click', function () {
-                    if (document.documentElement.classList.contains('dark')) {
-                        document.documentElement.classList.remove('dark');
-                        localStorage.setItem('theme', 'light');
-                        themeToggleIcon.classList.replace('bi-sun-fill', 'bi-moon-fill');
-                    } else {
-                        document.documentElement.classList.add('dark');
-                        localStorage.setItem('theme', 'dark');
-                        themeToggleIcon.classList.replace('bi-moon-fill', 'bi-sun-fill');
+                    const isDark = document.documentElement.classList.contains('dark');
+                    const targetThemeIsDark = !isDark;
+
+                    // Tạo lớp phủ chuyển đổi mờ ảo (translucent & blur)
+                    const overlay = document.createElement('div');
+                    Object.assign(overlay.style, {
+                        position: 'fixed',
+                        inset: '0',
+                        zIndex: '999999',
+                        pointerEvents: 'none',
+                        opacity: '0',
+                        transition: 'opacity 0.25s ease-in-out',
+                        backgroundColor: targetThemeIsDark ? 'rgba(15, 23, 42, 0.35)' : 'rgba(255, 255, 255, 0.35)',
+                        backdropFilter: 'blur(8px)',
+                        webkitBackdropFilter: 'blur(8px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    });
+
+                    // Icon tiến trình chuyển đổi ở giữa
+                    const spinner = document.createElement('div');
+                    const iconClass = targetThemeIsDark ? 'bi-moon-stars-fill' : 'bi-sun-fill';
+                    const iconColor = targetThemeIsDark ? '#38bdf8' : '#eab308'; // xanh dương trời hoặc vàng ấm
+                    const animationName = targetThemeIsDark ? 'theme-pulse' : 'theme-spin';
+
+                    spinner.innerHTML = `<i class="bi ${iconClass}" style="font-size: 3rem; color: ${iconColor}; display: inline-block; animation: ${animationName} 0.8s ease-in-out infinite;"></i>`;
+
+                    // Thêm keyframe animation cho spinner nếu chưa có
+                    if (!document.getElementById('theme-transition-style')) {
+                        const style = document.createElement('style');
+                        style.id = 'theme-transition-style';
+                        style.textContent = `
+                            @keyframes theme-spin {
+                                0% { transform: rotate(0deg); }
+                                100% { transform: rotate(360deg); }
+                            }
+                            @keyframes theme-pulse {
+                                0% { transform: scale(0.8); opacity: 0.7; }
+                                50% { transform: scale(1.15); opacity: 1; }
+                                100% { transform: scale(0.8); opacity: 0.7; }
+                            }
+                        `;
+                        document.head.appendChild(style);
                     }
+
+                    overlay.appendChild(spinner);
+                    document.body.appendChild(overlay);
+
+                    // Kích hoạt transition xuất hiện lớp phủ
+                    requestAnimationFrame(() => {
+                        overlay.style.opacity = '1';
+                    });
+
+                    // Thực hiện đổi theme khi lớp phủ đã sẵn sàng (250ms)
+                    setTimeout(() => {
+                        if (isDark) {
+                            document.documentElement.classList.remove('dark');
+                            localStorage.setItem('theme', 'light');
+                            themeToggleIcon.classList.replace('bi-sun-fill', 'bi-moon-fill');
+                        } else {
+                            document.documentElement.classList.add('dark');
+                            localStorage.setItem('theme', 'dark');
+                            themeToggleIcon.classList.replace('bi-moon-fill', 'bi-sun-fill');
+                        }
+
+                        // Đợi thêm 200ms để CSS transition của các thành phần UI (textarea, card) hoàn tất dưới lớp phủ
+                        setTimeout(() => {
+                            // Mờ dần lớp phủ đi sau khi đổi theme hoàn tất
+                            requestAnimationFrame(() => {
+                                overlay.style.opacity = '0';
+                            });
+
+                            // Xóa overlay khỏi DOM khi kết thúc transition mờ dần (250ms)
+                            setTimeout(() => {
+                                overlay.remove();
+                            }, 250);
+                        }, 200);
+                    }, 250);
                 });
             }
 
-            // Hiển thị thông báo khi tự động kích hoạt chế độ tối
-            if (window.autoDarkThemeActivated) {
-                setTimeout(function () {
-                    if (typeof alert === 'function') {
-                        alert('success', 'Giao diện tối', 'Tự động chuyển giao diện sáng tối thành công');
-                    }
-                }, 1500);
-            }
+
         });
 
         NProgress.start();
@@ -432,53 +486,65 @@
             type = type != null ? type : 'success';
             title = title != null ? title : 'Thông báo';
             const alertClass = type === 'success' ? 'bg-success text-white' : 'bg-danger text-white';
-            const iconClass = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
+            function alert(type, title, message) {
+                if (arguments.length === 1) {
+                    message = type;
+                    type = 'danger';
+                    title = 'Thông báo';
+                } else {
+                    type = type != null ? type : 'success';
+                    title = title != null ? title : 'Thông báo';
+                }
+                const alertClass = type === 'success' ? 'bg-emerald-600 text-white shadow-emerald-500/20' : 'bg-rose-600 text-white shadow-rose-500/20';
+                const iconClass = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
 
-            // Tạo vùng chứa toast nếu chưa có
-            let toastContainer = document.getElementById('custom-toast-container');
-            if (!toastContainer) {
-                toastContainer = document.createElement('div');
-                toastContainer.id = 'custom-toast-container';
-                toastContainer.style.position = 'fixed';
-                toastContainer.style.top = '24px';
-                toastContainer.style.right = '24px';
-                toastContainer.style.zIndex = 1080;
-                toastContainer.style.maxWidth = '350px';
-                document.body.appendChild(toastContainer);
-            }
+                // Tạo vùng chứa toast nếu chưa có
+                let toastContainer = document.getElementById('custom-toast-container');
+                if (!toastContainer) {
+                    toastContainer = document.createElement('div');
+                    toastContainer.id = 'custom-toast-container';
+                    toastContainer.style.position = 'fixed';
+                    toastContainer.style.top = '24px';
+                    toastContainer.style.right = '24px';
+                    toastContainer.style.zIndex = 99999;
+                    toastContainer.style.maxWidth = '350px';
+                    document.body.appendChild(toastContainer);
+                }
 
-            // Tạo HTML toast
-            const toastId = 'toast-' + Date.now() + Math.floor(Math.random() * 10000);
-            const toastHtml = `
-                <div id="${toastId}" class="toast align-items-center ${alertClass} border-0 show mb-2 shadow" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 250px;">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            <i class="bi ${iconClass} me-2 fs-5"></i>
+                // Tạo HTML toast dạng TailwindCSS đặc đục, bóng đổ đẹp mắt
+                const toastId = 'toast-' + Date.now() + Math.floor(Math.random() * 10000);
+                const toastHtml = `
+                <div id="${toastId}" class="${alertClass} px-4 py-3 rounded-xl shadow-xl mb-3 flex items-center justify-between border border-white/10 min-w-[280px] max-w-[350px] transition-all duration-300 transform translate-y-0 opacity-100" role="alert">
+                    <div class="flex items-center gap-3">
+                        <i class="bi ${iconClass} text-lg flex-shrink-0"></i>
+                        <div class="text-sm font-medium text-left leading-snug">
                             <strong>${title}:</strong> ${message}
                         </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
+                    <button type="button" class="btn-close-toast text-white/70 hover:text-white transition-colors ml-4 text-lg flex-shrink-0" aria-label="Close">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
                 </div>
             `;
 
-            // Thêm toast vào vùng chứa
-            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+                // Thêm toast vào vùng chứa
+                toastContainer.insertAdjacentHTML('beforeend', toastHtml);
 
-            // Bắt sự kiện tắt bằng nút close
-            const toastElem = document.getElementById(toastId);
-            toastElem.querySelector('.btn-close').onclick = function () {
-                toastElem.classList.remove('show');
-                setTimeout(() => toastElem.remove(), 400);
-            };
+                // Bắt sự kiện tắt bằng nút close
+                const toastElem = document.getElementById(toastId);
+                toastElem.querySelector('.btn-close-toast').onclick = function () {
+                    toastElem.classList.add('opacity-0', 'translate-y-2');
+                    setTimeout(() => toastElem.remove(), 300);
+                };
 
-            // Tự động ẩn sau 5 giây
-            setTimeout(() => {
-                if (toastElem) {
-                    toastElem.classList.remove('show');
-                    setTimeout(() => { if (toastElem) toastElem.remove(); }, 400);
-                }
-            }, 5000);
-        }
+                // Tự động ẩn sau 5 giây
+                setTimeout(() => {
+                    if (toastElem) {
+                        toastElem.classList.add('opacity-0', 'translate-y-2');
+                        setTimeout(() => { if (toastElem) toastElem.remove(); }, 300);
+                    }
+                }, 5000);
+            }
     </script>
 </body>
 

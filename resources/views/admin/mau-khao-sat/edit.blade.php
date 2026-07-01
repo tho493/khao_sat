@@ -272,6 +272,74 @@
             overflow-x: hidden !important;
             overflow-y: visible !important;
         }
+
+        /* === Dark Mode Adjustments === */
+        html.dark .question-palette {
+            background: #1e293b !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        html.dark .palette-header {
+            color: #f8fafc !important;
+            border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        html.dark .question-type-item {
+            background: #1e293b !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        html.dark .question-type-item:hover {
+            background: #334155 !important;
+            border-color: rgba(255, 255, 255, 0.15) !important;
+        }
+
+        html.dark .question-type-name {
+            color: #f8fafc !important;
+        }
+
+        html.dark .question-type-desc {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .page-container {
+            background: #1e293b !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        html.dark .page-container.drag-over {
+            background: rgba(13, 202, 240, 0.1) !important;
+            border-color: #0dcaf0 !important;
+        }
+
+        html.dark .page-body.empty {
+            background: #0f172a !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            color: #94a3b8 !important;
+        }
+
+        html.dark .page-body.drag-over {
+            background: rgba(33, 150, 243, 0.1) !important;
+            border-color: #2196f3 !important;
+        }
+
+        html.dark #personal-questions-list.drag-over {
+            background: rgba(33, 150, 243, 0.1) !important;
+            border-color: #2196f3 !important;
+        }
+
+        html.dark .sortable-ghost {
+            background: rgba(33, 150, 243, 0.2) !important;
+        }
+
+        html.dark .sortable-chosen {
+            background: rgba(33, 150, 243, 0.1) !important;
+        }
+
+        html.dark .question-form-inline {
+            background: #1e293b !important;
+            border-color: #3b82f6 !important;
+        }
     </style>
 @endpush
 
