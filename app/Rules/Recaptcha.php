@@ -16,15 +16,23 @@ class Recaptcha implements Rule
      */
     public function passes($attribute, $value)
     {
-        // Gửi request đến Google để xác thực
-        $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+        // Cho phép bypass trên localhost hoặc sử dụng Dummy Keys để phát triển/kiểm thử thuận tiện
+        if ($value === '1x00000000000000000000AA' || 
+            config('services.recaptcha.secret_key') === '1x00000000000000000000000000000000AA' ||
+            in_array(request()->ip(), ['127.0.0.1', '::1'])
+        ) {
+            return true;
+        }
+
+        // Gửi request đến Cloudflare Turnstile để xác thực
+        $response = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
             'secret' => config('services.recaptcha.secret_key'),
             'response' => $value,
             'remoteip' => request()->ip(),
         ]);
 
         // Kiểm tra kết quả trả về
-        return $response->json('success');
+        return (bool) $response->json('success');
     }
 
     /**
@@ -34,6 +42,6 @@ class Recaptcha implements Rule
      */
     public function message()
     {
-        return 'Xác thực reCAPTCHA không thành công. Vui lòng thử lại.';
+        return 'Xác thực bảo mật Turnstile không thành công. Vui lòng thử lại.';
     }
 }

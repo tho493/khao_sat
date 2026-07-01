@@ -500,3 +500,127 @@ canvas.chartjs-render-monitor {
 .cookie-consent-buttons button:hover {
     background: #45a049;
 }
+
+/* --- DARK MODE STYLES FOR ADMIN PANEL --- */
+html.dark {
+    --bg-color: #0f172a; /* Slate 900 */
+    --text-dark: #cbd5e1; /* Slate 300 */
+    --text-light: #cbd5e1;
+}
+
+html.dark body {
+    background-color: #0f172a !important;
+}
+
+html.dark #sidebar {
+    background-color: #1e293b !important; /* Slate 800 */
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+html.dark #sidebar ul.components li a {
+    color: #e2e8f0 !important;
+}
+
+html.dark #sidebar ul.components li a:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #ffffff !important;
+}
+
+html.dark #sidebar ul.components li a.active {
+    background-color: #334155;
+    color: #ffffff !important;
+}
+
+html.dark #sidebar .sidebar-footer > a {
+    color: #e2e8f0 !important;
+}
+
+html.dark #sidebar .sidebar-footer > a:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Top Navbar */
+html.dark .top-navbar {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background-color: #1e293b;
+}
+
+html.dark #text-admin-panel {
+    color: #f8fafc !important;
+}
+
+html.dark #mobileSidebarToggle i {
+    color: #e2e8f0 !important;
+}
+
+/* Cards & Content */
+html.dark .card {
+    background-color: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    color: #e2e8f0 !important;
+}
+
+html.dark .card-header {
+    border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+    color: #f8fafc !important;
+}
+
+html.dark .table {
+    color: #e2e8f0 !important;
+}
+
+html.dark .table th, html.dark .table td {
+    border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark .table-striped>tbody>tr:nth-of-type(odd)>* {
+    color: #e2e8f0 !important;
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+html.dark .table-hover>tbody>tr:hover>* {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    color: #ffffff !important;
+}
+
+/* Inputs and Buttons in Admin */
+html.dark input.form-control, html.dark select.form-select, html.dark textarea.form-control {
+    background-color: rgba(15, 23, 42, 0.6) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #f8fafc !important;
+}
+
+html.dark input.form-control:focus, html.dark select.form-select:focus, html.dark textarea.form-control:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+}
+
+/* Modal and Dropdowns */
+html.dark .modal-content {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .modal-header, html.dark .modal-footer {
+    border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark .dropdown-menu.glass-effect {
+    background: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .dropdown-menu.glass-effect .dropdown-item {
+    color: #e2e8f0 !important;
+}
+
+html.dark .dropdown-menu.glass-effect .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: #ffffff !important;
+}
+
+html.dark .dropdown-menu.glass-effect .dropdown-divider {
+    border-top-color: rgba(255, 255, 255, 0.05) !important;
+}
+

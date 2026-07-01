@@ -5,8 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập Quản trị - Hệ thống khảo sát</title>
     
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    @php
+        $siteKey = env('RECAPTCHA_SITE_KEY');
+        if (in_array(request()->ip(), ['127.0.0.1', '::1']) || in_array(request()->getHost(), ['localhost', '127.0.0.1'])) {
+            if (empty($siteKey) || (!str_starts_with($siteKey, '1x') && !str_starts_with($siteKey, '2x') && !str_starts_with($siteKey, '3x'))) {
+                $siteKey = '1x00000000000000000000AA';
+            }
+        }
+    @endphp
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -161,6 +176,68 @@
             transform: scale(0.96);
             transform-origin: center;
         }
+
+        /* Dark Mode styles for Login Page */
+        html.dark body {
+            background-color: #0f172a !important; /* Slate 900 */
+            color: #cbd5e1 !important;
+        }
+
+        html.dark .login-card {
+            background: #1e293b !important; /* Slate 800 */
+            border-color: rgba(255, 255, 255, 0.05) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        html.dark .login-header h3 {
+            color: #f8fafc !important;
+        }
+
+        html.dark .login-header p {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .form-label {
+            color: #cbd5e1 !important;
+        }
+
+        html.dark .form-control {
+            background-color: rgba(15, 23, 42, 0.6) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            color: #f8fafc !important;
+        }
+
+        html.dark .form-control:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
+        }
+
+        html.dark .input-group-text {
+            background-color: #334155 !important; /* Slate 700 */
+            color: #94a3b8 !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        html.dark #togglePassword {
+            background-color: rgba(15, 23, 42, 0.6) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        html.dark #togglePassword i {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .back-link a {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .back-link a:hover {
+            color: #f8fafc !important;
+        }
+
+        html.dark .footer-text {
+            color: #64748b !important;
+        }
     </style>
 </head>
 <body>
@@ -203,7 +280,7 @@
                 </div>
                 
                 <div class="recaptcha-container">
-                    <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+                    <div class="cf-turnstile" data-sitekey="{{ $siteKey }}" data-response-field-name="g-recaptcha-response"></div>
                 </div>
 
                 <button type="submit" class="btn btn-login" id="loginBtn">

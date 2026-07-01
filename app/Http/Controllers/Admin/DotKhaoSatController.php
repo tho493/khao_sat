@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 class DotKhaoSatController extends Controller
 {
@@ -91,6 +92,7 @@ class DotKhaoSatController extends Controller
             }
 
             $dotKhaoSat = DotKhaoSat::create($dataToCreate);
+            Cache::forget('survey_active_dots');
 
             DB::commit();
 
@@ -194,6 +196,8 @@ class DotKhaoSatController extends Controller
         }
 
         $dotKhaoSat->update(['trangthai' => 'active']);
+        Cache::forget('survey_active_dots');
+        Cache::forget('survey_detail_' . $dotKhaoSat->id);
 
         return back()->with('success', 'Kích hoạt đợt khảo sát thành công');
     }
@@ -201,6 +205,8 @@ class DotKhaoSatController extends Controller
     public function close(DotKhaoSat $dotKhaoSat)
     {
         $dotKhaoSat->update(['trangthai' => 'closed']);
+        Cache::forget('survey_active_dots');
+        Cache::forget('survey_detail_' . $dotKhaoSat->id);
 
         return back()->with('success', 'Đóng đợt khảo sát thành công');
     }
@@ -265,6 +271,8 @@ class DotKhaoSatController extends Controller
             }
 
             $dotKhaoSat->update($dataToUpdate);
+            Cache::forget('survey_active_dots');
+            Cache::forget('survey_detail_' . $dotKhaoSat->id);
             DB::commit();
 
             return redirect()
@@ -296,6 +304,8 @@ class DotKhaoSatController extends Controller
             }
 
             $dotKhaoSat->delete();
+            Cache::forget('survey_active_dots');
+            Cache::forget('survey_detail_' . $dotKhaoSat->id);
             DB::commit();
 
             return redirect()->route('admin.dot-khao-sat.index')

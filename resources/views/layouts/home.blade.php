@@ -2,6 +2,25 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+            } else {
+                // Tự động bật chế độ tối từ 18h tối đến 6h sáng
+                const hours = new Date().getHours();
+                if (hours >= 18 || hours < 6) {
+                    document.documentElement.classList.add('dark');
+                    window.autoDarkThemeActivated = true;
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }
+        })();
+    </script>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -33,7 +52,8 @@
     <meta property="og:locale" content="vi_VN">
     <link rel="canonical" href="{{ url()->current() }}">
 
-    <link rel="stylesheet" href="{{ asset('css/splash-screen.css') }}?v={{ @filemtime(public_path('css/splash-screen.css')) }}">
+    <link rel="stylesheet"
+        href="{{ asset('css/splash-screen.css') }}?v={{ @filemtime(public_path('css/splash-screen.css')) }}">
     <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
 
     {{-- CSS for Glassmorphism & Improvements --}}
@@ -58,7 +78,7 @@
 
     {{-- Tailwind CSS & Scripts --}}
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
     {{-- Icons --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -147,6 +167,11 @@
                                 target="_blank"
                                 class="text-white/90 hover:text-white text-xs sm:text-sm font-medium transition xs:inline">GIỚI
                                 THIỆU</a>
+                            <a href="javascript:void(0)" id="theme-toggle"
+                                class="h-[32px] w-[32px] sm:h-[38px] sm:w-[38px] flex items-center justify-center rounded-lg bg-white/20 text-white hover:bg-white/30 transition backdrop-blur-sm"
+                                title="Chuyển chế độ tối/sáng">
+                                <i id="theme-toggle-icon" class="bi bi-moon-fill text-xs sm:text-sm"></i>
+                            </a>
                             <a href="{{ route('admin.dashboard') }}"
                                 class="px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-white/20 text-white text-xs font-semibold hover:bg-white/30 transition backdrop-blur-sm"
                                 title="Truy cập trang quản trị">
@@ -270,6 +295,42 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
     <script>
+        // Đồng bộ icon Dark Mode ngay khi load DOM
+        document.addEventListener('DOMContentLoaded', function () {
+            const themeToggleIcon = document.getElementById('theme-toggle-icon');
+            if (themeToggleIcon) {
+                if (document.documentElement.classList.contains('dark')) {
+                    themeToggleIcon.classList.replace('bi-moon-fill', 'bi-sun-fill');
+                } else {
+                    themeToggleIcon.classList.replace('bi-sun-fill', 'bi-moon-fill');
+                }
+            }
+
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            if (themeToggleBtn && themeToggleIcon) {
+                themeToggleBtn.addEventListener('click', function () {
+                    if (document.documentElement.classList.contains('dark')) {
+                        document.documentElement.classList.remove('dark');
+                        localStorage.setItem('theme', 'light');
+                        themeToggleIcon.classList.replace('bi-sun-fill', 'bi-moon-fill');
+                    } else {
+                        document.documentElement.classList.add('dark');
+                        localStorage.setItem('theme', 'dark');
+                        themeToggleIcon.classList.replace('bi-moon-fill', 'bi-sun-fill');
+                    }
+                });
+            }
+
+            // Hiển thị thông báo khi tự động kích hoạt chế độ tối
+            if (window.autoDarkThemeActivated) {
+                setTimeout(function () {
+                    if (typeof alert === 'function') {
+                        alert('success', 'Giao diện tối', 'Tự động chuyển giao diện sáng tối thành công');
+                    }
+                }, 1500);
+            }
+        });
+
         NProgress.start();
 
         window.addEventListener('load', function () {
