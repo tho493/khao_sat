@@ -578,3 +578,116 @@ body.page-zooming-out .survey-card-link:not(.zooming-in) {
         box-shadow: 0 0 40px 10px rgba(66, 153, 225, 0.6);
     }
 }
+
+/* --- DARK MODE STYLES --- */
+html.dark body {
+    background-color: #0f172a; /* Slate 900 */
+    color: #e2e8f0; /* Slate 200 */
+}
+
+/* Background overlay in dark mode */
+html.dark .bg-gradient-to-br.from-blue-500.to-slate-50 {
+    background: radial-gradient(circle at top right, #1e3a8a, #0f172a);
+}
+
+/* Header in dark mode */
+html.dark header.sticky-header {
+    background-color: #1e293b; /* Slate 800 */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+html.dark header.sticky-header.scrolled {
+    background-color: rgba(30, 41, 59, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Cards & Glassmorphism in dark mode */
+html.dark .glass-effect {
+    background: rgba(30, 41, 59, 0.4); /* Slate 800 with opacity */
+    border-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+html.dark .question-card {
+    background-color: rgba(15, 23, 42, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark .question-card:focus-within {
+    background-color: rgba(30, 41, 59, 0.6) !important;
+    border-color: #3b82f6 !important;
+}
+
+/* Selectable Cards (Likert, MCQ, Radio) */
+html.dark .selectable-likert-card {
+    background-color: rgba(30, 41, 59, 0.3) !important;
+    border-color: rgba(59, 130, 246, 0.2) !important;
+    color: #cbd5e1 !important;
+}
+
+html.dark .selectable-likert-card:hover {
+    background-color: rgba(59, 130, 246, 0.1) !important;
+    border-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+html.dark .selectable-likert-card.bg-blue-100\/80 {
+    background-color: rgba(30, 58, 138, 0.8) !important; /* blue-900 */
+    color: #60a5fa !important;
+    border-color: #2563eb !important;
+}
+
+/* Texts and Labels */
+html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6, 
+html.dark .text-slate-800, html.dark label {
+    color: #f8fafc !important; /* Slate 50 */
+}
+
+html.dark .text-slate-600, html.dark .text-slate-700 {
+    color: #cbd5e1 !important; /* Slate 300 */
+}
+
+html.dark .text-slate-500 {
+    color: #94a3b8 !important; /* Slate 400 */
+}
+
+/* Inputs and Forms */
+html.dark input.form-input, html.dark textarea.form-textarea, html.dark select.form-input {
+    background-color: rgba(15, 23, 42, 0.6) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #f8fafc !important;
+}
+
+html.dark input.form-input::placeholder, html.dark textarea.form-textarea::placeholder {
+    color: #64748b !important;
+}
+
+/* Buttons */
+html.dark #prevBtn {
+    background-color: #334155 !important; /* Slate 700 */
+    color: #f1f5f9 !important;
+}
+
+html.dark #prevBtn:hover {
+    background-color: #475569 !important;
+}
+
+/* Footer in dark mode */
+html.dark footer {
+    background: linear-gradient(to bottom right, #0f172a, #1e293b) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+html.dark footer .text-white\/80 {
+    color: #94a3b8 !important;
+}
+
+html.dark footer .text-white\/70 {
+    color: #64748b !important;
+}
+
+/* Toast container inside dark mode */
+html.dark .toast {
+    background-color: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+

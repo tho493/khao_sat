@@ -267,6 +267,59 @@
             color: var(--text);
         }
 
+        /* Dark Mode Support for Review page */
+        html.dark {
+            --primary: #3b82f6;
+            --primary-100: rgba(59, 130, 246, 0.15);
+            --text: #cbd5e1;
+            --muted: #64748b;
+            --card: #1e293b;
+            --border: rgba(255, 255, 255, 0.05);
+        }
+
+        html.dark .review-wrap {
+            background: #0f172a;
+            color: var(--text);
+        }
+
+        html.dark .info-item,
+        html.dark .table-clean,
+        html.dark .answer,
+        html.dark .actions,
+        html.dark .btn-ghost {
+            background: #1e293b !important;
+        }
+
+        html.dark .info-item h5,
+        html.dark .block-title,
+        html.dark .answer-head h5,
+        html.dark .answer-body {
+            color: #cbd5e1 !important;
+        }
+
+        html.dark .qno {
+            background: #3b82f6 !important;
+            color: #ffffff !important;
+        }
+
+        html.dark .table-clean td:first-child {
+            background: rgba(59, 130, 246, 0.1) !important;
+            color: #cbd5e1 !important;
+        }
+
+        html.dark .table-clean td:last-child {
+            color: #60a5fa !important;
+        }
+
+        html.dark .btn-ghost {
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            color: #cbd5e1 !important;
+        }
+
+        html.dark .btn-ghost:hover {
+            background: rgba(59, 130, 246, 0.1) !important;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .review-wrap {

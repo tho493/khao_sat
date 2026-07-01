@@ -7,6 +7,7 @@ use App\Models\CauHoiKhaoSat;
 use App\Models\MauKhaoSat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class CauHoiController extends Controller
 {
@@ -54,6 +55,7 @@ class CauHoiController extends Controller
                 $cauHoi->phuongAnTraLoi()->createMany($phuongAnData);
             }
 
+            $this->clearCacheForSurveyPattern($mauKhaoSat);
             DB::commit();
             return response()->json(['success' => true, 'message' => 'Thêm câu hỏi thành công!', 'cauHoi' => $cauHoi->load('phuongAnTraLoi')]);
         } catch (\Exception $e) {
@@ -130,6 +132,7 @@ class CauHoiController extends Controller
                 }
             }
 
+            $this->clearCacheForSurveyPattern($cauHoi->mauKhaoSat);
             DB::commit();
             return response()->json(['success' => true, 'message' => 'Cập nhật câu hỏi thành công!']);
         } catch (\Exception $e) {
@@ -148,6 +151,7 @@ class CauHoiController extends Controller
             ], 409); // Conflict
         }
 
+        $this->clearCacheForSurveyPattern($cauHoi->mauKhaoSat);
         $cauHoi->delete();
         return response()->json(['success' => true, 'message' => 'Xóa câu hỏi thành công.']);
     }
@@ -163,6 +167,12 @@ class CauHoiController extends Controller
         try {
             foreach ($validated['order'] as $index => $id) {
                 CauHoiKhaoSat::where('id', $id)->update(['thutu' => $index + 1]);
+            }
+            if (!empty($validated['order'])) {
+                $firstQuestion = CauHoiKhaoSat::find($validated['order'][0]);
+                if ($firstQuestion) {
+                    $this->clearCacheForSurveyPattern($firstQuestion->mauKhaoSat);
+                }
             }
             DB::commit();
 
@@ -180,4 +190,14 @@ class CauHoiController extends Controller
         }
     }
 
+    private function clearCacheForSurveyPattern($mauKhaoSat)
+    {
+        if ($mauKhaoSat) {
+            $dotKhaoSatIds = $mauKhaoSat->dotKhaoSat()->pluck('id');
+            foreach ($dotKhaoSatIds as $dotId) {
+                Cache::forget('survey_detail_' . $dotId);
+            }
+            Cache::forget('survey_active_dots');
+        }
+    }
 }

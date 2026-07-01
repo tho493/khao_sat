@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class MauKhaoSatController extends Controller
 {
@@ -150,6 +151,14 @@ class MauKhaoSatController extends Controller
 
         try {
             $mauKhaoSat->update($dataToUpdate);
+
+            // Xóa cache các đợt khảo sát liên quan
+            $dotKhaoSatIds = $mauKhaoSat->dotKhaoSat()->pluck('id');
+            foreach ($dotKhaoSatIds as $dotId) {
+                Cache::forget('survey_detail_' . $dotId);
+            }
+            Cache::forget('survey_active_dots');
+
             return back()->with('success', 'Cập nhật mẫu khảo sát thành công');
 
         } catch (\Exception $e) {
@@ -178,6 +187,9 @@ class MauKhaoSatController extends Controller
 
             // Xóa mẫu khảo sát
             $mauKhaoSat->delete();
+
+            // Xóa cache
+            Cache::forget('survey_active_dots');
 
             DB::commit();
 

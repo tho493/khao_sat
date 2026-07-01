@@ -147,6 +147,56 @@
     .timer-roll-out {
         animation: rollOut 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
     }
+
+    .shake-effect {
+        animation: shake 0.5s ease-in-out;
+        border-color: rgba(239, 68, 68, 0.8) !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        15%, 45%, 75% { transform: translateX(-6px); }
+        30%, 60%, 90% { transform: translateX(6px); }
+    }
+
+    /* Dark mode support for survey-completed-screen */
+    html.dark #survey-completed-screen .bg-gradient-to-br {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(59, 130, 246, 0.15)) !important;
+    }
+
+    html.dark #survey-completed-screen h1 {
+        color: #f8fafc !important;
+    }
+
+    html.dark #survey-completed-screen p.text-slate-600 {
+        color: #cbd5e1 !important;
+    }
+
+    html.dark #btn-redo-survey {
+        background-color: #334155 !important;
+        color: #e2e8f0 !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    html.dark #btn-redo-survey:hover {
+        background-color: #475569 !important;
+        color: #ef4444 !important;
+    }
+
+    html.dark #survey-completed-screen a[href*="index"] {
+        background-color: #1e293b !important;
+        color: #cbd5e1 !important;
+    }
+
+    html.dark #survey-completed-screen a[href*="index"]:hover {
+        background-color: #334155 !important;
+    }
+
+    html.dark #completed-submission-id {
+        background-color: #1e293b !important;
+        color: #cbd5e1 !important;
+    }
 </style>
 @endpush
 
@@ -252,7 +302,7 @@
                         <input type="hidden" name="metadata[thoigian_batdau]" id="thoigian_batdau">
 
                         <!-- Thông tin người trả lời -->
-                        <div class="glass-effect">
+                        <div class="glass-effect" id="personal-info-section">
                             <div class="bg-white/40 rounded-t-xl px-4 sm:px-6 py-3 sm:py-4 border-b border-white/30">
                                 <h5 class="text-slate-800 font-bold text-base sm:text-lg m-0">Thông tin của bạn</h5>
                             </div>
@@ -738,7 +788,7 @@
                                 <div id="html_element"></div> 
                             </div>
 
-                            <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
+                            <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadCallback&render=explicit" async defer></script>
                             
                             {{-- Nút điều hướng --}}
                             <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
@@ -985,6 +1035,14 @@
 
 <script src="https://unpkg.com/alpinejs" defer></script>
 @push('scripts')
+@php
+    $siteKey = env('RECAPTCHA_SITE_KEY');
+    if (in_array(request()->ip(), ['127.0.0.1', '::1']) || in_array(request()->getHost(), ['localhost', '127.0.0.1'])) {
+        if (empty($siteKey) || (!str_starts_with($siteKey, '1x') && !str_starts_with($siteKey, '2x') && !str_starts_with($siteKey, '3x'))) {
+            $siteKey = '1x00000000000000000000AA';
+        }
+    }
+@endphp
 <script>
      function getCurrentLocalDateTime() {
         const now = new Date();
@@ -1374,6 +1432,59 @@
             updateNumberWithAnimation($('#survey-timer-collapsed'), timeStr);
         }, 1000);
 
+        // Hàm validate một section câu hỏi (áp dụng shake-effect và highlight đỏ)
+        function validateFormSection(selector, isSubmit = false) {
+            let isValid = true;
+            let firstInvalidCard = null;
+
+            // Xóa các lỗi cũ trước khi kiểm tra
+            $(selector).find('.question-card').removeClass('unanswered-question shake-effect');
+
+            const checkedNames = new Set();
+            $(selector).find('.question-card').each(function() {
+                const $card = $(this);
+                const $requiredInputs = $card.find('[required]:visible');
+                if ($requiredInputs.length === 0) return; // Không có trường bắt buộc
+
+                let isCardValid = true;
+
+                $requiredInputs.each(function() {
+                    const $input = $(this);
+                    const inputType = $input.attr('type');
+                    const inputName = $input.attr('name');
+
+                    if (inputType === 'radio' || inputType === 'checkbox') {
+                        if (!checkedNames.has(inputName)) {
+                            checkedNames.add(inputName);
+                            // Kiểm tra xem trong card này đã check phương án nào chưa
+                            const isChecked = $card.find(`input[name="${inputName}"]:checked`).length > 0;
+                            if (!isChecked) {
+                                isCardValid = false;
+                            }
+                        }
+                    } else {
+                        if (!this.checkValidity()) {
+                            isCardValid = false;
+                        }
+                    }
+                });
+
+                if (!isCardValid) {
+                    isValid = false;
+                    $card.addClass('unanswered-question shake-effect');
+                    setTimeout(() => {
+                        $card.removeClass('shake-effect');
+                    }, 600);
+
+                    if (!firstInvalidCard) {
+                        firstInvalidCard = $card;
+                    }
+                }
+            });
+
+            return { isValid, firstInvalidCard };
+        }
+
         // ===========================================================
         // ==     XỬ LÝ SUBMIT FORM BẰNG AJAX                       ==
         // ===========================================================
@@ -1382,8 +1493,27 @@
             
             if (submitBtn.prop('disabled')) return;
 
-            if (!this.checkValidity()) {
-                this.reportValidity();
+            const currentPageKey = pageKeys[currentPageIndex];
+            
+            // Validate cả phần thông tin cá nhân và trang hiện tại trước khi submit
+            const personalValidation = validateFormSection('#personal-info-section', true);
+            const pageValidation = validateFormSection(`#survey-page-${currentPageKey}`, true);
+
+            if (!personalValidation.isValid || !pageValidation.isValid) {
+                alert('Vui lòng hoàn thành tất cả các câu hỏi bắt buộc trước khi gửi khảo sát.');
+                const firstInvalidCard = personalValidation.firstInvalidCard || pageValidation.firstInvalidCard;
+                if (firstInvalidCard) {
+                    firstInvalidCard[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalidCard.find('input, textarea, select').first().focus();
+                }
+                return;
+            }
+
+            // Kiểm tra xem đã hoàn thành xác thực Turnstile chưa (nếu widget đang hiển thị)
+            const captchaResponse = $('[name="g-recaptcha-response"]').val();
+            if ($('#captcha-container').is(':visible') && (!captchaResponse || captchaResponse.trim() === '')) {
+                alert('Vui lòng hoàn thành xác thực bảo mật trước khi gửi khảo sát.');
+                submitBtn.prop('disabled', false).html('<i class="bi bi-send mr-2"></i> Gửi khảo sát');
                 return;
             }
             
@@ -1426,9 +1556,9 @@
                     
                     alert(errorMessage);
 
-                    // Làm mới recaptcha
+                    // Làm mới Turnstile
                     if (xhr.responseJSON.errors && xhr.responseJSON.errors['g-recaptcha-response']) {
-                        grecaptcha.reset();
+                        if (typeof turnstile !== 'undefined') turnstile.reset();
                     }
                     
                     submitBtn.prop('disabled', false).html('<i class="bi bi-send mr-2"></i> Gửi khảo sát');
@@ -1448,7 +1578,7 @@
 var isCaptchaRendered = false;
 
 var onloadCallback = function() {
-    console.log("grecaptcha is ready!");
+    console.log("Turnstile is ready!");
 };
 
 function updateNavigationButtons() {
@@ -1464,10 +1594,13 @@ function updateNavigationButtons() {
         $('#captcha-container').show(); 
 
         if (!isCaptchaRendered) {
-            grecaptcha.render('html_element', {
-                'sitekey' : "{{ env('RECAPTCHA_SITE_KEY') }}" 
-            });
-            isCaptchaRendered = true;
+            if (typeof turnstile !== 'undefined') {
+                turnstile.render('#html_element', {
+                    'sitekey' : "{{ $siteKey }}",
+                    'response-field-name': 'g-recaptcha-response'
+                });
+                isCaptchaRendered = true;
+            }
         }
 
     } else {
@@ -1480,45 +1613,41 @@ function updateNavigationButtons() {
     function goToPage(newIndex) {
         if (newIndex < 0 || newIndex >= totalPages) return;
 
-        let isValid = true;
         const currentPageKey = pageKeys[currentPageIndex];
 
-        const checkedNames = new Set();
-        $(`#survey-page-${currentPageKey} [required]:visible`).each(function() {
-            const $input = $(this);
-            const inputType = $input.attr('type');
-            const inputName = $input.attr('name');
+        if (newIndex > currentPageIndex) {
+            // Validate cả phần thông tin cá nhân và trang hiện tại khi đi tiếp
+            const personalValidation = validateFormSection('#personal-info-section');
+            const pageValidation = validateFormSection(`#survey-page-${currentPageKey}`);
 
-            if ((inputType === 'radio' || inputType === 'checkbox') && !checkedNames.has(inputName)) {
-                checkedNames.add(inputName);
-                if (
-                    $(`#survey-page-${currentPageKey} input[name="${inputName}"]:checked`).length === 0 &&
-                    newIndex > currentPageIndex
-                ) {
-                    isValid = false;
-                    return false;
+            if (!personalValidation.isValid || !pageValidation.isValid) {
+                alert('Vui lòng hoàn thành tất cả các câu hỏi bắt buộc trước khi tiếp tục.');
+                const firstInvalidCard = personalValidation.firstInvalidCard || pageValidation.firstInvalidCard;
+                if (firstInvalidCard) {
+                    firstInvalidCard[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalidCard.find('input, textarea, select').first().focus();
                 }
-            } else if (inputType !== 'radio' && inputType !== 'checkbox') {
-                if (!this.checkValidity() && newIndex > currentPageIndex) {
-                    isValid = false;
-                }
+                return;
             }
-        });
-
-        if (!isValid) {
-            alert('Vui lòng hoàn thành tất cả các câu hỏi bắt buộc trong trang này trước khi tiếp tục.');
-            return;
+        } else {
+            // Xóa báo lỗi cũ khi quay lại
+            $(`#survey-page-${currentPageKey} .question-card`).removeClass('unanswered-question shake-effect');
+            $('#personal-info-section .question-card').removeClass('unanswered-question shake-effect');
         }
 
         const newPageKey = pageKeys[newIndex];
-        $('.survey-page').hide();
-        $(`#survey-page-${newPageKey}`).fadeIn();
-        currentPageIndex = newIndex;
-        updateNavigationButtons();
-        const container = document.getElementById('survey-pages-container');
-        if (container) {
-            container.scrollIntoView({ behavior: 'smooth' });
-        }
+        const $currentPage = $(`#survey-page-${currentPageKey}`);
+        const $newPage = $(`#survey-page-${newPageKey}`);
+        
+        $currentPage.fadeOut(250, function() {
+            $newPage.fadeIn(250);
+            currentPageIndex = newIndex;
+            updateNavigationButtons();
+            const container = document.getElementById('survey-pages-container');
+            if (container) {
+                container.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
     }
 
     // Gắn sự kiện

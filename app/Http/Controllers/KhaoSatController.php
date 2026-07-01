@@ -1,7 +1,7 @@
 <?php
-
+ 
 namespace App\Http\Controllers;
-
+ 
 use App\Models\DotKhaoSat;
 use App\Models\PhieuKhaoSat;
 use App\Models\PhieuKhaoSatChiTiet;
@@ -11,19 +11,22 @@ use Illuminate\Http\Request;
 use App\Models\CauHoiKhaoSat;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
 
 class KhaoSatController extends Controller
 {
     public function index()
     {
-        $dotKhaoSats = DotKhaoSat::with(['mauKhaoSat'])
-            ->withCount(['phieuKhaoSat as responses_count' => function ($query) {
-                $query->where('trangthai', 'completed');
-            }])
-            ->where('trangthai', 'active')
-            ->where('tungay', '<=', now())
-            ->where('denngay', '>=', now())
-            ->get();
+        $dotKhaoSats = Cache::remember('survey_active_dots', 300, function () {
+            return DotKhaoSat::with(['mauKhaoSat'])
+                ->withCount(['phieuKhaoSat as responses_count' => function ($query) {
+                    $query->where('trangthai', 'completed');
+                }])
+                ->where('trangthai', 'active')
+                ->where('tungay', '<=', now())
+                ->where('denngay', '>=', now())
+                ->get();
+        });
 
         return view('khao-sat.index', compact('dotKhaoSats'));
     }
@@ -75,15 +78,18 @@ class KhaoSatController extends Controller
             ));
         }
 
-        $mauKhaoSat = $dotKhaoSat->mauKhaoSat()->with([
-            'cauHoi' => function ($query) {
-                $query->where('trangthai', 1)->orderBy('page', 'asc')->orderBy('thutu', 'asc');
-            },
-            'cauHoi.phuongAnTraLoi' => function ($query) {
-                $query->orderBy('thutu', 'asc');
-            },
-            'cauHoi.dataSource.values'
-        ])->first();
+        $cacheKey = 'survey_detail_' . $dotKhaoSat->id;
+        $mauKhaoSat = Cache::remember($cacheKey, 86400, function () use ($dotKhaoSat) {
+            return $dotKhaoSat->mauKhaoSat()->with([
+                'cauHoi' => function ($query) {
+                    $query->where('trangthai', 1)->orderBy('page', 'asc')->orderBy('thutu', 'asc');
+                },
+                'cauHoi.phuongAnTraLoi' => function ($query) {
+                    $query->orderBy('thutu', 'asc');
+                },
+                'cauHoi.dataSource.values'
+            ])->first();
+        });
 
         if (!$mauKhaoSat) {
             return redirect()->route('khao-sat.index')
