@@ -624,3 +624,360 @@ html.dark .dropdown-menu.glass-effect .dropdown-divider {
     border-top-color: rgba(255, 255, 255, 0.05) !important;
 }
 
+/* General text and headings */
+html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6 {
+    color: #f1f5f9 !important;
+}
+
+html.dark p, html.dark span, html.dark label, html.dark small, html.dark li {
+    color: #cbd5e1;
+}
+
+html.dark a {
+    color: #60a5fa;
+}
+
+html.dark a:hover {
+    color: #93c5fd;
+}
+
+html.dark .text-dark, html.dark .text-muted {
+    color: #94a3b8 !important;
+}
+
+html.dark .text-body {
+    color: #e2e8f0 !important;
+}
+
+/* Main content area */
+html.dark #main-content {
+    color: #e2e8f0;
+}
+
+/* Breadcrumbs */
+html.dark .breadcrumb {
+    color: #94a3b8 !important;
+}
+
+html.dark .breadcrumb-item a {
+    color: #60a5fa !important;
+}
+
+html.dark .breadcrumb-item.active {
+    color: #cbd5e1 !important;
+}
+
+/* Alerts */
+html.dark .alert {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .alert-warning {
+    background-color: rgba(234, 179, 8, 0.15) !important;
+    color: #fbbf24 !important;
+    border-color: rgba(234, 179, 8, 0.3) !important;
+}
+
+html.dark .alert-info {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+    color: #60a5fa !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+html.dark .alert-success {
+    background-color: rgba(34, 197, 94, 0.15) !important;
+    color: #4ade80 !important;
+    border-color: rgba(34, 197, 94, 0.3) !important;
+}
+
+html.dark .alert-danger {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+    color: #f87171 !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Badges */
+html.dark .badge.bg-light {
+    background-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+
+html.dark .badge.bg-secondary {
+    background-color: #475569 !important;
+    color: #f1f5f9 !important;
+}
+
+/* List groups */
+html.dark .list-group-item {
+    background-color: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    color: #e2e8f0 !important;
+}
+
+html.dark .list-group-item:hover {
+    background-color: #334155 !important;
+}
+
+/* Pagination */
+html.dark .page-link {
+    background-color: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #60a5fa !important;
+}
+
+html.dark .page-link:hover {
+    background-color: #334155 !important;
+    color: #93c5fd !important;
+}
+
+html.dark .page-item.active .page-link {
+    background-color: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+    color: #fff !important;
+}
+
+html.dark .page-item.disabled .page-link {
+    background-color: #0f172a !important;
+    color: #475569 !important;
+}
+
+/* Card body specific */
+html.dark .card-body {
+    color: #e2e8f0 !important;
+}
+
+html.dark .card-title {
+    color: #f1f5f9 !important;
+}
+
+html.dark .card-text {
+    color: #cbd5e1 !important;
+}
+
+/* Form labels and inputs placeholder */
+html.dark .form-label, html.dark .col-form-label {
+    color: #cbd5e1 !important;
+}
+
+html.dark input::placeholder, html.dark textarea::placeholder {
+    color: #64748b !important;
+}
+
+html.dark .form-check-label {
+    color: #cbd5e1 !important;
+}
+
+html.dark .form-text {
+    color: #64748b !important;
+}
+
+/* Select2 and custom selects */
+html.dark select, html.dark select option {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+
+/* Borders and HRs */
+html.dark hr {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .border, html.dark .border-bottom, html.dark .border-top {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Sidebar logo text */
+html.dark #sidebar .sidebar-header .logo-text {
+    color: #f8fafc !important;
+}
+
+/* Profile dropdown in navbar */
+html.dark .profile-dropdown .nav-link {
+    color: #e2e8f0 !important;
+}
+
+html.dark .profile-dropdown .nav-link:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Chart containers - make chart labels readable */
+html.dark .chart-area, html.dark .chart-pie, html.dark .chart-container {
+    color: #cbd5e1 !important;
+}
+
+/* Nav tabs */
+html.dark .nav-tabs .nav-link {
+    color: #94a3b8 !important;
+}
+
+html.dark .nav-tabs .nav-link.active {
+    background-color: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #f8fafc !important;
+}
+
+html.dark .nav-tabs {
+    border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Generic background overrides */
+html.dark .bg-white, html.dark .bg-light {
+    background-color: #1e293b !important;
+}
+
+html.dark .shadow-sm, html.dark .shadow {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Cookie consent in admin */
+html.dark .cookie-consent {
+    background: rgba(30, 41, 59, 0.95) !important;
+}
+
+/* Theme toggle button */
+html.dark #adminThemeToggle {
+    color: #fbbf24 !important;
+}
+
+/* Content wrapper - catch-all for text color */
+html.dark #content {
+    color: #e2e8f0 !important;
+}
+
+/* Question/Survey editor specific styles */
+html.dark .question-item,
+html.dark .sortable-item,
+html.dark .draggable-item {
+    background-color: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    color: #e2e8f0 !important;
+}
+
+/* Drag-drop zones */
+html.dark .drop-zone,
+html.dark .sortable-list,
+html.dark .drag-area,
+html.dark [class*="dropzone"],
+html.dark [class*="drop-area"] {
+    background-color: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #94a3b8 !important;
+}
+
+/* All divs with explicit white/light backgrounds via inline or class */
+html.dark .bg-white,
+html.dark .bg-light,
+html.dark [style*="background-color: white"],
+html.dark [style*="background-color: #fff"],
+html.dark [style*="background: white"],
+html.dark [style*="background: #fff"],
+html.dark [style*="background-color: rgb(255"] {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+
+/* Override any text-dark class */
+html.dark .text-dark {
+    color: #e2e8f0 !important;
+}
+
+html.dark .text-secondary {
+    color: #94a3b8 !important;
+}
+
+html.dark .text-black, html.dark .text-black-50 {
+    color: #cbd5e1 !important;
+}
+
+/* Table specific - ensure all rows readable */
+html.dark .table > :not(caption) > * > * {
+    color: #e2e8f0 !important;
+    background-color: transparent !important;
+    border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark .table thead th {
+    color: #94a3b8 !important;
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Accordion */
+html.dark .accordion-item {
+    background-color: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .accordion-button {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+
+html.dark .accordion-button:not(.collapsed) {
+    background-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+html.dark .accordion-body {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+
+/* Close button */
+html.dark .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Offcanvas */
+html.dark .offcanvas {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+
+/* Tooltip */
+html.dark .tooltip-inner {
+    background-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+/* Popover */
+html.dark .popover {
+    background-color: #1e293b !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+html.dark .popover-body {
+    color: #e2e8f0 !important;
+}
+
+/* Data tables/search */
+html.dark .dataTables_wrapper .dataTables_filter input,
+html.dark .dataTables_wrapper .dataTables_length select {
+    background-color: #0f172a !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #e2e8f0 !important;
+}
+
+html.dark .dataTables_info, html.dark .dataTables_length label {
+    color: #94a3b8 !important;
+}
+
+/* Specific admin elements that might use inline styles */
+html.dark .glass-effect {
+    background: rgba(30, 41, 59, 0.8) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Strong/Bold text */
+html.dark strong, html.dark b {
+    color: #f1f5f9;
+}
+
+/* Sidebar divider */
+html.dark #sidebar hr {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}

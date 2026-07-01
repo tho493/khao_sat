@@ -2,6 +2,31 @@
 
 @section('title', 'Tổng quan Báo cáo')
 
+@push('styles')
+<style>
+    .bao-cao-card-header {
+        background: linear-gradient(90deg, #f8fafc 60%, #e3f0ff 100%);
+        border-bottom: 1px solid #e3e6f0;
+    }
+    html.dark .bao-cao-card-header {
+        background: linear-gradient(90deg, #1e293b 60%, #0f172a 100%) !important;
+        border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+    }
+    .search-input-custom {
+        background-color: #f8fafc !important;
+    }
+    html.dark .search-input-custom {
+        background-color: rgba(15, 23, 42, 0.6) !important;
+        color: #f8fafc !important;
+    }
+    html.dark thead.table-light th {
+        background-color: #1e293b !important;
+        color: #e2e8f0 !important;
+        border-color: rgba(255, 255, 255, 0.05) !important;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -104,7 +129,7 @@
     </div>
 
     <div class="card shadow">
-        <div class="card-header py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3" style="background: linear-gradient(90deg, #f8fafc 60%, #e3f0ff 100%); border-bottom: 1px solid #e3e6f0;">
+        <div class="card-header py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 bao-cao-card-header">
             <h6 class="m-0 font-weight-bold text-primary" style="font-size: 1.15rem;">
                 <i class="bi bi-list-task me-2 text-info"></i>Danh sách đợt khảo sát
             </h6>
@@ -112,11 +137,10 @@
                 <div class="input-group shadow-sm">
                     <input 
                         type="text" 
-                        class="form-control border-primary" 
+                        class="form-control border-primary search-input-custom" 
                         name="search" 
                         placeholder="Tìm theo tên đợt hoặc tên mẫu..." 
                         value="{{ request('search') }}"
-                        style="background: #f8fafc;"
                         autocomplete="off"
                     >
                     <button class="btn btn-primary" type="submit" title="Tìm kiếm">
