@@ -70,6 +70,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::prefix('bao-cao')->name('bao-cao.')->group(function () {
         Route::get('/', [BaoCaoController::class, 'index'])->name('index');
         Route::get('/dot-khao-sat/{dotKhaoSat}', [BaoCaoController::class, 'dotKhaoSat'])->name('dot-khao-sat');
+        Route::get('/dot-khao-sat/{dotKhaoSat}/answers/{cauHoi}', [BaoCaoController::class, 'getQuestionAnswers'])->name('question-answers');
         Route::get('/pdf-preview/{dotKhaoSat}', [BaoCaoController::class, 'previewPdf'])->name('pdf-preview');
         Route::get('/export/{dotKhaoSat}', [BaoCaoController::class, 'export'])->name('export');
         Route::post('{dotKhaoSat}/summarize', [BaoCaoController::class, 'summarizeWithAi'])->name('summarize');

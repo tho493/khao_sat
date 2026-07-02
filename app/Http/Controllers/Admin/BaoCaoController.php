@@ -513,4 +513,74 @@ class BaoCaoController extends Controller
             return response()->json(['success' => false, 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
+
+    public function getQuestionAnswers(Request $request, DotKhaoSat $dotKhaoSat, CauHoiKhaoSat $cauHoi)
+    {
+        $perPage = $request->input('per_page', 20);
+        $personalInfoFilters = $request->input('personal_info_filters', []);
+        
+        $baseCompletedQuery = $dotKhaoSat->phieuKhaoSat()
+            ->where('trangthai', 'completed')
+            ->where('is_duplicate', '!=', 1);
+
+        if (!empty($personalInfoFilters)) {
+            $filterQuestions = $dotKhaoSat->mauKhaoSat->cauHoi
+                ->filter(function ($q) {
+                    return $q->is_personal_info || $q->allow_filter;
+                })
+                ->values();
+
+            foreach ($personalInfoFilters as $questionId => $filterValue) {
+                if (empty($filterValue))
+                    continue;
+
+                $question = $filterQuestions->firstWhere('id', $questionId);
+                if (!$question)
+                    continue;
+
+                $filterQuery = DB::table('phieu_khaosat_chitiet')->where('cauhoi_id', $questionId);
+
+                if (in_array($question->loai_cauhoi, ['single_choice', 'multiple_choice'])) {
+                     $filterQuery->where('phuongan_id', $filterValue);
+                } elseif ($question->loai_cauhoi === 'custom_select') {
+                     $filterQuery->where('giatri_text', $filterValue);
+                } else {
+                    $filterQuery->where(function ($q) use ($filterValue) {
+                        $q->where('giatri_text', 'LIKE', "%{$filterValue}%")
+                            ->orWhere('giatri_number', '=', $filterValue);
+                    });
+                }
+
+                $filteredPhieuIds = $filterQuery->pluck('phieu_khaosat_id');
+                $baseCompletedQuery->whereIn('id', $filteredPhieuIds);
+            }
+        }
+
+        $completedSurveyIds = $baseCompletedQuery->pluck('id');
+
+        $query = DB::table('phieu_khaosat_chitiet')
+            ->where('cauhoi_id', $cauHoi->id)
+            ->whereIn('phieu_khaosat_id', $completedSurveyIds);
+
+        if ($cauHoi->loai_cauhoi === 'text') {
+            $query->whereNotNull('giatri_text')
+                ->where('giatri_text', '!=', '')
+                ->select('giatri_text as value', 'phieu_khaosat_id');
+        } elseif ($cauHoi->loai_cauhoi === 'number') {
+            $query->whereNotNull('giatri_number')
+                ->select('giatri_number as value', 'phieu_khaosat_id');
+        } else {
+            $query->select(DB::raw('COALESCE(giatri_text, CAST(giatri_number AS CHAR)) as value'), 'phieu_khaosat_id');
+        }
+
+        $paginator = $query->paginate($perPage);
+
+        return response()->json([
+            'data' => $paginator->items(),
+            'current_page' => $paginator->currentPage(),
+            'last_page' => $paginator->lastPage(),
+            'total' => $paginator->total(),
+            'per_page' => $paginator->perPage()
+        ]);
+    }
 }

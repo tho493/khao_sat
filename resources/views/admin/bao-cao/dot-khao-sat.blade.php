@@ -4,6 +4,61 @@
 
 @push('styles')
     <style>
+        /* CSS cho bảng có nhiều cột */
+        .table-nowrap th,
+        .table-nowrap td {
+            white-space: nowrap !important;
+        }
+
+        @media (min-width: 768px) {
+            .sticky-col-right {
+                position: sticky;
+                right: 0;
+                background-color: #fff !important;
+                z-index: 2;
+                box-shadow: -4px 0 8px rgba(0, 0, 0, 0.05);
+            }
+
+            .table-hover tbody tr:hover .sticky-col-right {
+                background-color: #f8f9fa !important;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .sticky-col-right {
+                position: static !important;
+                box-shadow: none !important;
+            }
+
+            .table-nowrap {
+                font-size: 0.8rem;
+            }
+
+            .table-nowrap .btn-group .btn {
+                padding: 0.2rem 0.35rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Custom thanh cuộn ngang mỏng cho bảng */
+        .table-responsive::-webkit-scrollbar {
+            height: 5px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
         .modal-backdrop.fade {
             opacity: 0;
             transition: opacity 0.3s ease-out !important;
@@ -101,9 +156,9 @@
                         <i class="bi bi-file-earmark-excel"></i> Xuất Excel
                     </a>
                     <!-- <a href="{{ route('admin.bao-cao.export', ['dotKhaoSat' => $dotKhaoSat, 'format' => 'pdf']) }}"
-                                                                                            class="btn btn-danger" id="exportPdfBtn">
-                                                                                            <i class="bi bi-file-earmark-pdf"></i> Tải PDF
-                                                                                        </a> -->
+                                                                                                class="btn btn-danger" id="exportPdfBtn">
+                                                                                                <i class="bi bi-file-earmark-pdf"></i> Tải PDF
+                                                                                            </a> -->
                     <a href="{{ route('admin.bao-cao.pdf-preview', array_merge(['dotKhaoSat' => $dotKhaoSat], $currentQuery, ['format' => 'pdf'])) }}"
                         class="btn btn-outline-danger" id="previewPdfBtn" target="_blank" rel="noopener">
                         <i class="bi bi-file-earmark-pdf"></i> Xuất PDF
@@ -370,24 +425,44 @@
                                     </div>
                                 </div>
                             @elseif($stats['type'] == 'text' && !empty($stats['data']) && $stats['data']->isNotEmpty())
-                                <ul class="list-group list-group-flush">
-                                    @foreach($stats['data'] as $item)
-                                        <li class="list-group-item">{{ $item }}</li>
-                                    @endforeach
-                                </ul>
-                                @if($stats['total'] > 20)
-                                    <p class="small text-muted mt-2 text-center">... và {{ $stats['total'] - 20 }} câu trả lời khác.</p>
-                                @endif
+                                <div class="ajax-answers-container"
+                                    data-url="{{ route('admin.bao-cao.question-answers', ['dotKhaoSat' => $dotKhaoSat->id, 'cauHoi' => $cauHoi->id]) }}"
+                                    data-personal-filters="{{ json_encode($personalInfoFilters) }}" data-current-page="1"
+                                    data-total="{{ $stats['total'] }}" data-per-page="20" data-last-page="{{ ceil($stats['total'] / 20) }}">
+                                    <div class="answers-list-wrapper">
+                                        <ul class="list-group list-group-flush mb-0">
+                                            @foreach($stats['data'] as $item)
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <span>{{ $item->giatri_text }}</span>
+                                                    <button class="btn btn-sm btn-link text-info p-0"
+                                                        onclick="showResponseDetail({{ $item->phieu_khaosat_id }})" title="Xem người trả lời">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
                             @elseif($stats['type'] == 'number_stats')
                                 @if(!empty($stats['cauTraLoi']) && is_iterable($stats['cauTraLoi']))
-                                    <ul class="list-group list-group-flush mb-2">
-                                        @foreach($stats['cauTraLoi'] as $item)
-                                            <li class="list-group-item">{{ intval($item) }}</li>
-                                        @endforeach
-                                    </ul>
-                                    @if(isset($stats['total']) && $stats['total'] > 20)
-                                        <p class="small text-muted mt-2 text-center">... và {{ $stats['total'] - 20 }} câu trả lời khác.</p>
-                                    @endif
+                                    <div class="ajax-answers-container"
+                                        data-url="{{ route('admin.bao-cao.question-answers', ['dotKhaoSat' => $dotKhaoSat->id, 'cauHoi' => $cauHoi->id]) }}"
+                                        data-personal-filters="{{ json_encode($personalInfoFilters) }}" data-current-page="1"
+                                        data-total="{{ $stats['total'] }}" data-per-page="20" data-last-page="{{ ceil($stats['total'] / 20) }}">
+                                        <div class="answers-list-wrapper">
+                                            <ul class="list-group list-group-flush mb-2">
+                                                @foreach($stats['cauTraLoi'] as $item)
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>{{ intval($item->giatri_number) }}</span>
+                                                        <button class="btn btn-sm btn-link text-info p-0"
+                                                            onclick="showResponseDetail({{ $item->phieu_khaosat_id }})" title="Xem người trả lời">
+                                                            <i class="bi bi-eye"></i> Xem người trả lời
+                                                        </button>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </div>
                                 @else
                                     <p class="text-muted text-center mb-0">Không có dữ liệu.</p>
                                 @endif
@@ -519,25 +594,45 @@
                                     </div>
                                 </div>
                             @elseif($stats['type'] == 'text' && !empty($stats['data']) && $stats['data']->isNotEmpty())
-                                <ul class="list-group list-group-flush">
-                                    @foreach($stats['data'] as $item)
-                                        <li class="list-group-item">{{ $item }}</li>
-                                    @endforeach
-                                </ul>
-                                @if($stats['total'] > 20)
-                                    <p class="small text-muted mt-2 text-center">... và {{ $stats['total'] - 20 }} câu trả lời khác.</p>
-                                @endif
+                                <div class="ajax-answers-container"
+                                    data-url="{{ route('admin.bao-cao.question-answers', ['dotKhaoSat' => $dotKhaoSat->id, 'cauHoi' => $cauHoi->id]) }}"
+                                    data-personal-filters="{{ json_encode($personalInfoFilters) }}" data-current-page="1"
+                                    data-total="{{ $stats['total'] }}" data-per-page="20" data-last-page="{{ ceil($stats['total'] / 20) }}">
+                                    <div class="answers-list-wrapper">
+                                        <ul class="list-group list-group-flush mb-0">
+                                            @foreach($stats['data'] as $item)
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <span>{{ $item->giatri_text }}</span>
+                                                    <button class="btn btn-sm btn-link text-info p-0"
+                                                        onclick="showResponseDetail({{ $item->phieu_khaosat_id }})" title="Xem người trả lời">
+                                                        <i class="bi bi-eye"></i> Xem người trả lời
+                                                    </button>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
                             @elseif($stats['type'] == 'number_stats')
                                 @if(!empty($cauHoi->is_personal_info))
                                     @if(!empty($stats['cauTraLoi']) && is_iterable($stats['cauTraLoi']))
-                                        <ul class="list-group list-group-flush mb-2">
-                                            @foreach($stats['cauTraLoi'] as $item)
-                                                <li class="list-group-item">{{ intval($item) }}</li>
-                                            @endforeach
-                                        </ul>
-                                        @if(isset($stats['total']) && $stats['total'] > 20)
-                                            <p class="small text-muted mt-2 text-center">... và {{ $stats['total'] - 20 }} câu trả lời khác.</p>
-                                        @endif
+                                        <div class="ajax-answers-container"
+                                            data-url="{{ route('admin.bao-cao.question-answers', ['dotKhaoSat' => $dotKhaoSat->id, 'cauHoi' => $cauHoi->id]) }}"
+                                            data-personal-filters="{{ json_encode($personalInfoFilters) }}" data-current-page="1"
+                                            data-total="{{ $stats['total'] }}" data-per-page="20" data-last-page="{{ ceil($stats['total'] / 20) }}">
+                                            <div class="answers-list-wrapper">
+                                                <ul class="list-group list-group-flush mb-2">
+                                                    @foreach($stats['cauTraLoi'] as $item)
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <span>{{ intval($item->giatri_number) }}</span>
+                                                            <button class="btn btn-sm btn-link text-info p-0"
+                                                                onclick="showResponseDetail({{ $item->phieu_khaosat_id }})" title="Xem người trả lời">
+                                                                <i class="bi bi-eye"></i> Xem người trả lời
+                                                            </button>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
                                     @else
                                         <p class="text-muted text-center mb-0">Không có dữ liệu.</p>
                                     @endif
@@ -587,7 +682,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0 table-nowrap">
                         <thead class="table-light">
                             <tr>
                                 <th scope="col" class="text-center" style="width: 70px;">STT</th>
@@ -597,7 +692,7 @@
                                     @endforeach
                                 @endif
                                 <th scope="col">Thời gian làm bài</th>
-                                <th scope="col" class="text-end">Thao tác</th>
+                                <th scope="col" class="text-end sticky-col-right border-start">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -615,7 +710,7 @@
                                         {{ $phieu->thoigian_batdau ? $phieu->thoigian_batdau->format('d/m/Y H:i') : 'N/A' }} -
                                         {{ $phieu->thoigian_hoanthanh ? $phieu->thoigian_hoanthanh->format('d/m/Y H:i') : 'N/A' }}
                                     </td>
-                                    <td class="text-end">
+                                    <td class="text-end sticky-col-right border-start">
                                         <div class="btn-group" role="group">
                                             <button class="btn btn-sm btn-outline-info" title="Xem chi tiết phiếu"
                                                 onclick="showResponseDetail({{ $phieu->id }})">
@@ -650,7 +745,7 @@
 
         <!-- Danh sách phiếu bị đánh dấu trùng lặp -->
         @if($danhSachPhieuTrungLap->isNotEmpty())
-            <div class="card shadow mb-4 border-warning">
+            <div class="card shadow mb-4 border-warning" id="duplicateSurvey">
                 <div class="card-header bg-amber-100 bg-opacity-25">
                     <h6 class="m-0 font-weight-bold text-warning">
                         <i class="bi bi-exclamation-triangle me-1"></i>
@@ -659,7 +754,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
+                        <table class="table table-hover align-middle mb-0 table-nowrap">
                             <thead class="table-light">
                                 <tr>
                                     @if(isset($personalInfoQuestions) && $personalInfoQuestions->count())
@@ -668,7 +763,7 @@
                                         @endforeach
                                     @endif
                                     <th scope="col">Thời gian làm bài</th>
-                                    <th scope="col" class="text-end">Thao tác</th>
+                                    <th scope="col" class="text-end sticky-col-right border-start">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -683,7 +778,7 @@
                                             {{ $phieu->thoigian_batdau ? $phieu->thoigian_batdau->format('d/m/Y H:i') : 'N/A' }} -
                                             {{ $phieu->thoigian_hoanthanh ? $phieu->thoigian_hoanthanh->format('d/m/Y H:i') : 'N/A' }}
                                         </td>
-                                        <td class="text-end">
+                                        <td class="text-end sticky-col-right border-start">
                                             <div class="btn-group" role="group">
                                                 <button class="btn btn-sm btn-outline-info" title="Xem chi tiết phiếu"
                                                     onclick="showResponseDetail({{ $phieu->id }})">
@@ -909,18 +1004,18 @@
                     }
                 @endif
             @endforeach
-                        });
+                            });
 
         const summaryModal = new bootstrap.Modal(document.getElementById('summaryModal'));
 
         function requestSummary(questionId, questionContext) {
             $('#summaryQuestionContext').text('Câu hỏi: ' + questionContext + '.');
             $('#summaryContent').html(`
-                                                            <div class="text-center py-5">
-                                                                <div class="spinner-border text-primary" role="status"></div>
-                                                                <p class="mt-3">AI đang phân tích và tóm tắt... Vui lòng chờ trong giây lát.</p>
-                                                            </div>
-                                                        `);
+                                                                <div class="text-center py-5">
+                                                                    <div class="spinner-border text-primary" role="status"></div>
+                                                                    <p class="mt-3">AI đang phân tích và tóm tắt... Vui lòng chờ trong giây lát.</p>
+                                                                </div>
+                                                            `);
             summaryModal.show();
 
             $.ajax({
@@ -956,11 +1051,11 @@
 
             modalLabel.text('Chi tiết Phiếu khảo sát #' + phieuId);
             modalContent.html(`
-                                                        <div class="text-center py-5">
-                                                            <div class="spinner-border text-primary" role="status"></div>
-                                                            <p class="mt-2 text-muted">Đang tải dữ liệu...</p>
-                                                        </div>
-                                                    `);
+                                                            <div class="text-center py-5">
+                                                                <div class="spinner-border text-primary" role="status"></div>
+                                                                <p class="mt-2 text-muted">Đang tải dữ liệu...</p>
+                                                            </div>
+                                                        `);
             modalInstance.show();
 
             $.get(`/admin/phieu-khao-sat/${phieuId}`)
@@ -983,14 +1078,14 @@
                     let html = '';
                     if (personalInfoQuestions.length > 0) {
                         html += `<h5><i class="bi bi-person-circle text-primary me-2"></i>Thông tin người trả lời</h5>
-                                                            <table class="table table-sm table-bordered mb-4"><tbody>`;
+                                                                <table class="table table-sm table-bordered mb-4"><tbody>`;
                         personalInfoQuestions.forEach(question => {
                             const answerArray = answersByQuestionId[question.id] || [];
                             const answerText = answerArray.length > 0 ? answerArray.join('; ') : '<em class="text-muted">(Không trả lời)</em>';
                             html += `<tr>
-                                                                        <td width="40%"><strong>${escapeHtml(question.noidung_cauhoi)}</strong></td>
-                                                                        <td>${answerText}</td>
-                                                                        </tr>`;
+                                                                            <td width="40%"><strong>${escapeHtml(question.noidung_cauhoi)}</strong></td>
+                                                                            <td>${answerText}</td>
+                                                                            </tr>`;
                         });
                         html += `</tbody></table>`;
                     }
@@ -1005,22 +1100,22 @@
                             const responseDetails = phieuData.chi_tiet.filter(detail => detail.cauhoi_id === question.id);
 
                             html += `<div class="mb-3 border rounded p-3">
-                                                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                                                <p class="mb-1"><strong>Câu ${index + 1}:</strong> ${escapeHtml(question.noidung_cauhoi)}</p>
-                                                                                ${responseDetails.length > 0 ? `
-                                                                                    <div class="btn-group btn-group-sm" role="group">
-                                                                                        ${responseDetails.map(detail => `
-                                                                                            <!-- <button class="btn btn-outline-danger btn-sm" 
-                                                                                                    title="Xóa câu trả lời này"
-                                                                                                    onclick="deleteSpecificResponse(${detail.id}, '${escapeHtml(question.noidung_cauhoi)}', '${escapeHtml(answerText)}')">
-                                                                                                <i class="bi bi-trash"></i>
-                                                                                            </button> -->
-                                                                                        `).join('')}
-                                                                                    </div>
-                                                                                ` : ''}
-                                                                            </div>
-                                                                            <p class="ps-3 text-primary fst-italic mb-0">${answerText}</p>
-                                                                            </div>`;
+                                                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                                                    <p class="mb-1"><strong>Câu ${index + 1}:</strong> ${escapeHtml(question.noidung_cauhoi)}</p>
+                                                                                    ${responseDetails.length > 0 ? `
+                                                                                        <div class="btn-group btn-group-sm" role="group">
+                                                                                            ${responseDetails.map(detail => `
+                                                                                                <!-- <button class="btn btn-outline-danger btn-sm" 
+                                                                                                        title="Xóa câu trả lời này"
+                                                                                                        onclick="deleteSpecificResponse(${detail.id}, '${escapeHtml(question.noidung_cauhoi)}', '${escapeHtml(answerText)}')">
+                                                                                                    <i class="bi bi-trash"></i>
+                                                                                                </button> -->
+                                                                                            `).join('')}
+                                                                                        </div>
+                                                                                    ` : ''}
+                                                                                </div>
+                                                                                <p class="ps-3 text-primary fst-italic mb-0">${answerText}</p>
+                                                                                </div>`;
                         });
                     }
                     modalContent.html(html);
@@ -1067,11 +1162,11 @@
 
             // Hiển thị thông tin phiếu trong modal
             $('#deleteSurveyInfo').html(`
-                                                                                                                                <div class="text-center py-3">
-                                                                                                                                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                                                                                                                                    <p class="mt-2 mb-0">Đang tải thông tin phiếu...</p>
-                                                                                                                                </div>
-                                                                                                                            `);
+                                                                                                                                    <div class="text-center py-3">
+                                                                                                                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                                                                                                                        <p class="mt-2 mb-0">Đang tải thông tin phiếu...</p>
+                                                                                                                                    </div>
+                                                                                                                                `);
 
             deleteSurveyModal.show();
 
@@ -1264,8 +1359,8 @@
                 updateExportLinks();
             @endif
 
-                    // Tự động cuộn đến phần detailSurvey nếu có tham số page
-                    if (new URLSearchParams(window.location.search).has('page')) {
+                // Tự động cuộn đến phần detailSurvey nếu có tham số page
+                if (new URLSearchParams(window.location.search).has('page')) {
                 const detailSurvey = document.getElementById('detailSurvey');
                 if (detailSurvey) {
                     setTimeout(() => {
@@ -1273,6 +1368,243 @@
                     }, 100);
                 }
             }
+
+            // Phân trang Server-side qua Ajax cho danh sách câu trả lời (.ajax-answers-container)
+            document.querySelectorAll('.ajax-answers-container').forEach(function (container) {
+                const url = container.getAttribute('data-url');
+                const filters = JSON.parse(container.getAttribute('data-personal-filters') || '{}');
+                const total = parseInt(container.getAttribute('data-total')) || 0;
+                const perPage = parseInt(container.getAttribute('data-per-page')) || 20;
+                const lastPage = parseInt(container.getAttribute('data-last-page')) || 1;
+
+                const listWrapper = container.querySelector('.answers-list-wrapper');
+                // Lưu lại HTML gốc của Trang 1 được render bởi Blade
+                container.originalPage1Html = listWrapper.innerHTML;
+
+                let currentPage = 1;
+
+                function loadPage(page) {
+                    currentPage = page;
+
+                    if (currentPage === 1) {
+                        // Giải phóng minHeight và khôi phục nhanh Trang 1 từ bộ nhớ
+                        listWrapper.style.minHeight = '';
+                        listWrapper.innerHTML = container.originalPage1Html;
+                        renderPaginationControls();
+                        return;
+                    }
+
+                    // Đo chiều cao hiện tại để giữ chiều cao trong lúc tải, tránh sụt layout (giật trang)
+                    const currentHeight = listWrapper.offsetHeight;
+                    if (currentHeight > 0) {
+                        listWrapper.style.minHeight = currentHeight + 'px';
+                    }
+
+                    listWrapper.innerHTML = `
+                            <div class="d-flex align-items-center justify-content-center text-muted" style="min-height: ${currentHeight || 150}px;">
+                                <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div> Đang tải câu trả lời...
+                            </div>
+                        `;
+
+                    $.ajax({
+                        url: url,
+                        method: 'GET',
+                        data: {
+                            page: currentPage,
+                            per_page: perPage,
+                            personal_info_filters: filters
+                        },
+                        success: function (response) {
+                            renderData(response);
+                        },
+                        error: function (xhr) {
+                            listWrapper.style.minHeight = '';
+                            listWrapper.innerHTML = `
+                                    <div class="alert alert-danger py-2 mb-0" style="font-size:0.85rem;">
+                                        Không thể tải dữ liệu câu trả lời. Vui lòng thử lại.
+                                    </div>
+                                `;
+                        }
+                    });
+                }
+
+                function renderData(response) {
+                    // Giải phóng chiều cao cố định sau khi đã có dữ liệu mới
+                    listWrapper.style.minHeight = '';
+
+                    const items = response.data;
+                    const totalItems = response.total;
+
+                    if (totalItems === 0) {
+                        listWrapper.innerHTML = '<p class="text-muted text-center mb-0">Chưa có câu trả lời.</p>';
+                        return;
+                    }
+
+                    let html = '<ul class="list-group list-group-flush mb-0">';
+                    items.forEach(function (item) {
+                        html += `
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>${escapeHtml(String(item.value))}</span>
+                                    <button class="btn btn-sm btn-link text-info p-0" onclick="showResponseDetail(${item.phieu_khaosat_id})" title="Xem người trả lời">
+                                        <i class="bi bi-eye"></i> Xem người trả lời
+                                    </button>
+                                </li>
+                            `;
+                    });
+                    html += '</ul>';
+
+                    listWrapper.innerHTML = html;
+                    renderPaginationControls();
+                }
+
+                function renderPaginationControls() {
+                    if (lastPage <= 1) return;
+
+                    const start = (currentPage - 1) * perPage + 1;
+                    const end = Math.min(currentPage * perPage, total);
+
+                    // Xóa pagination điều hướng cũ nếu có
+                    const oldPagination = container.querySelector('.ajax-pagination-nav');
+                    if (oldPagination) {
+                        oldPagination.remove();
+                    }
+
+                    const paginationHtml = `
+                            <div class="ajax-pagination-nav d-flex justify-content-between align-items-center mt-2 px-3 py-2 bg-light rounded-bottom border" style="font-size: 0.8rem;">
+                                <span class="text-muted fw-medium">
+                                    Hiển thị ${start}-${end} / ${total}
+                                </span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2 btn-prev-ajax" ${currentPage === 1 ? 'disabled' : ''}>
+                                        <i class="bi bi-chevron-left" style="font-size: 0.75rem;"></i>
+                                    </button>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <span>Trang</span>
+                                        <input type="number" class="form-control form-control-sm text-center input-page-ajax" value="${currentPage}" min="1" max="${lastPage}" style="width: 50px; height: 26px; padding: 2px;">
+                                        <span>/ ${lastPage}</span>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2 btn-next-ajax" ${currentPage === lastPage ? 'disabled' : ''}>
+                                        <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+
+                    container.insertAdjacentHTML('beforeend', paginationHtml);
+
+                    // Gắn sự kiện
+                    const nav = container.querySelector('.ajax-pagination-nav');
+                    const prevBtn = nav.querySelector('.btn-prev-ajax');
+                    const nextBtn = nav.querySelector('.btn-next-ajax');
+                    const pageInput = nav.querySelector('.input-page-ajax');
+
+                    if (prevBtn) {
+                        prevBtn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            loadPage(currentPage - 1);
+                        });
+                    }
+
+                    if (nextBtn) {
+                        nextBtn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            loadPage(currentPage + 1);
+                        });
+                    }
+
+                    if (pageInput) {
+                        pageInput.addEventListener('keydown', function (e) {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handlePageJump();
+                            }
+                        });
+
+                        pageInput.addEventListener('blur', function (e) {
+                            handlePageJump();
+                        });
+
+                        function handlePageJump() {
+                            let pageVal = parseInt(pageInput.value);
+                            if (isNaN(pageVal) || pageVal < 1) {
+                                pageVal = 1;
+                            } else if (pageVal > lastPage) {
+                                pageVal = lastPage;
+                            }
+                            if (pageVal !== currentPage) {
+                                loadPage(pageVal);
+                            }
+                        }
+                    }
+                }
+
+                // Vẽ thanh điều hướng phân trang cho Trang 1 (không cần gọi Ajax)
+                renderPaginationControls();
+            });
+
+            // Ajax phân trang cho Danh sách phiếu đã hoàn thành (#detailSurvey)
+            $(document).on('click', '#detailSurvey .pagination a', function (e) {
+                e.preventDefault();
+                const url = $(this).attr('href');
+                if (!url) return;
+
+                const $container = $('#detailSurvey');
+                const currentHeight = $container.outerHeight();
+                $container.css({
+                    'min-height': currentHeight + 'px',
+                    'opacity': '0.6'
+                });
+
+                $.get(url, function (html) {
+                    const $newHtml = $(html).find('#detailSurvey').html();
+                    $container.html($newHtml);
+                    $container.css({
+                        'min-height': '',
+                        'opacity': ''
+                    });
+
+                    // Cuộn mượt tới vị trí bảng
+                    document.getElementById('detailSurvey').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }).fail(function () {
+                    $container.css({
+                        'min-height': '',
+                        'opacity': ''
+                    });
+                    alert('Không thể tải danh sách phiếu. Vui lòng thử lại.');
+                });
+            });
+
+            // Ajax phân trang cho Danh sách phiếu trùng lặp (#duplicateSurvey)
+            $(document).on('click', '#duplicateSurvey .pagination a', function (e) {
+                e.preventDefault();
+                const url = $(this).attr('href');
+                if (!url) return;
+
+                const $container = $('#duplicateSurvey');
+                const currentHeight = $container.outerHeight();
+                $container.css({
+                    'min-height': currentHeight + 'px',
+                    'opacity': '0.6'
+                });
+
+                $.get(url, function (html) {
+                    const $newHtml = $(html).find('#duplicateSurvey').html();
+                    $container.html($newHtml);
+                    $container.css({
+                        'min-height': '',
+                        'opacity': ''
+                    });
+
+                    // Cuộn mượt tới vị trí bảng
+                    document.getElementById('duplicateSurvey').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }).fail(function () {
+                    $container.css({
+                        'min-height': '',
+                        'opacity': ''
+                    });
+                    alert('Không thể tải danh sách phiếu. Vui lòng thử lại.');
+                });
+            });
         });
     </script>
 @endpush

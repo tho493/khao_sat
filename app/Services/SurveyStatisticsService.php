@@ -19,14 +19,35 @@ class SurveyStatisticsService
             return 'N/A';
         }
 
+        if ($avgSeconds === 0) {
+            return '0 giây';
+        }
+
+        $parts = [];
+        
+        $days = floor($avgSeconds / 86400);
+        $avgSeconds %= 86400;
+        
+        $hours = floor($avgSeconds / 3600);
+        $avgSeconds %= 3600;
+        
         $minutes = floor($avgSeconds / 60);
         $seconds = round($avgSeconds % 60);
 
-        if ($minutes == 0) {
-            return "{$seconds} giây";
+        if ($days > 0) {
+            $parts[] = "{$days} ngày";
+        }
+        if ($hours > 0) {
+            $parts[] = "{$hours} giờ";
+        }
+        if ($minutes > 0) {
+            $parts[] = "{$minutes} phút";
+        }
+        if ($seconds > 0 || empty($parts)) {
+            $parts[] = "{$seconds} giây";
         }
 
-        return "{$minutes} phút {$seconds} giây";
+        return implode(' ', $parts);
     }
 
     /**
@@ -37,10 +58,20 @@ class SurveyStatisticsService
         if ($completedSurveys->isEmpty()) {
             return 'N/A';
         }
-        $avgSeconds = $completedSurveys->avg(function ($phieu) {
-            return $phieu->thoigian_batdau ? $phieu->thoigian_batdau->diffInSeconds($phieu->thoigian_hoanthanh) : 0;
-        });
-        return $this->formatSeconds((int) round($avgSeconds));
+        $seconds = $completedSurveys->map(function ($phieu) {
+            if (!$phieu->thoigian_batdau || !$phieu->thoigian_hoanthanh) {
+                return null;
+            }
+            $start = Carbon::parse($phieu->thoigian_batdau);
+            $end = Carbon::parse($phieu->thoigian_hoanthanh);
+            return $end->timestamp - $start->timestamp;
+        })->filter(fn($value) => !is_null($value) && $value > 0);
+
+        if ($seconds->isEmpty()) {
+            return 'N/A';
+        }
+
+        return $this->formatSeconds((int) round($seconds->average()));
     }
 
     /**
@@ -52,8 +83,13 @@ class SurveyStatisticsService
             return 'N/A';
         }
         $seconds = $completedSurveys->map(function ($phieu) {
-            return $phieu->thoigian_batdau ? $phieu->thoigian_batdau->diffInSeconds($phieu->thoigian_hoanthanh) : null;
-        })->filter(fn($value) => !is_null($value));
+            if (!$phieu->thoigian_batdau || !$phieu->thoigian_hoanthanh) {
+                return null;
+            }
+            $start = Carbon::parse($phieu->thoigian_batdau);
+            $end = Carbon::parse($phieu->thoigian_hoanthanh);
+            return $end->timestamp - $start->timestamp;
+        })->filter(fn($value) => !is_null($value) && $value > 0);
 
         if ($seconds->isEmpty()) {
             return 'N/A';
@@ -234,9 +270,9 @@ class SurveyStatisticsService
                 $data = (clone $baseQuery)
                     ->whereNotNull('giatri_text')
                     ->where('giatri_text', '!=', '')
-                    ->select('giatri_text')
+                    ->select('giatri_text', 'phieu_khaosat_id')
                     ->limit(20)
-                    ->pluck('giatri_text');
+                    ->get();
 
                 return ['type' => 'text', 'data' => $data, 'total' => $totalResponses];
 
@@ -319,9 +355,9 @@ class SurveyStatisticsService
 
                 $cauTraLoi = (clone $baseQuery)
                     ->whereNotNull('giatri_number')
-                    ->select('giatri_number')
+                    ->select('giatri_number', 'phieu_khaosat_id')
                     ->limit(20)
-                    ->pluck('giatri_number');
+                    ->get();
                 return [
                     'type' => 'number_stats',
                     'data' => $stats,
