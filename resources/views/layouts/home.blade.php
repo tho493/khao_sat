@@ -81,6 +81,22 @@
         rel="stylesheet">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* View Transitions API styles for circular theme transition */
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+            animation: none;
+            mix-blend-mode: normal;
+        }
+
+        ::view-transition-old(root) {
+            z-index: 1;
+        }
+
+        ::view-transition-new(root) {
+            z-index: 9999;
+        }
+    </style>
     @stack('styles')
 </head>
 
@@ -299,86 +315,101 @@
 
             const themeToggleBtn = document.getElementById('theme-toggle');
             if (themeToggleBtn && themeToggleIcon) {
-                themeToggleBtn.addEventListener('click', function () {
+                // Cấu hình transition cho icon xoay
+                themeToggleIcon.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+
+                function toggleTheme() {
                     const isDark = document.documentElement.classList.contains('dark');
-                    const targetThemeIsDark = !isDark;
-
-                    // Tạo lớp phủ chuyển đổi mờ ảo (translucent & blur)
-                    const overlay = document.createElement('div');
-                    Object.assign(overlay.style, {
-                        position: 'fixed',
-                        inset: '0',
-                        zIndex: '999999',
-                        pointerEvents: 'none',
-                        opacity: '0',
-                        transition: 'opacity 0.25s ease-in-out',
-                        backgroundColor: targetThemeIsDark ? 'rgba(15, 23, 42, 0.35)' : 'rgba(255, 255, 255, 0.35)',
-                        backdropFilter: 'blur(8px)',
-                        webkitBackdropFilter: 'blur(8px)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    });
-
-                    // Icon tiến trình chuyển đổi ở giữa
-                    const spinner = document.createElement('div');
-                    const iconClass = targetThemeIsDark ? 'bi-moon-stars-fill' : 'bi-sun-fill';
-                    const iconColor = targetThemeIsDark ? '#38bdf8' : '#eab308'; // xanh dương trời hoặc vàng ấm
-                    const animationName = targetThemeIsDark ? 'theme-pulse' : 'theme-spin';
-
-                    spinner.innerHTML = `<i class="bi ${iconClass}" style="font-size: 3rem; color: ${iconColor}; display: inline-block; animation: ${animationName} 0.8s ease-in-out infinite;"></i>`;
-
-                    // Thêm keyframe animation cho spinner nếu chưa có
-                    if (!document.getElementById('theme-transition-style')) {
-                        const style = document.createElement('style');
-                        style.id = 'theme-transition-style';
-                        style.textContent = `
-                            @keyframes theme-spin {
-                                0% { transform: rotate(0deg); }
-                                100% { transform: rotate(360deg); }
-                            }
-                            @keyframes theme-pulse {
-                                0% { transform: scale(0.8); opacity: 0.7; }
-                                50% { transform: scale(1.15); opacity: 1; }
-                                100% { transform: scale(0.8); opacity: 0.7; }
-                            }
-                        `;
-                        document.head.appendChild(style);
+                    if (isDark) {
+                        document.documentElement.classList.remove('dark');
+                        localStorage.setItem('theme', 'light');
+                        themeToggleIcon.classList.replace('bi-sun-fill', 'bi-moon-fill');
+                    } else {
+                        document.documentElement.classList.add('dark');
+                        localStorage.setItem('theme', 'dark');
+                        themeToggleIcon.classList.replace('bi-moon-fill', 'bi-sun-fill');
                     }
+                }
 
-                    overlay.appendChild(spinner);
-                    document.body.appendChild(overlay);
+                themeToggleBtn.addEventListener('click', function (event) {
+                    // Hiệu ứng xoay và thu nhỏ icon trước
+                    themeToggleIcon.style.transform = 'rotate(180deg) scale(0.3)';
 
-                    // Kích hoạt transition xuất hiện lớp phủ
-                    requestAnimationFrame(() => {
-                        overlay.style.opacity = '1';
-                    });
-
-                    // Thực hiện đổi theme khi lớp phủ đã sẵn sàng (250ms)
                     setTimeout(() => {
-                        if (isDark) {
-                            document.documentElement.classList.remove('dark');
-                            localStorage.setItem('theme', 'light');
-                            themeToggleIcon.classList.replace('bi-sun-fill', 'bi-moon-fill');
-                        } else {
-                            document.documentElement.classList.add('dark');
-                            localStorage.setItem('theme', 'dark');
-                            themeToggleIcon.classList.replace('bi-moon-fill', 'bi-sun-fill');
-                        }
+                        // Nếu trình duyệt hỗ trợ View Transitions API
+                        if (document.startViewTransition) {
+                            const rect = themeToggleBtn.getBoundingClientRect();
+                            const x = rect.left + rect.width / 2;
+                            const y = rect.top + rect.height / 2;
 
-                        // Đợi thêm 200ms để CSS transition của các thành phần UI (textarea, card) hoàn tất dưới lớp phủ
-                        setTimeout(() => {
-                            // Mờ dần lớp phủ đi sau khi đổi theme hoàn tất
-                            requestAnimationFrame(() => {
-                                overlay.style.opacity = '0';
+                            const endRadius = Math.hypot(
+                                Math.max(x, window.innerWidth - x),
+                                Math.max(y, window.innerHeight - y)
+                            );
+
+                            const transition = document.startViewTransition(() => {
+                                toggleTheme();
                             });
 
-                            // Xóa overlay khỏi DOM khi kết thúc transition mờ dần (250ms)
+                            transition.ready.then(() => {
+                                const clipPath = [
+                                    `circle(0px at ${x}px ${y}px)`,
+                                    `circle(${endRadius}px at ${x}px ${y}px)`
+                                ];
+
+                                document.documentElement.animate(
+                                    {
+                                        clipPath: clipPath
+                                    },
+                                    {
+                                        duration: 500,
+                                        easing: 'ease-in-out',
+                                        pseudoElement: '::view-transition-new(root)'
+                                    }
+                                );
+                            });
+                        } else {
+                            // Fallback cho trình duyệt không hỗ trợ (ví dụ: Firefox)
+                            const overlay = document.createElement('div');
+                            Object.assign(overlay.style, {
+                                position: 'fixed',
+                                inset: '0',
+                                zIndex: '999999',
+                                pointerEvents: 'none',
+                                opacity: '0',
+                                transition: 'opacity 0.25s ease-in-out',
+                                backgroundColor: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.15)' : 'rgba(15, 23, 42, 0.15)',
+                                backdropFilter: 'blur(4px)',
+                                webkitBackdropFilter: 'blur(4px)'
+                            });
+                            document.body.appendChild(overlay);
+
+                            requestAnimationFrame(() => {
+                                overlay.style.opacity = '1';
+                            });
+
                             setTimeout(() => {
-                                overlay.remove();
-                            }, 250);
-                        }, 200);
-                    }, 250);
+                                toggleTheme();
+                                requestAnimationFrame(() => {
+                                    overlay.style.opacity = '0';
+                                });
+                                setTimeout(() => overlay.remove(), 250);
+                            }, 150);
+                        }
+
+                        // Khôi phục lại icon sau khi chuyển đổi hoàn tất
+                        setTimeout(() => {
+                            themeToggleIcon.style.transform = 'rotate(360deg) scale(1)';
+                            setTimeout(() => {
+                                themeToggleIcon.style.transition = 'none';
+                                themeToggleIcon.style.transform = 'none';
+                                setTimeout(() => {
+                                    themeToggleIcon.style.transition = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                                }, 50);
+                            }, 400);
+                        }, 50);
+
+                    }, 150);
                 });
             }
 
@@ -482,69 +513,65 @@
         });
 
         // Hàm hiển thị thông báo
-        function alert(type, title = null, message = null) {
-            type = type != null ? type : 'success';
-            title = title != null ? title : 'Thông báo';
-            const alertClass = type === 'success' ? 'bg-success text-white' : 'bg-danger text-white';
-            function alert(type, title, message) {
-                if (arguments.length === 1) {
-                    message = type;
-                    type = 'danger';
-                    title = 'Thông báo';
-                } else {
-                    type = type != null ? type : 'success';
-                    title = title != null ? title : 'Thông báo';
-                }
-                const alertClass = type === 'success' ? 'bg-emerald-600 text-white shadow-emerald-500/20' : 'bg-rose-600 text-white shadow-rose-500/20';
-                const iconClass = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
-
-                // Tạo vùng chứa toast nếu chưa có
-                let toastContainer = document.getElementById('custom-toast-container');
-                if (!toastContainer) {
-                    toastContainer = document.createElement('div');
-                    toastContainer.id = 'custom-toast-container';
-                    toastContainer.style.position = 'fixed';
-                    toastContainer.style.top = '24px';
-                    toastContainer.style.right = '24px';
-                    toastContainer.style.zIndex = 99999;
-                    toastContainer.style.maxWidth = '350px';
-                    document.body.appendChild(toastContainer);
-                }
-
-                // Tạo HTML toast dạng TailwindCSS đặc đục, bóng đổ đẹp mắt
-                const toastId = 'toast-' + Date.now() + Math.floor(Math.random() * 10000);
-                const toastHtml = `
-                <div id="${toastId}" class="${alertClass} px-4 py-3 rounded-xl shadow-xl mb-3 flex items-center justify-between border border-white/10 min-w-[280px] max-w-[350px] transition-all duration-300 transform translate-y-0 opacity-100" role="alert">
-                    <div class="flex items-center gap-3">
-                        <i class="bi ${iconClass} text-lg flex-shrink-0"></i>
-                        <div class="text-sm font-medium text-left leading-snug">
-                            <strong>${title}:</strong> ${message}
-                        </div>
-                    </div>
-                    <button type="button" class="btn-close-toast text-white/70 hover:text-white transition-colors ml-4 text-lg flex-shrink-0" aria-label="Close">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
-            `;
-
-                // Thêm toast vào vùng chứa
-                toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-
-                // Bắt sự kiện tắt bằng nút close
-                const toastElem = document.getElementById(toastId);
-                toastElem.querySelector('.btn-close-toast').onclick = function () {
-                    toastElem.classList.add('opacity-0', 'translate-y-2');
-                    setTimeout(() => toastElem.remove(), 300);
-                };
-
-                // Tự động ẩn sau 5 giây
-                setTimeout(() => {
-                    if (toastElem) {
-                        toastElem.classList.add('opacity-0', 'translate-y-2');
-                        setTimeout(() => { if (toastElem) toastElem.remove(); }, 300);
-                    }
-                }, 5000);
+        function alert(type, title, message) {
+            if (arguments.length === 1) {
+                message = type;
+                type = 'danger';
+                title = 'Thông báo';
+            } else {
+                type = type != null ? type : 'success';
+                title = title != null ? title : 'Thông báo';
             }
+            const alertClass = type === 'success' ? 'bg-emerald-600 text-white shadow-emerald-500/20' : 'bg-rose-600 text-white shadow-rose-500/20';
+            const iconClass = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
+
+            // Tạo vùng chứa toast nếu chưa có
+            let toastContainer = document.getElementById('custom-toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'custom-toast-container';
+                toastContainer.style.position = 'fixed';
+                toastContainer.style.top = '24px';
+                toastContainer.style.right = '24px';
+                toastContainer.style.zIndex = 99999;
+                toastContainer.style.maxWidth = '350px';
+                document.body.appendChild(toastContainer);
+            }
+
+            // Tạo HTML toast dạng TailwindCSS đặc đục, bóng đổ đẹp mắt
+            const toastId = 'toast-' + Date.now() + Math.floor(Math.random() * 10000);
+            const toastHtml = `
+            <div id="${toastId}" class="${alertClass} px-4 py-3 rounded-xl shadow-xl mb-3 flex items-center justify-between border border-white/10 min-w-[280px] max-w-[350px] transition-all duration-300 transform translate-y-0 opacity-100" role="alert">
+                <div class="flex items-center gap-3">
+                    <i class="bi ${iconClass} text-lg flex-shrink-0"></i>
+                    <div class="text-sm font-medium text-left leading-snug">
+                        <strong>${title}:</strong> ${message}
+                    </div>
+                </div>
+                <button type="button" class="btn-close-toast text-white/70 hover:text-white transition-colors ml-4 text-lg flex-shrink-0" aria-label="Close">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        `;
+
+            // Thêm toast vào vùng chứa
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+
+            // Bắt sự kiện tắt bằng nút close
+            const toastElem = document.getElementById(toastId);
+            toastElem.querySelector('.btn-close-toast').onclick = function () {
+                toastElem.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toastElem.remove(), 300);
+            };
+
+            // Tự động ẩn sau 5 giây
+            setTimeout(() => {
+                if (toastElem) {
+                    toastElem.classList.add('opacity-0', 'translate-y-2');
+                    setTimeout(() => { if (toastElem) toastElem.remove(); }, 300);
+                }
+            }, 5000);
+        }
     </script>
 </body>
 
