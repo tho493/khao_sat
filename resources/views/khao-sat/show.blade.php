@@ -1116,8 +1116,8 @@
         let data = {};
         
         $.each(formData, function(i, field) {
-            if (field.name === '_token' || field.name === '_submission_token') {
-                return; // Bỏ qua
+            if (field.name === '_token' || field.name === '_submission_token' || field.name === 'metadata[thoigian_batdau]') {
+                return; // Bỏ qua token và thời gian bắt đầu (để tính thời gian làm tiếp chính xác)
             }
 
             if (field.name.endsWith('[]')) {
@@ -1154,6 +1154,9 @@
                 
                 // 1. Khôi phục các input thông thường trước (textarea, text, select, date...)
                 for (const name in data) {
+                    if (name === 'metadata[thoigian_batdau]') {
+                        continue; // Bỏ qua không ghi đè thời gian bắt đầu của phiên làm việc mới
+                    }
                     const value = data[name];
                     const element = surveyForm.find(`[name="${name}"]`);
                     if (element.length && !element.is(':radio') && !element.is(':checkbox')) {

@@ -24,6 +24,28 @@
         color: #e2e8f0 !important;
         border-color: rgba(255, 255, 255, 0.05) !important;
     }
+    .text-truncate-2-lines {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    /* Làm đẹp thanh cuộn cho legend */
+    #objectChartLegend::-webkit-scrollbar {
+        width: 4px;
+    }
+    #objectChartLegend::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    #objectChartLegend::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    #objectChartLegend::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
 </style>
 @endpush
 
@@ -119,10 +141,11 @@
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Tỷ lệ phiếu theo mẫu khảo sát</h6>
                 </div>
-                <div class="card-body">
-                    <div class="chart-pie" style="height: 300px;">
+                <div class="card-body d-flex flex-column" style="height: 350px;">
+                    <div class="chart-pie flex-grow-1" style="height: 180px;">
                         <canvas id="objectChart"></canvas>
                     </div>
+                    <div id="objectChartLegend" class="mt-3 overflow-auto pe-2" style="max-height: 120px; font-size: 0.8rem; line-height: 1.4;"></div>
                 </div>
             </div>
         </div>
@@ -277,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Biểu đồ đối tượng
     const objectCtx = document.getElementById('objectChart')?.getContext('2d');
     if (objectCtx) {
-        new Chart(objectCtx, {
+        const objectChart = new Chart(objectCtx, {
             type: 'doughnut',
             data: {
                 labels: {!! json_encode($thongKeMauKhaoSat->pluck('ten_mau')) !!},
@@ -292,18 +315,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            boxWidth: 12,
-                            font: {
-                                size: 12
-                            }
-                        }
+                        display: false
                     }
                 }
             }
         });
+
+        // Vẽ Custom Legend
+        const legendContainer = document.getElementById('objectChartLegend');
+        if (legendContainer) {
+            const data = objectChart.data;
+            const dataset = data.datasets[0];
+            let legendHtml = '<div class="row g-2">';
+            
+            data.labels.forEach((label, index) => {
+                const color = dataset.backgroundColor[index % dataset.backgroundColor.length];
+                const value = dataset.data[index] || 0;
+                
+                legendHtml += `
+                    <div class="col-12 d-flex align-items-start gap-2">
+                        <span class="d-inline-block rounded-circle flex-shrink-0" style="width: 10px; height: 10px; background-color: ${color}; margin-top: 4px;"></span>
+                        <div class="text-truncate-2-lines flex-grow-1 text-muted" title="${label}">
+                            <strong>${value} phiếu</strong> - ${label}
+                        </div>
+                    </div>
+                `;
+            });
+            legendHtml += '</div>';
+            legendContainer.innerHTML = legendHtml;
+        }
     }
 });
 </script>

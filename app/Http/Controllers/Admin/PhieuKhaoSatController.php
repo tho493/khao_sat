@@ -41,6 +41,35 @@ class PhieuKhaoSatController extends Controller
             }
         }
 
+        // Thay thế mã thành tên đối với các câu hỏi custom_select dùng DataSource
+        $customSelectQuestions = optional($phieuKhaoSat->dotKhaoSat->mauKhaoSat->cauHoi)
+            ->where('loai_cauhoi', 'custom_select')
+            ->whereNotNull('data_source_id');
+
+        if ($customSelectQuestions && $customSelectQuestions->isNotEmpty()) {
+            $dataSourceIds = $customSelectQuestions->pluck('data_source_id')->unique()->all();
+            $sourceValues = \App\Models\DataSourceValue::whereIn('data_source_id', $dataSourceIds)
+                ->get()
+                ->groupBy('data_source_id');
+
+            foreach ($customSelectQuestions as $question) {
+                $valuesMap = isset($sourceValues[$question->data_source_id])
+                    ? $sourceValues[$question->data_source_id]->pluck('label', 'value')->all()
+                    : [];
+
+                if (!empty($valuesMap)) {
+                    foreach ($phieuKhaoSat->chiTiet as $chiTiet) {
+                        if ($chiTiet->cauhoi_id === $question->id) {
+                            $ma = $chiTiet->giatri_text ?? $chiTiet->giatri_number ?? null;
+                            if ($ma !== null && isset($valuesMap[$ma])) {
+                                $chiTiet->giatri_text = $valuesMap[$ma];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         return response()->json($phieuKhaoSat);
     }
 }
