@@ -522,7 +522,6 @@
             // Tạo HTML toast dạng TailwindCSS đặc đục, bóng đổ đẹp mắt
             const toastId = 'toast-' + Date.now() + Math.floor(Math.random() * 10000);
             const toastHtml = `
-<<<<<<< Updated upstream
                 <div id="${toastId}" class="${alertClass} px-4 py-3 rounded-xl shadow-xl mb-3 flex items-center justify-between border border-white/10 min-w-[280px] max-w-[350px] transition-all duration-300 transform translate-y-0 opacity-100" role="alert">
                     <div class="flex items-center gap-3">
                         <i class="bi ${iconClass} text-lg flex-shrink-0"></i>
@@ -535,20 +534,6 @@
                     </button>
                 </div>
             `;
-=======
-            <div id="${toastId}" class="${alertClass} px-4 py-3 rounded-xl shadow-xl mb-3 flex items-center justify-between border border-white/10 min-w-[280px] max-w-[350px] transition-all duration-300 transform translate-y-0 opacity-100" role="alert">
-                <div class="flex items-center gap-3">
-                    <i class="bi ${iconClass} text-lg flex-shrink-0"></i>
-                    <div class="text-sm font-medium text-left leading-snug">
-                        <strong>${title}:</strong> ${message}
-                    </div>
-                </div>
-                <button type="button" class="btn-close-toast text-white/70 hover:text-white transition-colors ml-4 text-lg flex-shrink-0" aria-label="Close">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-        `;
->>>>>>> Stashed changes
 
             // Thêm toast vào vùng chứa
             toastContainer.insertAdjacentHTML('beforeend', toastHtml);
