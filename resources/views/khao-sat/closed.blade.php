@@ -79,6 +79,52 @@
                 transform: translateY(0);
             }
         }
+
+        /* Dark mode support */
+        html.dark .closed-container {
+            background: rgba(15, 23, 42, 0.6) !important;
+        }
+
+        html.dark .closed-card {
+            background: rgba(30, 41, 59, 0.8) !important;
+            box-shadow: 0 10px 45px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        html.dark .closed-card h1 {
+            color: #f8fafc !important;
+        }
+
+        html.dark .closed-card p.text-muted,
+        html.dark .closed-card .text-muted {
+            color: #cbd5e1 !important;
+        }
+
+        html.dark .closed-card strong.text-dark {
+            color: #f8fafc !important;
+        }
+
+        html.dark .survey-info-box {
+            background: rgba(15, 23, 42, 0.4) !important;
+            border-left: 4px solid #3b82f6 !important;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        html.dark .survey-info-box p.fw-bold {
+            color: #f8fafc !important;
+        }
+
+        html.dark .closed-card .alert-info {
+            background-color: rgba(13, 202, 240, 0.15) !important;
+            border-color: rgba(13, 202, 240, 0.25) !important;
+            color: #0dcaf0 !important;
+        }
+
+        html.dark .closed-card .alert-danger {
+            background-color: rgba(220, 53, 69, 0.15) !important;
+            border-color: rgba(220, 53, 69, 0.25) !important;
+            color: #ea868f !important;
+        }
     </style>
 @endpush
 
