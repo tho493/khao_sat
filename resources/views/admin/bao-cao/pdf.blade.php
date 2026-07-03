@@ -264,7 +264,7 @@
                         @if(!empty($cauHoi->is_personal_info))
                             <ul style="padding-left: 20px; border: 1px solid #eee; padding: 10px;">
                                 @foreach($stats['cauTraLoi'] as $item)
-                                    <li>{{ $item }}</li>
+                                    <li>{{ $item->giatri_number }}</li>
                                 @endforeach
                             </ul>
                         @else
@@ -287,10 +287,16 @@
                                 </tr>
                             </table>
                         @endif
-                    @elseif($stats['type'] == 'list' || $stats['type'] == 'text')
+                    @elseif($stats['type'] == 'list')
                         <ul style="padding-left: 20px; border: 1px solid #eee; padding: 10px;">
                             @foreach($stats['data'] as $item)
                                 <li>{{ $item }}</li>
+                            @endforeach
+                        </ul>
+                    @elseif($stats['type'] == 'text')
+                        <ul style="padding-left: 20px; border: 1px solid #eee; padding: 10px;">
+                            @foreach($stats['data'] as $item)
+                                <li>{{ $item->giatri_text }}</li>
                             @endforeach
                         </ul>
                     @endif
