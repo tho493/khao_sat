@@ -22,6 +22,17 @@
             .table-hover tbody tr:hover .sticky-col-right {
                 background-color: #f8f9fa !important;
             }
+
+            /* Hỗ trợ chế độ tối (dark mode) */
+            html.dark .table tbody tr td.sticky-col-right,
+            html.dark .table thead tr th.sticky-col-right {
+                background-color: #1e293b !important;
+                box-shadow: -4px 0 8px rgba(0, 0, 0, 0.2);
+            }
+
+            html.dark .table-hover tbody tr:hover td.sticky-col-right {
+                background-color: #242f41 !important;
+            }
         }
 
         @media (max-width: 767.98px) {
