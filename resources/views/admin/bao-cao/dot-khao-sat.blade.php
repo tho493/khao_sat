@@ -257,17 +257,51 @@
             </div>
         </div>
 
-        <!-- Bộ lọc -->
-        @if(isset($filterQuestions) && $filterQuestions->count() > 0)
-            <div class="card shadow mb-4">
-                <div class="card-header bg-light">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="bi bi-funnel"></i> Bộ lọc theo thông tin & câu hỏi khảo sát
-                    </h6>
+        <!-- Biểu đồ Thống kê Thiết bị, Hệ điều hành & Nguồn truy cập -->
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Thống kê Loại thiết bị</h6>
+                    </div>
+                    <div class="card-body">
+                        <div style="height: 250px;"><canvas id="deviceTypeChart"></canvas></div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <form method="GET" action="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}" id="filterForm">
-                        <div class="row g-3">
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Thống kê Hệ điều hành</h6>
+                    </div>
+                    <div class="card-body">
+                        <div style="height: 250px;"><canvas id="deviceOsChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Thống kê Nguồn truy cập</h6>
+                    </div>
+                    <div class="card-body">
+                        <div style="height: 250px;"><canvas id="accessSourceChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bộ lọc -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-light">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="bi bi-funnel"></i> Bộ lọc báo cáo khảo sát
+                </h6>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}" id="filterForm">
+                    <div class="row g-3">
+                        @if(isset($filterQuestions) && $filterQuestions->count() > 0)
                             @foreach($filterQuestions as $q)
                                 @php
                                     $currentValue = $personalInfoFilters[$q->id] ?? null;
@@ -294,24 +328,59 @@
                                     @endif
                                 </div>
                             @endforeach
-                            <div class="col-12">
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-primary btn-sm" type="submit">
-                                        <i class="bi bi-filter"></i> Áp dụng bộ lọc
-                                    </button>
-                                    @if(!empty($personalInfoFilters))
-                                        <a href="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}"
-                                            class="btn btn-outline-secondary btn-sm">
-                                            <i class="bi bi-x-lg"></i> Bỏ tất cả bộ lọc
-                                        </a>
-                                    @endif
-                                </div>
+                        @endif
+
+                        {{-- Lọc theo thiết bị & hệ điều hành --}}
+                        <div class="col-md-6 col-lg-4">
+                            <label class="form-label small text-muted mb-1">Loại thiết bị</label>
+                            <select class="form-select form-select-sm" name="device_filter">
+                                <option value="">-- Tất cả thiết bị --</option>
+                                <option value="Desktop" {{ ($deviceFilter ?? '') === 'Desktop' ? 'selected' : '' }}>Máy tính (Desktop)</option>
+                                <option value="Mobile" {{ ($deviceFilter ?? '') === 'Mobile' ? 'selected' : '' }}>Điện thoại (Mobile)</option>
+                                <option value="Tablet" {{ ($deviceFilter ?? '') === 'Tablet' ? 'selected' : '' }}>Máy tính bảng (Tablet)</option>
+                                <option value="Bot" {{ ($deviceFilter ?? '') === 'Bot' ? 'selected' : '' }}>Robot / Crawler</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <label class="form-label small text-muted mb-1">Hệ điều hành</label>
+                            <select class="form-select form-select-sm" name="os_filter">
+                                <option value="">-- Tất cả hệ điều hành --</option>
+                                <option value="Windows" {{ ($osFilter ?? '') === 'Windows' ? 'selected' : '' }}>Windows</option>
+                                <option value="Android" {{ ($osFilter ?? '') === 'Android' ? 'selected' : '' }}>Android</option>
+                                <option value="iOS" {{ ($osFilter ?? '') === 'iOS' ? 'selected' : '' }}>iOS (iPhone/iPad)</option>
+                                <option value="macOS" {{ ($osFilter ?? '') === 'macOS' ? 'selected' : '' }}>macOS</option>
+                                <option value="Linux" {{ ($osFilter ?? '') === 'Linux' ? 'selected' : '' }}>Linux</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <label class="form-label small text-muted mb-1">Nguồn truy cập</label>
+                            <select class="form-select form-select-sm" name="source_filter">
+                                <option value="">-- Tất cả nguồn --</option>
+                                <option value="Trực tiếp" {{ ($sourceFilter ?? '') === 'Trực tiếp' ? 'selected' : '' }}>Trực tiếp (Trình duyệt gốc)</option>
+                                <option value="Zalo App" {{ ($sourceFilter ?? '') === 'Zalo App' ? 'selected' : '' }}>Zalo App</option>
+                                <option value="Facebook App" {{ ($sourceFilter ?? '') === 'Facebook App' ? 'selected' : '' }}>Facebook App</option>
+                                <option value="Messenger App" {{ ($sourceFilter ?? '') === 'Messenger App' ? 'selected' : '' }}>Messenger App</option>
+                                <option value="Instagram App" {{ ($sourceFilter ?? '') === 'Instagram App' ? 'selected' : '' }}>Instagram App</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary btn-sm" type="submit">
+                                    <i class="bi bi-filter"></i> Áp dụng bộ lọc
+                                </button>
+                                @if(!empty($personalInfoFilters) || !empty($deviceFilter) || !empty($osFilter))
+                                    <a href="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}"
+                                        class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-x-lg"></i> Bỏ tất cả bộ lọc
+                                    </a>
+                                @endif
                             </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
-        @endif
+        </div>
 
         {{-- Thống kê chi tiết tất cả câu trả lời --}}
         <h3 class="h4 mb-3">
@@ -438,7 +507,11 @@
                             @elseif($stats['type'] == 'text' && !empty($stats['data']) && $stats['data']->isNotEmpty())
                                 <div class="ajax-answers-container"
                                     data-url="{{ route('admin.bao-cao.question-answers', ['dotKhaoSat' => $dotKhaoSat->id, 'cauHoi' => $cauHoi->id]) }}"
-                                    data-personal-filters="{{ json_encode($personalInfoFilters) }}" data-current-page="1"
+                                    data-personal-filters="{{ json_encode($personalInfoFilters) }}" 
+                                    data-device-filter="{{ $deviceFilter ?? '' }}"
+                                    data-os-filter="{{ $osFilter ?? '' }}"
+                                    data-source-filter="{{ $sourceFilter ?? '' }}"
+                                    data-current-page="1"
                                     data-total="{{ $stats['total'] }}" data-per-page="20" data-last-page="{{ ceil($stats['total'] / 20) }}">
                                     <div class="answers-list-wrapper">
                                         <ul class="list-group list-group-flush mb-0">
@@ -458,7 +531,11 @@
                                 @if(!empty($stats['cauTraLoi']) && is_iterable($stats['cauTraLoi']))
                                     <div class="ajax-answers-container"
                                         data-url="{{ route('admin.bao-cao.question-answers', ['dotKhaoSat' => $dotKhaoSat->id, 'cauHoi' => $cauHoi->id]) }}"
-                                        data-personal-filters="{{ json_encode($personalInfoFilters) }}" data-current-page="1"
+                                        data-personal-filters="{{ json_encode($personalInfoFilters) }}" 
+                                        data-device-filter="{{ $deviceFilter ?? '' }}"
+                                        data-os-filter="{{ $osFilter ?? '' }}"
+                                        data-source-filter="{{ $sourceFilter ?? '' }}"
+                                        data-current-page="1"
                                         data-total="{{ $stats['total'] }}" data-per-page="20" data-last-page="{{ ceil($stats['total'] / 20) }}">
                                         <div class="answers-list-wrapper">
                                             <ul class="list-group list-group-flush mb-2">
@@ -607,7 +684,11 @@
                             @elseif($stats['type'] == 'text' && !empty($stats['data']) && $stats['data']->isNotEmpty())
                                 <div class="ajax-answers-container"
                                     data-url="{{ route('admin.bao-cao.question-answers', ['dotKhaoSat' => $dotKhaoSat->id, 'cauHoi' => $cauHoi->id]) }}"
-                                    data-personal-filters="{{ json_encode($personalInfoFilters) }}" data-current-page="1"
+                                    data-personal-filters="{{ json_encode($personalInfoFilters) }}" 
+                                    data-device-filter="{{ $deviceFilter ?? '' }}"
+                                    data-os-filter="{{ $osFilter ?? '' }}"
+                                    data-source-filter="{{ $sourceFilter ?? '' }}"
+                                    data-current-page="1"
                                     data-total="{{ $stats['total'] }}" data-per-page="20" data-last-page="{{ ceil($stats['total'] / 20) }}">
                                     <div class="answers-list-wrapper">
                                         <ul class="list-group list-group-flush mb-0">
@@ -628,7 +709,11 @@
                                     @if(!empty($stats['cauTraLoi']) && is_iterable($stats['cauTraLoi']))
                                         <div class="ajax-answers-container"
                                             data-url="{{ route('admin.bao-cao.question-answers', ['dotKhaoSat' => $dotKhaoSat->id, 'cauHoi' => $cauHoi->id]) }}"
-                                            data-personal-filters="{{ json_encode($personalInfoFilters) }}" data-current-page="1"
+                                            data-personal-filters="{{ json_encode($personalInfoFilters) }}" 
+                                            data-device-filter="{{ $deviceFilter ?? '' }}"
+                                            data-os-filter="{{ $osFilter ?? '' }}"
+                                            data-source-filter="{{ $sourceFilter ?? '' }}"
+                                            data-current-page="1"
                                             data-total="{{ $stats['total'] }}" data-per-page="20" data-last-page="{{ ceil($stats['total'] / 20) }}">
                                             <div class="answers-list-wrapper">
                                                 <ul class="list-group list-group-flush mb-2">
@@ -702,6 +787,8 @@
                                         <th scope="col">{{ $q->noidung_cauhoi }}</th>
                                     @endforeach
                                 @endif
+                                <th scope="col">IP Người gửi</th>
+                                <th scope="col">Thiết bị</th>
                                 <th scope="col">Thời gian làm bài</th>
                                 <th scope="col" class="text-end sticky-col-right border-start">Thao tác</th>
                             </tr>
@@ -717,6 +804,23 @@
                                             <td>{{ $personalInfoAnswers[$phieu->id][$q->id] ?? 'N/A' }}</td>
                                         @endforeach
                                     @endif
+                                    <td>
+                                        <code class="text-muted">{{ $surveyMetadata[$phieu->id]['ip'] ?? 'N/A' }}</code>
+                                    </td>
+                                    <td>
+                                        @php
+                                            $devType = $surveyMetadata[$phieu->id]['device_type'] ?? 'Desktop';
+                                            $devSummary = $surveyMetadata[$phieu->id]['device_summary'] ?? 'N/A';
+                                            $icon = 'bi-laptop';
+                                            if ($devType === 'Mobile') $icon = 'bi-phone';
+                                            elseif ($devType === 'Tablet') $icon = 'bi-tablet';
+                                            elseif ($devType === 'Bot') $icon = 'bi-robot';
+                                        @endphp
+                                        <span class="text-secondary" data-bs-toggle="tooltip" title="{{ $devSummary }}">
+                                            <i class="bi {{ $icon }} me-1"></i>
+                                            <span style="font-size: 0.85rem;">{{ Str::limit($devSummary, 25) }}</span>
+                                        </span>
+                                    </td>
                                     <td>
                                         {{ $phieu->thoigian_batdau ? $phieu->thoigian_batdau->format('d/m/Y H:i') : 'N/A' }} -
                                         {{ $phieu->thoigian_hoanthanh ? $phieu->thoigian_hoanthanh->format('d/m/Y H:i') : 'N/A' }}
@@ -773,6 +877,8 @@
                                             <th scope="col">{{ $q->noidung_cauhoi }}</th>
                                         @endforeach
                                     @endif
+                                    <th scope="col">IP Người gửi</th>
+                                    <th scope="col">Thiết bị</th>
                                     <th scope="col">Thời gian làm bài</th>
                                     <th scope="col" class="text-end sticky-col-right border-start">Thao tác</th>
                                 </tr>
@@ -785,6 +891,23 @@
                                                 <td>{{ $personalInfoAnswers[$phieu->id][$q->id] ?? 'N/A' }}</td>
                                             @endforeach
                                         @endif
+                                        <td>
+                                            <code class="text-muted">{{ $surveyMetadata[$phieu->id]['ip'] ?? 'N/A' }}</code>
+                                        </td>
+                                        <td>
+                                            @php
+                                                $devType = $surveyMetadata[$phieu->id]['device_type'] ?? 'Desktop';
+                                                $devSummary = $surveyMetadata[$phieu->id]['device_summary'] ?? 'N/A';
+                                                $icon = 'bi-laptop';
+                                                if ($devType === 'Mobile') $icon = 'bi-phone';
+                                                elseif ($devType === 'Tablet') $icon = 'bi-tablet';
+                                                elseif ($devType === 'Bot') $icon = 'bi-robot';
+                                            @endphp
+                                            <span class="text-secondary" data-bs-toggle="tooltip" title="{{ $devSummary }}">
+                                                <i class="bi {{ $icon }} me-1"></i>
+                                                <span style="font-size: 0.85rem;">{{ Str::limit($devSummary, 25) }}</span>
+                                            </span>
+                                        </td>
                                         <td>
                                             {{ $phieu->thoigian_batdau ? $phieu->thoigian_batdau->format('d/m/Y H:i') : 'N/A' }} -
                                             {{ $phieu->thoigian_hoanthanh ? $phieu->thoigian_hoanthanh->format('d/m/Y H:i') : 'N/A' }}
@@ -960,6 +1083,135 @@
                 });
             }
 
+            // Biểu đồ Thống kê Loại thiết bị
+            const deviceTypeCtx = document.getElementById('deviceTypeChart')?.getContext('2d');
+            if (deviceTypeCtx) {
+                const deviceTypeData = @json($thongKeThietBi['devices'] ?? ['labels'=>[], 'values'=>[]]);
+                new Chart(deviceTypeCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: deviceTypeData.labels,
+                        datasets: [{
+                            data: deviceTypeData.values,
+                            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
+                            hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#f4b619', '#e02d1b'],
+                            hoverBorderColor: "rgba(234, 236, 244, 1)",
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 15, padding: 15 }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const dataset = context.dataset;
+                                        const total = dataset.data.reduce((sum, val) => sum + val, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return ` ${label}: ${value} phiếu (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            }
+
+            // Biểu đồ Thống kê Hệ điều hành
+            const deviceOsCtx = document.getElementById('deviceOsChart')?.getContext('2d');
+            if (deviceOsCtx) {
+                const deviceOsData = @json($thongKeThietBi['os'] ?? ['labels'=>[], 'values'=>[]]);
+                new Chart(deviceOsCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: deviceOsData.labels,
+                        datasets: [{
+                            data: deviceOsData.values,
+                            backgroundColor: ['#1cc88a', '#36b9cc', '#4e73df', '#f6c23e', '#e74a3b', '#858796'],
+                            hoverBackgroundColor: ['#17a673', '#2c9faf', '#2e59d9', '#f4b619', '#e02d1b', '#717384'],
+                            hoverBorderColor: "rgba(234, 236, 244, 1)",
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 15, padding: 15 }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const dataset = context.dataset;
+                                        const total = dataset.data.reduce((sum, val) => sum + val, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return ` ${label}: ${value} phiếu (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            }
+
+            // Biểu đồ Thống kê Nguồn truy cập
+            const accessSourceCtx = document.getElementById('accessSourceChart')?.getContext('2d');
+            if (accessSourceCtx) {
+                const accessSourceData = @json($thongKeThietBi['sources'] ?? ['labels'=>[], 'values'=>[]]);
+                new Chart(accessSourceCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: accessSourceData.labels,
+                        datasets: [{
+                            data: accessSourceData.values,
+                            backgroundColor: ['#4e73df', '#1cc88a', '#e74a3b', '#36b9cc', '#f6c23e'],
+                            hoverBackgroundColor: ['#2e59d9', '#17a673', '#e02d1b', '#2c9faf', '#f4b619'],
+                            hoverBorderColor: "rgba(234, 236, 244, 1)",
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 15, padding: 15 }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const dataset = context.dataset;
+                                        const total = dataset.data.reduce((sum, val) => sum + val, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return ` ${label}: ${value} phiếu (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            }
+
+            // Khởi tạo Bootstrap Tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+
             // Biểu đồ cho từng câu hỏi
             @foreach($dotKhaoSat->mauKhaoSat->cauHoi as $cauHoi)
                 @php $stats = $thongKeCauHoi[$cauHoi->id] ?? null; @endphp
@@ -1034,7 +1286,11 @@
                 method: 'POST',
                 data: {
                     _token: '{{ csrf_token() }}',
-                    cauhoi_id: questionId
+                    cauhoi_id: questionId,
+                    personal_info_filters: @json($personalInfoFilters),
+                    device_filter: '{{ $deviceFilter ?? "" }}',
+                    os_filter: '{{ $osFilter ?? "" }}',
+                    source_filter: '{{ $sourceFilter ?? "" }}'
                 },
                 success: function (response) {
                     $('#summaryContent').html(response.summary);
@@ -1087,6 +1343,22 @@
                     const surveyQuestions = allQuestions.filter(q => !q.is_personal_info);
 
                     let html = '';
+                    
+                    // Thêm thông tin truy cập IP và thiết bị vào popup
+                    html += `<h5><i class="bi bi-info-circle text-primary me-2"></i>Thông tin truy cập</h5>
+                            <table class="table table-sm table-bordered mb-4">
+                                <tbody>
+                                    <tr>
+                                        <td width="40%"><strong>Địa chỉ IP</strong></td>
+                                        <td><code>${phieuData.ip_address || 'N/A'}</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Thiết bị (User Agent)</strong></td>
+                                        <td><span class="text-secondary">${phieuData.device_summary || 'N/A'}</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>`;
+
                     if (personalInfoQuestions.length > 0) {
                         html += `<h5><i class="bi bi-person-circle text-primary me-2"></i>Thông tin người trả lời</h5>
                                                                     <table class="table table-sm table-bordered mb-4"><tbody>`;
@@ -1322,9 +1594,9 @@
                 const formData = new FormData(filterForm);
                 const filters = [];
 
-                // Lấy personal info filters
+                // Lấy personal info filters, device_filter, os_filter và source_filter
                 for (const [key, value] of formData.entries()) {
-                    if (key.startsWith('personal_info_filters[') && value) {
+                    if (value && (key.startsWith('personal_info_filters[') || key === 'device_filter' || key === 'os_filter' || key === 'source_filter')) {
                         filters.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
                     }
                 }
@@ -1366,7 +1638,7 @@
             }
 
             // Chạy lần đầu khi tải trang để cập nhật link theo bộ lọc hiện tại
-            @if(!empty($personalInfoFilters))
+            @if(!empty($personalInfoFilters) || !empty($deviceFilter) || !empty($osFilter) || !empty($sourceFilter))
                 updateExportLinks();
             @endif
 
@@ -1384,6 +1656,9 @@
             document.querySelectorAll('.ajax-answers-container').forEach(function (container) {
                 const url = container.getAttribute('data-url');
                 const filters = JSON.parse(container.getAttribute('data-personal-filters') || '{}');
+                const deviceFilter = container.getAttribute('data-device-filter') || '';
+                const osFilter = container.getAttribute('data-os-filter') || '';
+                const sourceFilter = container.getAttribute('data-source-filter') || '';
                 const total = parseInt(container.getAttribute('data-total')) || 0;
                 const perPage = parseInt(container.getAttribute('data-per-page')) || 20;
                 const lastPage = parseInt(container.getAttribute('data-last-page')) || 1;
@@ -1423,7 +1698,10 @@
                         data: {
                             page: currentPage,
                             per_page: perPage,
-                            personal_info_filters: filters
+                            personal_info_filters: filters,
+                            device_filter: deviceFilter,
+                            os_filter: osFilter,
+                            source_filter: sourceFilter
                         },
                         success: function (response) {
                             renderData(response);

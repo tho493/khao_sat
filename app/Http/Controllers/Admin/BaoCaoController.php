@@ -119,6 +119,92 @@ class BaoCaoController extends Controller
         $nonDuplicateQuery = (clone $baseCompletedQuery)->where('is_duplicate', '!=', 1);
         $duplicateQuery = (clone $baseCompletedQuery)->where('is_duplicate', 1);
 
+        $deviceFilter = $request->input('device_filter');
+        $osFilter = $request->input('os_filter');
+        $sourceFilter = $request->input('source_filter');
+
+        $applyUserAgentFilters = function ($query) use ($deviceFilter, $osFilter, $sourceFilter) {
+            if ($deviceFilter) {
+                if ($deviceFilter === 'Mobile') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%mobile%')
+                            ->orWhere('user_agent', 'LIKE', '%phone%')
+                            ->orWhere('user_agent', 'LIKE', '%ipod%');
+                    });
+                } elseif ($deviceFilter === 'Tablet') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%ipad%')
+                            ->orWhere('user_agent', 'LIKE', '%tablet%')
+                            ->orWhere(function ($sub) {
+                                $sub->where('user_agent', 'LIKE', '%android%')
+                                    ->where('user_agent', 'NOT LIKE', '%mobile%');
+                            });
+                    });
+                } elseif ($deviceFilter === 'Desktop') {
+                    $query->where('user_agent', 'NOT LIKE', '%mobile%')
+                        ->where('user_agent', 'NOT LIKE', '%phone%')
+                        ->where('user_agent', 'NOT LIKE', '%ipod%')
+                        ->where('user_agent', 'NOT LIKE', '%ipad%')
+                        ->where('user_agent', 'NOT LIKE', '%tablet%')
+                        ->where('user_agent', 'NOT LIKE', '%bot%')
+                        ->where('user_agent', 'NOT LIKE', '%crawler%')
+                        ->where('user_agent', 'NOT LIKE', '%spider%');
+                } elseif ($deviceFilter === 'Bot') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%bot%')
+                            ->orWhere('user_agent', 'LIKE', '%crawler%')
+                            ->orWhere('user_agent', 'LIKE', '%spider%');
+                    });
+                }
+            }
+
+            if ($osFilter) {
+                if ($osFilter === 'iOS') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%iphone%')
+                            ->orWhere('user_agent', 'LIKE', '%ipad%')
+                            ->orWhere('user_agent', 'LIKE', '%ipod%');
+                    });
+                } else {
+                    $query->where('user_agent', 'LIKE', "%{$osFilter}%");
+                }
+            }
+
+            if ($sourceFilter) {
+                if ($sourceFilter === 'Trực tiếp') {
+                    $query->where(function ($q) {
+                        $q->whereNull('user_agent')
+                            ->orWhere(function ($sub) {
+                                $sub->where('user_agent', 'NOT LIKE', '%zalo%')
+                                    ->where('user_agent', 'NOT LIKE', '%fbav%')
+                                    ->where('user_agent', 'NOT LIKE', '%fb_iab%')
+                                    ->where('user_agent', 'NOT LIKE', '%instagram%')
+                                    ->where('user_agent', 'NOT LIKE', '%messenger%')
+                                    ->where('user_agent', 'NOT LIKE', '%fbms%');
+                            });
+                    });
+                } elseif ($sourceFilter === 'Zalo App') {
+                    $query->where('user_agent', 'LIKE', '%zalo%');
+                } elseif ($sourceFilter === 'Facebook App') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%fbav%')
+                            ->orWhere('user_agent', 'LIKE', '%fb_iab%');
+                    });
+                } elseif ($sourceFilter === 'Messenger App') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%messenger%')
+                            ->orWhere('user_agent', 'LIKE', '%fbms%');
+                    });
+                } elseif ($sourceFilter === 'Instagram App') {
+                    $query->where('user_agent', 'LIKE', '%instagram%');
+                }
+            }
+        };
+
+        $applyUserAgentFilters($nonDuplicateQuery);
+        $applyUserAgentFilters($duplicateQuery);
+        $applyUserAgentFilters($baseCompletedQuery);
+
         $personalInfoFilters = $request->input('personal_info_filters', []);
 
         if (!empty($personalInfoFilters)) {
@@ -176,7 +262,7 @@ class BaoCaoController extends Controller
             'thoi_gian_lau_nhat' => $this->statisticsService->getExtremeCompletionTime($completedSurveys, 'MAX'),
         ];
 
-        $responseTrendChart = $this->statisticsService->getResponseTrendForSurvey($dotKhaoSat, $personalInfoFilters, $filterQuestions);
+        $responseTrendChart = $this->statisticsService->getResponseTrendForSurvey($dotKhaoSat, $personalInfoFilters, $filterQuestions, $deviceFilter, $osFilter, $sourceFilter);
 
         $thongKeCauHoi = [];
         foreach ($dotKhaoSat->mauKhaoSat->cauHoi as $cauHoi) {
@@ -270,6 +356,18 @@ class BaoCaoController extends Controller
             $personalInfoOptions[$question->id] = $options;
         }
 
+        $thongKeThietBi = $this->statisticsService->getThongKeThietBi($completedSurveys);
+
+        $surveyMetadata = [];
+        foreach ($allSubmittedSurveys as $phieu) {
+            $parsedAgent = \App\Helpers\UserAgentParser::parse($phieu->user_agent);
+            $surveyMetadata[$phieu->id] = [
+                'ip' => $phieu->ip_address ?: 'N/A',
+                'device_summary' => $parsedAgent['summary'],
+                'device_type' => $parsedAgent['device']
+            ];
+        }
+
         return view('admin.bao-cao.dot-khao-sat', compact(
             'dotKhaoSat',
             'tongQuan',
@@ -281,7 +379,12 @@ class BaoCaoController extends Controller
             'filterQuestions',
             'personalInfoAnswers',
             'personalInfoOptions',
-            'personalInfoFilters'
+            'personalInfoFilters',
+            'thongKeThietBi',
+            'surveyMetadata',
+            'deviceFilter',
+            'osFilter',
+            'sourceFilter'
         ));
     }
 
@@ -333,7 +436,141 @@ class BaoCaoController extends Controller
             return response()->json(['summary' => 'Chức năng này chỉ áp dụng cho câu hỏi tự luận.'], 400);
         }
 
-        $completedSurveyIds = $dotKhaoSat->phieuKhaoSat()->where('trangthai', 'completed')->pluck('id');
+        $baseCompletedQuery = $dotKhaoSat->phieuKhaoSat()
+            ->where('trangthai', 'completed')
+            ->where('is_duplicate', '!=', 1);
+
+        $deviceFilter = $request->input('device_filter');
+        $osFilter = $request->input('os_filter');
+        $sourceFilter = $request->input('source_filter');
+
+        $applyUserAgentFilters = function ($query) use ($deviceFilter, $osFilter, $sourceFilter) {
+            if ($deviceFilter) {
+                if ($deviceFilter === 'Mobile') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%mobile%')
+                            ->orWhere('user_agent', 'LIKE', '%phone%')
+                            ->orWhere('user_agent', 'LIKE', '%ipod%');
+                    });
+                } elseif ($deviceFilter === 'Tablet') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%ipad%')
+                            ->orWhere('user_agent', 'LIKE', '%tablet%')
+                            ->orWhere(function ($sub) {
+                                $sub->where('user_agent', 'LIKE', '%android%')
+                                    ->where('user_agent', 'NOT LIKE', '%mobile%');
+                            });
+                    });
+                } elseif ($deviceFilter === 'Desktop') {
+                    $query->where('user_agent', 'NOT LIKE', '%mobile%')
+                        ->where('user_agent', 'NOT LIKE', '%phone%')
+                        ->where('user_agent', 'NOT LIKE', '%ipod%')
+                        ->where('user_agent', 'NOT LIKE', '%ipad%')
+                        ->where('user_agent', 'NOT LIKE', '%tablet%')
+                        ->where('user_agent', 'NOT LIKE', '%bot%')
+                        ->where('user_agent', 'NOT LIKE', '%crawler%')
+                        ->where('user_agent', 'NOT LIKE', '%spider%');
+                } elseif ($deviceFilter === 'Bot') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%bot%')
+                            ->orWhere('user_agent', 'LIKE', '%crawler%')
+                            ->orWhere('user_agent', 'LIKE', '%spider%');
+                    });
+                }
+            }
+
+            if ($osFilter) {
+                if ($osFilter === 'iOS') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%iphone%')
+                            ->orWhere('user_agent', 'LIKE', '%ipad%')
+                            ->orWhere('user_agent', 'LIKE', '%ipod%');
+                    });
+                } else {
+                    $query->where('user_agent', 'LIKE', "%{$osFilter}%");
+                }
+            }
+
+            if ($sourceFilter) {
+                if ($sourceFilter === 'Trực tiếp') {
+                    $query->where(function ($q) {
+                        $q->whereNull('user_agent')
+                            ->orWhere(function ($sub) {
+                                $sub->where('user_agent', 'NOT LIKE', '%zalo%')
+                                    ->where('user_agent', 'NOT LIKE', '%fbav%')
+                                    ->where('user_agent', 'NOT LIKE', '%fb_iab%')
+                                    ->where('user_agent', 'NOT LIKE', '%instagram%')
+                                    ->where('user_agent', 'NOT LIKE', '%messenger%')
+                                    ->where('user_agent', 'NOT LIKE', '%fbms%');
+                            });
+                    });
+                } elseif ($sourceFilter === 'Zalo App') {
+                    $query->where('user_agent', 'LIKE', '%zalo%');
+                } elseif ($sourceFilter === 'Facebook App') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%fbav%')
+                            ->orWhere('user_agent', 'LIKE', '%fb_iab%');
+                    });
+                } elseif ($sourceFilter === 'Messenger App') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%messenger%')
+                            ->orWhere('user_agent', 'LIKE', '%fbms%');
+                    });
+                } elseif ($sourceFilter === 'Instagram App') {
+                    $query->where('user_agent', 'LIKE', '%instagram%');
+                }
+            }
+        };
+
+        $applyUserAgentFilters($baseCompletedQuery);
+
+        $personalInfoFilters = $request->input('personal_info_filters', []);
+        if (!empty($personalInfoFilters)) {
+            $filterQuestions = $dotKhaoSat->mauKhaoSat->cauHoi
+                ->filter(function ($q) {
+                    return $q->is_personal_info || $q->allow_filter;
+                })
+                ->values();
+
+            foreach ($personalInfoFilters as $questionId => $filterValue) {
+                if (empty($filterValue))
+                    continue;
+
+                $question = $filterQuestions->firstWhere('id', $questionId);
+                if (!$question)
+                    continue;
+
+                $filterQuery = DB::table('phieu_khaosat_chitiet')->where('cauhoi_id', $questionId);
+
+                if (in_array($question->loai_cauhoi, ['single_choice', 'multiple_choice'])) {
+                     $filterQuery->where('phuongan_id', $filterValue);
+                } elseif ($question->loai_cauhoi === 'custom_select') {
+                     $filterQuery->where('giatri_text', $filterValue);
+                } elseif ($question->loai_cauhoi === 'date') {
+                    $dateStr = null;
+                    try {
+                        if (preg_match('/^\d{1,2}\/\d{1,2}\/\d{4}$/', $filterValue)) {
+                            $dateStr = \Carbon\Carbon::createFromFormat('d/m/Y', $filterValue)->toDateString();
+                        } else {
+                            $dateStr = \Carbon\Carbon::parse($filterValue)->toDateString();
+                        }
+                    } catch (\Exception $e) {
+                        $dateStr = $filterValue;
+                    }
+                    $filterQuery->whereDate('giatri_date', '=', $dateStr);
+                } else {
+                    $filterQuery->where(function ($q) use ($filterValue) {
+                        $q->where('giatri_text', 'LIKE', "%{$filterValue}%")
+                            ->orWhere('giatri_number', '=', $filterValue);
+                    });
+                }
+
+                $filteredPhieuIds = $filterQuery->pluck('phieu_khaosat_id');
+                $baseCompletedQuery->whereIn('id', $filteredPhieuIds);
+            }
+        }
+
+        $completedSurveyIds = $baseCompletedQuery->pluck('id');
 
         $answers = DB::table('phieu_khaosat_chitiet')
             ->where('cauhoi_id', $cauHoi->id)
@@ -534,6 +771,90 @@ class BaoCaoController extends Controller
         $baseCompletedQuery = $dotKhaoSat->phieuKhaoSat()
             ->where('trangthai', 'completed')
             ->where('is_duplicate', '!=', 1);
+
+        $deviceFilter = $request->input('device_filter');
+        $osFilter = $request->input('os_filter');
+        $sourceFilter = $request->input('source_filter');
+
+        $applyUserAgentFilters = function ($query) use ($deviceFilter, $osFilter, $sourceFilter) {
+            if ($deviceFilter) {
+                if ($deviceFilter === 'Mobile') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%mobile%')
+                            ->orWhere('user_agent', 'LIKE', '%phone%')
+                            ->orWhere('user_agent', 'LIKE', '%ipod%');
+                    });
+                } elseif ($deviceFilter === 'Tablet') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%ipad%')
+                            ->orWhere('user_agent', 'LIKE', '%tablet%')
+                            ->orWhere(function ($sub) {
+                                $sub->where('user_agent', 'LIKE', '%android%')
+                                    ->where('user_agent', 'NOT LIKE', '%mobile%');
+                            });
+                    });
+                } elseif ($deviceFilter === 'Desktop') {
+                    $query->where('user_agent', 'NOT LIKE', '%mobile%')
+                        ->where('user_agent', 'NOT LIKE', '%phone%')
+                        ->where('user_agent', 'NOT LIKE', '%ipod%')
+                        ->where('user_agent', 'NOT LIKE', '%ipad%')
+                        ->where('user_agent', 'NOT LIKE', '%tablet%')
+                        ->where('user_agent', 'NOT LIKE', '%bot%')
+                        ->where('user_agent', 'NOT LIKE', '%crawler%')
+                        ->where('user_agent', 'NOT LIKE', '%spider%');
+                } elseif ($deviceFilter === 'Bot') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%bot%')
+                            ->orWhere('user_agent', 'LIKE', '%crawler%')
+                            ->orWhere('user_agent', 'LIKE', '%spider%');
+                    });
+                }
+            }
+
+            if ($osFilter) {
+                if ($osFilter === 'iOS') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%iphone%')
+                            ->orWhere('user_agent', 'LIKE', '%ipad%')
+                            ->orWhere('user_agent', 'LIKE', '%ipod%');
+                    });
+                } else {
+                    $query->where('user_agent', 'LIKE', "%{$osFilter}%");
+                }
+            }
+
+            if ($sourceFilter) {
+                if ($sourceFilter === 'Trực tiếp') {
+                    $query->where(function ($q) {
+                        $q->whereNull('user_agent')
+                            ->orWhere(function ($sub) {
+                                $sub->where('user_agent', 'NOT LIKE', '%zalo%')
+                                    ->where('user_agent', 'NOT LIKE', '%fbav%')
+                                    ->where('user_agent', 'NOT LIKE', '%fb_iab%')
+                                    ->where('user_agent', 'NOT LIKE', '%instagram%')
+                                    ->where('user_agent', 'NOT LIKE', '%messenger%')
+                                    ->where('user_agent', 'NOT LIKE', '%fbms%');
+                            });
+                    });
+                } elseif ($sourceFilter === 'Zalo App') {
+                    $query->where('user_agent', 'LIKE', '%zalo%');
+                } elseif ($sourceFilter === 'Facebook App') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%fbav%')
+                            ->orWhere('user_agent', 'LIKE', '%fb_iab%');
+                    });
+                } elseif ($sourceFilter === 'Messenger App') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%messenger%')
+                            ->orWhere('user_agent', 'LIKE', '%fbms%');
+                    });
+                } elseif ($sourceFilter === 'Instagram App') {
+                    $query->where('user_agent', 'LIKE', '%instagram%');
+                }
+            }
+        };
+
+        $applyUserAgentFilters($baseCompletedQuery);
 
         if (!empty($personalInfoFilters)) {
             $filterQuestions = $dotKhaoSat->mauKhaoSat->cauHoi
