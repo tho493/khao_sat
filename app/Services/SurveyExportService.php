@@ -70,6 +70,18 @@ class SurveyExportService
                         $q->where('giatri_text', $matchedValue ?? $filterValue)
                             ->orWhere('giatri_number', '=', $matchedValue ?? $filterValue);
                     });
+                } elseif ($question->loai_cauhoi === 'date') {
+                    $dateStr = null;
+                    try {
+                        if (preg_match('/^\d{1,2}\/\d{1,2}\/\d{4}$/', $filterValue)) {
+                            $dateStr = \Carbon\Carbon::createFromFormat('d/m/Y', $filterValue)->toDateString();
+                        } else {
+                            $dateStr = \Carbon\Carbon::parse($filterValue)->toDateString();
+                        }
+                    } catch (\Exception $e) {
+                        $dateStr = $filterValue;
+                    }
+                    $filterQuery->whereDate('giatri_date', '=', $dateStr);
                 } else {
                     $filterQuery->where(function ($q) use ($filterValue) {
                         $q->where('giatri_text', 'LIKE', "%{$filterValue}%")

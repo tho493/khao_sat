@@ -126,6 +126,18 @@ class SurveyStatisticsService
                     $filterQuery->where('phuongan_id', $filterValue);
                 } elseif ($question->loai_cauhoi === 'custom_select') {
                     $filterQuery->where('giatri_text', $filterValue);
+                } elseif ($question->loai_cauhoi === 'date') {
+                    $dateStr = null;
+                    try {
+                        if (preg_match('/^\d{1,2}\/\d{1,2}\/\d{4}$/', $filterValue)) {
+                            $dateStr = \Carbon\Carbon::createFromFormat('d/m/Y', $filterValue)->toDateString();
+                        } else {
+                            $dateStr = \Carbon\Carbon::parse($filterValue)->toDateString();
+                        }
+                    } catch (\Exception $e) {
+                        $dateStr = $filterValue;
+                    }
+                    $filterQuery->whereDate('giatri_date', '=', $dateStr);
                 } else {
                     $filterQuery->where(function ($q) use ($filterValue) {
                         $q->where('giatri_text', 'LIKE', "%{$filterValue}%")
@@ -341,6 +353,21 @@ class SurveyStatisticsService
                     'data' => $data,
                     'total' => $totalResponses,
                 ];
+
+            case 'date':
+                $totalResponses = (clone $baseQuery)
+                    ->whereNotNull('giatri_date')->count();
+                $data = (clone $baseQuery)
+                    ->whereNotNull('giatri_date')
+                    ->select('giatri_date', 'phieu_khaosat_id')
+                    ->limit(20)
+                    ->get()
+                    ->map(function ($row) {
+                        $row->giatri_text = $row->giatri_date ? \Carbon\Carbon::parse($row->giatri_date)->format('d/m/Y') : '';
+                        return $row;
+                    });
+
+                return ['type' => 'text', 'data' => $data, 'total' => $totalResponses];
 
             case 'number':
                 $stats = (clone $baseQuery)

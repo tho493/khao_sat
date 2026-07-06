@@ -136,6 +136,18 @@ class BaoCaoController extends Controller
                      $filterQuery->where('phuongan_id', $filterValue);
                 } elseif ($question->loai_cauhoi === 'custom_select') {
                      $filterQuery->where('giatri_text', $filterValue);
+                } elseif ($question->loai_cauhoi === 'date') {
+                    $dateStr = null;
+                    try {
+                        if (preg_match('/^\d{1,2}\/\d{1,2}\/\d{4}$/', $filterValue)) {
+                            $dateStr = \Carbon\Carbon::createFromFormat('d/m/Y', $filterValue)->toDateString();
+                        } else {
+                            $dateStr = \Carbon\Carbon::parse($filterValue)->toDateString();
+                        }
+                    } catch (\Exception $e) {
+                        $dateStr = $filterValue;
+                    }
+                    $filterQuery->whereDate('giatri_date', '=', $dateStr);
                 } else {
                     $filterQuery->where(function ($q) use ($filterValue) {
                         $q->where('giatri_text', 'LIKE', "%{$filterValue}%")
@@ -544,6 +556,18 @@ class BaoCaoController extends Controller
                      $filterQuery->where('phuongan_id', $filterValue);
                 } elseif ($question->loai_cauhoi === 'custom_select') {
                      $filterQuery->where('giatri_text', $filterValue);
+                } elseif ($question->loai_cauhoi === 'date') {
+                    $dateStr = null;
+                    try {
+                        if (preg_match('/^\d{1,2}\/\d{1,2}\/\d{4}$/', $filterValue)) {
+                            $dateStr = \Carbon\Carbon::createFromFormat('d/m/Y', $filterValue)->toDateString();
+                        } else {
+                            $dateStr = \Carbon\Carbon::parse($filterValue)->toDateString();
+                        }
+                    } catch (\Exception $e) {
+                        $dateStr = $filterValue;
+                    }
+                    $filterQuery->whereDate('giatri_date', '=', $dateStr);
                 } else {
                     $filterQuery->where(function ($q) use ($filterValue) {
                         $q->where('giatri_text', 'LIKE', "%{$filterValue}%")
@@ -569,14 +593,26 @@ class BaoCaoController extends Controller
         } elseif ($cauHoi->loai_cauhoi === 'number') {
             $query->whereNotNull('giatri_number')
                 ->select('giatri_number as value', 'phieu_khaosat_id');
+        } elseif ($cauHoi->loai_cauhoi === 'date') {
+            $query->whereNotNull('giatri_date')
+                ->select('giatri_date as value', 'phieu_khaosat_id');
         } else {
             $query->select(DB::raw('COALESCE(giatri_text, CAST(giatri_number AS CHAR)) as value'), 'phieu_khaosat_id');
         }
 
         $paginator = $query->paginate($perPage);
 
+        if ($cauHoi->loai_cauhoi === 'date') {
+            $items = collect($paginator->items())->map(function ($item) {
+                $item->value = $item->value ? \Carbon\Carbon::parse($item->value)->format('d/m/Y') : '';
+                return $item;
+            })->all();
+        } else {
+            $items = $paginator->items();
+        }
+
         return response()->json([
-            'data' => $paginator->items(),
+            'data' => $items,
             'current_page' => $paginator->currentPage(),
             'last_page' => $paginator->lastPage(),
             'total' => $paginator->total(),

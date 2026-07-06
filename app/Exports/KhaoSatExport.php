@@ -145,7 +145,7 @@ class KhaoSatExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoS
                 } elseif (!is_null($firstAnswer->giatri_number)) {
                     $cellValue = (string) $firstAnswer->giatri_number;
                 } elseif (!empty($firstAnswer->giatri_date)) {
-                    $cellValue = (string) $firstAnswer->giatri_date;
+                    $cellValue = $firstAnswer->giatri_date instanceof \Carbon\Carbon ? $firstAnswer->giatri_date->format('d/m/Y') : (string) $firstAnswer->giatri_date;
                 }
             }
         }
