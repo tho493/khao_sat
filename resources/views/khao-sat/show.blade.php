@@ -300,6 +300,7 @@
                     <form id="formKhaoSat" method="POST" action="{{ route('khao-sat.store', $dotKhaoSat) }}" class="space-y-6">
                         @csrf
                         <input type="hidden" name="metadata[thoigian_batdau]" id="thoigian_batdau">
+                        <input type="hidden" name="metadata[thoigian_hoanthanh]" id="thoigian_hoanthanh">
 
                         <!-- Thông tin người trả lời -->
                         <div class="glass-effect" id="personal-info-section">
@@ -1116,8 +1117,8 @@
         let data = {};
         
         $.each(formData, function(i, field) {
-            if (field.name === '_token' || field.name === '_submission_token' || field.name === 'metadata[thoigian_batdau]') {
-                return; // Bỏ qua token và thời gian bắt đầu (để tính thời gian làm tiếp chính xác)
+            if (field.name === '_token' || field.name === '_submission_token' || field.name === 'metadata[thoigian_batdau]' || field.name === 'metadata[thoigian_hoanthanh]') {
+                return; // Bỏ qua token, thời gian bắt đầu và kết thúc (để tính thời gian làm tiếp chính xác)
             }
 
             if (field.name.endsWith('[]')) {
@@ -1154,8 +1155,8 @@
                 
                 // 1. Khôi phục các input thông thường trước (textarea, text, select, date...)
                 for (const name in data) {
-                    if (name === 'metadata[thoigian_batdau]') {
-                        continue; // Bỏ qua không ghi đè thời gian bắt đầu của phiên làm việc mới
+                    if (name === 'metadata[thoigian_batdau]' || name === 'metadata[thoigian_hoanthanh]') {
+                        continue; // Bỏ qua không ghi đè thời gian bắt đầu/kết thúc của phiên làm việc mới
                     }
                     const value = data[name];
                     const element = surveyForm.find(`[name="${name}"]`);
@@ -1525,6 +1526,11 @@
         // ===========================================================
         surveyForm.on('submit', function(e) {
             e.preventDefault(); 
+            
+            const thoigianHoanThanhEl = document.getElementById('thoigian_hoanthanh');
+            if (thoigianHoanThanhEl) {
+                thoigianHoanThanhEl.value = getCurrentLocalDateTime();
+            }
             
             if (submitBtn.prop('disabled')) return;
 
