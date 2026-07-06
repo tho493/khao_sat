@@ -191,10 +191,44 @@ class KhaoSatController extends Controller
 
         DB::beginTransaction();
         try {
+            $thoigian_hoanthanh_server = now();
+            $thoigian_batdau_server = null;
+
+            $client_batdau_raw = $request->input('metadata.thoigian_batdau');
+            $client_hoanthanh_raw = $request->input('metadata.thoigian_hoanthanh');
+
+            if ($client_batdau_raw && $client_hoanthanh_raw) {
+                try {
+                    $client_batdau = \Carbon\Carbon::parse($client_batdau_raw);
+                    $client_hoanthanh = \Carbon\Carbon::parse($client_hoanthanh_raw);
+
+                    if ($client_hoanthanh->greaterThanOrEqualTo($client_batdau)) {
+                        $durationInSeconds = $client_batdau->diffInSeconds($client_hoanthanh);
+                        if ($durationInSeconds >= 0) {
+                            $thoigian_batdau_server = (clone $thoigian_hoanthanh_server)->subSeconds($durationInSeconds);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    $thoigian_batdau_server = null;
+                }
+            }
+
+            // Fallback nếu không tính được theo Client duration
+            if (!$thoigian_batdau_server && $client_batdau_raw) {
+                try {
+                    $thoigian_batdau_server = \Carbon\Carbon::parse($client_batdau_raw);
+                    if ($thoigian_batdau_server->greaterThan($thoigian_hoanthanh_server)) {
+                        $thoigian_batdau_server = (clone $thoigian_hoanthanh_server)->subSecond();
+                    }
+                } catch (\Exception $e) {
+                    $thoigian_batdau_server = null;
+                }
+            }
+
             // Tạo phiếu khảo sát, bao gồm trạng thái trùng lặp
             $phieuKhaoSat = PhieuKhaoSat::create([
                 'dot_khaosat_id' => $dotKhaoSat->id,
-                'thoigian_batdau' => $request->metadata['thoigian_batdau'] ?? null,
+                'thoigian_batdau' => $thoigian_batdau_server,
                 'trangthai' => 'draft',
                 'ip_address' => $request->ip(), // Lưu địa chỉ IP của người dùng
                 'user_agent' => $request->userAgent(), // Lưu thông tin trình duyệt/thiết bị
@@ -266,7 +300,7 @@ class KhaoSatController extends Controller
 
             $phieuKhaoSat->update([
                 'trangthai' => 'completed',
-                'thoigian_hoanthanh' => now()
+                'thoigian_hoanthanh' => $thoigian_hoanthanh_server
             ]);
 
             DB::commit();
