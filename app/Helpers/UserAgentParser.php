@@ -18,22 +18,46 @@ class UserAgentParser
                 'os' => 'Unknown',
                 'browser' => 'Unknown',
                 'app' => null,
+                'source' => 'Trực tiếp',
                 'summary' => 'N/A'
             ];
         }
 
         $userAgentLower = strtolower($userAgent);
 
-        // 1. Phân tích Hệ điều hành
+        // 1. Phân tích Hệ điều hành & Phiên bản
         $os = 'Unknown OS';
         if (str_contains($userAgentLower, 'windows')) {
             $os = 'Windows';
+            if (preg_match('/windows\s+nt\s+([0-9\.]+)/i', $userAgent, $matches)) {
+                $ntVersion = $matches[1];
+                $winVersions = [
+                    '10.0' => '10/11',
+                    '6.3' => '8.1',
+                    '6.2' => '8',
+                    '6.1' => '7',
+                    '6.0' => 'Vista',
+                    '5.1' => 'XP',
+                    '5.0' => '2000'
+                ];
+                $osVersion = $winVersions[$ntVersion] ?? $ntVersion;
+                $os .= ' ' . $osVersion;
+            }
         } elseif (str_contains($userAgentLower, 'android')) {
             $os = 'Android';
+            if (preg_match('/android\s+([0-9\.]+)/i', $userAgent, $matches)) {
+                $os .= ' ' . $matches[1];
+            }
         } elseif (str_contains($userAgentLower, 'iphone') || str_contains($userAgentLower, 'ipad') || str_contains($userAgentLower, 'ipod')) {
             $os = 'iOS';
+            if (preg_match('/os\s+([0-9_]+)\s+like\s+mac/i', $userAgent, $matches)) {
+                $os .= ' ' . str_replace('_', '.', $matches[1]);
+            }
         } elseif (str_contains($userAgentLower, 'macintosh') || str_contains($userAgentLower, 'mac os x')) {
             $os = 'macOS';
+            if (preg_match('/mac\s+os\s+x\s+([0-9_\.]+)/i', $userAgent, $matches)) {
+                $os .= ' ' . str_replace('_', '.', $matches[1]);
+            }
         } elseif (str_contains($userAgentLower, 'linux')) {
             $os = 'Linux';
         }
@@ -74,6 +98,9 @@ class UserAgentParser
             $browser = 'Safari';
         }
 
+        // 5. Xác định nguồn truy cập
+        $source = $app ? $app . ' App' : 'Trực tiếp';
+
         // Tạo summary
         $summary = $browser . ' / ' . $os;
         if ($app) {
@@ -85,6 +112,7 @@ class UserAgentParser
             'os' => $os,
             'browser' => $browser,
             'app' => $app,
+            'source' => $source,
             'summary' => $summary
         ];
     }
