@@ -178,9 +178,14 @@ class BaoCaoController extends Controller
                                 $sub->where('user_agent', 'NOT LIKE', '%zalo%')
                                     ->where('user_agent', 'NOT LIKE', '%fbav%')
                                     ->where('user_agent', 'NOT LIKE', '%fb_iab%')
+                                    ->where('user_agent', 'NOT LIKE', '%fban/%')
                                     ->where('user_agent', 'NOT LIKE', '%instagram%')
                                     ->where('user_agent', 'NOT LIKE', '%messenger%')
-                                    ->where('user_agent', 'NOT LIKE', '%fbms%');
+                                    ->where('user_agent', 'NOT LIKE', '%fbms%')
+                                    ->where('user_agent', 'NOT LIKE', '%tiktok%')
+                                    ->where('user_agent', 'NOT LIKE', '%musically%')
+                                    ->where('user_agent', 'NOT LIKE', '%twitter%')
+                                    ->where('user_agent', 'NOT LIKE', '%com.google.android.youtube%');
                             });
                     });
                 } elseif ($sourceFilter === 'Zalo App') {
@@ -188,7 +193,8 @@ class BaoCaoController extends Controller
                 } elseif ($sourceFilter === 'Facebook App') {
                     $query->where(function ($q) {
                         $q->where('user_agent', 'LIKE', '%fbav%')
-                            ->orWhere('user_agent', 'LIKE', '%fb_iab%');
+                            ->orWhere('user_agent', 'LIKE', '%fb_iab%')
+                            ->orWhere('user_agent', 'LIKE', '%fban/%');
                     });
                 } elseif ($sourceFilter === 'Messenger App') {
                     $query->where(function ($q) {
@@ -197,6 +203,15 @@ class BaoCaoController extends Controller
                     });
                 } elseif ($sourceFilter === 'Instagram App') {
                     $query->where('user_agent', 'LIKE', '%instagram%');
+                } elseif ($sourceFilter === 'TikTok App') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%tiktok%')
+                            ->orWhere('user_agent', 'LIKE', '%musically%');
+                    });
+                } elseif ($sourceFilter === 'Twitter App') {
+                    $query->where('user_agent', 'LIKE', '%twitter%');
+                } elseif ($sourceFilter === 'YouTube App') {
+                    $query->where('user_agent', 'LIKE', '%com.google.android.youtube%');
                 }
             }
         };
@@ -509,7 +524,8 @@ class BaoCaoController extends Controller
                 } elseif ($sourceFilter === 'Facebook App') {
                     $query->where(function ($q) {
                         $q->where('user_agent', 'LIKE', '%fbav%')
-                            ->orWhere('user_agent', 'LIKE', '%fb_iab%');
+                            ->orWhere('user_agent', 'LIKE', '%fb_iab%')
+                            ->orWhere('user_agent', 'LIKE', '%fban/%');
                     });
                 } elseif ($sourceFilter === 'Messenger App') {
                     $query->where(function ($q) {
@@ -518,6 +534,15 @@ class BaoCaoController extends Controller
                     });
                 } elseif ($sourceFilter === 'Instagram App') {
                     $query->where('user_agent', 'LIKE', '%instagram%');
+                } elseif ($sourceFilter === 'TikTok App') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%tiktok%')
+                            ->orWhere('user_agent', 'LIKE', '%musically%');
+                    });
+                } elseif ($sourceFilter === 'Twitter App') {
+                    $query->where('user_agent', 'LIKE', '%twitter%');
+                } elseif ($sourceFilter === 'YouTube App') {
+                    $query->where('user_agent', 'LIKE', '%com.google.android.youtube%');
                 }
             }
         };
@@ -841,7 +866,8 @@ class BaoCaoController extends Controller
                 } elseif ($sourceFilter === 'Facebook App') {
                     $query->where(function ($q) {
                         $q->where('user_agent', 'LIKE', '%fbav%')
-                            ->orWhere('user_agent', 'LIKE', '%fb_iab%');
+                            ->orWhere('user_agent', 'LIKE', '%fb_iab%')
+                            ->orWhere('user_agent', 'LIKE', '%fban/%');
                     });
                 } elseif ($sourceFilter === 'Messenger App') {
                     $query->where(function ($q) {
@@ -850,6 +876,15 @@ class BaoCaoController extends Controller
                     });
                 } elseif ($sourceFilter === 'Instagram App') {
                     $query->where('user_agent', 'LIKE', '%instagram%');
+                } elseif ($sourceFilter === 'TikTok App') {
+                    $query->where(function ($q) {
+                        $q->where('user_agent', 'LIKE', '%tiktok%')
+                            ->orWhere('user_agent', 'LIKE', '%musically%');
+                    });
+                } elseif ($sourceFilter === 'Twitter App') {
+                    $query->where('user_agent', 'LIKE', '%twitter%');
+                } elseif ($sourceFilter === 'YouTube App') {
+                    $query->where('user_agent', 'LIKE', '%com.google.android.youtube%');
                 }
             }
         };
