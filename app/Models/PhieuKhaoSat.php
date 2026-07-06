@@ -8,6 +8,8 @@ class PhieuKhaoSat extends Model
 {
     protected $table = 'phieu_khaosat';
 
+    protected $appends = ['device_summary'];
+
     protected $fillable = [
         'dot_khaosat_id',
         'trangthai',
@@ -18,6 +20,14 @@ class PhieuKhaoSat extends Model
         'is_duplicate',
         'token'
     ];
+
+    /**
+     * Tóm tắt thiết bị của phiếu khảo sát
+     */
+    public function getDeviceSummaryAttribute()
+    {
+        return \App\Helpers\UserAgentParser::parse($this->user_agent)['summary'];
+    }
 
     protected $casts = [
         'thoigian_batdau' => 'datetime',

@@ -101,10 +101,86 @@ class SurveyStatisticsService
     /**
      * Lấy xu hướng phản hồi theo ngày của đợt khảo sát có kèm bộ lọc.
      */
-    public function getResponseTrendForSurvey(DotKhaoSat $dotKhaoSat, $personalInfoFilters = [], $filterQuestions = null)
+    public function getResponseTrendForSurvey(DotKhaoSat $dotKhaoSat, $personalInfoFilters = [], $filterQuestions = null, $deviceFilter = null, $osFilter = null, $sourceFilter = null)
     {
         $query = $dotKhaoSat->phieuKhaoSat()
             ->where('trangthai', 'completed');
+
+        if ($deviceFilter) {
+            if ($deviceFilter === 'Mobile') {
+                $query->where(function ($q) {
+                    $q->where('user_agent', 'LIKE', '%mobile%')
+                        ->orWhere('user_agent', 'LIKE', '%phone%')
+                        ->orWhere('user_agent', 'LIKE', '%ipod%');
+                });
+            } elseif ($deviceFilter === 'Tablet') {
+                $query->where(function ($q) {
+                    $q->where('user_agent', 'LIKE', '%ipad%')
+                        ->orWhere('user_agent', 'LIKE', '%tablet%')
+                        ->orWhere(function ($sub) {
+                            $sub->where('user_agent', 'LIKE', '%android%')
+                                ->where('user_agent', 'NOT LIKE', '%mobile%');
+                        });
+                });
+            } elseif ($deviceFilter === 'Desktop') {
+                $query->where('user_agent', 'NOT LIKE', '%mobile%')
+                    ->where('user_agent', 'NOT LIKE', '%phone%')
+                    ->where('user_agent', 'NOT LIKE', '%ipod%')
+                    ->where('user_agent', 'NOT LIKE', '%ipad%')
+                    ->where('user_agent', 'NOT LIKE', '%tablet%')
+                    ->where('user_agent', 'NOT LIKE', '%bot%')
+                    ->where('user_agent', 'NOT LIKE', '%crawler%')
+                    ->where('user_agent', 'NOT LIKE', '%spider%');
+            } elseif ($deviceFilter === 'Bot') {
+                $query->where(function ($q) {
+                    $q->where('user_agent', 'LIKE', '%bot%')
+                        ->orWhere('user_agent', 'LIKE', '%crawler%')
+                        ->orWhere('user_agent', 'LIKE', '%spider%');
+                });
+            }
+        }
+
+        if ($osFilter) {
+            if ($osFilter === 'iOS') {
+                $query->where(function ($q) {
+                    $q->where('user_agent', 'LIKE', '%iphone%')
+                        ->orWhere('user_agent', 'LIKE', '%ipad%')
+                        ->orWhere('user_agent', 'LIKE', '%ipod%');
+                });
+            } else {
+                $query->where('user_agent', 'LIKE', "%{$osFilter}%");
+            }
+        }
+
+        if ($sourceFilter) {
+            if ($sourceFilter === 'Trực tiếp') {
+                $query->where(function ($q) {
+                    $q->whereNull('user_agent')
+                        ->orWhere(function ($sub) {
+                            $sub->where('user_agent', 'NOT LIKE', '%zalo%')
+                                ->where('user_agent', 'NOT LIKE', '%fbav%')
+                                ->where('user_agent', 'NOT LIKE', '%fb_iab%')
+                                ->where('user_agent', 'NOT LIKE', '%instagram%')
+                                ->where('user_agent', 'NOT LIKE', '%messenger%')
+                                ->where('user_agent', 'NOT LIKE', '%fbms%');
+                        });
+                });
+            } elseif ($sourceFilter === 'Zalo App') {
+                $query->where('user_agent', 'LIKE', '%zalo%');
+            } elseif ($sourceFilter === 'Facebook App') {
+                $query->where(function ($q) {
+                    $q->where('user_agent', 'LIKE', '%fbav%')
+                        ->orWhere('user_agent', 'LIKE', '%fb_iab%');
+                });
+            } elseif ($sourceFilter === 'Messenger App') {
+                $query->where(function ($q) {
+                    $q->where('user_agent', 'LIKE', '%messenger%')
+                        ->orWhere('user_agent', 'LIKE', '%fbms%');
+                });
+            } elseif ($sourceFilter === 'Instagram App') {
+                $query->where('user_agent', 'LIKE', '%instagram%');
+            }
+        }
 
         // Áp dụng bộ lọc cho từng câu hỏi thông tin cá nhân/câu hỏi lọc
         if (!empty($personalInfoFilters) && $filterQuestions) {
@@ -480,5 +556,75 @@ class SurveyStatisticsService
             ->select('phieu_khaosat_chitiet.cauhoi_id', 'phuongan_traloi.thutu as option_order')
             ->get();
         return $allAnswers->groupBy('cauhoi_id')->map(fn($answers) => $answers->groupBy('option_order')->map->count());
+    }
+
+    /**
+     * Thống kê thiết bị và hệ điều hành của các phiếu khảo sát đã hoàn thành.
+     */
+    public function getThongKeThietBi($completedSurveys): array
+    {
+        $devices = ['Desktop' => 0, 'Mobile' => 0, 'Tablet' => 0, 'Bot' => 0, 'Unknown' => 0];
+        $osList = [];
+        $browsers = [];
+        $sources = ['Trực tiếp' => 0, 'Zalo App' => 0, 'Facebook App' => 0, 'Messenger App' => 0, 'Instagram App' => 0];
+
+        foreach ($completedSurveys as $phieu) {
+            $parsed = \App\Helpers\UserAgentParser::parse($phieu->user_agent);
+
+            // 1. Đếm thiết bị
+            $devType = $parsed['device'];
+            if (isset($devices[$devType])) {
+                $devices[$devType]++;
+            } else {
+                $devices['Unknown']++;
+            }
+
+            // 2. Đếm hệ điều hành
+            $os = $parsed['os'];
+            $osList[$os] = ($osList[$os] ?? 0) + 1;
+
+            // 3. Đếm trình duyệt
+            $browserName = $parsed['browser'];
+            if ($parsed['app']) {
+                $browserName .= ' (' . $parsed['app'] . ' App)';
+            }
+            $browsers[$browserName] = ($browsers[$browserName] ?? 0) + 1;
+
+            // 4. Đếm nguồn truy cập
+            $src = $parsed['app'] ? $parsed['app'] . ' App' : 'Trực tiếp';
+            if (isset($sources[$src])) {
+                $sources[$src]++;
+            } else {
+                $sources['Trực tiếp']++;
+            }
+        }
+
+        // Loại bỏ các thiết bị có số lượng = 0 để biểu đồ hiển thị đẹp hơn
+        $filteredDevices = array_filter($devices, fn($count) => $count > 0);
+        $filteredSources = array_filter($sources, fn($count) => $count > 0);
+
+        // Sắp xếp giảm dần theo số lượng
+        arsort($osList);
+        arsort($browsers);
+        arsort($filteredSources);
+
+        return [
+            'devices' => [
+                'labels' => array_keys($filteredDevices),
+                'values' => array_values($filteredDevices)
+            ],
+            'os' => [
+                'labels' => array_keys($osList),
+                'values' => array_values($osList)
+            ],
+            'browsers' => [
+                'labels' => array_keys($browsers),
+                'values' => array_values($browsers)
+            ],
+            'sources' => [
+                'labels' => array_keys($filteredSources),
+                'values' => array_values($filteredSources)
+            ]
+        ];
     }
 }

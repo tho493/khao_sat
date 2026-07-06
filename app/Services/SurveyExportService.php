@@ -43,6 +43,86 @@ class SurveyExportService
             ->where('trangthai', 'completed')
             ->where('is_duplicate', 0);
 
+        $deviceFilter = $request->input('device_filter');
+        $osFilter = $request->input('os_filter');
+        $sourceFilter = $request->input('source_filter');
+
+        if ($deviceFilter) {
+            if ($deviceFilter === 'Mobile') {
+                $completedSurveysQuery->where(function ($q) {
+                    $q->where('user_agent', 'LIKE', '%mobile%')
+                        ->orWhere('user_agent', 'LIKE', '%phone%')
+                        ->orWhere('user_agent', 'LIKE', '%ipod%');
+                });
+            } elseif ($deviceFilter === 'Tablet') {
+                $completedSurveysQuery->where(function ($q) {
+                    $q->where('user_agent', 'LIKE', '%ipad%')
+                        ->orWhere('user_agent', 'LIKE', '%tablet%')
+                        ->orWhere(function ($sub) {
+                            $sub->where('user_agent', 'LIKE', '%android%')
+                                ->where('user_agent', 'NOT LIKE', '%mobile%');
+                        });
+                });
+            } elseif ($deviceFilter === 'Desktop') {
+                $completedSurveysQuery->where('user_agent', 'NOT LIKE', '%mobile%')
+                    ->where('user_agent', 'NOT LIKE', '%phone%')
+                    ->where('user_agent', 'NOT LIKE', '%ipod%')
+                    ->where('user_agent', 'NOT LIKE', '%ipad%')
+                    ->where('user_agent', 'NOT LIKE', '%tablet%')
+                    ->where('user_agent', 'NOT LIKE', '%bot%')
+                    ->where('user_agent', 'NOT LIKE', '%crawler%')
+                    ->where('user_agent', 'NOT LIKE', '%spider%');
+            } elseif ($deviceFilter === 'Bot') {
+                $completedSurveysQuery->where(function ($q) {
+                    $q->where('user_agent', 'LIKE', '%bot%')
+                        ->orWhere('user_agent', 'LIKE', '%crawler%')
+                        ->orWhere('user_agent', 'LIKE', '%spider%');
+                });
+            }
+        }
+
+        if ($osFilter) {
+            if ($osFilter === 'iOS') {
+                $completedSurveysQuery->where(function ($q) {
+                    $q->where('user_agent', 'LIKE', '%iphone%')
+                        ->orWhere('user_agent', 'LIKE', '%ipad%')
+                        ->orWhere('user_agent', 'LIKE', '%ipod%');
+                });
+            } else {
+                $completedSurveysQuery->where('user_agent', 'LIKE', "%{$osFilter}%");
+            }
+        }
+
+        if ($sourceFilter) {
+            if ($sourceFilter === 'Trực tiếp') {
+                $completedSurveysQuery->where(function ($q) {
+                    $q->whereNull('user_agent')
+                        ->orWhere(function ($sub) {
+                            $sub->where('user_agent', 'NOT LIKE', '%zalo%')
+                                ->where('user_agent', 'NOT LIKE', '%fbav%')
+                                ->where('user_agent', 'NOT LIKE', '%fb_iab%')
+                                ->where('user_agent', 'NOT LIKE', '%instagram%')
+                                ->where('user_agent', 'NOT LIKE', '%messenger%')
+                                ->where('user_agent', 'NOT LIKE', '%fbms%');
+                        });
+                });
+            } elseif ($sourceFilter === 'Zalo App') {
+                $completedSurveysQuery->where('user_agent', 'LIKE', '%zalo%');
+            } elseif ($sourceFilter === 'Facebook App') {
+                $completedSurveysQuery->where(function ($q) {
+                    $q->where('user_agent', 'LIKE', '%fbav%')
+                        ->orWhere('user_agent', 'LIKE', '%fb_iab%');
+                });
+            } elseif ($sourceFilter === 'Messenger App') {
+                $completedSurveysQuery->where(function ($q) {
+                    $q->where('user_agent', 'LIKE', '%messenger%')
+                        ->orWhere('user_agent', 'LIKE', '%fbms%');
+                });
+            } elseif ($sourceFilter === 'Instagram App') {
+                $completedSurveysQuery->where('user_agent', 'LIKE', '%instagram%');
+            }
+        }
+
         if (!empty($personalInfoFilters)) {
             $allFilteredPhieuIds = collect();
             foreach ($personalInfoFilters as $questionId => $filterValue) {
