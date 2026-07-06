@@ -16,6 +16,7 @@ class UserAgentParser
             return [
                 'device' => 'Unknown',
                 'os' => 'Unknown',
+                'os_version' => null,
                 'browser' => 'Unknown',
                 'app' => null,
                 'source' => 'Trực tiếp',
@@ -27,6 +28,7 @@ class UserAgentParser
 
         // 1. Phân tích Hệ điều hành & Phiên bản
         $os = 'Unknown OS';
+        $osVersion = null;
         if (str_contains($userAgentLower, 'windows')) {
             $os = 'Windows';
             if (preg_match('/windows\s+nt\s+([0-9\.]+)/i', $userAgent, $matches)) {
@@ -41,22 +43,21 @@ class UserAgentParser
                     '5.0' => '2000'
                 ];
                 $osVersion = $winVersions[$ntVersion] ?? $ntVersion;
-                $os .= ' ' . $osVersion;
             }
         } elseif (str_contains($userAgentLower, 'android')) {
             $os = 'Android';
             if (preg_match('/android\s+([0-9\.]+)/i', $userAgent, $matches)) {
-                $os .= ' ' . $matches[1];
+                $osVersion = $matches[1];
             }
         } elseif (str_contains($userAgentLower, 'iphone') || str_contains($userAgentLower, 'ipad') || str_contains($userAgentLower, 'ipod')) {
             $os = 'iOS';
             if (preg_match('/os\s+([0-9_]+)\s+like\s+mac/i', $userAgent, $matches)) {
-                $os .= ' ' . str_replace('_', '.', $matches[1]);
+                $osVersion = str_replace('_', '.', $matches[1]);
             }
         } elseif (str_contains($userAgentLower, 'macintosh') || str_contains($userAgentLower, 'mac os x')) {
             $os = 'macOS';
             if (preg_match('/mac\s+os\s+x\s+([0-9_\.]+)/i', $userAgent, $matches)) {
-                $os .= ' ' . str_replace('_', '.', $matches[1]);
+                $osVersion = str_replace('_', '.', $matches[1]);
             }
         } elseif (str_contains($userAgentLower, 'linux')) {
             $os = 'Linux';
@@ -103,6 +104,9 @@ class UserAgentParser
 
         // Tạo summary
         $summary = $browser . ' / ' . $os;
+        if ($osVersion) {
+            $summary .= ' ' . $osVersion;
+        }
         if ($app) {
             $summary .= ' (' . $app . ' App)';
         }
@@ -110,6 +114,7 @@ class UserAgentParser
         return [
             'device' => $device,
             'os' => $os,
+            'os_version' => $osVersion,
             'browser' => $browser,
             'app' => $app,
             'source' => $source,

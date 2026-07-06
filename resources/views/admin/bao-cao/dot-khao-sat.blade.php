@@ -1365,7 +1365,11 @@
                                     </tr>
                                     <tr>
                                         <td><strong>Hệ điều hành</strong></td>
-                                        <td><span class="badge bg-info text-dark">${phieuData.device_os || 'N/A'}</span></td>
+                                        <td>
+                                            <span class="badge bg-info text-dark">
+                                                ${phieuData.device_os || 'N/A'}${phieuData.device_os_version ? ' ' + phieuData.device_os_version : ''}
+                                            </span>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td><strong>Thiết bị / Trình duyệt</strong></td>
