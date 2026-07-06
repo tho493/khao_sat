@@ -350,6 +350,8 @@
                                 <option value="iOS" {{ ($osFilter ?? '') === 'iOS' ? 'selected' : '' }}>iOS (iPhone/iPad)</option>
                                 <option value="macOS" {{ ($osFilter ?? '') === 'macOS' ? 'selected' : '' }}>macOS</option>
                                 <option value="Linux" {{ ($osFilter ?? '') === 'Linux' ? 'selected' : '' }}>Linux</option>
+                                <option value="Chrome OS" {{ ($osFilter ?? '') === 'Chrome OS' ? 'selected' : '' }}>Chrome OS</option>
+                                <option value="Windows Phone" {{ ($osFilter ?? '') === 'Windows Phone' ? 'selected' : '' }}>Windows Phone</option>
                             </select>
                         </div>
                         <div class="col-md-6 col-lg-4">
@@ -361,6 +363,9 @@
                                 <option value="Facebook App" {{ ($sourceFilter ?? '') === 'Facebook App' ? 'selected' : '' }}>Facebook App</option>
                                 <option value="Messenger App" {{ ($sourceFilter ?? '') === 'Messenger App' ? 'selected' : '' }}>Messenger App</option>
                                 <option value="Instagram App" {{ ($sourceFilter ?? '') === 'Instagram App' ? 'selected' : '' }}>Instagram App</option>
+                                <option value="TikTok App" {{ ($sourceFilter ?? '') === 'TikTok App' ? 'selected' : '' }}>TikTok App</option>
+                                <option value="Twitter App" {{ ($sourceFilter ?? '') === 'Twitter App' ? 'selected' : '' }}>Twitter App</option>
+                                <option value="YouTube App" {{ ($sourceFilter ?? '') === 'YouTube App' ? 'selected' : '' }}>YouTube App</option>
                             </select>
                         </div>
 
