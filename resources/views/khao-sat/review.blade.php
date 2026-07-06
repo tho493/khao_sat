@@ -411,7 +411,7 @@
                             </div>
 
                             <div class="title-wrap">
-                                <h1 id="kh-sr-head">Khảo sát hoàn thành</h1>
+                                <h1 id="kh-sr-head">Đã hoàn thành khảo sát</h1>
                                 <p class="subtitle">
                                     {{ $reviewData['phieu_info']['ten_dot'] ?? 'Đợt khảo sát' }} ·
                                     Cảm ơn bạn đã tham gia khảo sát
@@ -451,21 +451,25 @@
                                 <i class="bi bi-person-badge"></i> Thông tin phiếu khảo sát
                             </h3>
                             <div class="info-grid">
+                                <!-- <div class="info-item">
+                                                            <h6><i class="bi bi-journal-text me-1"></i>Tên đợt khảo sát</h6>
+                                                            <h5>{{ $reviewData['phieu_info']['ten_dot'] ?? 'N/A' }}</h5>
+                                                        </div> -->
                                 <div class="info-item">
-                                    <h6><i class="bi bi-hash me-1"></i>Tên đợt khảo sát</h6>
-                                    <h5>{{ $reviewData['phieu_info']['ten_dot'] ?? 'N/A' }}</h5>
-                                </div>
-                                <div class="info-item">
-                                    <h6><i class="bi bi-hash me-1"></i>Mã định danh</h6>
+                                    <h6><i class="bi bi-hash me-1"></i>Mã định danh phiếu</h6>
                                     <h5>{{ $reviewData['phieu_info']['id'] ?? 'N/A' }}</h5>
                                 </div>
                                 <div class="info-item">
-                                    <h6><i class="bi bi-clock me-1"></i>Thời gian nộp</h6>
+                                    <h6><i class="bi bi-calendar-check me-1"></i>Thời gian nộp</h6>
                                     <h5>{{ $reviewData['phieu_info']['thoi_gian_nop'] ?? 'N/A' }}</h5>
                                 </div>
                                 <div class="info-item">
-                                    <h6><i class="bi bi-clock me-1"></i>Thời gian làm bài</h6>
-                                    <h5>{{ $reviewData['phieu_info']['thoi_gian_lam_bai'] ?? 'N/A' }}s</h5>
+                                    <h6><i class="bi bi-stopwatch me-1"></i>Thời gian làm bài</h6>
+                                    <h5>{{ $reviewData['phieu_info']['thoi_gian_lam_bai'] ?? 'N/A' }}</h5>
+                                </div>
+                                <div class="info-item">
+                                    <h6><i class="bi bi-laptop me-1"></i>Thiết bị làm bài</h6>
+                                    <h5>{{ $reviewData['phieu_info']['thiet_bi'] ?? 'N/A' }}</h5>
                                 </div>
                             </div>
                         </div>
@@ -544,7 +548,37 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            @if(!empty($isNewSubmission))
+                const scriptConfetti = document.createElement('script');
+                scriptConfetti.src = "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js";
+                scriptConfetti.defer = true;
+                scriptConfetti.onload = function () {
+                    var duration = 4.5 * 1000;
+                    var end = Date.now() + duration;
+
+                    (function frame() {
+                        confetti({
+                            particleCount: 5,
+                            angle: 60,
+                            spread: 60,
+                            origin: { x: 0, y: 0.55 }
+                        });
+                        confetti({
+                            particleCount: 5,
+                            angle: 120,
+                            spread: 60,
+                            origin: { x: 1, y: 0.55 }
+                        });
+
+                        if (Date.now() < end) {
+                            requestAnimationFrame(frame);
+                        }
+                    }());
+                };
+                document.head.appendChild(scriptConfetti);
+            @endif
+
+                            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
             const els = document.querySelectorAll('.answer');
             els.forEach((el, i) => {
                 el.style.opacity = '0';

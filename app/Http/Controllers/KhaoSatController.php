@@ -1,7 +1,7 @@
 <?php
- 
+
 namespace App\Http\Controllers;
- 
+
 use App\Models\DotKhaoSat;
 use App\Models\PhieuKhaoSat;
 use App\Models\PhieuKhaoSatChiTiet;
@@ -19,9 +19,11 @@ class KhaoSatController extends Controller
     {
         $dotKhaoSats = Cache::remember('survey_active_dots', 300, function () {
             return DotKhaoSat::with(['mauKhaoSat'])
-                ->withCount(['phieuKhaoSat as responses_count' => function ($query) {
-                    $query->where('trangthai', 'completed');
-                }])
+                ->withCount([
+                    'phieuKhaoSat as responses_count' => function ($query) {
+                        $query->where('trangthai', 'completed');
+                    }
+                ])
                 ->where('trangthai', 'active')
                 ->where('tungay', '<=', now())
                 ->where('denngay', '>=', now())
@@ -346,7 +348,9 @@ class KhaoSatController extends Controller
                 ->with('error', 'Không tìm thấy dữ liệu khảo sát để xem lại.');
         }
 
-        return view('khao-sat.review', compact('reviewData'));
+        $isNewSubmission = true;
+
+        return view('khao-sat.review', compact('reviewData', 'isNewSubmission'));
     }
 
     public function reviewHistory(PhieuKhaoSat $phieuKhaoSat, Request $request)
@@ -358,7 +362,8 @@ class KhaoSatController extends Controller
 
         // Cho phép xem lịch sử nếu có thông tin
         $reviewData = $this->getReviewData($phieuKhaoSat);
-        return view('khao-sat.review', compact('reviewData'));
+        $isNewSubmission = false;
+        return view('khao-sat.review', compact('reviewData', 'isNewSubmission'));
     }
 
     private function getReviewData($phieuKhaoSat)
@@ -377,7 +382,7 @@ class KhaoSatController extends Controller
             'id' => $phieuKhaoSat->id,
             'ten_dot' => $dotKhaoSat->ten_dot ?? 'N/A',
             'thoi_gian_nop' => $phieuKhaoSat->thoigian_hoanthanh ?
-                $phieuKhaoSat->thoigian_hoanthanh : 'N/A',
+                $phieuKhaoSat->thoigian_hoanthanh->format('d/m/Y H:i') : 'N/A',
 
             // Tính thời gian làm bài dưới dạng phút:giây
             'thoi_gian_lam_bai' => (function () use ($phieuKhaoSat) {
@@ -389,8 +394,16 @@ class KhaoSatController extends Controller
                 $diffSeconds = $batDau->diffInSeconds($hoanThanh);
                 $minutes = floor($diffSeconds / 60);
                 $seconds = $diffSeconds % 60;
-                $time = $minutes . ':' . $seconds;
-                return $time;
+                return $minutes . ' phút ' . $seconds . ' giây';
+            })(),
+            'thiet_bi' => (function () use ($phieuKhaoSatWithDetails) {
+                $parsed = \App\Helpers\UserAgentParser::parse($phieuKhaoSatWithDetails->user_agent);
+                $osInfo = $parsed['os'];
+                if ($parsed['os_version']) {
+                    $osInfo .= ' ' . $parsed['os_version'];
+                }
+                $appInfo = $parsed['app'] ? " ({$parsed['app']} App)" : '';
+                return "{$parsed['device']} - {$osInfo} ({$parsed['browser']}{$appInfo})";
             })(),
         ];
 
