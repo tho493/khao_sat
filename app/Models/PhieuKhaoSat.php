@@ -8,7 +8,7 @@ class PhieuKhaoSat extends Model
 {
     protected $table = 'phieu_khaosat';
 
-    protected $appends = ['device_summary'];
+    protected $appends = ['device_summary', 'device_os', 'device_browser', 'device_type', 'device_app', 'device_source'];
 
     protected $fillable = [
         'dot_khaosat_id',
@@ -27,6 +27,31 @@ class PhieuKhaoSat extends Model
     public function getDeviceSummaryAttribute()
     {
         return \App\Helpers\UserAgentParser::parse($this->user_agent)['summary'];
+    }
+
+    public function getDeviceOsAttribute()
+    {
+        return \App\Helpers\UserAgentParser::parse($this->user_agent)['os'];
+    }
+
+    public function getDeviceBrowserAttribute()
+    {
+        return \App\Helpers\UserAgentParser::parse($this->user_agent)['browser'];
+    }
+
+    public function getDeviceTypeAttribute()
+    {
+        return \App\Helpers\UserAgentParser::parse($this->user_agent)['device'];
+    }
+
+    public function getDeviceAppAttribute()
+    {
+        return \App\Helpers\UserAgentParser::parse($this->user_agent)['app'];
+    }
+
+    public function getDeviceSourceAttribute()
+    {
+        return \App\Helpers\UserAgentParser::parse($this->user_agent)['source'];
     }
 
     protected $casts = [

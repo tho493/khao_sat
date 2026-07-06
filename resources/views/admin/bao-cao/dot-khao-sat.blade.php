@@ -1345,6 +1345,13 @@
                     let html = '';
                     
                     // Thêm thông tin truy cập IP và thiết bị vào popup
+                    let appInfo = phieuData.device_app ? ` (${phieuData.device_app} App)` : '';
+                    let sourceBadgeClass = 'bg-secondary';
+                    if (phieuData.device_source === 'Zalo App') sourceBadgeClass = 'bg-primary bg-opacity-75';
+                    else if (phieuData.device_source === 'Facebook App') sourceBadgeClass = 'bg-primary';
+                    else if (phieuData.device_source === 'Messenger App') sourceBadgeClass = 'bg-info text-dark';
+                    else if (phieuData.device_source === 'Instagram App') sourceBadgeClass = 'bg-danger';
+
                     html += `<h5><i class="bi bi-info-circle text-primary me-2"></i>Thông tin truy cập</h5>
                             <table class="table table-sm table-bordered mb-4">
                                 <tbody>
@@ -1353,8 +1360,20 @@
                                         <td><code>${phieuData.ip_address || 'N/A'}</code></td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Thiết bị (User Agent)</strong></td>
-                                        <td><span class="text-secondary">${phieuData.device_summary || 'N/A'}</span></td>
+                                        <td><strong>Nguồn truy cập</strong></td>
+                                        <td><span class="badge ${sourceBadgeClass}">${phieuData.device_source || 'N/A'}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Hệ điều hành</strong></td>
+                                        <td><span class="badge bg-info text-dark">${phieuData.device_os || 'N/A'}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Thiết bị / Trình duyệt</strong></td>
+                                        <td>
+                                            <span class="text-secondary">
+                                                ${phieuData.device_type || 'N/A'} - ${phieuData.device_browser || 'N/A'}${appInfo}
+                                            </span>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>`;
