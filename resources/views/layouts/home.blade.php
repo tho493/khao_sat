@@ -43,6 +43,11 @@
     <meta property="og:locale" content="vi_VN">
     <link rel="canonical" href="{{ url()->current() }}">
 
+    <!-- PWA -->
+    <meta name="theme-color" content="#1e40af">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ asset('image/logo.png') }}">
+
     <link rel="stylesheet"
         href="{{ asset('css/splash-screen.css') }}?v={{ @filemtime(public_path('css/splash-screen.css')) }}">
     <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
@@ -154,6 +159,15 @@
                                 target="_blank"
                                 class="text-white/90 hover:text-white text-xs sm:text-sm font-medium transition xs:inline">GIỚI
                                 THIỆU</a>
+                            
+                            <!-- Nút cài đặt PWA -->
+                            <a href="javascript:void(0)" id="pwa-install-btn"
+                                class="hidden h-[32px] sm:h-[38px] px-2 sm:px-3 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition backdrop-blur-sm shadow-md"
+                                title="Cài đặt ứng dụng">
+                                <i class="bi bi-download text-xs sm:text-sm"></i>
+                                <span class="text-xs sm:text-sm font-semibold hidden xs:inline">Cài đặt</span>
+                            </a>
+
                             <a href="javascript:void(0)" id="theme-toggle"
                                 class="h-[32px] w-[32px] sm:h-[38px] sm:w-[38px] flex items-center justify-center rounded-lg bg-white/20 text-white hover:bg-white/30 transition backdrop-blur-sm"
                                 title="Chuyển chế độ tối/sáng">
@@ -443,6 +457,33 @@
         });
 
     </script>
+
+    <!-- PWA Install Banner -->
+    <div id="pwa-install-banner"
+        class="fixed bottom-20 left-4 right-4 sm:right-auto sm:left-4 z-[100] p-4 max-w-md transition-all duration-500 transform translate-y-full opacity-0 hidden">
+        <div class="glass-effect p-5 rounded-xl shadow-lg flex items-start gap-4 border border-white/10 dark:bg-slate-900/80">
+            <div class="text-2xl text-emerald-500 mt-1 flex-shrink-0">
+                <i class="bi bi-download"></i>
+            </div>
+            <div class="flex-1">
+                <h6 class="font-bold text-slate-800 dark:text-white text-sm mb-1">Cài đặt ứng dụng</h6>
+                <p class="text-xs text-slate-600 dark:text-slate-300 mb-3 leading-relaxed">
+                    Cài đặt ứng dụng Khảo sát trực tuyến SDU để truy cập nhanh chóng và có trải nghiệm tốt nhất.
+                </p>
+                <div class="flex justify-end gap-2">
+                    <button id="pwa-banner-dismiss"
+                        class="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition">
+                        Để sau
+                    </button>
+                    <button id="pwa-banner-install"
+                        class="px-4 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded-lg hover:bg-emerald-700 transition">
+                        Cài đặt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="cookie-consent"
         class="fixed bottom-20 right-0 left-0 sm:left-auto sm:bottom-24 sm:right-4 z-[100] p-4 max-w-md transition-all duration-500 transform translate-y-full opacity-0">
         <div class="glass-effect p-5 rounded-xl shadow-lg flex items-start gap-4">
@@ -553,6 +594,104 @@
                 }
             }, 5000);
         }
+    </script>
+
+    <!-- PWA Service Worker & Install Logic -->
+    <script>
+        let deferredPrompt;
+        const installBtn = document.getElementById('pwa-install-btn');
+        const installBanner = document.getElementById('pwa-install-banner');
+        const bannerDismiss = document.getElementById('pwa-banner-dismiss');
+        const bannerInstall = document.getElementById('pwa-banner-install');
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered successfully:', reg.scope))
+                    .catch(err => console.error('Service Worker registration failed:', err));
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            
+            // Show the install button in header
+            if (installBtn) {
+                installBtn.classList.remove('hidden');
+                installBtn.classList.add('flex');
+            }
+
+            // Show the custom install banner if not dismissed before
+            if (installBanner && localStorage.getItem('pwa_prompt_dismissed') !== 'true') {
+                installBanner.classList.remove('hidden');
+                setTimeout(() => {
+                    installBanner.classList.remove('translate-y-full', 'opacity-0');
+                }, 1500);
+            }
+        });
+
+        // Click event on header button
+        if (installBtn) {
+            installBtn.addEventListener('click', () => {
+                triggerInstall();
+            });
+        }
+
+        // Click event on banner buttons
+        if (bannerInstall) {
+            bannerInstall.addEventListener('click', () => {
+                triggerInstall();
+            });
+        }
+
+        if (bannerDismiss) {
+            bannerDismiss.addEventListener('click', () => {
+                dismissBanner();
+                localStorage.setItem('pwa_prompt_dismissed', 'true');
+            });
+        }
+
+        function triggerInstall() {
+            if (!deferredPrompt) return;
+            // Hide the custom banner
+            dismissBanner();
+            // Show the install prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                    if (installBtn) {
+                        installBtn.classList.add('hidden');
+                        installBtn.classList.remove('flex');
+                    }
+                } else {
+                    console.log('User dismissed the install prompt');
+                }
+                deferredPrompt = null;
+            });
+        }
+
+        function dismissBanner() {
+            if (installBanner) {
+                installBanner.classList.add('opacity-0', 'translate-y-full');
+                setTimeout(() => {
+                    installBanner.classList.add('hidden');
+                }, 500);
+            }
+        }
+
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('SDU Survey App installed successfully');
+            if (installBtn) {
+                installBtn.classList.add('hidden');
+                installBtn.classList.remove('flex');
+            }
+            dismissBanner();
+        });
     </script>
 </body>
 

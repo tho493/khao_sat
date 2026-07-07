@@ -14,6 +14,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Panel') - Hệ thống khảo sát</title>
+
+    <!-- PWA -->
+    <meta name="theme-color" content="#1e40af">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ asset('image/logo.png') }}">
     <style>
         /* View Transitions API styles for circular theme transition */
         ::view-transition-old(root),
@@ -181,6 +186,11 @@
                     <i class="bi bi-list fs-3"></i>
                 </button>
                 <div class="ms-auto d-flex align-items-center gap-2">
+                    {{-- Nút cài đặt PWA --}}
+                    <button id="pwa-install-btn" class="btn btn-success btn-sm d-none align-items-center gap-1.5 shadow-sm" title="Cài đặt ứng dụng">
+                        <i class="bi bi-download"></i> <span class="d-none d-sm-inline">Cài đặt</span>
+                    </button>
+
                     {{-- Nút chuyển đổi Theme --}}
                     <button id="adminThemeToggle" class="btn btn-link p-2" aria-label="Đổi chế độ sáng/tối"
                         style="font-size: 1.25rem; color: inherit; text-decoration: none;">
@@ -492,6 +502,58 @@
                 });
             }
         })();
+    </script>
+
+    <!-- PWA Service Worker & Install Logic -->
+    <script>
+        let deferredPrompt;
+        const installBtn = document.getElementById('pwa-install-btn');
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered successfully:', reg.scope))
+                    .catch(err => console.error('Service Worker registration failed:', err));
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            
+            // Show the install button in header
+            if (installBtn) {
+                installBtn.classList.remove('d-none');
+                installBtn.classList.add('d-flex');
+            }
+        });
+
+        if (installBtn) {
+            installBtn.addEventListener('click', () => {
+                if (!deferredPrompt) return;
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                        if (installBtn) {
+                            installBtn.classList.add('d-none');
+                            installBtn.classList.remove('d-flex');
+                        }
+                    }
+                    deferredPrompt = null;
+                });
+            });
+        }
+
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('SDU Survey App installed successfully');
+            if (installBtn) {
+                installBtn.classList.add('d-none');
+                installBtn.classList.remove('d-flex');
+            }
+        });
     </script>
 </body>
 
