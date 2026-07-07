@@ -503,6 +503,27 @@
         </div>
     </div>
 
+    <!-- PWA iOS Install Popup -->
+    <div id="pwa-ios-popup"
+        class="fixed bottom-20 left-4 right-4 sm:right-auto sm:left-4 z-[100] p-4 max-w-sm transition-all duration-500 transform translate-y-full opacity-0 hidden">
+        <div class="glass-effect p-5 rounded-xl shadow-lg border border-white/10 dark:bg-slate-900/80">
+            <div class="flex justify-between items-start mb-2">
+                <h6 class="font-bold text-slate-800 dark:text-white text-sm">Cài đặt trên iOS</h6>
+                <button id="pwa-ios-dismiss" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-600 dark:text-slate-300 mb-3 leading-relaxed">
+                Để cài đặt ứng dụng <strong>Khảo sát trực tuyến SDU</strong> lên iPhone/iPad:
+            </p>
+            <ol class="text-xs text-slate-700 dark:text-slate-200 space-y-2 list-decimal pl-4">
+                <li>Mở trang web này bằng trình duyệt <strong>Safari</strong>.</li>
+                <li>Bấm nút <strong>Chia sẻ</strong> <i class="bi bi-box-arrow-up text-blue-500"></i> ở dưới màn hình.</li>
+                <li>Cuộn xuống và chọn <strong>Thêm vào MH chính</strong> <i class="bi bi-plus-square"></i>.</li>
+            </ol>
+        </div>
+    </div>
+
     <div id="cookie-consent"
         class="fixed bottom-20 right-0 left-0 sm:left-auto sm:bottom-24 sm:right-4 z-[100] p-4 max-w-md transition-all duration-500 transform translate-y-full opacity-0">
         <div class="glass-effect p-5 rounded-xl shadow-lg flex items-start gap-4">
@@ -579,23 +600,8 @@
                 document.body.appendChild(toastContainer);
             }
 
-            // Tạo HTML toast dạng TailwindCSS đặc đục, bóng đổ đẹp mắt
             const toastId = 'toast-' + Date.now() + Math.floor(Math.random() * 10000);
             const toastHtml = `
-<<<<<<< Updated upstream
-            <div id="${toastId}" class="${alertClass} px-4 py-3 rounded-xl shadow-xl mb-3 flex items-center justify-between border border-white/10 min-w-[280px] max-w-[350px] transition-all duration-300 transform translate-y-0 opacity-100" role="alert">
-                <div class="flex items-center gap-3">
-                    <i class="bi ${iconClass} text-lg flex-shrink-0"></i>
-                    <div class="text-sm font-medium text-left leading-snug">
-                        <strong>${title}:</strong> ${message}
-                    </div>
-                </div>
-                <button type="button" class="btn-close-toast text-white/70 hover:text-white transition-colors ml-4 text-lg flex-shrink-0" aria-label="Close">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-        `;
-=======
                 <div id="${toastId}" class="${alertClass} px-4 py-3 rounded-xl shadow-xl mb-3 flex items-center justify-between border border-white/10 min-w-[280px] max-w-[350px] transition-all duration-300 transform translate-y-0 opacity-100" role="alert">
                     <div class="flex items-center gap-3">
                         <i class="bi ${iconClass} text-lg flex-shrink-0"></i>
@@ -608,7 +614,6 @@
                     </button>
                 </div>
             `;
->>>>>>> Stashed changes
 
             // Thêm toast vào vùng chứa
             toastContainer.insertAdjacentHTML('beforeend', toastHtml);
@@ -637,6 +642,57 @@
         const installBanner = document.getElementById('pwa-install-banner');
         const bannerDismiss = document.getElementById('pwa-banner-dismiss');
         const bannerInstall = document.getElementById('pwa-banner-install');
+        const iosPopup = document.getElementById('pwa-ios-popup');
+        const iosDismiss = document.getElementById('pwa-ios-dismiss');
+
+        // iOS detection and manual install guidance
+        const isIOS = (navigator.userAgent.includes("Mac") && "ontouchend" in document) || /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+        if (isIOS && !isStandalone) {
+            // Show the install button in header and point it to manual popup instructions
+            if (installBtn) {
+                installBtn.classList.remove('hidden');
+                installBtn.classList.add('flex');
+                installBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showIOSPopup();
+                });
+            }
+
+            // Show iOS popup instruction if not dismissed
+            if (iosPopup && localStorage.getItem('pwa_ios_dismissed') !== 'true') {
+                iosPopup.classList.remove('hidden');
+                setTimeout(() => {
+                    iosPopup.classList.remove('translate-y-full', 'opacity-0');
+                }, 2000);
+            }
+        }
+
+        if (iosDismiss) {
+            iosDismiss.addEventListener('click', () => {
+                dismissIOSPopup();
+                localStorage.setItem('pwa_ios_dismissed', 'true');
+            });
+        }
+
+        function showIOSPopup() {
+            if (iosPopup) {
+                iosPopup.classList.remove('hidden');
+                setTimeout(() => {
+                    iosPopup.classList.remove('translate-y-full', 'opacity-0');
+                }, 50);
+            }
+        }
+
+        function dismissIOSPopup() {
+            if (iosPopup) {
+                iosPopup.classList.add('opacity-0', 'translate-y-full');
+                setTimeout(() => {
+                    iosPopup.classList.add('hidden');
+                }, 500);
+            }
+        }
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
