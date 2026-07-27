@@ -10,7 +10,7 @@
         confettiCount: 25,
         enableConfetti: false,
         enableFireworks: true,
-        fireworkInterval: 100,
+        fireworkInterval: 3000,
     };
 
     document.addEventListener('DOMContentLoaded', function () {

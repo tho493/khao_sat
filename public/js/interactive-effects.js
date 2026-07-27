@@ -187,6 +187,15 @@
     // Respect reduced motion preference
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    // Handle browser back/forward cache (bfcache)
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) {
+            document.body.style.opacity = '1';
+            const overlay = document.getElementById('page-transition-overlay');
+            if (overlay) overlay.classList.remove('active');
+        }
+    });
+
     // Initialize
     function init() {
         if (!prefersReducedMotion) {
