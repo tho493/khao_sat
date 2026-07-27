@@ -126,8 +126,16 @@
                 </div>
 
                 <div class="splash-text-group">
-                    <h1 id="splash-title-line" class="splash-title-text">Hệ thống khảo sát</h1>
-                    <p id="splash-subtitle-line" class="splash-subtitle hidden sm:block">Thu thập ý kiến, nâng cao chất lượng</p>
+                    <div id="splash-title-line" class="splash-svg-wrap">
+                        <svg id="splash-title-svg" class="splash-title-svg" aria-label="Hệ thống khảo sát" role="img"
+                            viewBox="0 0 320 50" preserveAspectRatio="xMinYMin meet">
+                            <text id="splash-svg-text" x="0" y="0" dominant-baseline="hanging"
+                                font-family="'Be Vietnam Pro', system-ui, sans-serif" font-weight="800"
+                                font-style="normal">Hệ thống khảo sát</text>
+                        </svg>
+                        <h1 class="sr-only">Hệ thống khảo sát</h1>
+                    </div>
+
                 </div>
             </div>
 
@@ -177,11 +185,15 @@
                                 <img id="header-logo-img" src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ"
                                     class="h-full w-full object-contain">
                             </div>
-                            <span id="header-text-container" class="hidden min-[320px]:block">
-                                <span class="text-white font-bold text-base sm:text-lg">Hệ thống khảo sát</span>
-                                <span class="hidden sm:block text-white/80 text-xs font-medium">Thu thập ý kiến, nâng
-                                    cao chất lượng</span>
-                            </span>
+                            <div id="header-text-container"
+                                class="hidden min-[320px]:flex flex-col justify-center items-start">
+                                <span id="header-title-line"
+                                    class="text-white font-bold text-base sm:text-lg leading-tight inline-block">Hệ
+                                    thống khảo sát</span>
+                                <!-- <span id="header-subtitle-line"
+                                    class="hidden sm:block text-white/80 text-xs font-medium leading-tight inline-block">Thu
+                                    thập ý kiến, nâng cao chất lượng</span> -->
+                            </div>
                         </a>
                         <nav class="flex items-center gap-2 sm:gap-4">
                             <a href="https://saodo.edu.vn/vi/about/Gioi-thieu-ve-truong-Dai-hoc-Sao-Do.html"

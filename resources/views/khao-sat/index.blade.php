@@ -52,6 +52,21 @@
                     font-size: 56px;
                 }
             }
+
+            /* Typing Cursor Blink */
+            @keyframes typing-cursor-blink {
+                50% { opacity: 0; }
+            }
+
+            .typing-cursor {
+                display: inline-block;
+                width: 2px;
+                height: 18px;
+                background-color: currentColor;
+                margin-left: 4px;
+                vertical-align: middle;
+                animation: typing-cursor-blink 1s step-end infinite;
+            }
         </style>
 
         <!-- BACKGROUND Shapes -->
@@ -93,8 +108,9 @@
 
                     <!-- Subtext -->
                     <p
-                        class="text-base sm:text-[18px] max-w-xl text-center lg:text-left pb-1 sm:pb-2 font-medium px-2 lg:px-0 text-white/90">
-                        Lắng nghe để thay đổi. Trải nghiệm khảo sát thông minh.
+                        class="text-base sm:text-[18px] max-w-xl text-center lg:text-left pb-1 sm:pb-2 font-medium px-2 lg:px-0 text-white/90 min-h-[56px] sm:min-h-[28px] flex items-center justify-center lg:justify-start"
+                        id="hero-typing-text">
+                        &nbsp;
                     </p>
 
                     <!-- CTA Buttons -->
@@ -369,6 +385,38 @@
                     }
                 }
             });
+
+            // Hiệu ứng gõ chữ (Typing animation) cho phụ đề
+            const text = "Lắng nghe để thay đổi. Trải nghiệm khảo sát thông minh.";
+            const target = document.getElementById('hero-typing-text');
+            if (target) {
+                let i = 0;
+                const typingSpeed = 45; // Tốc độ gõ (ms mỗi ký tự)
+                
+                function startTyping() {
+                    if (target.getAttribute('data-typing-started')) return;
+                    target.setAttribute('data-typing-started', 'true');
+                    target.innerHTML = '';
+                    
+                    function type() {
+                        if (i < text.length) {
+                            target.innerHTML = text.substring(0, i + 1) + '<span class="typing-cursor"></span>';
+                            i++;
+                            setTimeout(type, typingSpeed);
+                        } else {
+                            target.innerHTML = text + '<span class="typing-cursor"></span>'; // Giữ cursor nhấp nháy ở cuối
+                        }
+                    }
+                    type();
+                }
+
+                // Kích hoạt typing ngay nếu không có splash screen, ngược lại đợi splashDismissed
+                if (document.documentElement.classList.contains('no-splash') || sessionStorage.getItem('splash_shown')) {
+                    startTyping();
+                } else {
+                    document.addEventListener('splashDismissed', startTyping);
+                }
+            }
         });
     </script>
 @endsection

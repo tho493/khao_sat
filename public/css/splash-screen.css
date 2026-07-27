@@ -1,4 +1,4 @@
-/* ===== Splash Screen — Horizontal Brand & Letter Drawing & Dual Slide Up ===== */
+/* ===== Splash Screen — Horizontal Brand & Letter Drawing & FLIP Dismiss ===== */
 
 /* --- Immediate Skip for SessionStorage --- */
 html.no-splash #splash-screen {
@@ -7,7 +7,16 @@ html.no-splash #splash-screen {
 
 html.no-splash #main-content {
     visibility: visible !important;
+    opacity: 1 !important;
+    transition: none !important;
 }
+
+#main-content {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 
 /* --- Container --- */
 #splash-screen {
@@ -23,8 +32,9 @@ html.no-splash #main-content {
         #0a0f1e 100%
     );
     z-index: 99999;
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
     will-change: opacity, filter;
     backface-visibility: hidden;
@@ -86,12 +96,13 @@ html.no-splash #main-content {
 .splash-content {
     position: relative;
     z-index: 1;
-    text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    width: 100%;
     max-width: 92%;
+    box-sizing: border-box;
 }
 
 .splash-brand-row {
@@ -99,7 +110,7 @@ html.no-splash #main-content {
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 20px;
+    gap: 24px;
     will-change: transform, opacity;
     transform-origin: center center;
 }
@@ -165,36 +176,81 @@ html.no-splash #main-content {
         0 8px 32px rgba(0, 0, 0, 0.4);
     opacity: 0;
     transform: scale(0.6);
-    animation: pop-in 0.45s 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation: pop-in 0.45s 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275)
+        forwards;
 }
 
-.splash-title-container {
-    margin: 0 0 4px 0;
-    padding: 0;
-}
-
-.splash-title-text {
-    font-family: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
-    font-size: clamp(1.5rem, 4vw, 2rem);
-    font-weight: 700;
-    line-height: 1.25;
-    letter-spacing: -0.015em;
-    color: #ffffff;
-    margin: 0;
-    white-space: nowrap;
+/* --- SVG Title (stroke drawing) --- */
+.splash-svg-wrap {
+    display: block;
     opacity: 0;
-    transform: translateY(12px);
-    animation: slide-up 0.5s 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    transition: opacity 0.35s ease;
+    transform: translateY(8px);
+    animation: slide-up 0.3s 0.1s ease-out forwards;
+    line-height: 0;
+}
+
+.splash-title-svg {
+    display: block;
+    overflow: visible;
+    /* Explicit sizing — JS sẽ set viewBox chính xác */
+    width: clamp(220px, 36vw, 380px);
+    height: auto;
+    /* Fallback min-height để tránh layout jump */
+    min-height: 36px;
+}
+
+#splash-svg-text {
+    font-family: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+    font-style: normal;
+    letter-spacing: -0.01em;
+    fill: transparent;
+    stroke: transparent;
+    stroke-width: 0.8px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    /* dasharray/dashoffset set by JS */
+}
+
+/* Phase 1: Stroke draws in (white) */
+#splash-svg-text.drawing {
+    stroke: rgba(255, 255, 255, 0.9);
+    animation: svg-stroke-draw 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Phase 2: Fill appears, stroke fades */
+#splash-svg-text.filled {
+    animation: none;
+    stroke-dashoffset: 0 !important;
+    fill: #ffffff;
+    stroke: transparent;
+    transition: fill 0.4s ease-out, stroke 0.3s ease-out;
+}
+
+/* Frozen state for FLIP dismiss */
+#splash-svg-text.frozen {
+    animation: none !important;
+    transition: none !important;
+    stroke-dashoffset: 0 !important;
+    fill: #ffffff !important;
+    stroke: transparent !important;
+}
+
+
+@keyframes svg-stroke-draw {
+    to {
+        stroke-dashoffset: 0;
+    }
 }
 
 /* --- Subtitle --- */
 .splash-subtitle {
-    font-size: clamp(1rem, 2.67vw, 1.33rem);
-    margin: 3px 0 0 0;
+    font-size: clamp(0.9rem, 2.4vw, 1.25rem);
+    margin: 6px 0 0 0;
     opacity: 0;
     transform: translateY(10px);
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.75);
     font-weight: 500;
     line-height: 1.25;
     white-space: nowrap;
@@ -254,35 +310,44 @@ html.no-splash #main-content {
     opacity: 0 !important;
 }
 
-/* ===== Responsive Mobile Adjustments ===== */
+.splash-logo-wrapper.morphing .splash-logo {
+    box-shadow: none !important;
+    padding: 4px !important;
+    transition:
+        padding 0.68s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.68s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* ===== Responsive Mobile ===== */
 @media (max-width: 540px) {
     .splash-brand-row {
         gap: 14px;
     }
-    .splash-logo-wrapper, .splash-logo {
-        width: 76px;
-        height: 76px;
+    .splash-logo-wrapper,
+    .splash-logo {
+        width: 72px;
+        height: 72px;
+    }
+    .splash-title-svg {
+        width: clamp(160px, 48vw, 240px);
+    }
+    .splash-subtitle {
+        font-size: clamp(0.75rem, 3vw, 0.95rem);
+    }
+}
+
+@media (max-width: 360px) {
+    .splash-brand-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .splash-text-group {
+        align-items: center;
+        text-align: center;
     }
 }
 
 /* ===== Keyframes ===== */
-@keyframes svg-fade-in {
-    to { opacity: 1; }
-}
-
-@keyframes svg-draw-stroke {
-    to {
-        stroke-dashoffset: 0;
-    }
-}
-
-@keyframes svg-fill-text {
-    to {
-        fill: #ffffff;
-        stroke-width: 0px;
-    }
-}
-
 @keyframes pop-in {
     to {
         opacity: 1;
@@ -305,27 +370,54 @@ html.no-splash #main-content {
 }
 
 @keyframes shimmer {
-    0% { background-position: 100% 0; }
-    100% { background-position: -100% 0; }
+    0% {
+        background-position: 100% 0;
+    }
+    100% {
+        background-position: -100% 0;
+    }
 }
 
 @keyframes progress-shimmer {
-    0% { background-position: 100% 0; }
-    100% { background-position: -100% 0; }
+    0% {
+        background-position: 100% 0;
+    }
+    100% {
+        background-position: -100% 0;
+    }
 }
 
 @keyframes float-a {
-    0%, 100% { transform: translateY(0px) scale(1); }
-    33% { transform: translateY(-28px) scale(1.04); }
-    66% { transform: translateY(14px) scale(0.97); }
+    0%,
+    100% {
+        transform: translateY(0px) scale(1);
+    }
+    33% {
+        transform: translateY(-28px) scale(1.04);
+    }
+    66% {
+        transform: translateY(14px) scale(0.97);
+    }
 }
 
 @keyframes float-b {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-22px) rotate(8deg); }
+    0%,
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-22px) rotate(8deg);
+    }
 }
 
 @keyframes pulse-ring {
-    0%, 100% { transform: scale(1); opacity: 0.5; }
-    50% { transform: scale(1.18); opacity: 0.15; }
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.18);
+        opacity: 0.15;
+    }
 }
