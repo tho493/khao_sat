@@ -233,8 +233,8 @@
             var dyText = dstTitleRect.top - srcGroupRect.top - (offsetY * sText);
 
             // Cấu hình transition đồng bộ trên GPU cho phần tử bay của splash
-            // transform: 680ms, opacity: mờ dần trong 250ms sau khi đã bay được 430ms (delay 0.43s)
-            var ease = 'transform 0.68s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease 0.43s';
+            // transform: 680ms, opacity: mờ dần trong 250ms sau khi đã bay được 680ms + đứng yên 500ms (tổng delay 1.18s)
+            var ease = 'transform 0.68s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease 1.18s';
             
             splashLogoWrapper.style.transformOrigin = 'top left';
             splashLogoWrapper.style.transition = ease;
@@ -243,8 +243,8 @@
             splashTextGroup.style.transition = ease;
 
             // Đồng bộ hoá sự xuất hiện (fade-in) của logo & text thật trên Header
-            headerLogoContainer.style.transition = 'opacity 0.25s ease 0.43s';
-            headerTextContainer.style.transition = 'opacity 0.25s ease 0.43s';
+            headerLogoContainer.style.transition = 'opacity 0.25s ease 1.18s';
+            headerTextContainer.style.transition = 'opacity 0.25s ease 1.18s';
             
             // Ép trình duyệt reflow để ghi nhận thuộc tính transition và trạng thái transform: none ban đầu
             void splashLogoWrapper.offsetWidth;
@@ -276,10 +276,10 @@
                 main.style.opacity = '1';
             }
 
-            // Đợi transform 680ms hoàn tất rồi đóng splash
+            // Đợi toàn bộ quá trình (bay 680ms + trễ 500ms + fade 250ms) hoàn tất rồi đóng splash
             setTimeout(function () {
                 finishDismiss();
-            }, 680);
+            }, 1430);
 
         } else if (splashLogoWrapper && headerLogoContainer) {
             // --- TRƯỜNG HỢP 2: Màn hình nhỏ (chỉ Logo) ---
@@ -303,11 +303,12 @@
             splashLogoWrapper.classList.add('morphing');
 
             // Cấu hình transition đồng bộ
-            var easeSmall = 'transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease 0.45s';
+            // transform: 650ms, opacity: mờ dần trong 200ms sau khi bay 650ms + trễ 500ms (tổng delay 1.15s)
+            var easeSmall = 'transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease 1.15s';
             splashLogoWrapper.style.transformOrigin = 'top left';
             splashLogoWrapper.style.transition = easeSmall;
 
-            headerLogoContainer.style.transition = 'opacity 0.2s ease 0.45s';
+            headerLogoContainer.style.transition = 'opacity 0.2s ease 1.15s';
 
             // Ép reflow
             void splashLogoWrapper.offsetWidth;
@@ -324,9 +325,10 @@
                 main.style.opacity = '1';
             }
 
+            // Đợi toàn bộ quá trình hoàn tất (bay 650ms + trễ 500ms + fade 200ms)
             setTimeout(function () {
                 finishDismiss();
-            }, 650);
+            }, 1350);
 
         } else {
             fallbackDismiss();
