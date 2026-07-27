@@ -168,6 +168,8 @@
             main.style.visibility = 'visible';
             main.style.opacity = '0';
         }
+        if (headerLogoContainer) headerLogoContainer.style.opacity = '0';
+        if (headerTextContainer) headerTextContainer.style.opacity = '0';
 
         // Freeze tất cả animation trước khi đo
         freezeAnimations();
@@ -196,11 +198,6 @@
 
         if (isHeaderTextVisible && splashLogoWrapper && splashTextGroup && headerLogoContainer) {
             // --- TRƯỜNG HỢP 1: Cả Logo + Chữ trên Header ---
-            headerLogoContainer.style.transition = 'opacity 0.15s ease';
-            headerTextContainer.style.transition = 'opacity 0.15s ease';
-            headerLogoContainer.style.opacity = '0';
-            headerTextContainer.style.opacity = '0';
-
             // FLIP Logo
             var srcLogo = splashLogoWrapper.getBoundingClientRect();
             var dstLogo = headerLogoContainer.getBoundingClientRect();
@@ -235,6 +232,36 @@
             var dxText = dstTitleRect.left - srcGroupRect.left - (offsetX * sText);
             var dyText = dstTitleRect.top - srcGroupRect.top - (offsetY * sText);
 
+            // Cấu hình transition đồng bộ trên GPU cho phần tử bay của splash
+            // transform: 680ms, opacity: mờ dần trong 250ms sau khi đã bay được 430ms (delay 0.43s)
+            var ease = 'transform 0.68s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease 0.43s';
+            
+            splashLogoWrapper.style.transformOrigin = 'top left';
+            splashLogoWrapper.style.transition = ease;
+            
+            splashTextGroup.style.transformOrigin = 'top left';
+            splashTextGroup.style.transition = ease;
+
+            // Đồng bộ hoá sự xuất hiện (fade-in) của logo & text thật trên Header
+            headerLogoContainer.style.transition = 'opacity 0.25s ease 0.43s';
+            headerTextContainer.style.transition = 'opacity 0.25s ease 0.43s';
+            
+            // Ép trình duyệt reflow để ghi nhận thuộc tính transition và trạng thái transform: none ban đầu
+            void splashLogoWrapper.offsetWidth;
+            void splashTextGroup.offsetWidth;
+            void headerLogoContainer.offsetWidth;
+
+            // Kích hoạt transform bay lên góc và mờ dần cùng lúc
+            splashLogoWrapper.style.transform = 'translate(' + dxLogo + 'px, ' + dyLogo + 'px) scale(' + sLogo + ')';
+            splashLogoWrapper.style.opacity = '0';
+
+            splashTextGroup.style.transform = 'translate(' + dxText + 'px, ' + dyText + 'px) scale(' + sText + ')';
+            splashTextGroup.style.opacity = '0';
+
+            // Kích hoạt hiển thị logo & text thật trên Header
+            headerLogoContainer.style.opacity = '1';
+            headerTextContainer.style.opacity = '1';
+
             // Ẩn phông nền phụ
             if (progressTrack) progressTrack.classList.add('dismissing-text');
             orbs.forEach(function (orb) { orb.classList.add('dismissing-text'); });
@@ -249,40 +276,13 @@
                 main.style.opacity = '1';
             }
 
-            // Bay Logo
-            var ease = 'transform 0.68s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.68s ease';
-            splashLogoWrapper.style.transformOrigin = 'top left';
-            splashLogoWrapper.style.transition = ease;
-            splashLogoWrapper.style.transform = 'translate(' + dxLogo + 'px, ' + dyLogo + 'px) scale(' + sLogo + ')';
-
-            // Bay Text Group
-            splashTextGroup.style.transformOrigin = 'top left';
-            splashTextGroup.style.transition = ease;
-            splashTextGroup.style.transform = 'translate(' + dxText + 'px, ' + dyText + 'px) scale(' + sText + ')';
-
-            // Cross-fade Header
-            setTimeout(function () {
-                headerLogoContainer.style.transition = 'opacity 0.25s ease';
-                headerTextContainer.style.transition = 'opacity 0.25s ease';
-                headerLogoContainer.style.opacity = '1';
-                headerTextContainer.style.opacity = '1';
-
-                // Đồng thời mờ dần phần tử bay của splash
-                splashLogoWrapper.style.transition = 'transform 0.68s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease';
-                splashTextGroup.style.transition = 'transform 0.68s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease';
-                splashLogoWrapper.style.opacity = '0';
-                splashTextGroup.style.opacity = '0';
-            }, 450);
-
+            // Đợi transform 680ms hoàn tất rồi đóng splash
             setTimeout(function () {
                 finishDismiss();
             }, 680);
 
         } else if (splashLogoWrapper && headerLogoContainer) {
             // --- TRƯỜNG HỢP 2: Màn hình nhỏ (chỉ Logo) ---
-            headerLogoContainer.style.transition = 'opacity 0.2s ease';
-            headerLogoContainer.style.opacity = '0';
-
             var srcRectLogo = splashLogoWrapper.getBoundingClientRect();
             var dstRectLogo = headerLogoContainer.getBoundingClientRect();
 
@@ -302,22 +302,27 @@
             splash.classList.add('transparent-bg');
             splashLogoWrapper.classList.add('morphing');
 
+            // Cấu hình transition đồng bộ
+            var easeSmall = 'transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease 0.45s';
+            splashLogoWrapper.style.transformOrigin = 'top left';
+            splashLogoWrapper.style.transition = easeSmall;
+
+            headerLogoContainer.style.transition = 'opacity 0.2s ease 0.45s';
+
+            // Ép reflow
+            void splashLogoWrapper.offsetWidth;
+            void headerLogoContainer.offsetWidth;
+
+            // Kích hoạt bay và fade-in/out
+            splashLogoWrapper.style.transform = 'translate(' + dxLogoSmall + 'px, ' + dyLogoSmall + 'px) scale(' + sLogoSmall + ')';
+            splashLogoWrapper.style.opacity = '0';
+
+            headerLogoContainer.style.opacity = '1';
+
             // Kích hoạt hiển thị main content mượt mà
             if (main) {
                 main.style.opacity = '1';
             }
-
-            splashLogoWrapper.style.transformOrigin = 'top left';
-            splashLogoWrapper.style.transition = 'transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.65s ease';
-            splashLogoWrapper.style.transform = 'translate(' + dxLogoSmall + 'px, ' + dyLogoSmall + 'px) scale(' + sLogoSmall + ')';
-
-            setTimeout(function () {
-                headerLogoContainer.style.opacity = '1';
-
-                // Đồng thời mờ dần phần tử bay của splash
-                splashLogoWrapper.style.transition = 'transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease';
-                splashLogoWrapper.style.opacity = '0';
-            }, 450);
 
             setTimeout(function () {
                 finishDismiss();
