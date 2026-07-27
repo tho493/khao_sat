@@ -219,7 +219,7 @@ html.no-splash #main-content {
 /* Phase 1: Stroke draws in (white) */
 #splash-svg-text.drawing {
     stroke: rgba(255, 255, 255, 0.9);
-    animation: svg-stroke-draw 4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: svg-stroke-draw 3.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 /* Phase 2: Fill appears, stroke fades */
