@@ -10,6 +10,9 @@
             } else {
                 document.documentElement.classList.add('dark');
             }
+            if (sessionStorage.getItem('splash_shown')) {
+                document.documentElement.classList.add('no-splash');
+            }
         })();
     </script>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -114,13 +117,19 @@
         <div class="splash-orb splash-orb-3"></div>
 
         <div class="splash-content">
-            <div class="splash-logo-wrapper">
-                <div class="splash-logo-bg"></div>
-                <img src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ" class="splash-logo">
-            </div>
+            <!-- Brand Row: Logo + Animated Drawing Title side-by-side -->
+            <div class="splash-brand-row">
+                <div class="splash-logo-wrapper">
+                    <div class="splash-logo-bg"></div>
+                    <img id="splash-logo-img" src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ"
+                        class="splash-logo">
+                </div>
 
-            <h1 class="splash-title">Hệ thống Khảo sát Trực tuyến</h1>
-            <p class="splash-subtitle">Trường Đại học Sao Đỏ</p>
+                <div class="splash-text-group">
+                    <h1 id="splash-title-line" class="splash-title-text">Hệ thống khảo sát</h1>
+                    <p id="splash-subtitle-line" class="splash-subtitle hidden sm:block">Thu thập ý kiến, nâng cao chất lượng</p>
+                </div>
+            </div>
 
             <noscript>
                 <div id="splash-noscript-warning">Trình duyệt của bạn đang không bật Javascript. Bạn cần bật nó để
@@ -163,12 +172,12 @@
                 <div class="mx-auto px-2 sm:px-4" style="max-width: 90%;">
                     <div class="flex items-center justify-between py-2">
                         <a href="{{ route('khao-sat.index') }}" class="flex items-center gap-2 sm:gap-3">
-                            <div
+                            <div id="header-logo-container"
                                 class="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white/95 grid place-items-center shadow-md p-1">
-                                <img src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ"
+                                <img id="header-logo-img" src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ"
                                     class="h-full w-full object-contain">
                             </div>
-                            <span class="hidden min-[320px]:block">
+                            <span id="header-text-container" class="hidden min-[320px]:block">
                                 <span class="text-white font-bold text-base sm:text-lg">Hệ thống khảo sát</span>
                                 <span class="hidden sm:block text-white/80 text-xs font-medium">Thu thập ý kiến, nâng
                                     cao chất lượng</span>
@@ -179,7 +188,7 @@
                                 target="_blank"
                                 class="text-white/90 hover:text-white text-xs sm:text-sm font-medium transition xs:inline">GIỚI
                                 THIỆU</a>
-                            
+
                             <!-- Nút cài đặt PWA -->
                             <a href="javascript:void(0)" id="pwa-install-btn"
                                 class="hidden h-[32px] sm:h-[38px] px-2 sm:px-3 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition backdrop-blur-sm shadow-md"
@@ -480,7 +489,8 @@
     <!-- PWA Install Banner -->
     <div id="pwa-install-banner"
         class="fixed bottom-20 left-4 right-4 sm:right-auto sm:left-4 z-[100] p-4 max-w-md transition-all duration-500 transform translate-y-full opacity-0 hidden">
-        <div class="glass-effect p-5 rounded-xl shadow-lg flex items-start gap-4 border border-white/10 dark:bg-slate-900/80">
+        <div
+            class="glass-effect p-5 rounded-xl shadow-lg flex items-start gap-4 border border-white/10 dark:bg-slate-900/80">
             <div class="text-2xl text-emerald-500 mt-1 flex-shrink-0">
                 <i class="bi bi-download"></i>
             </div>
@@ -518,7 +528,8 @@
             </p>
             <ol class="text-xs text-slate-700 dark:text-slate-200 space-y-2 list-decimal pl-4">
                 <li>Mở trang web này bằng trình duyệt <strong>Safari</strong>.</li>
-                <li>Bấm nút <strong>Chia sẻ</strong> <i class="bi bi-box-arrow-up text-blue-500"></i> ở dưới màn hình.</li>
+                <li>Bấm nút <strong>Chia sẻ</strong> <i class="bi bi-box-arrow-up text-blue-500"></i> ở dưới màn hình.
+                </li>
                 <li>Cuộn xuống và chọn <strong>Thêm vào MH chính</strong> <i class="bi bi-plus-square"></i>.</li>
             </ol>
         </div>
@@ -707,7 +718,7 @@
             e.preventDefault();
             // Stash the event so it can be triggered later.
             deferredPrompt = e;
-            
+
             // Show the install button in header
             if (installBtn) {
                 installBtn.classList.remove('hidden');
