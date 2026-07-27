@@ -10,7 +10,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Prompt:wght@400;700&display=swap');
 
-
         body {
             margin: 0;
             display: flex;

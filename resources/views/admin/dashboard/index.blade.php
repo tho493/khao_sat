@@ -2,15 +2,6 @@
 
 @section('title', 'Admin Dashboard')
 
-@push('styles')
-    <link rel="stylesheet" href="/css/splash-screen.css">
-@endpush
-
-@section('splash-screen')
-    @include('layouts.splash-screen')
-    <script src="/js/splash-screen.js"></script>
-@endsection
-
 @section('content')
     <div class="container-fluid">
         <div class="mb-4">
@@ -253,7 +244,6 @@
                 </div>
             </div>
         </div>
-@endsection
 
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -305,3 +295,4 @@
             });
         </script>
     @endpush
+@endsection

@@ -50,9 +50,6 @@
 </head>
 
 <body>
-    {{--
-    @yield('splash-screen')
-    --}}
 
     <div id="wrapper">
         <!-- Sidebar -->
@@ -187,7 +184,9 @@
                 </button>
                 <div class="ms-auto d-flex align-items-center gap-2">
                     {{-- Nút cài đặt PWA --}}
-                    <button id="pwa-install-btn" class="btn btn-success btn-sm d-none align-items-center gap-1.5 shadow-sm" title="Cài đặt ứng dụng">
+                    <button id="pwa-install-btn"
+                        class="btn btn-success btn-sm d-none align-items-center gap-1.5 shadow-sm"
+                        title="Cài đặt ứng dụng">
                         <i class="bi bi-download"></i> <span class="d-none d-sm-inline">Cài đặt</span>
                     </button>
 
@@ -282,6 +281,45 @@
                     backdrop.classList.remove('show');
                     document.body.style.overflow = '';
                 });
+            }
+
+            // Sidebar sliding highlight
+            const navList = sidebar.querySelector('ul.components');
+            if (navList) {
+                const highlight = document.createElement('div');
+                highlight.className = 'sidebar-highlight';
+                navList.appendChild(highlight);
+
+                const navLinks = navList.querySelectorAll('li a');
+                const activeLink = navList.querySelector('li a.active');
+
+                function moveHighlight(el) {
+                    const listRect = navList.getBoundingClientRect();
+                    const elRect = el.getBoundingClientRect();
+                    highlight.style.top = (elRect.top - listRect.top) + 'px';
+                    highlight.style.height = elRect.height + 'px';
+                    highlight.style.opacity = '1';
+                }
+
+                function resetHighlight() {
+                    if (activeLink) {
+                        moveHighlight(activeLink);
+                    } else {
+                        highlight.style.opacity = '0';
+                    }
+                }
+
+                navLinks.forEach(link => {
+                    link.addEventListener('mouseenter', () => moveHighlight(link));
+                });
+
+                navList.addEventListener('mouseleave', resetHighlight);
+
+                // Hiển thị highlight trên item active mặc định
+                if (activeLink) {
+                    // Đợi layout ổn định
+                    requestAnimationFrame(() => moveHighlight(activeLink));
+                }
             }
         });
     </script>
@@ -522,7 +560,7 @@
             e.preventDefault();
             // Stash the event so it can be triggered later.
             deferredPrompt = e;
-            
+
             // Show the install button in header
             if (installBtn) {
                 installBtn.classList.remove('d-none');

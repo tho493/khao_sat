@@ -197,9 +197,11 @@
                                     <strong>{{ $dot->ten_dot }}</strong>
                                 </td>
                                 <td>
-                                    <span class="badge bg-info" style="max-width: 180px; white-space: normal; word-break: break-word; display: inline-block;">
+                                    <a href="{{ route('admin.dot-khao-sat.show', $dot) }}" 
+                                       class="text-decoration-none fw-semibold"
+                                       title="Xem chi tiết đợt khảo sát">
                                         {{ $dot->mauKhaoSat->ten_mau ?? 'N/A' }}
-                                    </span>
+                                    </a>
                                 </td>
                                 <td>
                                     <small>

@@ -151,6 +151,28 @@ textarea {
     padding: 0 12px;
     margin: 0;
     list-style: none;
+    position: relative;
+}
+
+/* Sliding highlight element */
+.sidebar-highlight {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    height: 0;
+    background-color: #f2f2f2;
+    border-radius: 8px;
+    z-index: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+        top 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+        height 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+        opacity 0.2s ease;
+}
+
+html.dark .sidebar-highlight {
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 #sidebar ul.components li a {
@@ -163,22 +185,19 @@ textarea {
     align-items: center;
     justify-content: flex-start;
     text-decoration: none;
-    margin-bottom: 12px; /* Tăng khoảng cách giữa các item cho thoáng giống Instagram */
+    margin-bottom: 12px;
     white-space: nowrap;
     overflow: hidden;
     position: relative;
+    z-index: 1;
     transition:
-        background-color 0.25s cubic-bezier(0.25, 1, 0.5, 1),
         transform 0.25s cubic-bezier(0.25, 1, 0.5, 1),
         font-weight 0.2s ease;
 }
 
 #sidebar ul.components li a:hover {
-    background-color: #f2f2f2;
     color: #000000;
-    transform: scale(
-        1.02
-    ); /* Hiệu ứng co giãn nhẹ tạo cảm giác nền nổi ra mượt mà */
+    transform: scale(1.02);
 }
 
 #sidebar ul.components li a:active {
@@ -522,7 +541,6 @@ html.dark #sidebar ul.components li a {
 }
 
 html.dark #sidebar ul.components li a:hover {
-    background-color: rgba(255, 255, 255, 0.05);
     color: #ffffff !important;
 }
 
@@ -569,28 +587,33 @@ html.dark .table {
     color: #e2e8f0 !important;
 }
 
-html.dark .table th, html.dark .table td {
+html.dark .table th,
+html.dark .table td {
     border-color: rgba(255, 255, 255, 0.05) !important;
 }
 
-html.dark .table-striped>tbody>tr:nth-of-type(odd)>* {
+html.dark .table-striped > tbody > tr:nth-of-type(odd) > * {
     color: #e2e8f0 !important;
     background-color: rgba(255, 255, 255, 0.02) !important;
 }
 
-html.dark .table-hover>tbody>tr:hover>* {
+html.dark .table-hover > tbody > tr:hover > * {
     background-color: rgba(255, 255, 255, 0.04) !important;
     color: #ffffff !important;
 }
 
 /* Inputs and Buttons in Admin */
-html.dark input.form-control, html.dark select.form-select, html.dark textarea.form-control {
+html.dark input.form-control,
+html.dark select.form-select,
+html.dark textarea.form-control {
     background-color: rgba(15, 23, 42, 0.6) !important;
     border-color: rgba(255, 255, 255, 0.1) !important;
     color: #f8fafc !important;
 }
 
-html.dark input.form-control:focus, html.dark select.form-select:focus, html.dark textarea.form-control:focus {
+html.dark input.form-control:focus,
+html.dark select.form-select:focus,
+html.dark textarea.form-control:focus {
     border-color: #3b82f6 !important;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25) !important;
 }
@@ -602,7 +625,8 @@ html.dark .modal-content {
     border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-html.dark .modal-header, html.dark .modal-footer {
+html.dark .modal-header,
+html.dark .modal-footer {
     border-color: rgba(255, 255, 255, 0.05) !important;
 }
 
@@ -625,11 +649,20 @@ html.dark .dropdown-menu.glass-effect .dropdown-divider {
 }
 
 /* General text and headings */
-html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6 {
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6 {
     color: #f1f5f9 !important;
 }
 
-html.dark p, html.dark span, html.dark label, html.dark small, html.dark li {
+html.dark p,
+html.dark span,
+html.dark label,
+html.dark small,
+html.dark li {
     color: #cbd5e1;
 }
 
@@ -641,7 +674,8 @@ html.dark a:hover {
     color: #93c5fd;
 }
 
-html.dark .text-dark, html.dark .text-muted {
+html.dark .text-dark,
+html.dark .text-muted {
     color: #94a3b8 !important;
 }
 
@@ -755,11 +789,13 @@ html.dark .card-text {
 }
 
 /* Form labels and inputs placeholder */
-html.dark .form-label, html.dark .col-form-label {
+html.dark .form-label,
+html.dark .col-form-label {
     color: #cbd5e1 !important;
 }
 
-html.dark input::placeholder, html.dark textarea::placeholder {
+html.dark input::placeholder,
+html.dark textarea::placeholder {
     color: #64748b !important;
 }
 
@@ -772,7 +808,8 @@ html.dark .form-text {
 }
 
 /* Select2 and custom selects */
-html.dark select, html.dark select option {
+html.dark select,
+html.dark select option {
     background-color: #1e293b !important;
     color: #e2e8f0 !important;
 }
@@ -782,7 +819,9 @@ html.dark hr {
     border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-html.dark .border, html.dark .border-bottom, html.dark .border-top {
+html.dark .border,
+html.dark .border-bottom,
+html.dark .border-top {
     border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
@@ -801,7 +840,9 @@ html.dark .profile-dropdown .nav-link:hover {
 }
 
 /* Chart containers - make chart labels readable */
-html.dark .chart-area, html.dark .chart-pie, html.dark .chart-container {
+html.dark .chart-area,
+html.dark .chart-pie,
+html.dark .chart-container {
     color: #cbd5e1 !important;
 }
 
@@ -821,11 +862,13 @@ html.dark .nav-tabs {
 }
 
 /* Generic background overrides */
-html.dark .bg-white, html.dark .bg-light {
+html.dark .bg-white,
+html.dark .bg-light {
     background-color: #1e293b !important;
 }
 
-html.dark .shadow-sm, html.dark .shadow {
+html.dark .shadow-sm,
+html.dark .shadow {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
 }
 
@@ -885,7 +928,8 @@ html.dark .text-secondary {
     color: #94a3b8 !important;
 }
 
-html.dark .text-black, html.dark .text-black-50 {
+html.dark .text-black,
+html.dark .text-black-50 {
     color: #cbd5e1 !important;
 }
 
@@ -962,7 +1006,8 @@ html.dark .dataTables_wrapper .dataTables_length select {
     color: #e2e8f0 !important;
 }
 
-html.dark .dataTables_info, html.dark .dataTables_length label {
+html.dark .dataTables_info,
+html.dark .dataTables_length label {
     color: #94a3b8 !important;
 }
 
@@ -973,11 +1018,22 @@ html.dark .glass-effect {
 }
 
 /* Strong/Bold text */
-html.dark strong, html.dark b {
+html.dark strong,
+html.dark b {
     color: #f1f5f9;
 }
 
 /* Sidebar divider */
 html.dark #sidebar hr {
     border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Buttons text color in dark mode */
+html.dark .btn-secondary,
+html.dark .btn-info,
+html.dark .btn-success,
+html.dark .btn-primary,
+html.dark .btn-danger,
+html.dark .btn-warning {
+    color: #fff !important;
 }

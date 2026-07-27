@@ -23,7 +23,14 @@
 
 ---
 
-## Giao diện hệ thống
+<div style="background: #fff3cd; color: #856404; border-left: 6px solid #ffe083; padding: 14px 18px; border-radius: 6px; margin: 18px 0; display: flex; align-items: center; font-weight: 500;">
+    <span style="font-size: 1.3em; margin-right: 0.6em;">&#9888;&#65039;</span>
+    <span>
+        <strong>Important:</strong> Dự án này hiện đã hoàn tất. Sẽ không có bất kỳ bản cập nhật nào trong tương lai.
+    </span>
+</div>
+
+## �️ Giao diện hệ thống
 
 <details>
 <summary><b>1. Màn hình chính</b></summary>
@@ -61,7 +68,7 @@
 
 ---
 
-## _Tính năng nổi bật_
+## �🚀 Tính năng nổi bật
 
 - **Quản lý Khảo sát Động:** Dễ dàng tạo, sửa, xóa, và sao chép các mẫu khảo sát.
 - **Quản lý Đợt khảo sát:** Lên lịch và quản lý các đợt khảo sát theo thời gian.

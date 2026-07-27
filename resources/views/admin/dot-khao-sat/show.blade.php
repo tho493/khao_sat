@@ -106,22 +106,23 @@
                                     <i class="bi bi-play"></i> Kích hoạt đợt khảo sát
                                 </button>
                             </form>
-                        @elseif($dotKhaoSat->trangthai == 'active')
+                        @endif
+
                             <a href="{{ route('khao-sat.show', $dotKhaoSat) }}" 
                                class="btn btn-primary" target="_blank">
                                 <i class="bi bi-link-45deg"></i> Xem form khảo sát
                             </a>
                             
+                        @if ($dotKhaoSat->trangthai == 'active')
                             <button class="btn btn-info" onclick="copyLink()">
                                 <i class="bi bi-clipboard"></i> Copy link khảo sát
                             </button>
-                            
+                        @endif
                             @if($thongKe['tong_phieu'] > 0)
                             <a href="{{ route('admin.bao-cao.dot-khao-sat', $dotKhaoSat) }}" 
-                               class="btn btn-info">
+                                class="btn btn-info">
                                 <i class="bi bi-graph-up"></i> Xem báo cáo
                             </a>
-                        @endif
 
                             <form action="{{ route('admin.dot-khao-sat.close', $dotKhaoSat) }}" method="POST">
                                 @csrf

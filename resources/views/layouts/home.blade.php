@@ -10,9 +10,9 @@
             } else {
                 document.documentElement.classList.add('dark');
             }
-            
+
             window.isHomepage = {{ Request::routeIs('khao-sat.index') ? 'true' : 'false' }};
-            
+
             if (sessionStorage.getItem('splash_shown') && !window.isHomepage) {
                 document.documentElement.classList.add('no-splash');
             }
@@ -155,26 +155,6 @@
     <div class="bg-gradient-to-br from-blue-500 to-slate-50 text-slate-800">
         {{-- Main Content Wrapper --}}
         <div id="main-content" style="visibility: hidden;">
-
-            {{-- Chatbot Container --}}
-            <!-- <button class="chatbot-toggler">
-                <i class="bi bi-chat-dots-fill"></i>
-            </button> -->
-
-            <!-- <div class="chatbot-container">
-                <div class="chatbot-header">
-                    <h2>Trợ lý ảo</h2>
-                </div>
-                <ul class="chatbox list-unstyled">
-                    <li class="chat incoming">
-                        <p>Xin chào 👋<br>Tôi có thể giúp gì cho bạn về các vấn đề thường gặp trong khảo sát?</p>
-                    </li>
-                </ul>
-                <div class="chat-input">
-                    <textarea placeholder="Nhập câu hỏi của bạn..." required></textarea>
-                    <button id="send-btn"><i class="bi bi-send-fill"></i></button>
-                </div>
-            </div> -->
 
             <header class="sticky-header">
                 <div class="mx-auto px-2 sm:px-4" style="max-width: 90%;">
@@ -496,6 +476,7 @@
             // Hiệu ứng cho các card khảo sát (xuất hiện lần lượt)
             sr.reveal('.reveal-survey-card', { interval: 100 });
         });
+
     </script>
 
     <!-- PWA Install Banner -->

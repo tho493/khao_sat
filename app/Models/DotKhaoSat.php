@@ -19,7 +19,7 @@ class DotKhaoSat extends Model
         parent::boot();
         static::creating(function ($model) {
             if (empty($model->{$model->getKeyName()})) {
-                $model->{$model->getKeyName()} = (string) Str::uuid();
+                $model->{$model->getKeyName()} = substr(Str::uuid()->toString(), 0, 6);
             }
         });
     }
