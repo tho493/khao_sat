@@ -10,7 +10,10 @@
             } else {
                 document.documentElement.classList.add('dark');
             }
-            if (sessionStorage.getItem('splash_shown')) {
+            
+            window.isHomepage = {{ Request::routeIs('khao-sat.index') ? 'true' : 'false' }};
+            
+            if (sessionStorage.getItem('splash_shown') && !window.isHomepage) {
                 document.documentElement.classList.add('no-splash');
             }
         })();
@@ -145,10 +148,7 @@
             </noscript>
         </div>
 
-        <!-- Progress bar -->
-        <div id="splash-progress-track">
-            <div id="splash-progress"></div>
-        </div>
+
     </div>
     <script src="{{ asset('js/splash-screen.js') }}?v={{ @filemtime(public_path('js/splash-screen.js')) }}"></script>
 
