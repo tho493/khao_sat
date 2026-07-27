@@ -11,8 +11,8 @@
 (function () {
     'use strict';
 
-    // 1. Skip nếu đã xem splash trong session này
-    if (sessionStorage.getItem('splash_shown')) {
+    // 1. Skip nếu đã xem splash trong session này và không phải trang chủ
+    if (sessionStorage.getItem('splash_shown') && !window.isHomepage) {
         document.documentElement.classList.add('no-splash');
         var splash = document.getElementById('splash-screen');
         var main = document.getElementById('main-content');
@@ -22,23 +22,14 @@
     }
 
     var splash = document.getElementById('splash-screen');
-    var progressBar = document.getElementById('splash-progress');
 
     if (!splash) return;
 
     var startTime = Date.now();
-    var pageLoaded = false;
     var svgAnimationDone = false;
     var dismissed = false;
 
-    // 2. Progress bar fake-fill (0% → 88%)
-    var pct = 0;
-    var fillInterval = setInterval(function () {
-        pct += (88 - pct) * 0.055;
-        if (progressBar) progressBar.style.width = pct.toFixed(1) + '%';
-    }, 40);
-
-    // 3. SVG Stroke Drawing — khởi tạo sau khi font load xong
+    // 2. SVG Stroke Drawing — khởi tạo sau khi font load xong
     function initSvgDraw() {
         var svgText = document.getElementById('splash-svg-text');
         var svg = document.getElementById('splash-title-svg');
@@ -79,17 +70,17 @@
                 // Bắt đầu vẽ nét
                 svgText.classList.add('drawing');
 
-                // Sau 1.8s (stroke xong) → fill trắng
+                // 1. Tô màu trắng dần dần khi chữ vẽ xong (sau 1.2s)
                 setTimeout(function () {
                     svgText.classList.remove('drawing');
                     svgText.classList.add('filled');
-                }, 1800);
+                }, 1200);
 
-                // Sau 2.2s (tô màu xong hoàn toàn) → cho phép dismiss
+                // 2. Chờ thêm 0.8s (gồm 0.35s transition màu + 0.45s đứng yên) rồi mới dismiss bay đi
                 setTimeout(function () {
                     svgAnimationDone = true;
                     checkDismiss();
-                }, 2200);
+                }, 2000);
             } catch (e) {
                 // Fallback: hiện chữ trắng ngay
                 svgText.style.fill = '#ffffff';
@@ -140,7 +131,7 @@
 
     // 5. Dismiss — FLIP animation
     function checkDismiss() {
-        if (pageLoaded && svgAnimationDone) {
+        if (svgAnimationDone) {
             triggerDismiss();
         }
     }
@@ -148,9 +139,6 @@
     function triggerDismiss() {
         if (dismissed) return;
         dismissed = true;
-
-        clearInterval(fillInterval);
-        if (progressBar) progressBar.style.width = '100%';
 
         var main = document.getElementById('main-content');
         var splashLogoWrapper = document.querySelector('#splash-screen .splash-logo-wrapper');
@@ -230,22 +218,22 @@
             var offsetX = srcTitleRect.left - srcGroupRect.left;
             var offsetY = srcTitleRect.top - srcGroupRect.top;
             var dxText = dstTitleRect.left - srcGroupRect.left - (offsetX * sText);
-            var dyText = dstTitleRect.top - srcGroupRect.top - (offsetY * sText);
+            var dyText = dstTitleRect.top - srcGroupRect.top - (offsetY * sText) - (6 * sText);
 
             // Cấu hình transition đồng bộ trên GPU cho phần tử bay của splash
             // transform: 680ms, opacity: mờ dần trong 250ms sau khi đã bay được 680ms + đứng yên 500ms (tổng delay 1.18s)
             var ease = 'transform 0.68s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease 1.18s';
-            
+
             splashLogoWrapper.style.transformOrigin = 'top left';
             splashLogoWrapper.style.transition = ease;
-            
+
             splashTextGroup.style.transformOrigin = 'top left';
             splashTextGroup.style.transition = ease;
 
             // Đồng bộ hoá sự xuất hiện (fade-in) của logo & text thật trên Header
             headerLogoContainer.style.transition = 'opacity 0.25s ease 1.18s';
             headerTextContainer.style.transition = 'opacity 0.25s ease 1.18s';
-            
+
             // Ép trình duyệt reflow để ghi nhận thuộc tính transition và trạng thái transform: none ban đầu
             void splashLogoWrapper.offsetWidth;
             void splashTextGroup.offsetWidth;
@@ -365,15 +353,8 @@
         }, 400);
     }
 
-    // 6. Tự động dismiss khi trang nạp xong
-    window.addEventListener('load', function () {
-        pageLoaded = true;
-        checkDismiss();
-    });
-
-    // 7. Fail-safe: tối đa 5 giây
+    // 6. Fail-safe: tối đa 5 giây
     setTimeout(function () {
-        pageLoaded = true;
         svgAnimationDone = true;
         checkDismiss();
     }, 5000);

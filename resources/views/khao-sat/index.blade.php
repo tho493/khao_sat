@@ -108,7 +108,7 @@
 
                     <!-- Subtext -->
                     <p
-                        class="text-base sm:text-[18px] max-w-xl text-center lg:text-left pb-1 sm:pb-2 font-medium px-2 lg:px-0 text-white/90 min-h-[56px] sm:min-h-[28px] flex items-center justify-center lg:justify-start"
+                        class="text-base sm:text-[18px] max-w-xl text-center lg:text-left pb-1 sm:pb-2 font-medium px-2 lg:px-0 text-white/90 min-h-[56px] sm:min-h-[28px] block"
                         id="hero-typing-text">
                         &nbsp;
                     </p>

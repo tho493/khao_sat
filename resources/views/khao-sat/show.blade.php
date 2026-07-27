@@ -197,6 +197,62 @@
         background-color: #1e293b !important;
         color: #cbd5e1 !important;
     }
+
+    /* Slide transition for survey pages */
+    #survey-pages-container {
+        position: relative;
+        transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    #survey-pages-container.animating {
+        overflow: hidden;
+    }
+    
+    #survey-pages-container.animating .survey-page {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 10;
+        pointer-events: none;
+        will-change: transform, opacity;
+    }
+    
+    #survey-pages-container.animating .survey-page.active-slide {
+        z-index: 20;
+        pointer-events: auto;
+    }
+
+    /* Keyframes for sliding transition (Optimized for low-end mobile - no filter:blur) */
+    .slide-out-left {
+        animation: slideOutLeft-effect 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    .slide-in-right {
+        animation: slideInRight-effect 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    .slide-out-right {
+        animation: slideOutRight-effect 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    .slide-in-left {
+        animation: slideInLeft-effect 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes slideOutLeft-effect {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(-100%); opacity: 0; }
+    }
+    @keyframes slideInRight-effect {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOutRight-effect {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+    @keyframes slideInLeft-effect {
+        from { transform: translateX(-100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
 </style>
 @endpush
 
@@ -1679,16 +1735,50 @@ function updateNavigationButtons() {
         const newPageKey = pageKeys[newIndex];
         const $currentPage = $(`#survey-page-${currentPageKey}`);
         const $newPage = $(`#survey-page-${newPageKey}`);
+        const $container = $('#survey-pages-container');
         
-        $currentPage.fadeOut(250, function() {
-            $newPage.fadeIn(250);
+        const isNext = newIndex > currentPageIndex;
+        
+        // 1. Khóa chiều cao container tạm thời để tránh giật giao diện
+        const currentHeight = $container.height();
+        $container.css('height', currentHeight + 'px');
+        $container.addClass('animating');
+
+        // 2. Clear các class animation cũ
+        $currentPage.removeClass('slide-out-left slide-out-right slide-in-left slide-in-right active-slide');
+        $newPage.removeClass('slide-out-left slide-out-right slide-in-left slide-in-right active-slide');
+
+        // 3. Hiện trang mới để tính toán chiều cao thật
+        $newPage.show();
+        const newHeight = $newPage.outerHeight();
+
+        // 4. Bắt đầu co giãn chiều cao container và chạy animation trượt
+        $container.css('height', newHeight + 'px');
+
+        if (isNext) {
+            $currentPage.addClass('slide-out-left');
+            $newPage.addClass('slide-in-right active-slide');
+        } else {
+            $currentPage.addClass('slide-out-right');
+            $newPage.addClass('slide-in-left active-slide');
+        }
+
+        // 5. Kết thúc animation sau 400ms
+        setTimeout(function() {
+            $currentPage.hide().removeClass('slide-out-left slide-out-right active-slide');
+            $newPage.removeClass('slide-in-left slide-in-right');
+            
+            $container.removeClass('animating');
+            $container.css('height', ''); // Trả lại chiều cao tự động
+
             currentPageIndex = newIndex;
             updateNavigationButtons();
-            const container = document.getElementById('survey-pages-container');
-            if (container) {
-                container.scrollIntoView({ behavior: 'smooth' });
+
+            const containerEl = document.getElementById('survey-pages-container');
+            if (containerEl) {
+                containerEl.scrollIntoView({ behavior: 'smooth' });
             }
-        });
+        }, 400);
     }
 
     // Gắn sự kiện

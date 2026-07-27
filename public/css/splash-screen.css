@@ -17,7 +17,6 @@ html.no-splash #main-content {
     transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-
 /* --- Container --- */
 #splash-screen {
     position: fixed;
@@ -200,7 +199,11 @@ html.no-splash #main-content {
 }
 
 #splash-svg-text {
-    font-family: 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+    font-family:
+        "Be Vietnam Pro",
+        system-ui,
+        -apple-system,
+        sans-serif;
     font-size: 30px;
     font-weight: 800;
     font-style: normal;
@@ -216,16 +219,18 @@ html.no-splash #main-content {
 /* Phase 1: Stroke draws in (white) */
 #splash-svg-text.drawing {
     stroke: rgba(255, 255, 255, 0.9);
-    animation: svg-stroke-draw 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation: svg-stroke-draw 4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 /* Phase 2: Fill appears, stroke fades */
 #splash-svg-text.filled {
     animation: none;
     stroke-dashoffset: 0 !important;
-    fill: #ffffff;
-    stroke: transparent;
-    transition: fill 0.4s ease-out, stroke 0.3s ease-out;
+    fill: #ffffff !important;
+    stroke: transparent !important;
+    transition:
+        fill 0.35s ease-out,
+        stroke 0.3s ease-out !important;
 }
 
 /* Frozen state for FLIP dismiss */
@@ -236,7 +241,6 @@ html.no-splash #main-content {
     fill: #ffffff !important;
     stroke: transparent !important;
 }
-
 
 @keyframes svg-stroke-draw {
     to {
@@ -344,6 +348,34 @@ html.no-splash #main-content {
     .splash-text-group {
         align-items: center;
         text-align: center;
+    }
+}
+
+/* ===== Performance Optimization for Low-end Mobile ===== */
+@media (max-width: 768px) {
+    .splash-orb-1,
+    .splash-orb-2,
+    .splash-orb-3 {
+        animation: none !important; /* Tắt chuyển động nền liên tục trên di động */
+        transform: none !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .splash-orb,
+    .splash-logo-wrapper::before,
+    .splash-logo-wrapper::after,
+    #splash-progress,
+    .splash-logo,
+    .splash-svg-wrap,
+    .splash-subtitle {
+        animation: none !important;
+        transition: none !important;
+    }
+    #splash-svg-text.drawing {
+        stroke-dashoffset: 0 !important;
+        stroke: transparent !important;
+        fill: #ffffff !important;
     }
 }
 
