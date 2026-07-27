@@ -253,7 +253,8 @@
             // Ẩn phông nền phụ
             if (progressTrack) progressTrack.classList.add('dismissing-text');
             orbs.forEach(function (orb) { orb.classList.add('dismissing-text'); });
-            splash.classList.add('transparent-bg');
+            var bgOverlay = document.querySelector('#splash-screen .splash-bg-overlay');
+            if (bgOverlay) bgOverlay.classList.add('dismissing-bg');
             splashLogoWrapper.classList.add('morphing');
 
             // Ẩn subtitle
@@ -287,7 +288,8 @@
             if (splashSubtitle) splashSubtitle.classList.add('dismissing-text');
             if (progressTrack) progressTrack.classList.add('dismissing-text');
             orbs.forEach(function (orb) { orb.classList.add('dismissing-text'); });
-            splash.classList.add('transparent-bg');
+            var bgOverlay = document.querySelector('#splash-screen .splash-bg-overlay');
+            if (bgOverlay) bgOverlay.classList.add('dismissing-bg');
             splashLogoWrapper.classList.add('morphing');
 
             // Cấu hình transition đồng bộ

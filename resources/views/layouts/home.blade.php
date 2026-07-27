@@ -112,8 +112,8 @@
 </head>
 
 <body>
-    <!-- Splash (overlay) -->
     <div id="splash-screen">
+        <div class="splash-bg-overlay"></div>
         <!-- Ambient orbs -->
         <div class="splash-orb splash-orb-1"></div>
         <div class="splash-orb splash-orb-2"></div>
