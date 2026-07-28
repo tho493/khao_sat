@@ -56,7 +56,6 @@
 
     <link rel="stylesheet"
         href="{{ asset('css/splash-screen.css') }}?v={{ @filemtime(public_path('css/splash-screen.css')) }}">
-    <!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool'></script> -->
 
     {{-- CSS for Glassmorphism & Improvements --}}
     <link rel="stylesheet" href="{{ asset('css/home.css') }}?v={{ @filemtime(public_path('css/home.css')) }}">
@@ -109,6 +108,7 @@
         }
     </style>
     @stack('styles')
+    @stack('header-scripts')
 </head>
 
 <body>

@@ -23,8 +23,83 @@
     @endif
 @endif
 
+@push('header-scripts')
+    <script src='https://cdn.jsdelivr.net/npm/disable-devtool'></script>
+    <script src="{{ asset('js/devtool-guard.js') }}?v={{ @filemtime(public_path('js/devtool-guard.js')) }}"></script>
+@endpush
+
 @push('styles')
 <style>
+    /* ── DevTool Warning ─────────────────────────────────── */
+    .devtool-warning {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(10, 15, 30, 0.97);
+        font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .devtool-warning__card {
+        text-align: center;
+        color: #fff;
+        padding: 44px 36px;
+        max-width: 460px;
+        width: 90%;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.13);
+        border-radius: 24px;
+        box-shadow: 0 32px 80px rgba(0, 0, 0, 0.55);
+    }
+
+    .devtool-warning__icon {
+        font-size: 56px;
+        margin-bottom: 20px;
+        line-height: 1;
+    }
+
+    .devtool-warning__title {
+        margin: 0 0 14px;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    .devtool-warning__desc {
+        margin: 0 0 28px;
+        font-size: 14px;
+        line-height: 1.75;
+        color: rgba(255, 255, 255, 0.68);
+    }
+
+    .devtool-warning__btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 11px 28px;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        background: #3b82f6;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        font-family: inherit;
+        transition: background 0.2s ease, transform 0.15s ease;
+    }
+
+    .devtool-warning__btn:hover {
+        background: #2563eb;
+        transform: translateY(-1px);
+    }
+
+    .devtool-warning__btn:active {
+        transform: translateY(0);
+    }
     .progress-section {
         position: sticky;
         top: 100px;

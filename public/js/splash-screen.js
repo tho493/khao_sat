@@ -220,7 +220,7 @@
             var dxText = dstTitleRect.left - srcGroupRect.left - (offsetX * sText);
             var dyText = dstTitleRect.top - srcGroupRect.top - (offsetY * sText) - (6 * sText);
 
-            var ease = 'transform 0.4s cubic-bezier(0.4, 0, 1, 1), opacity 0.2s ease 0.45s';
+            var ease = 'transform 0.22s cubic-bezier(0.4, 0, 1, 1), opacity 0.15s ease 0.22s';
 
             splashLogoWrapper.style.transformOrigin = 'top left';
             splashLogoWrapper.style.transition = ease;
@@ -229,8 +229,8 @@
             splashTextGroup.style.transition = ease;
 
             // Đồng bộ hoá sự xuất hiện (fade-in) của logo & text thật trên Header
-            headerLogoContainer.style.transition = 'opacity 0.25s ease 0.45s';
-            headerTextContainer.style.transition = 'opacity 0.25s ease 0.45s';
+            headerLogoContainer.style.transition = 'opacity 0.15s ease 0.22s';
+            headerTextContainer.style.transition = 'opacity 0.15s ease 0.22s';
 
             // Ép trình duyệt reflow để ghi nhận thuộc tính transition và trạng thái transform: none ban đầu
             void splashLogoWrapper.offsetWidth;
@@ -263,10 +263,10 @@
                 main.style.opacity = '1';
             }
 
-            // Đợi toàn bộ quá trình (bay 680ms + trễ 500ms + fade 250ms) hoàn tất rồi đóng splash
+            // Đợi toàn bộ quá trình hoàn tất rồi đóng splash
             setTimeout(function () {
                 finishDismiss();
-            }, 750);
+            }, 420);
 
         } else if (splashLogoWrapper && headerLogoContainer) {
             // --- TRƯỜNG HỢP 2: Màn hình nhỏ (chỉ Logo) ---
@@ -291,11 +291,11 @@
             splashLogoWrapper.classList.add('morphing');
 
             // ease-in cho exit animation nhỏ
-            var easeSmall = 'transform 0.5s cubic-bezier(0.4, 0, 1, 1), opacity 0.2s ease 0.45s';
+            var easeSmall = 'transform 0.25s cubic-bezier(0.4, 0, 1, 1), opacity 0.15s ease 0.22s';
             splashLogoWrapper.style.transformOrigin = 'top left';
             splashLogoWrapper.style.transition = easeSmall;
 
-            headerLogoContainer.style.transition = 'opacity 0.2s ease 0.45s';
+            headerLogoContainer.style.transition = 'opacity 0.15s ease 0.22s';
 
             // Ép reflow
             void splashLogoWrapper.offsetWidth;
@@ -312,10 +312,10 @@
                 main.style.opacity = '1';
             }
 
-            // Đợi toàn bộ quá trình hoàn tất (bay 650ms + trễ 500ms + fade 200ms)
+            // Đợi toàn bộ quá trình hoàn tất
             setTimeout(function () {
                 finishDismiss();
-            }, 700);
+            }, 380);
 
         } else {
             fallbackDismiss();

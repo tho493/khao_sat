@@ -47,7 +47,7 @@ html.no-splash #main-content {
     );
     z-index: 0;
     opacity: 1;
-    transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .splash-bg-overlay.dismissing-bg {
@@ -313,7 +313,7 @@ html.no-splash #main-content {
 .splash-orb.dismissing-text,
 #splash-progress-track.dismissing-text {
     opacity: 0 !important;
-    transition: opacity 0.35s ease-out !important;
+    transition: opacity 0.15s ease-out !important;
 }
 
 .splash-logo-wrapper.morphing::before,
