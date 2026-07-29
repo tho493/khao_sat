@@ -56,9 +56,8 @@
             'Ơ... sao lại bật DevTools? 🤨',
             'Định debug em à? 😭',
             'Không có flag đâu 😅',
-            'OK... em biết anh/chị giỏi rồi 🥲',
+            'OK... bạn thì giỏi rồi 🥲',
             'Đẳng cấp quá, không dám bug 🤣',
-            'Nhìn em với anh/chị ai đẹp hơn',
             'Không tin à? Vào console gõ 10000 lần true',
         ];
 
@@ -85,7 +84,7 @@
         }
 
         nextMessage();
-        setInterval(nextMessage, 3500);
+        setInterval(nextMessage, 4500);
     }
 
     function showDevtoolWarning() {

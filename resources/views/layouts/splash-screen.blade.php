@@ -8,7 +8,7 @@
         <div class="splash-brand-row">
             <div class="splash-logo-wrapper">
                 <div class="splash-logo-bg"></div>
-                <img src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ" class="splash-logo">
+                <img src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ" class="splash-logo" loading="eager" fetchpriority="high">
             </div>
 
             <div class="splash-text-group">

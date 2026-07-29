@@ -64,11 +64,9 @@
                 svgText.style.strokeDasharray = textLen;
                 svgText.style.strokeDashoffset = textLen;
 
-                // Force reflow để trình duyệt nhận giá trị inline trước khi thêm class
-                void svgText.offsetWidth;
-
-                // Bắt đầu vẽ nét
-                svgText.classList.add('drawing');
+                requestAnimationFrame(function () {
+                    svgText.classList.add('drawing');
+                });
 
                 // 1. Tô màu trắng dần dần khi chữ vẽ xong (sau 1.2s)
                 setTimeout(function () {
@@ -220,7 +218,7 @@
             var dxText = dstTitleRect.left - srcGroupRect.left - (offsetX * sText);
             var dyText = dstTitleRect.top - srcGroupRect.top - (offsetY * sText) - (6 * sText);
 
-            var ease = 'transform 0.22s cubic-bezier(0.4, 0, 1, 1), opacity 0.15s ease 0.22s';
+            var ease = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease 0.2s';
 
             splashLogoWrapper.style.transformOrigin = 'top left';
             splashLogoWrapper.style.transition = ease;
@@ -229,24 +227,20 @@
             splashTextGroup.style.transition = ease;
 
             // Đồng bộ hoá sự xuất hiện (fade-in) của logo & text thật trên Header
-            headerLogoContainer.style.transition = 'opacity 0.15s ease 0.22s';
-            headerTextContainer.style.transition = 'opacity 0.15s ease 0.22s';
+            headerLogoContainer.style.transition = 'opacity 0.18s ease 0.2s';
+            headerTextContainer.style.transition = 'opacity 0.18s ease 0.2s';
 
-            // Ép trình duyệt reflow để ghi nhận thuộc tính transition và trạng thái transform: none ban đầu
-            void splashLogoWrapper.offsetWidth;
-            void splashTextGroup.offsetWidth;
-            void headerLogoContainer.offsetWidth;
+            // Kích hoạt transform bay lên góc và mượt mà trong rAF tiếp theo (loại bỏ forced reflows)
+            requestAnimationFrame(function () {
+                splashLogoWrapper.style.transform = 'translate3d(' + dxLogo + 'px, ' + dyLogo + 'px, 0) scale(' + sLogo + ')';
+                splashLogoWrapper.style.opacity = '0';
 
-            // Kích hoạt transform bay lên góc và mờ dần cùng lúc
-            splashLogoWrapper.style.transform = 'translate(' + dxLogo + 'px, ' + dyLogo + 'px) scale(' + sLogo + ')';
-            splashLogoWrapper.style.opacity = '0';
+                splashTextGroup.style.transform = 'translate3d(' + dxText + 'px, ' + dyText + 'px, 0) scale(' + sText + ')';
+                splashTextGroup.style.opacity = '0';
 
-            splashTextGroup.style.transform = 'translate(' + dxText + 'px, ' + dyText + 'px) scale(' + sText + ')';
-            splashTextGroup.style.opacity = '0';
-
-            // Kích hoạt hiển thị logo & text thật trên Header
-            headerLogoContainer.style.opacity = '1';
-            headerTextContainer.style.opacity = '1';
+                headerLogoContainer.style.opacity = '1';
+                headerTextContainer.style.opacity = '1';
+            });
 
             // Ẩn phông nền phụ
             if (progressTrack) progressTrack.classList.add('dismissing-text');
@@ -291,21 +285,17 @@
             splashLogoWrapper.classList.add('morphing');
 
             // ease-in cho exit animation nhỏ
-            var easeSmall = 'transform 0.25s cubic-bezier(0.4, 0, 1, 1), opacity 0.15s ease 0.22s';
+            var easeSmall = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease 0.2s';
             splashLogoWrapper.style.transformOrigin = 'top left';
             splashLogoWrapper.style.transition = easeSmall;
 
-            headerLogoContainer.style.transition = 'opacity 0.15s ease 0.22s';
+            headerLogoContainer.style.transition = 'opacity 0.18s ease 0.2s';
 
-            // Ép reflow
-            void splashLogoWrapper.offsetWidth;
-            void headerLogoContainer.offsetWidth;
-
-            // Kích hoạt bay và fade-in/out
-            splashLogoWrapper.style.transform = 'translate(' + dxLogoSmall + 'px, ' + dyLogoSmall + 'px) scale(' + sLogoSmall + ')';
-            splashLogoWrapper.style.opacity = '0';
-
-            headerLogoContainer.style.opacity = '1';
+            requestAnimationFrame(function () {
+                splashLogoWrapper.style.transform = 'translate3d(' + dxLogoSmall + 'px, ' + dyLogoSmall + 'px, 0) scale(' + sLogoSmall + ')';
+                splashLogoWrapper.style.opacity = '0';
+                headerLogoContainer.style.opacity = '1';
+            });
 
             // Kích hoạt hiển thị main content mượt mà
             if (main) {

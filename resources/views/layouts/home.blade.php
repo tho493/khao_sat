@@ -18,6 +18,28 @@
             }
         })();
     </script>
+    <style>
+        /* Critical Splash Prevention & Pre-render Styles */
+        html.no-splash #splash-screen { display: none !important; }
+        html.no-splash #main-content { visibility: visible !important; opacity: 1 !important; transition: none !important; }
+        #splash-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: #0a0f1e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            contain: strict;
+        }
+        .splash-logo {
+            opacity: 0;
+            transform: scale(0.8) translateZ(0);
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+        }
+    </style>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -125,7 +147,7 @@
                 <div class="splash-logo-wrapper">
                     <div class="splash-logo-bg"></div>
                     <img id="splash-logo-img" src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ"
-                        class="splash-logo">
+                        class="splash-logo" loading="eager" fetchpriority="high">
                 </div>
 
                 <div class="splash-text-group">

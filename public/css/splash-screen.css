@@ -185,9 +185,10 @@ html.no-splash #main-content {
         0 0 30px rgba(59, 130, 246, 0.35),
         0 8px 32px rgba(0, 0, 0, 0.4);
     opacity: 0;
-    transform: scale(0.6);
-    animation: pop-in 0.45s 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275)
-        forwards;
+    transform: scale(0.8) translateZ(0);
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    animation: pop-in 0.4s 0.05s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* --- SVG Title (stroke drawing) --- */
@@ -392,9 +393,13 @@ html.no-splash #main-content {
 
 /* ===== Keyframes ===== */
 @keyframes pop-in {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateZ(0);
+    }
     to {
         opacity: 1;
-        transform: scale(1);
+        transform: scale(1) translateZ(0);
     }
 }
 
