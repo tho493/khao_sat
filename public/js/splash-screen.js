@@ -94,18 +94,18 @@
                 // --- 3. TRIGGER SYNCHRONIZED STROKE DRAWING ---
                 requestAnimationFrame(function () {
                     requestAnimationFrame(function () {
-                        // Bật transition và kích hoạt nét vẽ từ 0% đến 100% cùng lúc cho Logo & Chữ
+                        // Cân bằng tốc độ: Logo vẽ 1.2s, Chữ vẽ 1.45s để cả hai hoàn thành nét vẽ cùng một lúc
                         for (var j = 0; j < logoPaths.length; j++) {
-                            logoPaths[j].style.transition = 'stroke-dashoffset 1.25s cubic-bezier(0.35, 0, 0.15, 1), fill 0.55s ease-out 0.05s, stroke 0.4s ease-out';
+                            logoPaths[j].style.transition = 'stroke-dashoffset 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), fill 0.5s ease-out 0.05s, stroke 0.4s ease-out';
                             logoPaths[j].style.strokeDashoffset = '0';
                         }
-                        svgText.style.transition = 'stroke-dashoffset 1.25s cubic-bezier(0.35, 0, 0.15, 1), fill 0.5s ease-out, stroke 0.4s ease-out';
+                        svgText.style.transition = 'stroke-dashoffset 1.45s cubic-bezier(0.25, 0.46, 0.45, 0.94), fill 0.5s ease-out, stroke 0.4s ease-out';
                         svgText.classList.add('drawing');
                         svgText.style.strokeDashoffset = '0';
                     });
                 });
 
-                // --- 4. PHASE 2: TÔ MÀU HIỆN RÕ (AT 1.25s) ---
+                // --- 4. PHASE 2: TÔ MÀU HIỆN RÕ (AT 1.4s) ---
                 setTimeout(function () {
                     // Tô màu các mảng path của Logo & bật background nền trắng cho logo
                     if (logoContainer) logoContainer.classList.add('filled');
@@ -118,13 +118,13 @@
                     // Tô màu trắng sáng cho chữ
                     svgText.classList.remove('drawing');
                     svgText.classList.add('filled');
-                }, 1250);
+                }, 1400);
 
-                // --- 5. BẮT ĐẦU DISMISS BAY LÊN (AT 2.0s) ---
+                // --- 5. BẮT ĐẦU DISMISS BAY LÊN (AT 2.1s) ---
                 setTimeout(function () {
                     svgAnimationDone = true;
                     checkDismiss();
-                }, 2000);
+                }, 2100);
 
             } catch (e) {
                 // Fallback nếu browser không hỗ trợ SVG length measurement
