@@ -313,11 +313,9 @@
                 headerTextContainer.style.opacity = '1';
             });
 
-            // Ẩn phông nền phụ
+            // Ẩn phông nền splash-screen mượt mà
+            if (splash) splash.classList.add('dismissing-splash');
             if (progressTrack) progressTrack.classList.add('dismissing-text');
-            orbs.forEach(function (orb) { orb.classList.add('dismissing-text'); });
-            var bgOverlay = document.querySelector('#splash-screen .splash-bg-overlay');
-            if (bgOverlay) bgOverlay.classList.add('dismissing-bg');
             splashLogoWrapper.classList.add('morphing');
 
             // Ẩn subtitle
@@ -347,12 +345,10 @@
             var dxLogoSmall = dstRectLogo.left - srcRectLogo.left;
             var dyLogoSmall = dstRectLogo.top - srcRectLogo.top;
 
+            if (splash) splash.classList.add('dismissing-splash');
             if (splashTextGroup) splashTextGroup.classList.add('dismissing-text');
             if (splashSubtitle) splashSubtitle.classList.add('dismissing-text');
             if (progressTrack) progressTrack.classList.add('dismissing-text');
-            orbs.forEach(function (orb) { orb.classList.add('dismissing-text'); });
-            var bgOverlay = document.querySelector('#splash-screen .splash-bg-overlay');
-            if (bgOverlay) bgOverlay.classList.add('dismissing-bg');
             splashLogoWrapper.classList.add('morphing');
 
             // ease-in cho exit animation nhỏ

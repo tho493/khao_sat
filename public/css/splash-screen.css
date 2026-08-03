@@ -23,83 +23,20 @@ html.no-splash #main-content {
     inset: 0;
     width: 100%;
     height: 100%;
-    background: transparent;
+    background: #0a0f1e;
     z-index: 99999;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    will-change: opacity, filter;
+    will-change: opacity;
     backface-visibility: hidden;
-}
-
-.splash-bg-overlay {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        135deg,
-        #0a0f1e 0%,
-        #0f2044 40%,
-        #1a1040 70%,
-        #0a0f1e 100%
-    );
-    z-index: 0;
-    opacity: 1;
-    transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.splash-bg-overlay.dismissing-bg {
-    opacity: 0 !important;
-}
-
-/* --- Ambient Orbs --- */
-.splash-orb {
-    position: absolute;
-    border-radius: 50%;
-    pointer-events: none;
     transition: opacity 0.35s ease-out;
-    z-index: 1;
 }
 
-.splash-orb-1 {
-    width: 420px;
-    height: 420px;
-    background: radial-gradient(
-        circle,
-        rgba(59, 130, 246, 0.18) 0%,
-        transparent 70%
-    );
-    top: -120px;
-    left: -100px;
-    animation: float-a 7s ease-in-out infinite;
-}
-
-.splash-orb-2 {
-    width: 320px;
-    height: 320px;
-    background: radial-gradient(
-        circle,
-        rgba(139, 92, 246, 0.14) 0%,
-        transparent 70%
-    );
-    bottom: -80px;
-    right: -80px;
-    animation: float-b 9s ease-in-out infinite;
-}
-
-.splash-orb-3 {
-    width: 220px;
-    height: 220px;
-    background: radial-gradient(
-        circle,
-        rgba(16, 185, 129, 0.1) 0%,
-        transparent 70%
-    );
-    top: 45%;
-    left: 55%;
-    animation: float-a 11s ease-in-out infinite reverse;
+#splash-screen.dismissing-splash {
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 /* --- Content Wrapper & Horizontal Brand Row --- */
@@ -154,9 +91,7 @@ html.no-splash #main-content {
     height: 96px;
     border-radius: 50%;
     overflow: hidden;
-    background: rgba(15, 23, 42, 0.65);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(15, 23, 42, 0.9);
     border: 1.5px solid rgba(255, 255, 255, 0.25);
     padding: 8px;
     box-shadow:

@@ -40,6 +40,13 @@
             justify-content: center;
             overflow: hidden;
             contain: strict;
+            transition: opacity 0.35s ease-out;
+            will-change: opacity;
+        }
+
+        #splash-screen.dismissing-splash {
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
 
         .splash-logo,
@@ -145,12 +152,6 @@
 
 <body>
     <div id="splash-screen">
-        <div class="splash-bg-overlay"></div>
-        <!-- Ambient orbs -->
-        <div class="splash-orb splash-orb-1"></div>
-        <div class="splash-orb splash-orb-2"></div>
-        <div class="splash-orb splash-orb-3"></div>
-
         <div class="splash-content">
             <!-- Brand Row: Logo + Animated Drawing Title side-by-side -->
             <div class="splash-brand-row">

@@ -1,9 +1,4 @@
 <div id="splash-screen">
-    <!-- Ambient orbs -->
-    <div class="splash-orb splash-orb-1"></div>
-    <div class="splash-orb splash-orb-2"></div>
-    <div class="splash-orb splash-orb-3"></div>
-
     <div class="splash-content">
         <div class="splash-brand-row">
             <div class="splash-logo-wrapper">
