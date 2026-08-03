@@ -20,8 +20,16 @@
     </script>
     <style>
         /* Critical Splash Prevention & Pre-render Styles */
-        html.no-splash #splash-screen { display: none !important; }
-        html.no-splash #main-content { visibility: visible !important; opacity: 1 !important; transition: none !important; }
+        html.no-splash #splash-screen {
+            display: none !important;
+        }
+
+        html.no-splash #main-content {
+            visibility: visible !important;
+            opacity: 1 !important;
+            transition: none !important;
+        }
+
         #splash-screen {
             position: fixed;
             inset: 0;
@@ -33,6 +41,7 @@
             overflow: hidden;
             contain: strict;
         }
+
         .splash-logo {
             opacity: 0;
             transform: scale(0.8) translateZ(0);
@@ -146,8 +155,8 @@
             <div class="splash-brand-row">
                 <div class="splash-logo-wrapper">
                     <div class="splash-logo-bg"></div>
-                    <img id="splash-logo-img" src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ"
-                        class="splash-logo" loading="eager" fetchpriority="high">
+                    <img id="splash-logo-img" src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ" class="splash-logo"
+                        loading="eager" fetchpriority="high">
                 </div>
 
                 <div class="splash-text-group">
@@ -242,7 +251,7 @@
                     <div class="lg:col-span-1">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="h-14 w-14 rounded-full bg-white/95 grid place-items-center shadow-md p-1">
-                                <img src="/image/logo.png" alt="Logo Trường Đại học Sao Đỏ"
+                                <img src="/image/logo.svg" alt="Logo Trường Đại học Sao Đỏ"
                                     class="h-full w-full object-contain">
                             </div>
                             <div>
@@ -467,13 +476,27 @@
 
         const header = document.querySelector('header.sticky-header');
         if (header) {
+            let lastScrollY = window.scrollY;
+
             window.addEventListener('scroll', () => {
-                if (window.scrollY > 50) {
+                const currentScrollY = window.scrollY;
+
+                // 1. Mờ nền khi cuộn xuống quá 50px
+                if (currentScrollY > 50) {
                     header.classList.add('scrolled');
                 } else {
                     header.classList.remove('scrolled');
                 }
-            });
+
+                // 2. Trượt ẩn khi cuộn tiếp xuống xa, trượt hiển thị lại khi cuộn ngược lên
+                if (currentScrollY > 120 && currentScrollY > lastScrollY) {
+                    header.classList.add('header-hidden');
+                } else if (currentScrollY < lastScrollY) {
+                    header.classList.remove('header-hidden');
+                }
+
+                lastScrollY = Math.max(0, currentScrollY);
+            }, { passive: true });
         }
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -560,7 +583,11 @@
                 <p class="text-sm text-slate-700 mb-3">
                     Trang web này sử dụng cookie để đảm bảo bạn có trải nghiệm tốt nhất. Vui lòng chấp nhận để tiếp tục.
                 </p>
-                <div class="flex justify-end">
+                <div class="flex justify-end gap-2">
+                    <button id="cookie-decline"
+                        class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-sm font-semibold rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">
+                        Từ chối
+                    </button>
                     <button id="cookie-accept"
                         class="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors">
                         Chấp nhận
@@ -586,18 +613,34 @@
         document.addEventListener('DOMContentLoaded', function () {
             const cookieConsent = document.getElementById('cookie-consent');
             const acceptButton = document.getElementById('cookie-accept');
+            const declineButton = document.getElementById('cookie-decline');
 
-            if (!localStorage.getItem('cookie_accepted')) {
+            const hasResponded = localStorage.getItem('cookie_consent') || localStorage.getItem('cookie_accepted');
+
+            if (!hasResponded) {
                 setTimeout(() => {
                     cookieConsent.classList.remove('translate-y-full', 'opacity-0');
                 }, 1000);
             }
 
-            acceptButton.addEventListener('click', function () {
-                localStorage.setItem('cookie_accepted', 'true');
+            function hideCookieBanner() {
                 cookieConsent.classList.add('opacity-0', 'translate-y-full');
                 setTimeout(() => cookieConsent.style.display = 'none', 500);
-            });
+            }
+
+            if (acceptButton) {
+                acceptButton.addEventListener('click', function () {
+                    localStorage.setItem('cookie_consent', 'accepted');
+                    hideCookieBanner();
+                });
+            }
+
+            if (declineButton) {
+                declineButton.addEventListener('click', function () {
+                    localStorage.setItem('cookie_consent', 'declined');
+                    hideCookieBanner();
+                });
+            }
         });
 
         // Hàm hiển thị thông báo
@@ -684,14 +727,6 @@
                     e.preventDefault();
                     showIOSPopup();
                 });
-            }
-
-            // Show iOS popup instruction if not dismissed
-            if (iosPopup && localStorage.getItem('pwa_ios_dismissed') !== 'true') {
-                iosPopup.classList.remove('hidden');
-                setTimeout(() => {
-                    iosPopup.classList.remove('translate-y-full', 'opacity-0');
-                }, 2000);
             }
         }
 

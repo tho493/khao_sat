@@ -53,7 +53,12 @@ header.sticky-header {
     padding: 0.5rem 0;
     background-color: #1f66b3;
     transition: background-color 0.4s ease-in-out, box-shadow 0.4s ease-in-out,
-        backdrop-filter 0.4s ease-in-out;
+        backdrop-filter 0.4s ease-in-out, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+}
+
+header.sticky-header.header-hidden {
+    transform: translateY(-100%);
 }
 
 @media (max-width: 640px) {

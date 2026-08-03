@@ -8,9 +8,16 @@
 
         if (_overlayEl && document.documentElement.contains(_overlayEl)) return;
 
-        if (document.body) {
-            document.body.innerHTML = '';
+        if (!document.body) {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', _enforceOverlay);
+            } else {
+                setTimeout(_enforceOverlay, 50);
+            }
+            return;
         }
+
+        document.body.innerHTML = '';
 
         var el = document.createElement('div');
         el.id = _OVERLAY_ID;
@@ -65,6 +72,7 @@
         var msgIndex = 0;
 
         function typeText(text) {
+            if (!typing) return;
             typing.innerHTML = '';
             var chars = Array.from(text);
             var i = 0;
@@ -95,33 +103,9 @@
     }
 
     window.__devtoolWarningFn = showDevtoolWarning;
-
-    // Kỹ thuật 1: chênh lệch kích thước cửa sổ
-    function _sizeDetect() {
-        return (window.outerWidth - window.innerWidth > 160)
-            || (window.outerHeight - window.innerHeight > 160);
-    }
-
-    // Kỹ thuật 2: Image.id getter
-    var _img = new Image();
-    var _imgHit = false;
-    Object.defineProperty(_img, 'id', { get: function () { _imgHit = true; } });
-
-    function _consoleDetect() {
-        _imgHit = false;
-        // eslint-disable-next-line no-console
-        console.log('%c', _img);
-        return _imgHit;
-    }
-
-    setInterval(function () {
-        if (!_triggered && (_sizeDetect() || _consoleDetect())) {
-            showDevtoolWarning();
-        }
-    }, 600);
 })();
 
-// disable-devtool CDN — lớp detect thứ 3 (nếu load được)
+// disable-devtool CDN — chạy liên tục không dùng stopIntervalTime
 if (typeof DisableDevtool !== 'undefined') {
     DisableDevtool({
         ondevtoolopen: function (type, next) {
@@ -129,6 +113,13 @@ if (typeof DisableDevtool !== 'undefined') {
         },
         clearLog: true,
         disableMenu: true,
-        stopIntervalTime: 400,
+        interval: 200,
     });
 }
+
+setInterval(function () {
+    if (typeof window.__devtoolWarningFn !== 'function') {
+        document.body.innerHTML = '';
+        location.reload();
+    }
+}, 1000);
