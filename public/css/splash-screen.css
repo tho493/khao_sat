@@ -142,53 +142,56 @@ html.no-splash #main-content {
     will-change: transform, opacity;
 }
 
-/* Pulse ring */
 .splash-logo-wrapper::before,
-.splash-logo-wrapper::after {
-    content: "";
-    position: absolute;
-    inset: -8px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(96, 165, 250, 0.5);
-    animation: pulse-ring 2.4s ease-in-out infinite;
-    transition: opacity 0.25s ease-out;
-}
-
-.splash-logo-wrapper::after {
-    inset: -16px;
-    border-color: rgba(96, 165, 250, 0.2);
-    animation-delay: -1.2s;
-}
-
-/* Glow backdrop */
+.splash-logo-wrapper::after,
 .splash-logo-bg {
-    position: absolute;
-    inset: -4px;
-    border-radius: 50%;
-    background: radial-gradient(
-        circle,
-        rgba(59, 130, 246, 0.25) 0%,
-        transparent 70%
-    );
-    transition: opacity 0.25s ease-out;
+    display: none !important;
 }
 
-.splash-logo {
+.splash-logo-svg-wrap {
     position: relative;
     width: 96px;
     height: 96px;
-    object-fit: contain;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.97);
+    overflow: hidden;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
     padding: 8px;
     box-shadow:
         0 0 30px rgba(59, 130, 246, 0.35),
         0 8px 32px rgba(0, 0, 0, 0.4);
     opacity: 0;
     transform: scale(0.8) translateZ(0);
-    will-change: transform, opacity;
+    will-change: transform, opacity, background-color, border-color, box-shadow;
     backface-visibility: hidden;
     animation: pop-in 0.4s 0.05s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition:
+        background-color 0.5s ease-out,
+        border-color 0.5s ease-out,
+        box-shadow 0.5s ease-out;
+}
+
+.splash-logo-svg-wrap.filled {
+    background: rgba(255, 255, 255, 0.97);
+    border-color: rgba(255, 255, 255, 0.95);
+    box-shadow:
+        0 0 35px rgba(59, 130, 246, 0.45),
+        0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.splash-logo-svg-wrap svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+}
+
+.splash-logo-svg-wrap svg path {
+    fill: transparent;
+    stroke: transparent;
+    will-change: stroke-dashoffset, fill, stroke;
 }
 
 /* --- SVG Title (stroke drawing) --- */
@@ -231,7 +234,6 @@ html.no-splash #main-content {
 /* Phase 1: Stroke draws in (white) */
 #splash-svg-text.drawing {
     stroke: rgba(255, 255, 255, 0.9);
-    animation: svg-stroke-draw 3.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 /* Phase 2: Fill appears, stroke fades */
@@ -326,7 +328,7 @@ html.no-splash #main-content {
     opacity: 0 !important;
 }
 
-.splash-logo-wrapper.morphing .splash-logo {
+.splash-logo-wrapper.morphing .splash-logo-svg-wrap {
     box-shadow: none !important;
     padding: 4px !important;
     transition:
@@ -340,7 +342,7 @@ html.no-splash #main-content {
         gap: 14px;
     }
     .splash-logo-wrapper,
-    .splash-logo {
+    .splash-logo-svg-wrap {
         width: 72px;
         height: 72px;
     }

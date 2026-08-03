@@ -7,8 +7,9 @@
     <div class="splash-content">
         <div class="splash-brand-row">
             <div class="splash-logo-wrapper">
-                <div class="splash-logo-bg"></div>
-                <img src="/image/logo.svg" alt="Logo Trường Đại học Sao Đỏ" class="splash-logo" loading="eager" fetchpriority="high">
+                <div id="splash-logo-container" class="splash-logo-svg-wrap">
+                    {!! file_get_contents(public_path('image/logo.svg')) !!}
+                </div>
             </div>
 
             <div class="splash-text-group">

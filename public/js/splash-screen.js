@@ -29,25 +29,45 @@
     var svgAnimationDone = false;
     var dismissed = false;
 
-    // 2. SVG Stroke Drawing — khởi tạo sau khi font load xong
+    // 2. SVG Stroke Drawing — Đồng bộ vẽ đơn sắc Logo & Chữ + Tô màu hiện rõ
     function initSvgDraw() {
         var svgText = document.getElementById('splash-svg-text');
-        var svg = document.getElementById('splash-title-svg');
-        if (!svgText || !svg) return;
+        var svgTitle = document.getElementById('splash-title-svg');
+        var logoSvg = document.getElementById('splash-logo-svg');
+        var logoContainer = document.getElementById('splash-logo-container');
+
+        if (!svgText || !svgTitle) return;
 
         function setup() {
             try {
-                // Đảm bảo SVG element đang visible trong DOM
+                // --- 1. SETUP LOGO PATHS (Nét vẽ đơn sắc ban đầu) ---
+                var logoPaths = logoSvg ? logoSvg.querySelectorAll('path') : [];
+                for (var i = 0; i < logoPaths.length; i++) {
+                    var path = logoPaths[i];
+                    var origFill = path.getAttribute('fill') || '#ffffff';
+                    path.setAttribute('data-fill', origFill);
+
+                    // Đặt transition = none trước để không bị nhấp nháy nét vẽ cũ
+                    path.style.transition = 'none';
+                    path.style.fill = 'transparent';
+                    path.style.stroke = 'rgba(255, 255, 255, 0.9)';
+                    path.style.strokeWidth = '1.4px';
+                    path.style.strokeLinecap = 'round';
+                    path.style.strokeLinejoin = 'round';
+
+                    var pLen = path.getTotalLength ? path.getTotalLength() : 200;
+                    if (!pLen || isNaN(pLen)) pLen = 200;
+                    path.style.strokeDasharray = pLen;
+                    path.style.strokeDashoffset = pLen;
+                }
+
+                // --- 2. SETUP TEXT DRAWING ---
                 if (!svgText.getBBox) return;
 
-                // Đo chiều dài nét chữ thực tế
                 var textLen = svgText.getComputedTextLength();
-                if (!textLen || textLen <= 0) textLen = 600; // fallback
+                if (!textLen || textLen <= 0) textLen = 600;
 
-                // Đo bounding box chữ (bao gồm dấu tiếng Việt)
                 var bbox = svgText.getBBox();
-
-                // Validate bbox — nếu width quá nhỏ nghĩa là font chưa load
                 if (bbox.width < 10) {
                     setTimeout(setup, 100);
                     return;
@@ -55,32 +75,66 @@
 
                 var padX = 6;
                 var padY = 8;
-                svg.setAttribute('viewBox',
+                svgTitle.setAttribute('viewBox',
                     (bbox.x - padX) + ' ' + (bbox.y - padY) + ' ' +
                     (bbox.width + padX * 2) + ' ' + (bbox.height + padY * 2)
                 );
 
-                // Set stroke-dasharray/offset inline → CSS animation sẽ animate về 0
+                svgText.style.transition = 'none';
+                svgText.style.fill = 'transparent';
+                svgText.style.stroke = 'rgba(255, 255, 255, 0.9)';
+                svgText.style.strokeWidth = '0.8px';
                 svgText.style.strokeDasharray = textLen;
                 svgText.style.strokeDashoffset = textLen;
 
+                // Ep layout reflow đe trinh duyet ghi nhận trạng thái offset = pLen (chua ve)
+                if (logoSvg) void logoSvg.getBoundingClientRect();
+                void svgTitle.getBoundingClientRect();
+
+                // --- 3. TRIGGER SYNCHRONIZED STROKE DRAWING ---
                 requestAnimationFrame(function () {
-                    svgText.classList.add('drawing');
+                    requestAnimationFrame(function () {
+                        // Bật transition và kích hoạt nét vẽ từ 0% đến 100% cùng lúc cho Logo & Chữ
+                        for (var j = 0; j < logoPaths.length; j++) {
+                            logoPaths[j].style.transition = 'stroke-dashoffset 1.25s cubic-bezier(0.35, 0, 0.15, 1), fill 0.55s ease-out 0.05s, stroke 0.4s ease-out';
+                            logoPaths[j].style.strokeDashoffset = '0';
+                        }
+                        svgText.style.transition = 'stroke-dashoffset 1.25s cubic-bezier(0.35, 0, 0.15, 1), fill 0.5s ease-out, stroke 0.4s ease-out';
+                        svgText.classList.add('drawing');
+                        svgText.style.strokeDashoffset = '0';
+                    });
                 });
 
-                // 1. Tô màu trắng dần dần khi chữ vẽ xong (sau 1.2s)
+                // --- 4. PHASE 2: TÔ MÀU HIỆN RÕ (AT 1.25s) ---
                 setTimeout(function () {
+                    // Tô màu các mảng path của Logo & bật background nền trắng cho logo
+                    if (logoContainer) logoContainer.classList.add('filled');
+                    for (var k = 0; k < logoPaths.length; k++) {
+                        var f = logoPaths[k].getAttribute('data-fill');
+                        logoPaths[k].style.fill = f;
+                        logoPaths[k].style.stroke = 'transparent';
+                    }
+
+                    // Tô màu trắng sáng cho chữ
                     svgText.classList.remove('drawing');
                     svgText.classList.add('filled');
-                }, 1200);
+                }, 1250);
 
-                // 2. Chờ thêm 0.8s (gồm 0.35s transition màu + 0.45s đứng yên) rồi mới dismiss bay đi
+                // --- 5. BẮT ĐẦU DISMISS BAY LÊN (AT 2.0s) ---
                 setTimeout(function () {
                     svgAnimationDone = true;
                     checkDismiss();
                 }, 2000);
+
             } catch (e) {
-                // Fallback: hiện chữ trắng ngay
+                // Fallback nếu browser không hỗ trợ SVG length measurement
+                if (logoPaths) {
+                    for (var m = 0; m < logoPaths.length; m++) {
+                        logoPaths[m].style.fill = logoPaths[m].getAttribute('fill') || '#ffffff';
+                        logoPaths[m].style.stroke = 'transparent';
+                    }
+                }
+                if (logoContainer) logoContainer.classList.add('filled');
                 svgText.style.fill = '#ffffff';
                 svgText.style.stroke = 'transparent';
                 svgText.style.opacity = '1';
@@ -92,20 +146,37 @@
         // Đợi font load xong rồi mới đo SVG
         if (document.fonts && document.fonts.ready) {
             document.fonts.ready.then(function () {
-                // Thêm delay nhỏ sau fonts.ready để đảm bảo render xong
                 requestAnimationFrame(function () {
                     requestAnimationFrame(setup);
                 });
             });
         } else {
-            setTimeout(setup, 250);
+            setTimeout(setup, 200);
         }
     }
 
     initSvgDraw();
 
-    // 4. Freeze SVG text + subtitle trước khi FLIP đo vị trí
+    // 4. Freeze SVG text + logo trước khi FLIP đo vị trí
     function freezeAnimations() {
+        var logoContainer = document.getElementById('splash-logo-container');
+        if (logoContainer) {
+            logoContainer.style.transition = 'none';
+            logoContainer.classList.add('filled');
+        }
+
+        var logoSvg = document.getElementById('splash-logo-svg');
+        if (logoSvg) {
+            var paths = logoSvg.querySelectorAll('path');
+            for (var i = 0; i < paths.length; i++) {
+                paths[i].style.transition = 'none';
+                paths[i].style.strokeDashoffset = '0';
+                var f = paths[i].getAttribute('data-fill') || paths[i].getAttribute('fill');
+                if (f) paths[i].style.fill = f;
+                paths[i].style.stroke = 'transparent';
+            }
+        }
+
         var svgText = document.getElementById('splash-svg-text');
         if (svgText) {
             svgText.classList.remove('drawing', 'filled');
