@@ -49,11 +49,11 @@
             pointer-events: none !important;
         }
 
-        .splash-logo,
-        .splash-logo-svg-wrap {
+        .splash-brand-row {
             opacity: 0;
-            transform: scale(0.8) translateZ(0);
+            transform: scale(1.2) translateZ(0);
             will-change: transform, opacity;
+            transform-origin: center center;
             backface-visibility: hidden;
         }
     </style>

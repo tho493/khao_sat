@@ -58,8 +58,21 @@ html.no-splash #main-content {
     align-items: center;
     justify-content: center;
     gap: 24px;
-    will-change: transform, opacity;
+    opacity: 0;
+    transform: scale(1.2) translateZ(0);
     transform-origin: center center;
+    will-change: transform, opacity;
+    transition:
+        opacity 0.35s ease-out,
+        transform 1.0s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.splash-brand-row.show-initial {
+    opacity: 1;
+}
+
+.splash-brand-row.drawing {
+    transform: scale(1) translateZ(0);
 }
 
 .splash-text-group {
@@ -92,16 +105,14 @@ html.no-splash #main-content {
     border-radius: 50%;
     overflow: hidden;
     background: rgba(15, 23, 42, 0.9);
-    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    border: 1.5px solid transparent;
     padding: 8px;
     box-shadow:
         0 0 30px rgba(59, 130, 246, 0.35),
         0 8px 32px rgba(0, 0, 0, 0.4);
-    opacity: 0;
-    transform: scale(0.8) translateZ(0);
+    opacity: 1;
     will-change: transform, opacity, background-color, border-color, box-shadow;
     backface-visibility: hidden;
-    animation: pop-in 0.4s 0.05s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     transition:
         background-color 0.5s ease-out,
         border-color 0.5s ease-out,
@@ -114,6 +125,10 @@ html.no-splash #main-content {
     box-shadow:
         0 0 35px rgba(59, 130, 246, 0.45),
         0 8px 32px rgba(0, 0, 0, 0.4);
+    transition:
+        background-color 0.5s ease-out,
+        border-color 0.5s ease-out,
+        box-shadow 0.5s ease-out;
 }
 
 .splash-logo-svg-wrap svg {
@@ -123,7 +138,8 @@ html.no-splash #main-content {
     overflow: visible;
 }
 
-.splash-logo-svg-wrap svg path {
+.splash-logo-svg-wrap svg path,
+.splash-logo-svg-wrap svg circle {
     fill: transparent;
     stroke: transparent;
     will-change: stroke-dashoffset, fill, stroke;
@@ -132,9 +148,7 @@ html.no-splash #main-content {
 /* --- SVG Title (stroke drawing) --- */
 .splash-svg-wrap {
     display: block;
-    opacity: 0;
-    transform: translateY(8px);
-    animation: slide-up 0.3s 0.1s ease-out forwards;
+    opacity: 1;
     line-height: 0;
 }
 
@@ -178,8 +192,8 @@ html.no-splash #main-content {
     fill: #ffffff !important;
     stroke: transparent !important;
     transition:
-        fill 0.35s ease-out,
-        stroke 0.3s ease-out !important;
+        fill 0.5s ease-out,
+        stroke 0.4s ease-out !important;
 }
 
 /* Frozen state for FLIP dismiss */

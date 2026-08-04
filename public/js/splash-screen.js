@@ -40,25 +40,26 @@
 
         function setup() {
             try {
-                // --- 1. SETUP LOGO PATHS (Nét vẽ đơn sắc ban đầu) ---
-                var logoPaths = logoSvg ? logoSvg.querySelectorAll('path') : [];
-                for (var i = 0; i < logoPaths.length; i++) {
-                    var path = logoPaths[i];
-                    var origFill = path.getAttribute('fill') || '#ffffff';
-                    path.setAttribute('data-fill', origFill);
+                // --- 1. SETUP LOGO PATHS & RING (Nét vẽ đơn sắc ban đầu) ---
+                var logoElements = logoSvg ? logoSvg.querySelectorAll('path, circle') : [];
+                for (var i = 0; i < logoElements.length; i++) {
+                    var elem = logoElements[i];
+                    var isCircle = elem.tagName.toLowerCase() === 'circle';
+                    var origFill = isCircle ? 'none' : (elem.getAttribute('fill') || '#ffffff');
+                    elem.setAttribute('data-fill', origFill);
 
                     // Đặt transition = none trước để không bị nhấp nháy nét vẽ cũ
-                    path.style.transition = 'none';
-                    path.style.fill = 'transparent';
-                    path.style.stroke = 'rgba(255, 255, 255, 0.9)';
-                    path.style.strokeWidth = '1.4px';
-                    path.style.strokeLinecap = 'round';
-                    path.style.strokeLinejoin = 'round';
+                    elem.style.transition = 'none';
+                    elem.style.fill = 'transparent';
+                    elem.style.stroke = 'rgba(255, 255, 255, 0.9)';
+                    elem.style.strokeWidth = isCircle ? '2.5px' : '1.4px';
+                    elem.style.strokeLinecap = 'round';
+                    elem.style.strokeLinejoin = 'round';
 
-                    var pLen = path.getTotalLength ? path.getTotalLength() : 200;
+                    var pLen = elem.getTotalLength ? elem.getTotalLength() : 200;
                     if (!pLen || isNaN(pLen)) pLen = 200;
-                    path.style.strokeDasharray = pLen;
-                    path.style.strokeDashoffset = pLen;
+                    elem.style.strokeDasharray = pLen;
+                    elem.style.strokeDashoffset = pLen;
                 }
 
                 // --- 2. SETUP TEXT DRAWING ---
@@ -87,51 +88,67 @@
                 svgText.style.strokeDasharray = textLen;
                 svgText.style.strokeDashoffset = textLen;
 
-                // Ep layout reflow đe trinh duyet ghi nhận trạng thái offset = pLen (chua ve)
-                if (logoSvg) void logoSvg.getBoundingClientRect();
-                void svgTitle.getBoundingClientRect();
+                var splashBrandRow = document.querySelector('.splash-brand-row');
 
-                // --- 3. TRIGGER SYNCHRONIZED STROKE DRAWING ---
+                // Cho hiện to ban đầu cả khối Logo + Chữ (scale 1.2, opacity: 1)
+                if (splashBrandRow) splashBrandRow.classList.add('show-initial');
+
+                // --- 3. TRIGGER SYNCHRONIZED STROKE DRAWING & SCALE DOWN TO NORMAL ---
                 requestAnimationFrame(function () {
                     requestAnimationFrame(function () {
-                        // Cân bằng tốc độ: Logo vẽ 1.2s, Chữ vẽ 1.45s để cả hai hoàn thành nét vẽ cùng một lúc
-                        for (var j = 0; j < logoPaths.length; j++) {
-                            logoPaths[j].style.transition = 'stroke-dashoffset 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), fill 0.5s ease-out 0.05s, stroke 0.4s ease-out';
-                            logoPaths[j].style.strokeDashoffset = '0';
+                        // Cả khối Logo + Chữ đồng thời thu nhỏ mượt (scale 1.2 -> 1.0) thống nhất khi vẽ nét
+                        if (splashBrandRow) splashBrandRow.classList.add('drawing');
+
+                        for (var j = 0; j < logoElements.length; j++) {
+                            logoElements[j].style.transition = 'stroke-dashoffset 1.0s cubic-bezier(0.25, 0.46, 0.45, 0.94), fill 0.5s ease-out 0.05s, stroke 0.4s ease-out';
+                            logoElements[j].style.strokeDashoffset = '0';
                         }
-                        svgText.style.transition = 'stroke-dashoffset 1.45s cubic-bezier(0.25, 0.46, 0.45, 0.94), fill 0.5s ease-out, stroke 0.4s ease-out';
+                        svgText.style.transition = 'stroke-dashoffset 1.0s cubic-bezier(0.25, 0.46, 0.45, 0.94), fill 0.5s ease-out, stroke 0.4s ease-out';
                         svgText.classList.add('drawing');
                         svgText.style.strokeDashoffset = '0';
                     });
                 });
 
-                // --- 4. PHASE 2: TÔ MÀU HIỆN RÕ (AT 1.4s) ---
+                // --- 4. PHASE 2: TÔ MÀU HIỆN RÕ (AT 1.2s - chuyển màu 0.5s) ---
                 setTimeout(function () {
-                    // Tô màu các mảng path của Logo & bật background nền trắng cho logo
+                    // Tô màu logo & chữ mượt trong 0.5s
                     if (logoContainer) logoContainer.classList.add('filled');
-                    for (var k = 0; k < logoPaths.length; k++) {
-                        var f = logoPaths[k].getAttribute('data-fill');
-                        logoPaths[k].style.fill = f;
-                        logoPaths[k].style.stroke = 'transparent';
+                    for (var k = 0; k < logoElements.length; k++) {
+                        var isC = logoElements[k].tagName.toLowerCase() === 'circle';
+                        logoElements[k].style.transition = 'fill 0.5s ease-out, stroke 0.4s ease-out';
+                        if (isC) {
+                            logoElements[k].style.fill = 'none';
+                            logoElements[k].style.stroke = 'rgba(255, 255, 255, 0.95)';
+                        } else {
+                            var f = logoElements[k].getAttribute('data-fill');
+                            logoElements[k].style.fill = f;
+                            logoElements[k].style.stroke = 'transparent';
+                        }
                     }
 
-                    // Tô màu trắng sáng cho chữ
+                    // Tô màu trắng sáng cho chữ (0.5s)
                     svgText.classList.remove('drawing');
                     svgText.classList.add('filled');
-                }, 1400);
+                }, 1200);
 
-                // --- 5. BẮT ĐẦU DISMISS BAY LÊN (AT 2.1s) ---
+                // --- 5. BẮT ĐẦU DISMISS BAY LÊN (AT 1.7s - ngay khi tô màu xong) ---
                 setTimeout(function () {
                     svgAnimationDone = true;
                     checkDismiss();
-                }, 2100);
+                }, 1700);
 
             } catch (e) {
                 // Fallback nếu browser không hỗ trợ SVG length measurement
-                if (logoPaths) {
-                    for (var m = 0; m < logoPaths.length; m++) {
-                        logoPaths[m].style.fill = logoPaths[m].getAttribute('fill') || '#ffffff';
-                        logoPaths[m].style.stroke = 'transparent';
+                if (logoElements) {
+                    for (var m = 0; m < logoElements.length; m++) {
+                        var isC2 = logoElements[m].tagName.toLowerCase() === 'circle';
+                        if (isC2) {
+                            logoElements[m].style.fill = 'none';
+                            logoElements[m].style.stroke = 'rgba(255, 255, 255, 0.95)';
+                        } else {
+                            logoElements[m].style.fill = logoElements[m].getAttribute('fill') || '#ffffff';
+                            logoElements[m].style.stroke = 'transparent';
+                        }
                     }
                 }
                 if (logoContainer) logoContainer.classList.add('filled');
@@ -167,13 +184,19 @@
 
         var logoSvg = document.getElementById('splash-logo-svg');
         if (logoSvg) {
-            var paths = logoSvg.querySelectorAll('path');
-            for (var i = 0; i < paths.length; i++) {
-                paths[i].style.transition = 'none';
-                paths[i].style.strokeDashoffset = '0';
-                var f = paths[i].getAttribute('data-fill') || paths[i].getAttribute('fill');
-                if (f) paths[i].style.fill = f;
-                paths[i].style.stroke = 'transparent';
+            var elements = logoSvg.querySelectorAll('path, circle');
+            for (var i = 0; i < elements.length; i++) {
+                elements[i].style.transition = 'none';
+                elements[i].style.strokeDashoffset = '0';
+                var isC3 = elements[i].tagName.toLowerCase() === 'circle';
+                if (isC3) {
+                    elements[i].style.fill = 'none';
+                    elements[i].style.stroke = 'rgba(255, 255, 255, 0.95)';
+                } else {
+                    var f = elements[i].getAttribute('data-fill') || elements[i].getAttribute('fill');
+                    if (f) elements[i].style.fill = f;
+                    elements[i].style.stroke = 'transparent';
+                }
             }
         }
 
@@ -253,13 +276,14 @@
             window.getComputedStyle(headerTextContainer).display !== 'none'
         );
 
+        var duration = 0.35; // 350ms
+        var easeTransform = 'transform ' + duration + 's cubic-bezier(0.16, 1, 0.3, 1)';
+
         if (isHeaderTextVisible && splashLogoWrapper && splashTextGroup && headerLogoContainer) {
             // --- TRƯỜNG HỢP 1: Cả Logo + Chữ trên Header ---
-            // FLIP Logo
             var srcLogo = splashLogoWrapper.getBoundingClientRect();
             var dstLogo = headerLogoContainer.getBoundingClientRect();
 
-            // Validate rects
             if (srcLogo.width <= 0 || dstLogo.width <= 0) {
                 fallbackDismiss();
                 return;
@@ -269,7 +293,6 @@
             var dxLogo = dstLogo.left - srcLogo.left;
             var dyLogo = dstLogo.top - srcLogo.top;
 
-            // FLIP Text Group
             var splashTitleLine = document.getElementById('splash-title-line');
             var headerTitleLine = document.getElementById('header-title-line') ||
                 headerTextContainer.querySelector('span') || headerTextContainer;
@@ -289,47 +312,49 @@
             var dxText = dstTitleRect.left - srcGroupRect.left - (offsetX * sText);
             var dyText = dstTitleRect.top - srcGroupRect.top - (offsetY * sText) - (6 * sText);
 
-            var ease = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease 0.2s';
-
+            // Giữ logo và text rõ ràng 100% (opacity: 1), chỉ trượt vị trí
             splashLogoWrapper.style.transformOrigin = 'top left';
-            splashLogoWrapper.style.transition = ease;
+            splashLogoWrapper.style.transition = easeTransform;
+            splashLogoWrapper.style.opacity = '1';
 
             splashTextGroup.style.transformOrigin = 'top left';
-            splashTextGroup.style.transition = ease;
+            splashTextGroup.style.transition = easeTransform;
+            splashTextGroup.style.opacity = '1';
 
-            // Đồng bộ hoá sự xuất hiện (fade-in) của logo & text thật trên Header
-            headerLogoContainer.style.transition = 'opacity 0.18s ease 0.2s';
-            headerTextContainer.style.transition = 'opacity 0.18s ease 0.2s';
+            // Header thật ẩn tạm thời cho tới khi trượt tới nơi
+            headerLogoContainer.style.transition = 'none';
+            headerLogoContainer.style.opacity = '0';
+            headerTextContainer.style.transition = 'none';
+            headerTextContainer.style.opacity = '0';
 
-            // Kích hoạt transform bay lên góc và mượt mà trong rAF tiếp theo (loại bỏ forced reflows)
-            requestAnimationFrame(function () {
-                splashLogoWrapper.style.transform = 'translate3d(' + dxLogo + 'px, ' + dyLogo + 'px, 0) scale(' + sLogo + ')';
-                splashLogoWrapper.style.opacity = '0';
-
-                splashTextGroup.style.transform = 'translate3d(' + dxText + 'px, ' + dyText + 'px, 0) scale(' + sText + ')';
-                splashTextGroup.style.opacity = '0';
-
-                headerLogoContainer.style.opacity = '1';
-                headerTextContainer.style.opacity = '1';
-            });
-
-            // Ẩn phông nền splash-screen mượt mà
-            if (splash) splash.classList.add('dismissing-splash');
+            // Làm mờ nền phông splash và subtitle
+            if (splash) {
+                splash.style.transition = 'background-color ' + duration + 's ease-out';
+                splash.style.backgroundColor = 'transparent';
+            }
             if (progressTrack) progressTrack.classList.add('dismissing-text');
-            splashLogoWrapper.classList.add('morphing');
-
-            // Ẩn subtitle
             if (splashSubtitle) splashSubtitle.classList.add('dismissing-text');
 
-            // Kích hoạt hiển thị main content mượt mà
+            // Kích hoạt hiển thị main content
             if (main) {
+                main.style.visibility = 'visible';
                 main.style.opacity = '1';
             }
 
-            // Đợi toàn bộ quá trình hoàn tất rồi đóng splash
+            // Kích hoạt trượt về góc header
+            requestAnimationFrame(function () {
+                splashLogoWrapper.style.transform = 'translate3d(' + dxLogo + 'px, ' + dyLogo + 'px, 0) scale(' + sLogo + ')';
+                splashTextGroup.style.transform = 'translate3d(' + dxText + 'px, ' + dyText + 'px, 0) scale(' + sText + ')';
+            });
+
+            // TỚI NƠI MỚI CHUYỂN ĐỔI CHÍNH XÁC (tại 350ms)
             setTimeout(function () {
+                splashLogoWrapper.style.opacity = '0';
+                splashTextGroup.style.opacity = '0';
+                headerLogoContainer.style.opacity = '1';
+                headerTextContainer.style.opacity = '1';
                 finishDismiss();
-            }, 420);
+            }, duration * 1000);
 
         } else if (splashLogoWrapper && headerLogoContainer) {
             // --- TRƯỜNG HỢP 2: Màn hình nhỏ (chỉ Logo) ---
@@ -345,34 +370,37 @@
             var dxLogoSmall = dstRectLogo.left - srcRectLogo.left;
             var dyLogoSmall = dstRectLogo.top - srcRectLogo.top;
 
-            if (splash) splash.classList.add('dismissing-splash');
+            splashLogoWrapper.style.transformOrigin = 'top left';
+            splashLogoWrapper.style.transition = easeTransform;
+            splashLogoWrapper.style.opacity = '1';
+
             if (splashTextGroup) splashTextGroup.classList.add('dismissing-text');
             if (splashSubtitle) splashSubtitle.classList.add('dismissing-text');
             if (progressTrack) progressTrack.classList.add('dismissing-text');
-            splashLogoWrapper.classList.add('morphing');
 
-            // ease-in cho exit animation nhỏ
-            var easeSmall = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease 0.2s';
-            splashLogoWrapper.style.transformOrigin = 'top left';
-            splashLogoWrapper.style.transition = easeSmall;
+            headerLogoContainer.style.transition = 'none';
+            headerLogoContainer.style.opacity = '0';
 
-            headerLogoContainer.style.transition = 'opacity 0.18s ease 0.2s';
+            if (splash) {
+                splash.style.transition = 'background-color ' + duration + 's ease-out';
+                splash.style.backgroundColor = 'transparent';
+            }
 
-            requestAnimationFrame(function () {
-                splashLogoWrapper.style.transform = 'translate3d(' + dxLogoSmall + 'px, ' + dyLogoSmall + 'px, 0) scale(' + sLogoSmall + ')';
-                splashLogoWrapper.style.opacity = '0';
-                headerLogoContainer.style.opacity = '1';
-            });
-
-            // Kích hoạt hiển thị main content mượt mà
             if (main) {
+                main.style.visibility = 'visible';
                 main.style.opacity = '1';
             }
 
-            // Đợi toàn bộ quá trình hoàn tất
+            requestAnimationFrame(function () {
+                splashLogoWrapper.style.transform = 'translate3d(' + dxLogoSmall + 'px, ' + dyLogoSmall + 'px, 0) scale(' + sLogoSmall + ')';
+            });
+
+            // TỚI NƠI MỚI CHUYỂN ĐỔI CHÍNH XÁC
             setTimeout(function () {
+                splashLogoWrapper.style.opacity = '0';
+                headerLogoContainer.style.opacity = '1';
                 finishDismiss();
-            }, 380);
+            }, duration * 1000);
 
         } else {
             fallbackDismiss();
