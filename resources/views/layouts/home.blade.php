@@ -146,6 +146,32 @@
             z-index: 9999;
         }
     </style>
+    <script>
+        /* Instant Prefetch on Hover/Touch */
+        (function () {
+            const prefetched = new Set();
+            function prefetch(url) {
+                if (!url || prefetched.has(url) || url.includes('/admin') || url.includes('#') || url.startsWith('javascript:')) return;
+                prefetched.add(url);
+                const link = document.createElement('link');
+                link.rel = 'prefetch';
+                link.href = url;
+                document.head.appendChild(link);
+            }
+            document.addEventListener('mouseover', function (e) {
+                const a = e.target.closest('a');
+                if (a && a.href && a.origin === location.origin) {
+                    prefetch(a.href);
+                }
+            }, { passive: true });
+            document.addEventListener('touchstart', function (e) {
+                const a = e.target.closest('a');
+                if (a && a.href && a.origin === location.origin) {
+                    prefetch(a.href);
+                }
+            }, { passive: true });
+        })();
+    </script>
     @stack('styles')
     @stack('header-scripts')
 </head>
