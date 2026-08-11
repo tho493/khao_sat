@@ -1,10 +1,19 @@
-const CACHE_NAME = 'sdu-survey-cache-v1';
+const CACHE_NAME = 'sdu-survey-cache-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/favicon.ico',
   '/image/logo.png',
   '/css/splash-screen.css',
   '/js/splash-screen.js'
+];
+
+const CDN_HOSTS = [
+  'cdn.tailwindcss.com',
+  'fonts.googleapis.com',
+  'fonts.gstatic.com',
+  'unpkg.com',
+  'cdn.jsdelivr.net',
+  'code.jquery.com'
 ];
 
 // Install Service Worker and cache core static assets
@@ -33,23 +42,28 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch events: Network-first falling back to cache for pages, cache-first for static assets
+// Fetch events: Stale-While-Revalidate for pages, cache-first for static assets & CDNs
 self.addEventListener('fetch', event => {
-  // Only handle same-origin GET requests
-  if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
+  if (event.request.method !== 'GET') {
     return;
   }
 
   const url = new URL(event.request.url);
+  const isSameOrigin = url.origin === self.location.origin;
+  const isCDN = CDN_HOSTS.includes(url.hostname);
 
-  // For administrative or dynamic routes, always fetch from network (do not use cache)
-  if (url.pathname.startsWith('/admin') || url.pathname.startsWith('/khao-sat/submit') || url.pathname.includes('/api/')) {
+  if (!isSameOrigin && !isCDN) {
+    return;
+  }
+
+  // For administrative or dynamic submission routes, always fetch from network (do not use cache)
+  if (isSameOrigin && (url.pathname.startsWith('/admin') || url.pathname.startsWith('/khao-sat/submit') || url.pathname.includes('/api/'))) {
     event.respondWith(fetch(event.request));
     return;
   }
 
-  // Check if it is a static asset (CSS, JS, images, fonts)
-  const isStaticAsset = (
+  // Check if it is a static asset (CSS, JS, images, fonts, CDN resources)
+  const isStaticAsset = isCDN || (
     url.pathname.endsWith('.css') ||
     url.pathname.endsWith('.js') ||
     url.pathname.endsWith('.png') ||
@@ -63,14 +77,14 @@ self.addEventListener('fetch', event => {
   );
 
   if (isStaticAsset) {
-    // Cache-first strategy for static assets
+    // Cache-first strategy for static assets & CDN assets
     event.respondWith(
       caches.match(event.request).then(cachedResponse => {
         if (cachedResponse) {
           return cachedResponse;
         }
         return fetch(event.request).then(networkResponse => {
-          if (networkResponse && networkResponse.status === 200) {
+          if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque')) {
             const responseToCache = networkResponse.clone();
             caches.open(CACHE_NAME).then(cache => {
               cache.put(event.request, responseToCache);
@@ -83,18 +97,22 @@ self.addEventListener('fetch', event => {
       })
     );
   } else {
-    // Network-first strategy for HTML pages to ensure latest survey questions are always loaded
+    // Stale-While-Revalidate strategy for HTML pages:
+    // Serve cached HTML immediately (instant Splash display), fetch fresh page in background
     event.respondWith(
-      fetch(event.request).then(networkResponse => {
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
+      caches.open(CACHE_NAME).then(cache => {
+        return cache.match(event.request).then(cachedResponse => {
+          const fetchPromise = fetch(event.request).then(networkResponse => {
+            if (networkResponse && networkResponse.status === 200) {
+              cache.put(event.request, networkResponse.clone());
+            }
+            return networkResponse;
+          }).catch(() => {
+            // Network failed, fallback gracefully
           });
-        }
-        return networkResponse;
-      }).catch(() => {
-        return caches.match(event.request);
+
+          return cachedResponse || fetchPromise;
+        });
       })
     );
   }
