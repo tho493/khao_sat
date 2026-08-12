@@ -158,8 +158,6 @@ html.no-splash #main-content {
     /* Explicit sizing — JS sẽ set viewBox chính xác */
     width: clamp(220px, 36vw, 380px);
     height: auto;
-    /* Fallback min-height để tránh layout jump */
-    min-height: 36px;
 }
 
 #splash-svg-text {
@@ -178,6 +176,12 @@ html.no-splash #main-content {
     stroke-linecap: round;
     stroke-linejoin: round;
     /* dasharray/dashoffset set by JS */
+}
+
+#header-title-line {
+    font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.01em;
 }
 
 /* Phase 1: Stroke draws in (white) */

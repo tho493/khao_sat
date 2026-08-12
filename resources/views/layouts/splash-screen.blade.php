@@ -9,13 +9,13 @@
 
             <div class="splash-text-group">
                 <div id="splash-title-line" class="splash-svg-wrap">
-                    <svg id="splash-title-svg" class="splash-title-svg" aria-label="Hệ thống Khảo sát Trực tuyến"
-                        role="img" viewBox="0 0 420 50" preserveAspectRatio="xMinYMin meet">
+                    <svg id="splash-title-svg" class="splash-title-svg" aria-label="Hệ thống khảo sát"
+                        role="img" viewBox="0 0 320 50" preserveAspectRatio="xMinYMin meet">
                         <text id="splash-svg-text" x="0" y="0" dominant-baseline="hanging"
                             font-family="'Be Vietnam Pro', system-ui, sans-serif" font-weight="800"
-                            font-style="normal">Hệ thống Khảo sát Trực tuyến</text>
+                            font-style="normal">Hệ thống khảo sát</text>
                     </svg>
-                    <h1 class="sr-only">Hệ thống Khảo sát Trực tuyến</h1>
+                    <h1 class="sr-only">Hệ thống khảo sát</h1>
                 </div>
             </div>
         </div>

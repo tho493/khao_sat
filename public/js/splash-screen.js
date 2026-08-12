@@ -74,8 +74,8 @@
                     return;
                 }
 
-                var padX = 6;
-                var padY = 8;
+                var padX = 2;
+                var padY = 2;
                 svgTitle.setAttribute('viewBox',
                     (bbox.x - padX) + ' ' + (bbox.y - padY) + ' ' +
                     (bbox.width + padX * 2) + ' ' + (bbox.height + padY * 2)
@@ -294,10 +294,14 @@
             var dyLogo = dstLogo.top - srcLogo.top;
 
             var splashTitleLine = document.getElementById('splash-title-line');
+            var svgText = document.getElementById('splash-svg-text');
             var headerTitleLine = document.getElementById('header-title-line') ||
                 headerTextContainer.querySelector('span') || headerTextContainer;
 
-            var srcTitleRect = (splashTitleLine || splashTextGroup).getBoundingClientRect();
+            var srcTextElem = (svgText && svgText.getBoundingClientRect && svgText.getBoundingClientRect().width > 0)
+                ? svgText
+                : (splashTitleLine || splashTextGroup);
+            var srcTitleRect = srcTextElem.getBoundingClientRect();
             var srcGroupRect = splashTextGroup.getBoundingClientRect();
             var dstTitleRect = headerTitleLine.getBoundingClientRect();
 
@@ -308,9 +312,11 @@
 
             var sText = dstTitleRect.width / srcTitleRect.width;
             var offsetX = srcTitleRect.left - srcGroupRect.left;
-            var offsetY = srcTitleRect.top - srcGroupRect.top;
+            var srcCenterY = (srcTitleRect.top + (srcTitleRect.height / 2)) - srcGroupRect.top;
+            var dstCenterY = dstTitleRect.top + (dstTitleRect.height / 2);
+
             var dxText = dstTitleRect.left - srcGroupRect.left - (offsetX * sText);
-            var dyText = dstTitleRect.top - srcGroupRect.top - (offsetY * sText) - (6 * sText);
+            var dyText = dstCenterY - srcGroupRect.top - (srcCenterY * sText);
 
             // Giữ logo và text rõ ràng 100% (opacity: 1), chỉ trượt vị trí
             splashLogoWrapper.style.transformOrigin = 'top left';

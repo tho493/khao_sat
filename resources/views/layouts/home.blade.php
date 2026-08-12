@@ -227,7 +227,7 @@
                             <div id="header-text-container"
                                 class="hidden min-[320px]:flex flex-col justify-center items-start">
                                 <span id="header-title-line"
-                                    class="text-white font-bold text-base sm:text-lg leading-tight inline-block">Hệ
+                                    class="text-white font-extrabold text-base sm:text-lg leading-tight inline-block tracking-tight">Hệ
                                     thống khảo sát</span>
                                 <!-- <span id="header-subtitle-line"
                                     class="hidden sm:block text-white/80 text-xs font-medium leading-tight inline-block">Thu
