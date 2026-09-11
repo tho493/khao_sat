@@ -34,14 +34,30 @@
             position: fixed;
             inset: 0;
             z-index: 99999;
-            background: #0a0f1e;
+            background: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             contain: strict;
-            transition: opacity 0.35s ease-out;
+            transition: opacity 0.4s ease-out;
             will-change: opacity;
+        }
+
+        #splash-screen::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: #0a0f1e;
+            background: radial-gradient(circle at 50% 48%, #162340 0%, #0a0f1e 80%);
+            z-index: 0;
+            opacity: 1;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+
+        #splash-screen.fade-bg::before {
+            opacity: 0 !important;
         }
 
         #splash-screen.dismissing-splash {
@@ -51,10 +67,11 @@
 
         .splash-brand-row {
             opacity: 0;
-            transform: scale(1.2) translateZ(0);
+            transform: scale(1.08) translateZ(0);
             will-change: transform, opacity;
             transform-origin: center center;
             backface-visibility: hidden;
+            transition: opacity 0.45s ease-out, transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
         }
     </style>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -177,38 +194,7 @@
 </head>
 
 <body>
-    <div id="splash-screen">
-        <div class="splash-content">
-            <!-- Brand Row: Logo + Animated Drawing Title side-by-side -->
-            <div class="splash-brand-row">
-                <div class="splash-logo-wrapper">
-                    <div id="splash-logo-container" class="splash-logo-svg-wrap">
-                        {!! file_get_contents(public_path('image/logo.svg')) !!}
-                    </div>
-                </div>
-
-                <div class="splash-text-group">
-                    <div id="splash-title-line" class="splash-svg-wrap">
-                        <svg id="splash-title-svg" class="splash-title-svg" aria-label="Hệ thống khảo sát" role="img"
-                            viewBox="0 0 320 50" preserveAspectRatio="xMinYMin meet">
-                            <text id="splash-svg-text" x="0" y="0" dominant-baseline="hanging"
-                                font-family="'Be Vietnam Pro', system-ui, sans-serif" font-weight="800"
-                                font-style="normal">Hệ thống khảo sát</text>
-                        </svg>
-                        <h1 class="sr-only">Hệ thống khảo sát</h1>
-                    </div>
-
-                </div>
-            </div>
-
-            <noscript>
-                <div id="splash-noscript-warning">Trình duyệt của bạn đang không bật Javascript. Bạn cần bật nó để
-                    website có thể hoạt động.</div>
-            </noscript>
-        </div>
-
-
-    </div>
+    @include('layouts.splash-screen')
     <script src="{{ asset('js/splash-screen.js') }}?v={{ @filemtime(public_path('js/splash-screen.js')) }}"></script>
 
     <div class="bg-gradient-to-br from-blue-500 to-slate-50 text-slate-800">
@@ -356,7 +342,7 @@
                 </div>
 
                 <div class="mt-12 border-t border-white/20 pt-6 text-center text-white/60 text-sm">
-                    © 2025 Trường Đại học Sao Đỏ · Hệ thống khảo sát trực tuyến.
+                    © 2025 - {{ date('Y') }} Trường Đại học Sao Đỏ · Hệ thống khảo sát trực tuyến.
                     <span class="text-white">
                         Designed by
                         <a style="color: aquamarine;" href="https://github.com/tho493" target="_blank"
@@ -370,7 +356,6 @@
     </div>
 
     {{-- Interactive Effects Script --}}
-    <!-- <script src="/js/interactive-effects.js"></script> -->
 
     <script src="https://unpkg.com/scrollreveal"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -627,23 +612,14 @@
 
     @stack('scripts')
 
-    {{-- Christmas Theme JS --}}
-    @if (date('m') == 12 && date('d') >= 20 && date('d') <= 25)
-        <script src="/js/christmas-theme.js"></script>
-    @endif
-
-    {{-- Happy New Year Theme JS (Dec 28 - Jan 5) --}}
-    @if ((date('m') == 12 && date('d') >= 29) || (date('m') == 1 && date('d') <= 3))
-        <script src="/js/newyear-theme.js"></script>
-    @endif
-
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const cookieConsent = document.getElementById('cookie-consent');
             const acceptButton = document.getElementById('cookie-accept');
             const declineButton = document.getElementById('cookie-decline');
 
-            const hasResponded = localStorage.getItem('cookie_consent') || localStorage.getItem('cookie_accepted');
+            // const hasResponded = localStorage.getItem('cookie_consent') || localStorage.getItem('cookie_accepted');
+            const hasResponded = true
 
             if (!hasResponded) {
                 setTimeout(() => {

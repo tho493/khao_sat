@@ -1,5 +1,6 @@
 <div id="splash-screen">
     <div class="splash-content">
+        <!-- Brand Row: Logo + Animated Drawing Title side-by-side -->
         <div class="splash-brand-row">
             <div class="splash-logo-wrapper">
                 <div id="splash-logo-container" class="splash-logo-svg-wrap">
@@ -9,8 +10,8 @@
 
             <div class="splash-text-group">
                 <div id="splash-title-line" class="splash-svg-wrap">
-                    <svg id="splash-title-svg" class="splash-title-svg" aria-label="Hệ thống khảo sát"
-                        role="img" viewBox="0 0 320 50" preserveAspectRatio="xMinYMin meet">
+                    <svg id="splash-title-svg" class="splash-title-svg" aria-label="Hệ thống khảo sát" role="img"
+                        viewBox="0 0 320 50" preserveAspectRatio="xMinYMin meet">
                         <text id="splash-svg-text" x="0" y="0" dominant-baseline="hanging"
                             font-family="'Be Vietnam Pro', system-ui, sans-serif" font-weight="800"
                             font-style="normal">Hệ thống khảo sát</text>
@@ -24,10 +25,5 @@
             <div id="splash-noscript-warning">Trình duyệt của bạn đang không bật Javascript. Bạn cần bật nó để website
                 có thể hoạt động.</div>
         </noscript>
-    </div>
-
-    <!-- Progress bar -->
-    <div id="splash-progress-track">
-        <div id="splash-progress"></div>
     </div>
 </div>

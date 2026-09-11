@@ -90,32 +90,29 @@
 
                 var splashBrandRow = document.querySelector('.splash-brand-row');
 
-                // Cho hiện to ban đầu cả khối Logo + Chữ (scale 1.2, opacity: 1)
-                if (splashBrandRow) splashBrandRow.classList.add('show-initial');
-
-                // --- 3. TRIGGER SYNCHRONIZED STROKE DRAWING & SCALE DOWN TO NORMAL ---
+                // --- 3. TRIGGER SYNCHRONIZED STROKE DRAWING, SMOOTH FADE-IN & SCALE DOWN ---
                 requestAnimationFrame(function () {
                     requestAnimationFrame(function () {
-                        // Cả khối Logo + Chữ đồng thời thu nhỏ mượt (scale 1.2 -> 1.0) thống nhất khi vẽ nét
+                        // Vừa fade-in (opacity: 0 -> 1 trong 0.45s) vừa scale từ 1.08 -> 1.0 mượt mà
                         if (splashBrandRow) splashBrandRow.classList.add('drawing');
 
                         for (var j = 0; j < logoElements.length; j++) {
-                            logoElements[j].style.transition = 'stroke-dashoffset 1.0s cubic-bezier(0.25, 0.46, 0.45, 0.94), fill 0.5s ease-out 0.05s, stroke 0.4s ease-out';
+                            logoElements[j].style.transition = 'stroke-dashoffset 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94), fill 0.3s ease-out 0.05s, stroke 0.25s ease-out';
                             logoElements[j].style.strokeDashoffset = '0';
                         }
-                        svgText.style.transition = 'stroke-dashoffset 1.0s cubic-bezier(0.25, 0.46, 0.45, 0.94), fill 0.5s ease-out, stroke 0.4s ease-out';
+                        svgText.style.transition = 'stroke-dashoffset 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94), fill 0.3s ease-out, stroke 0.25s ease-out';
                         svgText.classList.add('drawing');
                         svgText.style.strokeDashoffset = '0';
                     });
                 });
 
-                // --- 4. PHASE 2: TÔ MÀU HIỆN RÕ (AT 1.2s - chuyển màu 0.5s) ---
+                // --- 4. PHASE 2: TÔ MÀU HIỆN RÕ (AT 0.7s - chuyển màu 0.3s) ---
                 setTimeout(function () {
-                    // Tô màu logo & chữ mượt trong 0.5s
+                    // Tô màu logo & chữ mượt trong 0.3s
                     if (logoContainer) logoContainer.classList.add('filled');
                     for (var k = 0; k < logoElements.length; k++) {
                         var isC = logoElements[k].tagName.toLowerCase() === 'circle';
-                        logoElements[k].style.transition = 'fill 0.5s ease-out, stroke 0.4s ease-out';
+                        logoElements[k].style.transition = 'fill 0.3s ease-out, stroke 0.25s ease-out';
                         if (isC) {
                             logoElements[k].style.fill = 'none';
                             logoElements[k].style.stroke = 'rgba(255, 255, 255, 0.95)';
@@ -126,16 +123,16 @@
                         }
                     }
 
-                    // Tô màu trắng sáng cho chữ (0.5s)
+                    // Tô màu trắng sáng cho chữ (0.3s)
                     svgText.classList.remove('drawing');
                     svgText.classList.add('filled');
-                }, 1200);
+                }, 700);
 
-                // --- 5. BẮT ĐẦU DISMISS BAY LÊN (AT 1.7s - ngay khi tô màu xong) ---
+                // --- 5. BẮT ĐẦU DISMISS BAY LÊN (AT 1.1s - ngay khi tô màu xong) ---
                 setTimeout(function () {
                     svgAnimationDone = true;
                     checkDismiss();
-                }, 1700);
+                }, 1100);
 
             } catch (e) {
                 // Fallback nếu browser không hỗ trợ SVG length measurement
@@ -160,15 +157,21 @@
             }
         }
 
-        // Đợi font load xong rồi mới đo SVG
-        if (document.fonts && document.fonts.ready) {
-            document.fonts.ready.then(function () {
-                requestAnimationFrame(function () {
-                    requestAnimationFrame(setup);
-                });
+        // Bắt đầu setup mượt mà, không để màn hình đen chờ font quá lâu
+        var setupDone = false;
+        function runSetupOnce() {
+            if (setupDone) return;
+            setupDone = true;
+            requestAnimationFrame(function () {
+                requestAnimationFrame(setup);
             });
+        }
+
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(runSetupOnce);
+            setTimeout(runSetupOnce, 80);
         } else {
-            setTimeout(setup, 200);
+            setTimeout(runSetupOnce, 40);
         }
     }
 
@@ -335,8 +338,7 @@
 
             // Làm mờ nền phông splash và subtitle
             if (splash) {
-                splash.style.transition = 'background-color ' + duration + 's ease-out';
-                splash.style.backgroundColor = 'transparent';
+                splash.classList.add('fade-bg');
             }
             if (progressTrack) progressTrack.classList.add('dismissing-text');
             if (splashSubtitle) splashSubtitle.classList.add('dismissing-text');
@@ -388,8 +390,7 @@
             headerLogoContainer.style.opacity = '0';
 
             if (splash) {
-                splash.style.transition = 'background-color ' + duration + 's ease-out';
-                splash.style.backgroundColor = 'transparent';
+                splash.classList.add('fade-bg');
             }
 
             if (main) {
@@ -414,6 +415,10 @@
     }
 
     function finishDismiss() {
+        if (splash) {
+            splash.style.opacity = '0';
+            splash.classList.add('dismissing-splash');
+        }
         document.documentElement.classList.add('no-splash');
         sessionStorage.setItem('splash_shown', 'true');
         try {
@@ -443,9 +448,9 @@
         }, 400);
     }
 
-    // 6. Fail-safe: tối đa 5 giây
+    // 6. Fail-safe: tối đa 3.5 giây
     setTimeout(function () {
         svgAnimationDone = true;
         checkDismiss();
-    }, 5000);
+    }, 3500);
 })();

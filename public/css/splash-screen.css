@@ -23,7 +23,7 @@ html.no-splash #main-content {
     inset: 0;
     width: 100%;
     height: 100%;
-    background: #0a0f1e;
+    background: transparent;
     z-index: 99999;
     display: flex;
     align-items: center;
@@ -31,7 +31,23 @@ html.no-splash #main-content {
     overflow: hidden;
     will-change: opacity;
     backface-visibility: hidden;
-    transition: opacity 0.35s ease-out;
+    transition: opacity 0.4s ease-out;
+}
+
+#splash-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #0a0f1e;
+    background: radial-gradient(circle at 50% 48%, #162340 0%, #0a0f1e 80%);
+    z-index: 0;
+    opacity: 1;
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+}
+
+#splash-screen.fade-bg::before {
+    opacity: 0 !important;
 }
 
 #splash-screen.dismissing-splash {
@@ -59,19 +75,16 @@ html.no-splash #main-content {
     justify-content: center;
     gap: 24px;
     opacity: 0;
-    transform: scale(1.2) translateZ(0);
+    transform: scale(1.08) translateZ(0);
     transform-origin: center center;
     will-change: transform, opacity;
     transition:
-        opacity 0.35s ease-out,
-        transform 1.0s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.splash-brand-row.show-initial {
-    opacity: 1;
+        opacity 0.45s ease-out,
+        transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .splash-brand-row.drawing {
+    opacity: 1;
     transform: scale(1) translateZ(0);
 }
 
@@ -114,9 +127,9 @@ html.no-splash #main-content {
     will-change: transform, opacity, background-color, border-color, box-shadow;
     backface-visibility: hidden;
     transition:
-        background-color 0.5s ease-out,
-        border-color 0.5s ease-out,
-        box-shadow 0.5s ease-out;
+        background-color 0.3s ease-out,
+        border-color 0.3s ease-out,
+        box-shadow 0.3s ease-out;
 }
 
 .splash-logo-svg-wrap.filled {
@@ -126,9 +139,9 @@ html.no-splash #main-content {
         0 0 35px rgba(59, 130, 246, 0.45),
         0 8px 32px rgba(0, 0, 0, 0.4);
     transition:
-        background-color 0.5s ease-out,
-        border-color 0.5s ease-out,
-        box-shadow 0.5s ease-out;
+        background-color 0.3s ease-out,
+        border-color 0.3s ease-out,
+        box-shadow 0.3s ease-out;
 }
 
 .splash-logo-svg-wrap svg {
@@ -196,8 +209,8 @@ html.no-splash #main-content {
     fill: #ffffff !important;
     stroke: transparent !important;
     transition:
-        fill 0.5s ease-out,
-        stroke 0.4s ease-out !important;
+        fill 0.3s ease-out,
+        stroke 0.25s ease-out !important;
 }
 
 /* Frozen state for FLIP dismiss */
