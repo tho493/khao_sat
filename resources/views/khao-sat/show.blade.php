@@ -983,22 +983,22 @@
 
                             <div id="progress-collapsed" 
                                 class="hidden flex items-center justify-between gap-2 cursor-pointer select-none animate-fade-in
-                                        backdrop-blur-md shadow-lg rounded-full px-4 py-2 ring-1 ring-slate-900/5">
+                                        backdrop-blur-md shadow-lg rounded-full px-4 py-2 border">
                                 <div class="flex items-center gap-3 flex-1">
-                                    <div class="flex items-center gap-1 text-xs font-bold text-blue-600 border-r border-slate-300 pr-3">
+                                    <div class="progress-collapsed-timer flex items-center gap-1 text-xs font-bold border-r pr-3">
                                         <i class="bi bi-clock"></i>
                                         <span id="survey-timer-collapsed" class="min-w-[35px]">00:00</span>
                                     </div>
-                                    <div class="w-24 bg-white/40 rounded-full h-5 overflow-hidden border border-white/50 flex-shrink-0">
+                                    <div class="progress-collapsed-track w-24 rounded-full h-5 overflow-hidden border flex-shrink-0">
                                         <div class="progress-bar-dynamic h-5 rounded-full flex items-center justify-center text-white text-xs font-semibold transition-all duration-300"
                                             id="progressBarCollapsed" style="width: 0%; background-color: #f59e42;">
                                         </div>
                                     </div>
-                                    <span class="text-xs font-bold text-slate-700 whitespace-nowrap">
+                                    <span class="progress-collapsed-count text-xs font-bold whitespace-nowrap">
                                         <span id="answeredCountCollapsed">0</span>/<span id="totalCountCollapsed">0</span> câu
                                     </span>
                                 </div>
-                                <i class="bi bi-chevron-down text-slate-500"></i>
+                                <i class="progress-collapsed-icon bi bi-chevron-down"></i>
                             </div>
                         </div>
 
@@ -1023,6 +1023,52 @@
                             #progressBar.progress-done, #progressBarCollapsed.progress-done {
                                 background-color: #16a34a !important; /* Green */
                             }
+
+                            #progress-collapsed {
+                                background-color: rgba(255, 255, 255, 0.75);
+                                border-color: rgba(15, 23, 42, 0.15);
+                            }
+
+                            #progress-collapsed .progress-collapsed-timer {
+                                color: #1e40af;
+                                border-color: rgba(100, 116, 139, 0.7);
+                            }
+
+                            #progress-collapsed .progress-collapsed-track {
+                                background-color: rgba(203, 213, 225, 0.8);
+                                border-color: rgba(148, 163, 184, 0.6);
+                            }
+
+                            #progress-collapsed .progress-collapsed-count {
+                                color: #0f172a;
+                            }
+
+                            #progress-collapsed .progress-collapsed-icon {
+                                color: #475569;
+                            }
+
+                            html.dark #progress-collapsed {
+                                background-color: rgba(2, 6, 23, 0.75);
+                                border-color: rgba(255, 255, 255, 0.15);
+                            }
+
+                            html.dark #progress-collapsed .progress-collapsed-timer {
+                                color: #bae6fd;
+                                border-color: rgba(255, 255, 255, 0.2);
+                            }
+
+                            html.dark #progress-collapsed .progress-collapsed-track {
+                                background-color: rgba(255, 255, 255, 0.2);
+                                border-color: rgba(255, 255, 255, 0.25);
+                            }
+
+                            html.dark #progress-collapsed .progress-collapsed-count {
+                                color: #fff;
+                            }
+
+                            html.dark #progress-collapsed .progress-collapsed-icon {
+                                color: #e2e8f0;
+                            }
                         </style>
                         <script>
                            document.addEventListener('DOMContentLoaded', function() {
@@ -1040,7 +1086,17 @@
 
                                 window.addEventListener('resize', () => {
                                     if (!isSticky) initialHeight = container.offsetHeight;
+                                    if (isSticky) updateStickyTop();
                                 });
+
+                                function updateStickyTop() {
+                                    const header = document.querySelector('header.sticky-header');
+                                    const top = header && !header.classList.contains('header-hidden')
+                                        ? header.offsetHeight + 8
+                                        : 8;
+
+                                    container.style.top = top + 'px';
+                                }
 
                                 function syncData() {
                                     const fullBar = document.getElementById('progressBar');
@@ -1116,6 +1172,7 @@
 
                                     if (window.scrollY > threshold) {
                                         if (!isSticky) activateSticky();
+                                        requestAnimationFrame(updateStickyTop);
                                     } else {
                                         if (isSticky) deactivateSticky();
                                     }
@@ -1127,7 +1184,8 @@
                                     placeholder.classList.remove('hidden');
 
                                     container.classList.remove('lg:sticky');
-                                    container.classList.add('fixed', 'top-[70px]', 'left-4', 'right-4', 'z-50');
+                                    container.classList.add('fixed', 'left-4', 'right-4', 'z-50');
+                                    updateStickyTop();
                                     
                                     collapsePopup();
                                 }
@@ -1136,8 +1194,9 @@
                                     isSticky = false;
                                     isExpanded = false;
                                     placeholder.classList.add('hidden');
+                                    container.style.top = '';
 
-                                    container.classList.remove('fixed', 'top-[70px]', 'left-4', 'right-4', 'z-50');
+                                    container.classList.remove('fixed', 'left-4', 'right-4', 'z-50');
                                     container.classList.add('lg:sticky');
 
                                     clearContainerStyles();
